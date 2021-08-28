@@ -1709,6 +1709,13 @@
     hoist-non-react-statics "^3.3.0"
     redux "^4.0.0"
 
+"@types/react-tabs@^2.3.3":
+  version "2.3.3"
+  resolved "https://registry.yarnpkg.com/@types/react-tabs/-/react-tabs-2.3.3.tgz#93536e06d616b98012e0574b9b3e280400152734"
+  integrity sha512-iKnx10tskHi9gpsvEAAJGpytbZXfcCINCFsEeYd9QN0mW7kGcUzh8Llgul1IqmFbKigXI/l3H3ej8ljWak2grw==
+  dependencies:
+    "@types/react" "*"
+
 "@types/react@*":
   version "17.0.19"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-17.0.19.tgz#8f2a85e8180a43b57966b237d26a29481dacc991"

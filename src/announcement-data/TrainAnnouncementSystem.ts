@@ -35,11 +35,15 @@ interface INumberOptions {
 
 export default abstract class TrainAnnouncementSystem extends AnnouncementSystem {
   abstract playApproachingStationAnnouncement(stationCode: string, options: IAnyOptions): Promise<void>
+  abstract readonly approachingStationAnnouncementOptions: Record<string, IOptionsExplanation>
 
-  abstract readonly approachingStationAnnouncementOptions: Record<
-    keyof Parameters<typeof this.playApproachingStationAnnouncement>[1],
-    IOptionsExplanation
-  >
+  abstract playStoppedAtStationAnnouncement(
+    thisStationCode: string,
+    terminatesAtCode: string,
+    callingAtCodes: string[],
+    options: IAnyOptions,
+  ): Promise<void>
+  abstract readonly stoppedAtStationAnnouncementOptions: Record<string, IOptionsExplanation>
 
   abstract readonly AvailableStationNames: { high: string[]; low: string[] }
 }

@@ -11,6 +11,9 @@ const useStyles = makeStyles({
     backgroundColor: '#eee',
     marginTop: 24,
   },
+  heading: {
+    marginBottom: 16,
+  },
 })
 
 function AnnouncementPanel(): JSX.Element {
@@ -23,7 +26,7 @@ function AnnouncementPanel(): JSX.Element {
 
   return (
     <div className={classes.root}>
-      <h2>{AnnouncementSystemInstance.NAME}</h2>
+      <h2 className={classes.heading}>{AnnouncementSystemInstance.NAME}</h2>
 
       <Tabs tabNames={['Approaching Station', 'Stopped at station']} tabItems={[<ApproachingStation />, <ApproachingStation />]} />
     </div>

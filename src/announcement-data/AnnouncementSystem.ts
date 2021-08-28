@@ -2,6 +2,8 @@ export interface IPlayOptions {
   delayStart: number
 }
 
+export type AudioItem = string | { id: string; opts?: Partial<IPlayOptions> }
+
 export default abstract class AnnouncementSystem {
   /**
    * Display name for the announcement system.
@@ -27,7 +29,7 @@ export default abstract class AnnouncementSystem {
     return `/audio/${this.FILE_PREFIX}/${fileId.replace(/\./g, '/')}.mp3`
   }
 
-  playAudioFile(fileId: string, playOptions: Partial<IPlayOptions> = {}): HTMLAudioElement {
+  private playAudioFile(fileId: string, playOptions: Partial<IPlayOptions> = {}): HTMLAudioElement {
     const audio = new Audio(this.generateAudioFileUrl(fileId))
 
     if (playOptions.delayStart) {
@@ -39,7 +41,7 @@ export default abstract class AnnouncementSystem {
     return audio
   }
 
-  playAudioFiles(fileIds: (string | { id: string; opts?: Partial<IPlayOptions> })[]): Promise<void> {
+  playAudioFiles(fileIds: AudioItem[]): Promise<void> {
     const that = this
 
     return new Promise(resolve => {

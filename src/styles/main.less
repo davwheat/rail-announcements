@@ -1,0 +1,111 @@
+:root {
+  --primary-red: #f04c63;
+  --primary-blue: #51c5dd;
+  --blue-dark: #0a4f70;
+  --neutral-grey: #c6c4c4;
+  --link-color: #00528a;
+}
+
+@import './baseline.less';
+
+label {
+  display: block;
+  padding: 8px;
+  font-weight: bold;
+
+  user-select: none;
+  -webkit-user-select: none;
+
+  select:not([multiple]),
+  input {
+    margin-left: 8px;
+    display: inline-block;
+    vertical-align: baseline;
+  }
+
+  select[multiple] {
+    margin-top: 4px;
+    display: block;
+    min-width: max-content;
+    max-width: 100%;
+    width: 300px;
+  }
+
+  .helpText {
+    font-size: 0.8em;
+    font-weight: normal;
+    max-width: 100%;
+    width: 300px;
+    line-height: 1.15em;
+    margin-top: 4px;
+  }
+}
+
+button {
+  padding: 8px 12px;
+  background: #00528a;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1rem;
+
+  &:hover,
+  &:focus {
+    background: #0160a0;
+  }
+
+  &:active {
+    background: #004574;
+  }
+}
+
+select,
+input {
+  font-size: 1rem;
+  padding: 4px;
+}
+
+html,
+body {
+  scroll-behavior: smooth;
+}
+
+ul {
+  list-style: square outside;
+}
+
+ol {
+  list-style: decimal outside;
+}
+
+ul,
+ol {
+  margin-left: 20px;
+  counter-reset: none;
+
+  &:not(.list) {
+    list-style: none;
+  }
+}
+
+abbr {
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+  cursor: help;
+}
+
+h1 {
+  font-size: 1.5rem;
+}
+
+h2 {
+  font-size: 1.35rem;
+}
+
+h3 {
+  font-size: 1.2rem;
+}
+
+@import './checkbox.less';

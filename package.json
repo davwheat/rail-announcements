@@ -28,6 +28,7 @@
     "preact": "^10.5.14",
     "preact-render-to-string": "^5.1.19",
     "react": "^17.0.2",
+    "react-beautiful-dnd": "^13.1.0",
     "react-dom": "^17.0.2",
     "react-head": "^3.4.0",
     "react-tabs": "^3.2.2",
@@ -36,6 +37,7 @@
     "uk-railway-stations": "^1.2.0"
   },
   "devDependencies": {
+    "@types/react-beautiful-dnd": "^13.1.1",
     "gh-pages": "^3.2.3",
     "prettier": "^2.3.2",
     "typescript": "^4.4.2"

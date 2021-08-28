@@ -1,10 +1,10 @@
-import { atom } from 'recoil'
+import { persistentAtom } from 'recoil-persistence/react'
 
 interface GlobalState {
   systemId: null | string
 }
 
-export const globalStateAtom = atom<GlobalState>({
+export const globalStateAtom = persistentAtom<GlobalState>({
   key: 'globalState',
   default: {
     systemId: null,

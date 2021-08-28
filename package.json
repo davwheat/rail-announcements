@@ -32,6 +32,7 @@
     "react-head": "^3.4.0",
     "react-tabs": "^3.2.2",
     "recoil": "^0.4.1",
+    "recoil-persistence": "^0.2.6",
     "uk-railway-stations": "^1.2.0"
   },
   "devDependencies": {

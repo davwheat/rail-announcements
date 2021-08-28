@@ -1,3 +1,3 @@
-import TLClass700 from './TLClass700'
+import ThameslinkClass700 from './TLClass700'
 
-export const AllTrainAnnouncementSystems = [TLClass700] as const
+export const AllTrainAnnouncementSystems = [ThameslinkClass700] as const

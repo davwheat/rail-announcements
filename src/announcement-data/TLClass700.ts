@@ -13,7 +13,7 @@ interface IStoppedAtStationAnnouncementOptions {
   changeFor: string[]
 }
 
-export default class TLClass700 extends TrainAnnouncementSystem {
+export default class ThameslinkClass700 extends TrainAnnouncementSystem {
   readonly NAME = 'Thameslink Class 700'
   readonly ID = 'TL_CLASS_700_V1'
   readonly FILE_PREFIX = 'TL/700'

@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@material-ui/styles": "^4.11.4",
+    "babel-plugin-transform-remove-console": "^6.9.4",
     "gatsby": "^3.12.1",
     "gatsby-plugin-less": "^5.12.0",
     "gatsby-plugin-material-ui": "^3.0.1",

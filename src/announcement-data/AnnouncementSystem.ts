@@ -26,7 +26,7 @@ export default abstract class AnnouncementSystem {
    * Generates a URL for the provided audio file ID.
    */
   generateAudioFileUrl(fileId: string): string {
-    return `/audio/${this.FILE_PREFIX}/${fileId.replace(/\./g, '/')}.mp3`
+    return `/audio/${this.FILE_PREFIX}/${this.processAudioFileId(fileId).replace(/\./g, '/')}.mp3`
   }
 
   private playAudioFile(fileId: string, playOptions: Partial<IPlayOptions> = {}): HTMLAudioElement {
@@ -60,5 +60,14 @@ export default abstract class AnnouncementSystem {
 
       playAudioFile(0)
     })
+  }
+
+  /**
+   * Processes an audio file ID before playing it.
+   *
+   * Defaults to the identity function.
+   */
+  protected processAudioFileId(fileId: string): string {
+    return fileId
   }
 }

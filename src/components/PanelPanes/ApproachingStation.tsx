@@ -9,11 +9,15 @@ const useStyles = makeStyles({
   root: {
     padding: 16,
     backgroundColor: '#eee',
-    marginTop: 24,
+  },
+  disabledMessage: {
+    background: 'rgba(255, 0, 0, 0.15)',
+    borderLeft: '#f00 4px solid',
+    padding: '8px 16px',
   },
 })
 
-function ApproachingStation(): JSX.Element {
+function ApproachingStationPane(): JSX.Element {
   const classes = useStyles()
 
   const AnnouncementSystem = getActiveSystem()
@@ -37,6 +41,8 @@ function ApproachingStation(): JSX.Element {
 
   function createFieldUpdater(field: string): (value) => void {
     return (value): void => {
+      if (isDisabled) return
+
       setOptionsState(prevState => ({ ...prevState, [field]: value }))
     }
   }
@@ -44,7 +50,7 @@ function ApproachingStation(): JSX.Element {
   return (
     <div className={classes.root}>
       {isDisabled && (
-        <p>
+        <p className={classes.disabledMessage}>
           <strong>All options are disabled while an announcement is playing.</strong>
         </p>
       )}
@@ -76,10 +82,9 @@ function ApproachingStation(): JSX.Element {
         onClick={async () => {
           setIsDisabled(true)
 
-          AnnouncementSystemInstance.playApproachingStationAnnouncement(optionsState.nextStationCode as string, {
-            isAto: optionsState.isAto as boolean,
-            exchangePOIs: optionsState.exchangePOIs as string[],
-          })
+          const { nextStationCode, ...otherOpts } = optionsState
+
+          await AnnouncementSystemInstance.playApproachingStationAnnouncement(nextStationCode as string, otherOpts)
 
           setIsDisabled(false)
         }}
@@ -90,4 +95,4 @@ function ApproachingStation(): JSX.Element {
   )
 }
 
-export default ApproachingStation
+export default ApproachingStationPane

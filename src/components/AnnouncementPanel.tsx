@@ -6,6 +6,9 @@ import getActiveSystem from '@helpers/getActiveSystem'
 
 import ApproachingStationPane from './PanelPanes/ApproachingStation'
 import StoppedAtStationPane from './PanelPanes/StoppedAtStation'
+import type TrainAnnouncementSystem from '@announcement-data/TrainAnnouncementSystem'
+
+const TabPanels = [<ApproachingStationPane />, <StoppedAtStationPane />]
 
 const useStyles = makeStyles({
   root: {
@@ -24,13 +27,14 @@ function AnnouncementPanel(): JSX.Element {
 
   if (!AnnouncementSystem) return null
 
-  const AnnouncementSystemInstance = new AnnouncementSystem()
+  // @ts-expect-error
+  const AnnouncementSystemInstance = new AnnouncementSystem() as TrainAnnouncementSystem
 
   return (
     <div className={classes.root}>
       <h2 className={classes.heading}>{AnnouncementSystemInstance.NAME}</h2>
 
-      <Tabs tabNames={['Approaching Station', 'Stopped at station']} tabItems={[<ApproachingStationPane />, <StoppedAtStationPane />]} />
+      <Tabs tabNames={['Approaching Station', 'Stopped at station']} tabItems={TabPanels} customKeyPrefix={AnnouncementSystemInstance.ID} />
     </div>
   )
 }

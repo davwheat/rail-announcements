@@ -6,6 +6,7 @@ import Breakpoints from '@data/breakpoints'
 interface TabProps {
   tabNames: string[]
   tabItems: React.ReactElement[]
+  customKeyPrefix?: string
 }
 
 const useStyles = makeStyles({
@@ -61,7 +62,7 @@ const useStyles = makeStyles({
   },
 })
 
-const Tabs: React.FC<TabProps> = ({ tabNames, tabItems }) => {
+const Tabs: React.FC<TabProps> = ({ tabNames, tabItems, customKeyPrefix = '' }) => {
   const classes = useStyles()
 
   if (tabNames.length !== tabItems.length) {
@@ -79,7 +80,9 @@ const Tabs: React.FC<TabProps> = ({ tabNames, tabItems }) => {
       </TabList>
 
       {tabItems.map((tab, i) => (
-        <TabPanel key={tabNames[i]}>{tab}</TabPanel>
+        <TabPanel forceRender key={`${customKeyPrefix}${tabNames[i]}`}>
+          {tab}
+        </TabPanel>
       ))}
     </OGTabs>
   )

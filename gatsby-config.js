@@ -21,5 +21,11 @@ module.exports = {
     description: 'Announcements for the UK rail network',
     author: '@davwheat',
   },
-  plugins: [...prodPlugins, `gatsby-plugin-react-head`, `gatsby-plugin-material-ui`, `gatsby-plugin-less`],
+  plugins: [
+    ...prodPlugins,
+    `gatsby-plugin-react-head`,
+    `gatsby-plugin-material-ui`,
+    `gatsby-plugin-less`,
+    `gatsby-plugin-webpack-bundle-analyser-v2`,
+  ],
 }

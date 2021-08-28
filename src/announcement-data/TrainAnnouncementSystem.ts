@@ -6,18 +6,17 @@ interface IAnyOptions {
 
 interface IOptionsExplanation {
   name: string
-  type: 'boolean' | 'select' | 'multiselect' | 'time' | 'number'
 }
 
 export type OptionsExplanation = IOptionsExplanation & (IMultiselectOptions | ISelectOptions | IBooleanOptions | INumberOptions | ITimeOptions)
 
 interface IMultiselectOptions {
-  type: 'boolean' | 'select' | 'multiselect' | 'time' | 'number'
+  type: 'multiselect'
   default: string[]
   options: { title: string; value: string }[]
 }
 interface ISelectOptions {
-  type: 'boolean' | 'select' | 'multiselect' | 'time' | 'number'
+  type: 'select'
   default: string
   options: { title: string; value: string }[]
 }

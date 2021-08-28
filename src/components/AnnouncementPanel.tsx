@@ -3,7 +3,9 @@ import React from 'react'
 import { makeStyles } from '@material-ui/styles'
 import Tabs from './Tabs'
 import getActiveSystem from '@helpers/getActiveSystem'
-import ApproachingStation from './PanelPanes/ApproachingStation'
+
+import ApproachingStationPane from './PanelPanes/ApproachingStation'
+import StoppedAtStationPane from './PanelPanes/StoppedAtStation'
 
 const useStyles = makeStyles({
   root: {
@@ -28,7 +30,7 @@ function AnnouncementPanel(): JSX.Element {
     <div className={classes.root}>
       <h2 className={classes.heading}>{AnnouncementSystemInstance.NAME}</h2>
 
-      <Tabs tabNames={['Approaching Station', 'Stopped at station']} tabItems={[<ApproachingStation />, <ApproachingStation />]} />
+      <Tabs tabNames={['Approaching Station', 'Stopped at station']} tabItems={[<ApproachingStationPane />, <StoppedAtStationPane />]} />
     </div>
   )
 }

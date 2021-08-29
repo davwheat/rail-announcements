@@ -1,7 +1,7 @@
 import CallingAtSelector from '@components/CallingAtSelector'
 import CustomAnnouncementPane from '@components/PanelPanes/CustomAnnouncementPane'
 import { AllStationsTitleValueMap } from '@data/StationManipulators'
-import { AudioItem, CustomAnnouncementTab, OptionsExplanation } from './AnnouncementSystem'
+import { AudioItem, CustomAnnouncementTab } from './AnnouncementSystem'
 import TrainAnnouncementSystem from './TrainAnnouncementSystem'
 
 interface IApproachingStationAnnouncementOptions {

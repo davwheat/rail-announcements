@@ -27,5 +27,17 @@ module.exports = {
     `gatsby-plugin-material-ui`,
     `gatsby-plugin-less`,
     `gatsby-plugin-webpack-bundle-analyser-v2`,
+    {
+      resolve: `gatsby-plugin-manifest`,
+      options: {
+        name: `UK Rail Announcements`,
+        short_name: `Rail Announcements`,
+        start_url: `/?utm_source=pwa`,
+        background_color: `#000`,
+        theme_color: `#ffa500`,
+        display: `minimal-ui`,
+        icon: `src/images/logo.png`, // This path is relative to the root of the site.
+      },
+    },
   ],
 }

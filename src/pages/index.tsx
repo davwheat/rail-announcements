@@ -4,6 +4,7 @@ import MainSelector from '@components/MainSelector'
 import Layout from '@components/Layout'
 import AnnouncementPanel from '@components/AnnouncementPanel'
 
+// @ts-expect-error
 import LogoSmallUrl from '../images/logo_small.png'
 import { makeStyles } from '@material-ui/styles'
 
@@ -24,7 +25,7 @@ function IndexPage({ location }): JSX.Element {
   const classes = useStyles()
 
   return (
-    <Layout title="Rail announcements" location={location}>
+    <Layout location={location}>
       <header>
         <h1 className={classes.heading}>
           <img alt="" role="presentation" className={classes.logo} src={LogoSmallUrl} />

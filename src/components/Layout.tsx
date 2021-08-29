@@ -1,7 +1,5 @@
 import React from 'react'
 
-// import Header from './PageComponents/Header'
-// import Footer from './PageComponents/Footer'
 import SEO from './SEO'
 
 import { makeStyles } from '@material-ui/styles'
@@ -14,29 +12,36 @@ const useStyles = makeStyles({
   mainContent: {
     padding: 24,
   },
+  footer: {
+    padding: 24,
+  },
 })
 
 interface Props {
-  title: string
   description?: string
   location: LocationContext
 }
 
-const Layout: React.FC<Props> = ({ children, title, description, location }) => {
+const Layout: React.FC<Props> = ({ children, description, location }) => {
   const classes = useStyles()
 
   return (
     <ScrollContext location={location}>
       <RecoilRoot>
-        {/* <ThemeProvider theme={theme}> */}
-        <SEO title={title} description={description} />
-
-        {/* <Header /> */}
+        <SEO description={description} />
 
         <main className={classes.mainContent}>{children}</main>
 
-        {/* <Footer /> */}
-        {/* </ThemeProvider> */}
+        <footer className={classes.footer}>
+          <p>
+            <span style={{ fontFamily: 'sans-serif' }}>&copy;</span> {new Date().getFullYear()} &mdash; Made with love by David Wheatley.
+          </p>
+          <p>
+            <a href="https://github.com/davwheat/rail-announcements" rel="noopener noreferrer" target="_blank">
+              This site is open source, and available on GitHub.
+            </a>
+          </p>
+        </footer>
       </RecoilRoot>
     </ScrollContext>
   )

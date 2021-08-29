@@ -4,9 +4,6 @@ import { makeStyles } from '@material-ui/styles'
 import Tabs from './Tabs'
 import getActiveSystem from '@helpers/getActiveSystem'
 
-import ApproachingStationPane from './PanelPanes/ApproachingStation'
-import StoppedAtStationPane from './PanelPanes/StoppedAtStation'
-
 const useStyles = makeStyles({
   root: {
     padding: 16,

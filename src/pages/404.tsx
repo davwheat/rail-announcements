@@ -5,7 +5,7 @@ import { Link } from 'gatsby'
 
 function Error404Page({ location }): JSX.Element {
   return (
-    <Layout title="Rail announcements" location={location}>
+    <Layout location={location}>
       <header>
         <h1>Error 404 - Not found</h1>
       </header>

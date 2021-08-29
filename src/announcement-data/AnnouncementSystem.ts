@@ -38,6 +38,7 @@ interface ICustomOptions {
   type: 'custom'
   component: (props: { onChange: (newVal: any) => void; value: any; [key: string]: any }) => JSX.Element
   props: Record<string, unknown>
+  default: any
 }
 
 export type AudioItem = string | { id: string; opts?: Partial<IPlayOptions> }

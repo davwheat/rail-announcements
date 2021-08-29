@@ -1,44 +1,15 @@
 import { getStationByCrs } from '@data/StationManipulators'
-import AnnouncementSystem, { AudioItem } from './AnnouncementSystem'
+import AnnouncementSystem, { AudioItem, OptionsExplanation } from './AnnouncementSystem'
 
 interface IAnyOptions {
   [key: string]: any
 }
 
-interface IOptionsExplanation {
-  name: string
-}
-
-export type OptionsExplanation = IOptionsExplanation & (IMultiselectOptions | ISelectOptions | IBooleanOptions | INumberOptions | ITimeOptions)
-
-interface IMultiselectOptions {
-  type: 'multiselect'
-  default: string[]
-  options: { title: string; value: string }[]
-}
-interface ISelectOptions {
-  type: 'select'
-  default: string
-  options: { title: string; value: string }[]
-}
-interface IBooleanOptions {
-  type: 'boolean'
-  default: boolean
-}
-interface ITimeOptions {
-  type: 'time'
-  default: `${string}:${string}`
-}
-interface INumberOptions {
-  type: 'number'
-  default: number
-}
-
 export default abstract class TrainAnnouncementSystem extends AnnouncementSystem {
-  abstract readonly approachingStationAnnouncementOptions: Record<string, IOptionsExplanation>
+  abstract readonly approachingStationAnnouncementOptions: Record<string, OptionsExplanation>
   abstract playApproachingStationAnnouncement(stationCode: string, options: IAnyOptions): Promise<void>
 
-  abstract readonly stoppedAtStationAnnouncementOptions: Record<string, IOptionsExplanation>
+  abstract readonly stoppedAtStationAnnouncementOptions: Record<string, OptionsExplanation>
   abstract playStoppedAtStationAnnouncement(
     thisStationCode: string,
     terminatesAtCode: string,

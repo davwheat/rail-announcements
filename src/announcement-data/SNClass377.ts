@@ -1,4 +1,6 @@
-import { AudioItem } from './AnnouncementSystem'
+import CustomAnnouncementPane from '@components/PanelPanes/CustomAnnouncementPane'
+import { AllStationsTitleValueMap } from '@data/StationManipulators'
+import { AudioItem, CustomAnnouncementTab } from './AnnouncementSystem'
 import TrainAnnouncementSystem, { OptionsExplanation } from './TrainAnnouncementSystem'
 
 interface IApproachingStationAnnouncementOptions {
@@ -92,5 +94,43 @@ export default class SouthernClass377 extends TrainAnnouncementSystem {
   readonly AvailableStationNames = {
     high: this.RealAvailableStationNames,
     low: this.RealAvailableStationNames,
+  }
+
+  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab> = {
+    departingStation: {
+      name: 'Departing station',
+      playHandler: this.playDepartingStationAnnouncement.bind(this),
+      component: CustomAnnouncementPane,
+      options: {
+        terminatesAtCode: {
+          name: 'Terminates at',
+          default: this.RealAvailableStationNames[0],
+          options: AllStationsTitleValueMap.filter(s => this.RealAvailableStationNames.includes(s.value)),
+          type: 'select',
+        },
+        nextStationCode: {
+          name: 'Next station',
+          default: this.RealAvailableStationNames[0],
+          options: AllStationsTitleValueMap.filter(s => this.RealAvailableStationNames.includes(s.value)),
+          type: 'select',
+        },
+      },
+    },
+  }
+
+  async playDepartingStationAnnouncement(
+    options: Record<keyof typeof this.customAnnouncementTabs['departingStation']['options'], any>,
+  ): Promise<void> {
+    const files: AudioItem[] = []
+    files.push('bing bong')
+
+    files.push(
+      'this train is the southern service to',
+      `stations.${options.terminatesAtCode}`,
+      'the next station is',
+      `stations.${options.nextStationCode}`,
+    )
+
+    await this.playAudioFiles(files)
   }
 }

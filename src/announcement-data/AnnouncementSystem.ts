@@ -1,8 +1,46 @@
+import type { ICustomAnnouncementPaneProps } from '@components/PanelPanes/CustomAnnouncementPane'
+
 export interface IPlayOptions {
   delayStart: number
 }
 
+interface IOptionsExplanation {
+  name: string
+}
+
+export type OptionsExplanation = IOptionsExplanation & (IMultiselectOptions | ISelectOptions | IBooleanOptions | INumberOptions | ITimeOptions)
+
+interface IMultiselectOptions {
+  type: 'multiselect'
+  default: string[]
+  options: { title: string; value: string }[]
+}
+interface ISelectOptions {
+  type: 'select'
+  default: string
+  options: { title: string; value: string }[]
+}
+interface IBooleanOptions {
+  type: 'boolean'
+  default: boolean
+}
+interface ITimeOptions {
+  type: 'time'
+  default: `${string}:${string}`
+}
+interface INumberOptions {
+  type: 'number'
+  default: number
+}
+
 export type AudioItem = string | { id: string; opts?: Partial<IPlayOptions> }
+
+export interface CustomAnnouncementTab {
+  name: string
+  component: (props: ICustomAnnouncementPaneProps) => JSX.Element
+  options: Record<string, OptionsExplanation>
+  playHandler: (options: { [key: string]: any }) => Promise<void>
+}
 
 export default abstract class AnnouncementSystem {
   /**
@@ -90,4 +128,6 @@ export default abstract class AnnouncementSystem {
   protected processAudioFileId(fileId: string): string {
     return fileId
   }
+
+  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab> = {}
 }

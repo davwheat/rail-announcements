@@ -22,6 +22,7 @@
     "babel-plugin-transform-remove-console": "^6.9.4",
     "gatsby": "^3.12.1",
     "gatsby-plugin-less": "^5.12.0",
+    "gatsby-plugin-manifest": "^3.12.0",
     "gatsby-plugin-material-ui": "^3.0.1",
     "gatsby-plugin-preact": "^5.12.0",
     "gatsby-plugin-react-head": "https://github.com/davwheat/gatsby-plugin-react-head",

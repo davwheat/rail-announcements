@@ -11,10 +11,9 @@ type MetaEntry = {
 interface Props {
   description?: string
   meta?: MetaEntry[]
-  title: string
 }
 
-const SEO: React.FC<Props> = ({ description, meta, title }) => {
+const SEO: React.FC<Props> = ({ description, meta }) => {
   const { site } = useStaticQuery(
     graphql`
       query {
@@ -30,10 +29,11 @@ const SEO: React.FC<Props> = ({ description, meta, title }) => {
   )
 
   const metaDescription = description || site.siteMetadata.description
+  const title = site.siteMetadata.title
 
   return (
     <>
-      <Title>{title ? `${title} | ${site.siteMetadata.title}` : site.siteMetadata.title}</Title>
+      <Title>{title}</Title>
       <Meta name="description" content={metaDescription} />
 
       <Meta name="og:title" content={title} />

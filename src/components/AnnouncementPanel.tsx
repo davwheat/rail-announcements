@@ -27,8 +27,7 @@ function AnnouncementPanel(): JSX.Element {
 
   if (!AnnouncementSystem) return null
 
-  // @ts-expect-error
-  const AnnouncementSystemInstance = new AnnouncementSystem() as TrainAnnouncementSystem
+  const AnnouncementSystemInstance = new AnnouncementSystem()
 
   return (
     <div className={classes.root}>

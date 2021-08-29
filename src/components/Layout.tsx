@@ -12,6 +12,9 @@ const useStyles = makeStyles({
   mainContent: {
     padding: 24,
   },
+  footer: {
+    padding: 24,
+  },
 })
 
 interface Props {
@@ -28,6 +31,17 @@ const Layout: React.FC<Props> = ({ children, description, location }) => {
         <SEO description={description} />
 
         <main className={classes.mainContent}>{children}</main>
+
+        <footer className={classes.footer}>
+          <p>
+            <span style={{ fontFamily: 'sans-serif' }}>&copy;</span> {new Date().getFullYear()} &mdash; Made with love by David Wheatley.
+          </p>
+          <p>
+            <a href="https://github.com/davwheat/rail-announcements" rel="noopener noreferrer" target="_blank">
+              This site is open source, and available on GitHub.
+            </a>
+          </p>
+        </footer>
       </RecoilRoot>
     </ScrollContext>
   )

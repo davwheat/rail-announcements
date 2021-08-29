@@ -28,21 +28,13 @@ function AnnouncementPanel(): JSX.Element {
 
   const customTabs = AnnouncementSystemInstance.customAnnouncementTabs
 
-  const TabPanels = [
-    <ApproachingStationPane />,
-    <StoppedAtStationPane />,
-    ...Object.values(customTabs).map(({ component: TabComponent, ...opts }) => <TabComponent panelOptions={opts} key={opts.name} />),
-  ]
+  const TabPanels = Object.values(customTabs).map(({ component: TabComponent, ...opts }) => <TabComponent panelOptions={opts} key={opts.name} />)
 
   return (
     <div className={classes.root}>
       <h2 className={classes.heading}>{AnnouncementSystemInstance.NAME}</h2>
 
-      <Tabs
-        tabNames={['Approaching Station', 'Stopped at station', ...Object.values(customTabs).map(tab => tab.name)]}
-        tabItems={TabPanels}
-        customKeyPrefix={AnnouncementSystemInstance.ID}
-      />
+      <Tabs tabNames={Object.values(customTabs).map(tab => tab.name)} tabItems={TabPanels} customKeyPrefix={AnnouncementSystemInstance.ID} />
     </div>
   )
 }

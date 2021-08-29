@@ -1,22 +1,7 @@
 import { getStationByCrs } from '@data/StationManipulators'
-import AnnouncementSystem, { AudioItem, OptionsExplanation } from './AnnouncementSystem'
-
-interface IAnyOptions {
-  [key: string]: any
-}
+import AnnouncementSystem, { AudioItem } from './AnnouncementSystem'
 
 export default abstract class TrainAnnouncementSystem extends AnnouncementSystem {
-  abstract readonly approachingStationAnnouncementOptions: Record<string, OptionsExplanation>
-  abstract playApproachingStationAnnouncement(stationCode: string, options: IAnyOptions): Promise<void>
-
-  abstract readonly stoppedAtStationAnnouncementOptions: Record<string, OptionsExplanation>
-  abstract playStoppedAtStationAnnouncement(
-    thisStationCode: string,
-    terminatesAtCode: string,
-    callingAtCodes: string[],
-    options: IAnyOptions,
-  ): Promise<void>
-
   /**
    * ----------------------------------------------------------------------------------------------------
    */

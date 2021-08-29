@@ -1,6 +1,6 @@
 import React from 'react'
 
-import type { OptionsExplanation } from '@announcement-data/TrainAnnouncementSystem'
+import type { OptionsExplanation } from '@announcement-data/AnnouncementSystem'
 
 interface OptionFieldOptions {
   onChange: (value: any) => void
@@ -52,5 +52,9 @@ export default function createOptionField(optionData: OptionsExplanation, option
           </select>
         </label>
       )
+
+    case 'custom':
+      const Component = optionData.component
+      return <Component key={options.key} onChange={options.onChange} value={options.value} {...optionData.props} />
   }
 }

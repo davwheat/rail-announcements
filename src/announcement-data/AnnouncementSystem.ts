@@ -8,7 +8,8 @@ interface IOptionsExplanation {
   name: string
 }
 
-export type OptionsExplanation = IOptionsExplanation & (IMultiselectOptions | ISelectOptions | IBooleanOptions | INumberOptions | ITimeOptions)
+export type OptionsExplanation = IOptionsExplanation &
+  (IMultiselectOptions | ISelectOptions | IBooleanOptions | INumberOptions | ITimeOptions | ICustomOptions)
 
 interface IMultiselectOptions {
   type: 'multiselect'
@@ -31,6 +32,12 @@ interface ITimeOptions {
 interface INumberOptions {
   type: 'number'
   default: number
+}
+
+interface ICustomOptions {
+  type: 'custom'
+  component: (props: { onChange: (newVal: any) => void; value: any; [key: string]: any }) => JSX.Element
+  props: Record<string, unknown>
 }
 
 export type AudioItem = string | { id: string; opts?: Partial<IPlayOptions> }

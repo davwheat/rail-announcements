@@ -17,26 +17,26 @@ const useStyles = makeStyles({
 
     gridTemplateColumns: 'repeat(auto-fit, minmax(10px, 1fr))',
 
-    [Breakpoints.between.phone.and.bigPhone]: {
+    [Breakpoints.between.bigPhone.and.desktopSmall]: {
       gridTemplateColumns: '1fr 1fr',
       gridTemplateRows: 'repeat(auto-fit, minmax(10px, 1fr))',
     },
 
-    [Breakpoints.upTo.phone]: {
+    [Breakpoints.upTo.bigPhone]: {
       gridTemplateColumns: '1fr',
       gridTemplateRows: 'repeat(auto-fit, minmax(10px, 1fr))',
     },
   },
   tab: {
-    padding: 16,
+    padding: 12,
     color: '#000',
     textAlign: 'center',
     fontWeight: 'bold',
     cursor: 'pointer',
     position: 'relative',
 
-    [Breakpoints.upTo.phone]: {
-      padding: 12,
+    [Breakpoints.upTo.bigPhone]: {
+      padding: 8,
     },
 
     '&[aria-selected="true"]': {

@@ -20,6 +20,9 @@ export default abstract class AnnouncementSystem {
    */
   abstract readonly FILE_PREFIX: string
 
+  /**
+   * The announcement system type.
+   */
   abstract readonly SYSTEM_TYPE: 'station' | 'train'
 
   /**
@@ -29,6 +32,15 @@ export default abstract class AnnouncementSystem {
     return `/audio/${this.FILE_PREFIX}/${this.processAudioFileId(fileId).replace(/\./g, '/')}.mp3`
   }
 
+  /**
+   * Plays a single audio file with the provided playback options.
+   *
+   * Returns the HTML Audio Element used to play the audio file.
+   *
+   * @param fileId Audio file ID
+   * @param playOptions Playback options
+   * @returns HTML Audio Element used to play the audio
+   */
   private playAudioFile(fileId: string, playOptions: Partial<IPlayOptions> = {}): HTMLAudioElement {
     const audio = new Audio(this.generateAudioFileUrl(fileId))
 
@@ -41,6 +53,14 @@ export default abstract class AnnouncementSystem {
     return audio
   }
 
+  /**
+   * Plays multiple audio files.
+   *
+   * Returns a promise which resolves when the last audio file has finished playing.
+   *
+   * @param fileIds Array of audio files to play.
+   * @returns Promise which resolves when the last audio file has finished playing.
+   */
   playAudioFiles(fileIds: AudioItem[]): Promise<void> {
     const that = this
 

@@ -4,11 +4,32 @@ import MainSelector from '@components/MainSelector'
 import Layout from '@components/Layout'
 import AnnouncementPanel from '@components/AnnouncementPanel'
 
+import LogoSmallUrl from '../images/logo_small.png'
+import { makeStyles } from '@material-ui/styles'
+
+const useStyles = makeStyles({
+  heading: {
+    fontSize: '2rem',
+    display: 'flex',
+    alignItems: 'center',
+  },
+  logo: {
+    height: 50,
+    width: 50,
+    marginRight: 16,
+  },
+})
+
 function IndexPage({ location }): JSX.Element {
+  const classes = useStyles()
+
   return (
     <Layout title="Rail announcements" location={location}>
       <header>
-        <h1>Rail announcements</h1>
+        <h1 className={classes.heading}>
+          <img alt="" role="presentation" className={classes.logo} src={LogoSmallUrl} />
+          <span>Rail announcements</span>
+        </h1>
       </header>
       <main>
         <MainSelector />

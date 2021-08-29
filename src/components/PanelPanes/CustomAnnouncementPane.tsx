@@ -3,7 +3,6 @@ import React from 'react'
 import { makeStyles } from '@material-ui/styles'
 import getActiveSystem from '@helpers/getActiveSystem'
 import createOptionField from '@helpers/createOptionField'
-import { AllStationsTitleValueMap } from '@data/StationManipulators'
 import { CustomAnnouncementTab } from '@announcement-data/AnnouncementSystem'
 
 const useStyles = makeStyles({

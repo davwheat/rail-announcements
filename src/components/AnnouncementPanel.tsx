@@ -6,7 +6,6 @@ import getActiveSystem from '@helpers/getActiveSystem'
 
 import ApproachingStationPane from './PanelPanes/ApproachingStation'
 import StoppedAtStationPane from './PanelPanes/StoppedAtStation'
-import type TrainAnnouncementSystem from '@announcement-data/TrainAnnouncementSystem'
 
 const TabPanels = [<ApproachingStationPane />, <StoppedAtStationPane />]
 

@@ -45,7 +45,7 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
         'we will shortly be arriving at',
         `stations.high.${options.stationCode}`,
         'our final destination',
-        'thank you for travelling with us please make sure you take all your personal belongings with you when you leave the train',
+        'thank you for travelling with us please remember to take all your personal belongings with you when you leave the train',
       )
     } else {
       if (!this.validateStationExists(options.stationCode, 'low')) return

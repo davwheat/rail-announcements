@@ -9,6 +9,7 @@ interface IApproachingStationAnnouncementOptions {
   stationCode: string
   isAto: boolean
   terminatesHere: boolean
+  takeCareAsYouLeave: boolean
   nearbyPOIs: string[]
   changeFor: string[]
 }
@@ -61,6 +62,10 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
     if (options.nearbyPOIs.length > 0) {
       files.push('exit here for')
       files.push(...this.pluraliseAudio(...options.nearbyPOIs.map(poi => `POIs.${poi}`)))
+    }
+
+    if (options.takeCareAsYouLeave) {
+      files.push('please make sure you have all your belongings and take care as you leave the train')
     }
 
     if (options.isAto) {
@@ -218,6 +223,11 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
           },
           terminatesHere: {
             name: 'Terminates here?',
+            default: false,
+            type: 'boolean',
+          },
+          takeCareAsYouLeave: {
+            name: 'Take care as you leave the train?',
             default: false,
             type: 'boolean',
           },

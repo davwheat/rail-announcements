@@ -1,5 +1,6 @@
 import CallingAtSelector from '@components/CallingAtSelector'
 import CustomAnnouncementPane from '@components/PanelPanes/CustomAnnouncementPane'
+import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
 import { AllStationsTitleValueMap } from '@data/StationManipulators'
 import { AudioItem, CustomAnnouncementTab } from './AnnouncementSystem'
 import TrainAnnouncementSystem from './TrainAnnouncementSystem'
@@ -18,6 +19,10 @@ interface IStoppedAtStationAnnouncementOptions {
   mindTheGap: boolean
   nearbyPOIs: string[]
   changeFor: string[]
+}
+interface IInitialDepartureAnnouncementOptions {
+  terminatesAtCode: string
+  callingAtCodes: { crsCode: string; name: string; randomId: string }[]
 }
 
 export default class ThameslinkClass700 extends TrainAnnouncementSystem {
@@ -101,6 +106,33 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
     await this.playAudioFiles(files)
   }
 
+  private async playInitialDepartureAnnouncement(options: IInitialDepartureAnnouncementOptions): Promise<void> {
+    const { terminatesAtCode, callingAtCodes } = options
+
+    const files: AudioItem[] = []
+
+    if (!this.validateStationExists(terminatesAtCode, 'low')) return
+    files.push('welcome aboard this service to', `stations.low.${terminatesAtCode}`, {
+      id: `safety information is provided on posters in every carriage`,
+      opts: { delayStart: 2000 },
+    })
+
+    if (callingAtCodes.length === 0) {
+      if (!this.validateStationExists(terminatesAtCode, 'high')) return
+
+      files.push({ id: 'we will be calling at', opts: { delayStart: 1000 } }, `stations.high.${terminatesAtCode}`, `our final destination`)
+    } else {
+      files.push({ id: 'we will be calling at', opts: { delayStart: 1000 } })
+
+      if (callingAtCodes.some(({ crsCode }) => !this.validateStationExists(crsCode, 'high'))) return
+      if (!this.validateStationExists(terminatesAtCode, 'low')) return
+
+      files.push(...this.pluraliseAudio(...callingAtCodes.map(({ crsCode }) => `stations.high.${crsCode}`), `stations.low.${terminatesAtCode}`))
+    }
+
+    await this.playAudioFiles(files)
+  }
+
   readonly AvailableStationNames = {
     high: [
       'BAB',
@@ -134,89 +166,133 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
       'TBG',
       'WVF',
       'ZFD',
+      'HOR',
+      'RDH',
+      'ELD',
+      'SAF',
     ],
-    low: ['BDM', 'BFR', 'BTN', 'BUG', 'CBG', 'CTK', 'HSK', 'LUT', 'PRP', 'WVF'],
+    low: ['BDM', 'BFR', 'BTN', 'BUG', 'CBG', 'CTK', 'HSK', 'LUT', 'PRP', 'WVF', 'RDH', 'GTW', 'ELD'],
   }
 
   readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab> = {
+    initialDeparture: {
+      name: 'Initial departure',
+      component: CustomAnnouncementPane,
+      props: {
+        playHandler: this.playInitialDepartureAnnouncement.bind(this),
+        options: {
+          terminatesAtCode: {
+            name: 'Terminates at',
+            default: this.AvailableStationNames.low[0],
+            options: AllStationsTitleValueMap.filter(s => this.AvailableStationNames.low.includes(s.value)),
+            type: 'select',
+          },
+          callingAtCodes: {
+            name: '',
+            type: 'custom',
+            component: CallingAtSelector,
+            props: {
+              availableStations: this.AvailableStationNames.high,
+            },
+            default: [],
+          },
+        },
+      },
+    },
     approachingStation: {
       name: 'Approaching station',
       component: CustomAnnouncementPane,
-      playHandler: this.playApproachingStationAnnouncement.bind(this),
-      options: {
-        stationCode: {
-          name: 'Next station',
-          default: this.AvailableStationNames.low[0],
-          options: AllStationsTitleValueMap.filter(s => this.AvailableStationNames.low.includes(s.value)),
-          type: 'select',
-        },
-        isAto: {
-          name: 'Automatic train operation?',
-          default: false,
-          type: 'boolean',
-        },
-        terminatesHere: {
-          name: 'Terminates here?',
-          default: false,
-          type: 'boolean',
-        },
-        changeFor: {
-          name: 'Change for...',
-          type: 'multiselect',
-          options: this.OtherServicesAvailable,
-          default: [],
-        },
-        nearbyPOIs: {
-          name: 'Nearby POIs',
-          type: 'multiselect',
-          options: this.NearbyPointsOfInterest,
-          default: [],
+      props: {
+        playHandler: this.playApproachingStationAnnouncement.bind(this),
+        options: {
+          stationCode: {
+            name: 'Next station',
+            default: this.AvailableStationNames.low[0],
+            options: AllStationsTitleValueMap.filter(s => this.AvailableStationNames.low.includes(s.value)),
+            type: 'select',
+          },
+          isAto: {
+            name: 'Automatic train operation?',
+            default: false,
+            type: 'boolean',
+          },
+          terminatesHere: {
+            name: 'Terminates here?',
+            default: false,
+            type: 'boolean',
+          },
+          changeFor: {
+            name: 'Change for...',
+            type: 'multiselect',
+            options: this.OtherServicesAvailable,
+            default: [],
+          },
+          nearbyPOIs: {
+            name: 'Nearby POIs',
+            type: 'multiselect',
+            options: this.NearbyPointsOfInterest,
+            default: [],
+          },
         },
       },
     },
     stoppedAtStation: {
       name: 'Stopped at station',
       component: CustomAnnouncementPane,
-      playHandler: this.playStoppedAtStationAnnouncement.bind(this),
-      options: {
-        thisStationCode: {
-          name: 'This station',
-          default: this.AvailableStationNames.low[0],
-          options: AllStationsTitleValueMap.filter(s => this.AvailableStationNames.low.includes(s.value)),
-          type: 'select',
-        },
-        terminatesAtCode: {
-          name: 'Terminates at',
-          default: this.AvailableStationNames.low[0],
-          options: AllStationsTitleValueMap.filter(s => this.AvailableStationNames.low.includes(s.value)),
-          type: 'select',
-        },
-        callingAtCodes: {
-          name: '',
-          type: 'custom',
-          component: CallingAtSelector,
-          props: {
-            availableStations: this.AvailableStationNames.high,
+      props: {
+        playHandler: this.playStoppedAtStationAnnouncement.bind(this),
+        options: {
+          thisStationCode: {
+            name: 'This station',
+            default: this.AvailableStationNames.low[0],
+            options: AllStationsTitleValueMap.filter(s => this.AvailableStationNames.low.includes(s.value)),
+            type: 'select',
           },
-          default: [],
+          terminatesAtCode: {
+            name: 'Terminates at',
+            default: this.AvailableStationNames.low[0],
+            options: AllStationsTitleValueMap.filter(s => this.AvailableStationNames.low.includes(s.value)),
+            type: 'select',
+          },
+          callingAtCodes: {
+            name: '',
+            type: 'custom',
+            component: CallingAtSelector,
+            props: {
+              availableStations: this.AvailableStationNames.high,
+            },
+            default: [],
+          },
+          mindTheGap: {
+            name: 'Mind the gap?',
+            default: false,
+            type: 'boolean',
+          },
+          // changeFor: {
+          //   name: 'Change for...',
+          //   type: 'multiselect',
+          //   options: this.OtherServicesAvailable,
+          //   default: [],
+          // },
+          // nearbyPOIs: {
+          //   name: 'Nearby POIs',
+          //   type: 'multiselect',
+          //   options: this.NearbyPointsOfInterest,
+          //   default: [],
+          // },
         },
-        mindTheGap: {
-          name: 'Mind the gap?',
-          default: false,
-          type: 'boolean',
-        },
-        // changeFor: {
-        //   name: 'Change for...',
-        //   type: 'multiselect',
-        //   options: this.OtherServicesAvailable,
-        //   default: [],
-        // },
-        // nearbyPOIs: {
-        //   name: 'Nearby POIs',
-        //   type: 'multiselect',
-        //   options: this.NearbyPointsOfInterest,
-        //   default: [],
-        // },
+      },
+    },
+    announcementButtons: {
+      name: 'Announcement buttons',
+      component: CustomButtonPane,
+      props: {
+        buttons: [
+          {
+            label: 'Safety information',
+            onClick: this.playAudioFiles.bind(this, ['safety information is provided on posters in every carriage']),
+          },
+        ],
       },
     },
   }

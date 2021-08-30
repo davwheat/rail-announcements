@@ -3,7 +3,8 @@ import React from 'react'
 import { makeStyles } from '@material-ui/styles'
 import getActiveSystem from '@helpers/getActiveSystem'
 import createOptionField from '@helpers/createOptionField'
-import { CustomAnnouncementTab } from '@announcement-data/AnnouncementSystem'
+import type { OptionsExplanation } from '@announcement-data/AnnouncementSystem'
+import useIsPlayingAnnouncement from '@helpers/useIsPlayingAnnouncement'
 
 const useStyles = makeStyles({
   root: {
@@ -18,19 +19,20 @@ const useStyles = makeStyles({
 })
 
 export interface ICustomAnnouncementPaneProps {
-  panelOptions: Omit<CustomAnnouncementTab, 'component'>
+  options: Record<string, OptionsExplanation>
+  playHandler: (options: { [key: string]: any }) => Promise<void>
 }
 
-function CustomAnnouncementPane({ panelOptions }: ICustomAnnouncementPaneProps): JSX.Element {
+function CustomAnnouncementPane({ options, playHandler }: ICustomAnnouncementPaneProps): JSX.Element {
   const classes = useStyles()
 
   const AnnouncementSystem = getActiveSystem()
   if (!AnnouncementSystem) return null
 
   const [optionsState, setOptionsState] = React.useState<Record<string, unknown>>(
-    Object.entries(panelOptions.options).reduce((acc, [key, opt]) => ({ ...acc, [key]: opt.default }), {}),
+    Object.entries(options).reduce((acc, [key, opt]) => ({ ...acc, [key]: opt.default }), {}),
   )
-  const [isDisabled, setIsDisabled] = React.useState(false)
+  const [isDisabled, setIsDisabled] = useIsPlayingAnnouncement()
 
   function createFieldUpdater(field: string): (value) => void {
     return (value): void => {
@@ -50,10 +52,10 @@ function CustomAnnouncementPane({ panelOptions }: ICustomAnnouncementPaneProps):
       <fieldset>
         <h3>Options</h3>
 
-        {Object.keys(panelOptions.options).length === 0 && <p>No options</p>}
+        {Object.keys(options).length === 0 && <p>No options</p>}
 
         <>
-          {Object.entries(panelOptions.options).map(([key, opt]) =>
+          {Object.entries(options).map(([key, opt]) =>
             createOptionField(opt, { onChange: createFieldUpdater(key), value: optionsState[key], key }),
           )}
         </>
@@ -61,7 +63,7 @@ function CustomAnnouncementPane({ panelOptions }: ICustomAnnouncementPaneProps):
       <button
         onClick={async () => {
           setIsDisabled(true)
-          await panelOptions.playHandler(optionsState)
+          await playHandler(optionsState)
           setIsDisabled(false)
         }}
       >

@@ -89,7 +89,7 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
     } else if (callingAtCodes.length === 0) {
       if (!this.validateStationExists(terminatesAtCode, 'high')) return
 
-      files.push({ id: 'we will be calling at', opts: { delayStart: 3500 } }, `stations.high.${terminatesAtCode}`, `our final destination`)
+      files.push({ id: 'the next station is', opts: { delayStart: 3500 } }, `stations.high.${terminatesAtCode}`, `our final destination`)
     } else {
       if (!this.validateStationExists(terminatesAtCode, 'low')) return
 

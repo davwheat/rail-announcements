@@ -1,5 +1,6 @@
 import CallingAtSelector from '@components/CallingAtSelector'
 import CustomAnnouncementPane from '@components/PanelPanes/CustomAnnouncementPane'
+import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
 import { AllStationsTitleValueMap } from '@data/StationManipulators'
 import { AudioItem, CustomAnnouncementTab } from './AnnouncementSystem'
 import TrainAnnouncementSystem from './TrainAnnouncementSystem'
@@ -103,67 +104,89 @@ export default class SouthernClass377 extends TrainAnnouncementSystem {
   readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab> = {
     approachingStation: {
       name: 'Approaching station',
-      playHandler: this.playApproachingStationAnnouncement.bind(this),
       component: CustomAnnouncementPane,
-      options: {
-        stationCode: {
-          name: 'Next station',
-          default: this.RealAvailableStationNames[0],
-          options: AllStationsTitleValueMap.filter(s => this.RealAvailableStationNames.includes(s.value)),
-          type: 'select',
-        },
-        mindTheGap: {
-          name: 'Mind the gap?',
-          type: 'boolean',
-          default: true,
+      props: {
+        playHandler: this.playApproachingStationAnnouncement.bind(this),
+        options: {
+          stationCode: {
+            name: 'Next station',
+            default: this.RealAvailableStationNames[0],
+            options: AllStationsTitleValueMap.filter(s => this.RealAvailableStationNames.includes(s.value)),
+            type: 'select',
+          },
+          mindTheGap: {
+            name: 'Mind the gap?',
+            type: 'boolean',
+            default: true,
+          },
         },
       },
     },
     stoppedAtStation: {
       name: 'Stopped at station',
-      playHandler: this.playStoppedAtStationAnnouncement.bind(this),
       component: CustomAnnouncementPane,
-      options: {
-        thisStationCode: {
-          name: 'This station',
-          default: this.RealAvailableStationNames[0],
-          options: AllStationsTitleValueMap.filter(s => this.RealAvailableStationNames.includes(s.value)),
-          type: 'select',
-        },
-        terminatesAtCode: {
-          name: 'Terminates at',
-          default: this.RealAvailableStationNames[0],
-          options: AllStationsTitleValueMap.filter(s => this.RealAvailableStationNames.includes(s.value)),
-          type: 'select',
-        },
-        callingAtCodes: {
-          name: '',
-          type: 'custom',
-          component: CallingAtSelector,
-          props: {
-            availableStations: this.RealAvailableStationNames,
+      props: {
+        playHandler: this.playStoppedAtStationAnnouncement.bind(this),
+        options: {
+          thisStationCode: {
+            name: 'This station',
+            default: this.RealAvailableStationNames[0],
+            options: AllStationsTitleValueMap.filter(s => this.RealAvailableStationNames.includes(s.value)),
+            type: 'select',
           },
-          default: [],
+          terminatesAtCode: {
+            name: 'Terminates at',
+            default: this.RealAvailableStationNames[0],
+            options: AllStationsTitleValueMap.filter(s => this.RealAvailableStationNames.includes(s.value)),
+            type: 'select',
+          },
+          callingAtCodes: {
+            name: '',
+            type: 'custom',
+            component: CallingAtSelector,
+            props: {
+              availableStations: this.RealAvailableStationNames,
+            },
+            default: [],
+          },
         },
       },
     },
     departingStation: {
       name: 'Departing station',
-      playHandler: this.playDepartingStationAnnouncement.bind(this),
       component: CustomAnnouncementPane,
-      options: {
-        terminatesAtCode: {
-          name: 'Terminates at',
-          default: this.RealAvailableStationNames[0],
-          options: AllStationsTitleValueMap.filter(s => this.RealAvailableStationNames.includes(s.value)),
-          type: 'select',
+      props: {
+        playHandler: this.playDepartingStationAnnouncement.bind(this),
+        options: {
+          terminatesAtCode: {
+            name: 'Terminates at',
+            default: this.RealAvailableStationNames[0],
+            options: AllStationsTitleValueMap.filter(s => this.RealAvailableStationNames.includes(s.value)),
+            type: 'select',
+          },
+          nextStationCode: {
+            name: 'Next station',
+            default: this.RealAvailableStationNames[0],
+            options: AllStationsTitleValueMap.filter(s => this.RealAvailableStationNames.includes(s.value)),
+            type: 'select',
+          },
         },
-        nextStationCode: {
-          name: 'Next station',
-          default: this.RealAvailableStationNames[0],
-          options: AllStationsTitleValueMap.filter(s => this.RealAvailableStationNames.includes(s.value)),
-          type: 'select',
-        },
+      },
+    },
+    announcementButtons: {
+      name: 'Announcement buttons',
+      component: CustomButtonPane,
+      props: {
+        buttons: [
+          {
+            label: 'Bing bong',
+            onClick: this.playAudioFiles.bind(this, ['bing bong']),
+          },
+          {
+            label: 'You must wear a face covering',
+            onClick: this.playAudioFiles.bind(this, ['you must wear a face covering on your jouney unless you are exempt']),
+          },
+        ],
       },
     },
   }

@@ -1,4 +1,5 @@
 import type { ICustomAnnouncementPaneProps } from '@components/PanelPanes/CustomAnnouncementPane'
+import type { ICustomButtonPaneProps } from '@components/PanelPanes/CustomButtonPane'
 
 export interface IPlayOptions {
   delayStart: number
@@ -45,9 +46,13 @@ export type AudioItem = string | { id: string; opts?: Partial<IPlayOptions> }
 
 export interface CustomAnnouncementTab {
   name: string
-  component: (props: ICustomAnnouncementPaneProps) => JSX.Element
-  options: Record<string, OptionsExplanation>
-  playHandler: (options: { [key: string]: any }) => Promise<void>
+  component: (props: ICustomAnnouncementPaneProps | ICustomButtonPaneProps) => JSX.Element
+  props: ICustomAnnouncementPaneProps | ICustomButtonPaneProps
+}
+
+export interface CustomAnnouncementButton {
+  label: string
+  onClick: () => Promise<void>
 }
 
 export default abstract class AnnouncementSystem {

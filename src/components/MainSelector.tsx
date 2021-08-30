@@ -1,7 +1,7 @@
 import React from 'react'
 
 import { useRecoilState } from 'recoil'
-import { globalStateAtom } from '@atoms/globalStateAtom'
+import { globalPersistentStateAtom } from '@atoms/globalStateAtom'
 import { AllTrainAnnouncementSystems } from '@announcement-data/AllSystems'
 
 interface SystemListItem {
@@ -14,7 +14,7 @@ const AllAnnouncementSystems = AllTrainAnnouncementSystems.reduce((acc, sys) => 
 }, [] as SystemListItem[])
 
 function MainSelector(): JSX.Element {
-  const [globalState, setGlobalState] = useRecoilState(globalStateAtom)
+  const [globalState, setGlobalState] = useRecoilState(globalPersistentStateAtom)
 
   return (
     <div>

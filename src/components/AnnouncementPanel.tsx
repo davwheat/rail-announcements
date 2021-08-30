@@ -25,7 +25,7 @@ function AnnouncementPanel(): JSX.Element {
 
   const customTabs = AnnouncementSystemInstance.customAnnouncementTabs
 
-  const TabPanels = Object.values(customTabs).map(({ component: TabComponent, ...opts }) => <TabComponent panelOptions={opts} key={opts.name} />)
+  const TabPanels = Object.values(customTabs).map(({ component: TabComponent, ...opts }) => <TabComponent {...opts.props} key={opts.name} />)
 
   return (
     <div className={classes.root}>

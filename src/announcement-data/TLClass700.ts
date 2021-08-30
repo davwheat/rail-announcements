@@ -9,6 +9,7 @@ interface IApproachingStationAnnouncementOptions {
   stationCode: string
   isAto: boolean
   terminatesHere: boolean
+  takeCareAsYouLeave: boolean
   nearbyPOIs: string[]
   changeFor: string[]
 }
@@ -45,7 +46,7 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
         'we will shortly be arriving at',
         `stations.high.${options.stationCode}`,
         'our final destination',
-        'thank you for travelling with us please make sure you take all your personal belongings with you when you leave the train',
+        'thank you for travelling with us please remember to take all your personal belongings with you when you leave the train',
       )
     } else {
       if (!this.validateStationExists(options.stationCode, 'low')) return
@@ -61,6 +62,10 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
     if (options.nearbyPOIs.length > 0) {
       files.push('exit here for')
       files.push(...this.pluraliseAudio(...options.nearbyPOIs.map(poi => `POIs.${poi}`)))
+    }
+
+    if (options.takeCareAsYouLeave) {
+      files.push('please make sure you have all your belongings and take care as you leave the train')
     }
 
     if (options.isAto) {
@@ -89,7 +94,7 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
     } else if (callingAtCodes.length === 0) {
       if (!this.validateStationExists(terminatesAtCode, 'high')) return
 
-      files.push({ id: 'we will be calling at', opts: { delayStart: 3500 } }, `stations.high.${terminatesAtCode}`, `our final destination`)
+      files.push({ id: 'the next station is', opts: { delayStart: 3500 } }, `stations.high.${terminatesAtCode}`, `our final destination`)
     } else {
       if (!this.validateStationExists(terminatesAtCode, 'low')) return
 
@@ -171,7 +176,7 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
       'ELD',
       'SAF',
     ],
-    low: ['BDM', 'BFR', 'BTN', 'BUG', 'CBG', 'CTK', 'HSK', 'LUT', 'PRP', 'WVF', 'RDH', 'GTW', 'ELD'],
+    low: ['BDM', 'BFR', 'BTN', 'BUG', 'CBG', 'CTK', 'HSK', 'LUT', 'PRP', 'WVF', 'RDH', 'GTW', 'ELD', 'HOR', 'SAF'],
   }
 
   readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab> = {
@@ -218,6 +223,11 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
           },
           terminatesHere: {
             name: 'Terminates here?',
+            default: false,
+            type: 'boolean',
+          },
+          takeCareAsYouLeave: {
+            name: 'Take care as you leave the train?',
             default: false,
             type: 'boolean',
           },

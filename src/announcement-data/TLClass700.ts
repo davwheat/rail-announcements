@@ -171,7 +171,7 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
       'ELD',
       'SAF',
     ],
-    low: ['BDM', 'BFR', 'BTN', 'BUG', 'CBG', 'CTK', 'HSK', 'LUT', 'PRP', 'WVF', 'RDH', 'GTW', 'ELD'],
+    low: ['BDM', 'BFR', 'BTN', 'BUG', 'CBG', 'CTK', 'HSK', 'LUT', 'PRP', 'WVF', 'RDH', 'GTW', 'ELD', 'HOR', 'SAF'],
   }
 
   readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab> = {

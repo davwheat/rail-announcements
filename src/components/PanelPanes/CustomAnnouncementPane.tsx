@@ -61,11 +61,14 @@ function CustomAnnouncementPane({ options, playHandler }: ICustomAnnouncementPan
         </>
       </fieldset>
       <button
-        onClick={async () => {
+        disabled={isDisabled}
+        onClick={React.useCallback(async () => {
+          if (isDisabled) return
+
           setIsDisabled(true)
           await playHandler(optionsState)
           setIsDisabled(false)
-        }}
+        }, [isDisabled, playHandler, setIsDisabled, optionsState])}
       >
         Play announcement
       </button>

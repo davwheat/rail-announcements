@@ -6,6 +6,9 @@ import createOptionField from '@helpers/createOptionField'
 import type { OptionsExplanation } from '@announcement-data/AnnouncementSystem'
 import useIsPlayingAnnouncement from '@helpers/useIsPlayingAnnouncement'
 
+import PlayIcon from 'mdi-react/PlayIcon'
+import DownloadIcon from 'mdi-react/DownloadIcon'
+
 const useStyles = makeStyles({
   root: {
     padding: 16,
@@ -20,7 +23,7 @@ const useStyles = makeStyles({
 
 export interface ICustomAnnouncementPaneProps {
   options: Record<string, OptionsExplanation>
-  playHandler: (options: { [key: string]: any }) => Promise<void>
+  playHandler: (options: { [key: string]: any }, download?: boolean) => Promise<void>
 }
 
 function CustomAnnouncementPane({ options, playHandler }: ICustomAnnouncementPaneProps): JSX.Element {
@@ -60,18 +63,40 @@ function CustomAnnouncementPane({ options, playHandler }: ICustomAnnouncementPan
           )}
         </>
       </fieldset>
-      <button
-        disabled={isDisabled}
-        onClick={React.useCallback(async () => {
-          if (isDisabled) return
 
-          setIsDisabled(true)
-          await playHandler(optionsState)
-          setIsDisabled(false)
-        }, [isDisabled, playHandler, setIsDisabled, optionsState])}
-      >
-        Play announcement
-      </button>
+      <div className="buttonGroup">
+        <button
+          disabled={isDisabled}
+          onClick={React.useCallback(async () => {
+            if (isDisabled) return
+
+            setIsDisabled(true)
+            await playHandler(optionsState)
+            setIsDisabled(false)
+          }, [isDisabled, playHandler, setIsDisabled, optionsState])}
+        >
+          <span className="buttonLabel">
+            <PlayIcon />
+            Play announcement
+          </span>
+        </button>
+        <button
+          disabled={isDisabled}
+          onClick={React.useCallback(async () => {
+            if (isDisabled) return
+
+            setIsDisabled(true)
+            await playHandler(optionsState, true)
+            setIsDisabled(false)
+          }, [isDisabled, playHandler, setIsDisabled, optionsState])}
+          className="iconButton"
+          aria-label="Download announcement"
+        >
+          <DownloadIcon />
+        </button>
+      </div>
+
+      {isDisabled && <p>Assembling announcement...</p>}
     </div>
   )
 }

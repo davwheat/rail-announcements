@@ -27,7 +27,7 @@ export default class SouthernClass377 extends TrainAnnouncementSystem {
   readonly FILE_PREFIX = 'SN/377'
   readonly SYSTEM_TYPE = 'train'
 
-  private async playApproachingStationAnnouncement(options: IApproachingStationAnnouncementOptions): Promise<void> {
+  private async playApproachingStationAnnouncement(options: IApproachingStationAnnouncementOptions, download: boolean = false): Promise<void> {
     const files: AudioItem[] = []
 
     files.push('bing bong')
@@ -37,10 +37,10 @@ export default class SouthernClass377 extends TrainAnnouncementSystem {
       files.push('please mind the gap between the train and the platform')
     }
 
-    await this.playAudioFiles(files)
+    await this.playAudioFiles(files, download)
   }
 
-  private async playStoppedAtStationAnnouncement(options: IStoppedAtStationAnnouncementOptions): Promise<void> {
+  private async playStoppedAtStationAnnouncement(options: IStoppedAtStationAnnouncementOptions, download: boolean = false): Promise<void> {
     const { callingAtCodes: _callingAt, terminatesAtCode, thisStationCode } = options
 
     const callingAtCodes = _callingAt.map(stop => stop.crsCode)
@@ -61,7 +61,7 @@ export default class SouthernClass377 extends TrainAnnouncementSystem {
       files.push('the next station is', remainingStops[0])
     }
 
-    await this.playAudioFiles(files)
+    await this.playAudioFiles(files, download)
   }
 
   private RealAvailableStationNames = [
@@ -180,11 +180,13 @@ export default class SouthernClass377 extends TrainAnnouncementSystem {
         buttons: [
           {
             label: 'Bing bong',
-            onClick: this.playAudioFiles.bind(this, ['bing bong']),
+            play: this.playAudioFiles.bind(this, ['bing bong']),
+            download: this.playAudioFiles.bind(this, ['bing bong'], true),
           },
           {
             label: 'You must wear a face covering',
-            onClick: this.playAudioFiles.bind(this, ['you must wear a face covering on your jouney unless you are exempt']),
+            play: this.playAudioFiles.bind(this, ['you must wear a face covering on your jouney unless you are exempt']),
+            download: this.playAudioFiles.bind(this, ['you must wear a face covering on your jouney unless you are exempt'], true),
           },
         ],
       },

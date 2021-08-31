@@ -36,7 +36,7 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
 
   private readonly OtherServicesAvailable = [{ title: 'Other NR services', value: 'other national rail services' }]
 
-  private async playApproachingStationAnnouncement(options: IApproachingStationAnnouncementOptions): Promise<void> {
+  private async playApproachingStationAnnouncement(options: IApproachingStationAnnouncementOptions, download: boolean = false): Promise<void> {
     const files: AudioItem[] = []
 
     if (options.terminatesHere) {
@@ -72,10 +72,10 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
       files.push('the doors will open automatically at the next station')
     }
 
-    await this.playAudioFiles(files)
+    await this.playAudioFiles(files, download)
   }
 
-  private async playStoppedAtStationAnnouncement(options: IStoppedAtStationAnnouncementOptions): Promise<void> {
+  private async playStoppedAtStationAnnouncement(options: IStoppedAtStationAnnouncementOptions, download: boolean = false): Promise<void> {
     const { thisStationCode, terminatesAtCode, callingAtCodes } = options
 
     const files: AudioItem[] = []
@@ -124,10 +124,10 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
       )
     }
 
-    await this.playAudioFiles(files)
+    await this.playAudioFiles(files, download)
   }
 
-  private async playInitialDepartureAnnouncement(options: IInitialDepartureAnnouncementOptions): Promise<void> {
+  private async playInitialDepartureAnnouncement(options: IInitialDepartureAnnouncementOptions, download: boolean = false): Promise<void> {
     const { terminatesAtCode, callingAtCodes } = options
 
     const files: AudioItem[] = []
@@ -167,7 +167,7 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
       )
     }
 
-    await this.playAudioFiles(files)
+    await this.playAudioFiles(files, download)
   }
 
   readonly AvailableStationNames = {
@@ -332,7 +332,8 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
         buttons: [
           {
             label: 'Safety information',
-            onClick: this.playAudioFiles.bind(this, ['safety information is provided on posters in every carriage']),
+            play: this.playAudioFiles.bind(this, ['safety information is provided on posters in every carriage']),
+            download: this.playAudioFiles.bind(this, ['safety information is provided on posters in every carriage'], true),
           },
         ],
       },

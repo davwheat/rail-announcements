@@ -45,7 +45,7 @@ interface ICustomOptions {
 
 export type AudioItem = string | AudioItemObject
 
-interface AudioItemObject {
+export interface AudioItemObject {
   id: string
   opts?: Partial<IPlayOptions>
 }
@@ -58,7 +58,8 @@ export interface CustomAnnouncementTab {
 
 export interface CustomAnnouncementButton {
   label: string
-  onClick: () => Promise<void>
+  play: () => Promise<void>
+  download: () => Promise<void>
 }
 
 export default abstract class AnnouncementSystem {

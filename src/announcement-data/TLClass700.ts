@@ -168,7 +168,7 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
       'SAC',
       'STP',
       'SVG',
-      'TBG',
+      'TBD',
       'WVF',
       'ZFD',
       'HOR',

@@ -2,7 +2,7 @@ import CallingAtSelector from '@components/CallingAtSelector'
 import CustomAnnouncementPane from '@components/PanelPanes/CustomAnnouncementPane'
 import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
 import { AllStationsTitleValueMap } from '@data/StationManipulators'
-import { AudioItem, CustomAnnouncementTab } from './AnnouncementSystem'
+import { AudioItem, AudioItemObject, CustomAnnouncementTab } from './AnnouncementSystem'
 import TrainAnnouncementSystem from './TrainAnnouncementSystem'
 
 interface IApproachingStationAnnouncementOptions {
@@ -36,7 +36,7 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
 
   private readonly OtherServicesAvailable = [{ title: 'Other NR services', value: 'other national rail services' }]
 
-  private async playApproachingStationAnnouncement(options: IApproachingStationAnnouncementOptions): Promise<void> {
+  private async playApproachingStationAnnouncement(options: IApproachingStationAnnouncementOptions, download: boolean = false): Promise<void> {
     const files: AudioItem[] = []
 
     if (options.terminatesHere) {
@@ -44,24 +44,24 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
 
       files.push(
         'we will shortly be arriving at',
-        `stations.high.${options.stationCode}`,
+        { id: `stations.high.${options.stationCode}`, opts: { delayStart: 500 } },
         'our final destination',
         'thank you for travelling with us please remember to take all your personal belongings with you when you leave the train',
       )
     } else {
       if (!this.validateStationExists(options.stationCode, 'low')) return
 
-      files.push('we will shortly be arriving at', `stations.low.${options.stationCode}`)
+      files.push('we will shortly be arriving at', { id: `stations.low.${options.stationCode}`, opts: { delayStart: 500 } })
     }
 
     if (options.changeFor.length > 0) {
       files.push('change here for')
-      files.push(...this.pluraliseAudio(...options.changeFor.map(poi => `other-services.${poi}`)))
+      files.push(...this.pluraliseAudio(options.changeFor.map(poi => `other-services.${poi}`)))
     }
 
     if (options.nearbyPOIs.length > 0) {
       files.push('exit here for')
-      files.push(...this.pluraliseAudio(...options.nearbyPOIs.map(poi => `POIs.${poi}`)))
+      files.push(...this.pluraliseAudio(options.nearbyPOIs.map(poi => `POIs.${poi}`)))
     }
 
     if (options.takeCareAsYouLeave) {
@@ -72,10 +72,10 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
       files.push('the doors will open automatically at the next station')
     }
 
-    await this.playAudioFiles(files)
+    await this.playAudioFiles(files, download)
   }
 
-  private async playStoppedAtStationAnnouncement(options: IStoppedAtStationAnnouncementOptions): Promise<void> {
+  private async playStoppedAtStationAnnouncement(options: IStoppedAtStationAnnouncementOptions, download: boolean = false): Promise<void> {
     const { thisStationCode, terminatesAtCode, callingAtCodes } = options
 
     const files: AudioItem[] = []
@@ -84,7 +84,7 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
       files.push('please mind the gap between the train and the platform')
     }
 
-    files.push('this station is', `stations.low.${thisStationCode}`)
+    files.push({ id: 'this station is', opts: { delayStart: 500 } }, { id: `stations.low.${thisStationCode}`, opts: { delayStart: 250 } })
 
     if (thisStationCode === terminatesAtCode) {
       files.push(
@@ -105,22 +105,42 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
       if (callingAtCodes.some(({ crsCode }) => !this.validateStationExists(crsCode, 'high'))) return
       if (!this.validateStationExists(terminatesAtCode, 'low')) return
 
-      files.push(...this.pluraliseAudio(...callingAtCodes.map(({ crsCode }) => `stations.high.${crsCode}`), `stations.low.${terminatesAtCode}`))
+      files.push(
+        ...this.pluraliseAudio(
+          [
+            ...callingAtCodes.map(
+              ({ crsCode }, i): AudioItemObject => ({
+                id: `stations.high.${crsCode}`,
+                opts: { delayStart: 350 },
+              }),
+            ),
+            {
+              id: `stations.low.${terminatesAtCode}`,
+              opts: { delayStart: 350 },
+            },
+          ],
+          350,
+        ),
+      )
     }
 
-    await this.playAudioFiles(files)
+    await this.playAudioFiles(files, download)
   }
 
-  private async playInitialDepartureAnnouncement(options: IInitialDepartureAnnouncementOptions): Promise<void> {
+  private async playInitialDepartureAnnouncement(options: IInitialDepartureAnnouncementOptions, download: boolean = false): Promise<void> {
     const { terminatesAtCode, callingAtCodes } = options
 
     const files: AudioItem[] = []
 
     if (!this.validateStationExists(terminatesAtCode, 'low')) return
-    files.push('welcome aboard this service to', `stations.low.${terminatesAtCode}`, {
-      id: `safety information is provided on posters in every carriage`,
-      opts: { delayStart: 2000 },
-    })
+    files.push(
+      'welcome aboard this service to',
+      { id: `stations.low.${terminatesAtCode}`, opts: { delayStart: 250 } },
+      {
+        id: `safety information is provided on posters in every carriage`,
+        opts: { delayStart: 2000 },
+      },
+    )
 
     if (callingAtCodes.length === 0) {
       if (!this.validateStationExists(terminatesAtCode, 'high')) return
@@ -132,10 +152,26 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
       if (callingAtCodes.some(({ crsCode }) => !this.validateStationExists(crsCode, 'high'))) return
       if (!this.validateStationExists(terminatesAtCode, 'low')) return
 
-      files.push(...this.pluraliseAudio(...callingAtCodes.map(({ crsCode }) => `stations.high.${crsCode}`), `stations.low.${terminatesAtCode}`))
+      files.push(
+        ...this.pluraliseAudio(
+          [
+            ...callingAtCodes.map(
+              ({ crsCode }, i): AudioItemObject => ({
+                id: `stations.high.${crsCode}`,
+                opts: { delayStart: 350 },
+              }),
+            ),
+            {
+              id: `stations.low.${terminatesAtCode}`,
+              opts: { delayStart: 350 },
+            },
+          ],
+          350,
+        ),
+      )
     }
 
-    await this.playAudioFiles(files)
+    await this.playAudioFiles(files, download)
   }
 
   readonly AvailableStationNames = {
@@ -168,7 +204,7 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
       'SAC',
       'STP',
       'SVG',
-      'TBG',
+      'TBD',
       'WVF',
       'ZFD',
       'HOR',
@@ -300,7 +336,8 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
         buttons: [
           {
             label: 'Safety information',
-            onClick: this.playAudioFiles.bind(this, ['safety information is provided on posters in every carriage']),
+            play: this.playAudioFiles.bind(this, ['safety information is provided on posters in every carriage']),
+            download: this.playAudioFiles.bind(this, ['safety information is provided on posters in every carriage'], true),
           },
         ],
       },

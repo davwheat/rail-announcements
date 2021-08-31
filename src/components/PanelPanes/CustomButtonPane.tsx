@@ -4,6 +4,8 @@ import { makeStyles } from '@material-ui/styles'
 import getActiveSystem from '@helpers/getActiveSystem'
 import type { CustomAnnouncementButton } from '@announcement-data/AnnouncementSystem'
 import useIsPlayingAnnouncement from '@helpers/useIsPlayingAnnouncement'
+import DownloadIcon from 'mdi-react/DownloadIcon'
+import PlayIcon from 'mdi-react/PlayIcon'
 
 const useStyles = makeStyles({
   root: {
@@ -57,9 +59,17 @@ function CustomButtonPane({ buttons }: ICustomButtonPaneProps): JSX.Element {
 
         <div className={classes.buttonList}>
           {buttons.map(btn => (
-            <button key={btn.label} disabled={isDisabled} onClick={createClickHandler(btn.onClick)}>
-              {btn.label}
-            </button>
+            <div key={btn.label} className="buttonGroup">
+              <button disabled={isDisabled} onClick={createClickHandler(btn.play)}>
+                <span className="buttonLabel">
+                  <PlayIcon />
+                  {btn.label}
+                </span>
+              </button>
+              <button disabled={isDisabled} onClick={createClickHandler(btn.download)} className="iconButton" aria-label="Download announcement">
+                <DownloadIcon />
+              </button>
+            </div>
           ))}
         </div>
       </fieldset>

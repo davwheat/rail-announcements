@@ -42,9 +42,9 @@ export default abstract class TrainAnnouncementSystem extends AnnouncementSystem
    * @param items Array of audio files
    * @returns Pluralised array of audio files
    */
-  protected pluraliseAudio(...items: AudioItem[]): AudioItem[] {
+  protected pluraliseAudio(items: AudioItem[], delay: number = 0): AudioItem[] {
     if (items.length > 1) {
-      items.splice(items.length - 1, 0, 'and')
+      items.splice(items.length - 1, 0, { id: 'and', opts: { delayStart: delay } })
       return items
     }
 

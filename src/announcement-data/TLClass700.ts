@@ -2,7 +2,7 @@ import CallingAtSelector from '@components/CallingAtSelector'
 import CustomAnnouncementPane from '@components/PanelPanes/CustomAnnouncementPane'
 import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
 import { AllStationsTitleValueMap } from '@data/StationManipulators'
-import { AudioItem, CustomAnnouncementTab } from './AnnouncementSystem'
+import { AudioItem, AudioItemObject, CustomAnnouncementTab } from './AnnouncementSystem'
 import TrainAnnouncementSystem from './TrainAnnouncementSystem'
 
 interface IApproachingStationAnnouncementOptions {
@@ -44,14 +44,14 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
 
       files.push(
         'we will shortly be arriving at',
-        `stations.high.${options.stationCode}`,
+        { id: `stations.high.${options.stationCode}`, opts: { delayStart: 500 } },
         'our final destination',
         'thank you for travelling with us please remember to take all your personal belongings with you when you leave the train',
       )
     } else {
       if (!this.validateStationExists(options.stationCode, 'low')) return
 
-      files.push('we will shortly be arriving at', `stations.low.${options.stationCode}`)
+      files.push('we will shortly be arriving at', { id: `stations.low.${options.stationCode}`, opts: { delayStart: 500 } })
     }
 
     if (options.changeFor.length > 0) {
@@ -84,7 +84,7 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
       files.push('please mind the gap between the train and the platform')
     }
 
-    files.push('this station is', `stations.low.${thisStationCode}`)
+    files.push({ id: 'this station is', opts: { delayStart: 500 } }, { id: `stations.low.${thisStationCode}`, opts: { delayStart: 250 } })
 
     if (thisStationCode === terminatesAtCode) {
       files.push(
@@ -133,10 +133,14 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
     const files: AudioItem[] = []
 
     if (!this.validateStationExists(terminatesAtCode, 'low')) return
-    files.push('welcome aboard this service to', `stations.low.${terminatesAtCode}`, {
-      id: `safety information is provided on posters in every carriage`,
-      opts: { delayStart: 2000 },
-    })
+    files.push(
+      'welcome aboard this service to',
+      { id: `stations.low.${terminatesAtCode}`, opts: { delayStart: 250 } },
+      {
+        id: `safety information is provided on posters in every carriage`,
+        opts: { delayStart: 2000 },
+      },
+    )
 
     if (callingAtCodes.length === 0) {
       if (!this.validateStationExists(terminatesAtCode, 'high')) return

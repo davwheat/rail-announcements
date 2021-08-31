@@ -2,7 +2,7 @@ import CallingAtSelector from '@components/CallingAtSelector'
 import CustomAnnouncementPane from '@components/PanelPanes/CustomAnnouncementPane'
 import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
 import { AllStationsTitleValueMap } from '@data/StationManipulators'
-import { AudioItem, CustomAnnouncementTab } from './AnnouncementSystem'
+import { AudioItem, AudioItemObject, CustomAnnouncementTab } from './AnnouncementSystem'
 import TrainAnnouncementSystem from './TrainAnnouncementSystem'
 
 interface IApproachingStationAnnouncementOptions {
@@ -49,7 +49,10 @@ export default class SouthernClass377 extends TrainAnnouncementSystem {
     files.push('bing bong')
     files.push('this is', `stations.${thisStationCode}`, 'this train is the southern service to', `stations.${terminatesAtCode}`)
 
-    const remainingStops = [...callingAtCodes.map(crsCode => `stations.${crsCode}`), `stations.${terminatesAtCode}`]
+    const remainingStops = [
+      ...callingAtCodes.map((crsCode): AudioItemObject => ({ id: `stations.${crsCode}`, opts: { delayStart: 100 } })),
+      { id: `stations.${terminatesAtCode}`, opts: { delayStart: 100 } },
+    ]
 
     if (callingAtCodes.some(code => !this.validateStationExists(code))) return
     if (!this.validateStationExists(terminatesAtCode)) return

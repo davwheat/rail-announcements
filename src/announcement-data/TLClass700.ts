@@ -56,12 +56,12 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
 
     if (options.changeFor.length > 0) {
       files.push('change here for')
-      files.push(...this.pluraliseAudio(...options.changeFor.map(poi => `other-services.${poi}`)))
+      files.push(...this.pluraliseAudio(options.changeFor.map(poi => `other-services.${poi}`)))
     }
 
     if (options.nearbyPOIs.length > 0) {
       files.push('exit here for')
-      files.push(...this.pluraliseAudio(...options.nearbyPOIs.map(poi => `POIs.${poi}`)))
+      files.push(...this.pluraliseAudio(options.nearbyPOIs.map(poi => `POIs.${poi}`)))
     }
 
     if (options.takeCareAsYouLeave) {
@@ -105,7 +105,23 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
       if (callingAtCodes.some(({ crsCode }) => !this.validateStationExists(crsCode, 'high'))) return
       if (!this.validateStationExists(terminatesAtCode, 'low')) return
 
-      files.push(...this.pluraliseAudio(...callingAtCodes.map(({ crsCode }) => `stations.high.${crsCode}`), `stations.low.${terminatesAtCode}`))
+      files.push(
+        ...this.pluraliseAudio(
+          [
+            ...callingAtCodes.map(
+              ({ crsCode }, i): AudioItemObject => ({
+                id: `stations.high.${crsCode}`,
+                opts: { delayStart: 350 },
+              }),
+            ),
+            {
+              id: `stations.low.${terminatesAtCode}`,
+              opts: { delayStart: 350 },
+            },
+          ],
+          350,
+        ),
+      )
     }
 
     await this.playAudioFiles(files)
@@ -132,7 +148,23 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
       if (callingAtCodes.some(({ crsCode }) => !this.validateStationExists(crsCode, 'high'))) return
       if (!this.validateStationExists(terminatesAtCode, 'low')) return
 
-      files.push(...this.pluraliseAudio(...callingAtCodes.map(({ crsCode }) => `stations.high.${crsCode}`), `stations.low.${terminatesAtCode}`))
+      files.push(
+        ...this.pluraliseAudio(
+          [
+            ...callingAtCodes.map(
+              ({ crsCode }, i): AudioItemObject => ({
+                id: `stations.high.${crsCode}`,
+                opts: { delayStart: 350 },
+              }),
+            ),
+            {
+              id: `stations.low.${terminatesAtCode}`,
+              opts: { delayStart: 350 },
+            },
+          ],
+          350,
+        ),
+      )
     }
 
     await this.playAudioFiles(files)

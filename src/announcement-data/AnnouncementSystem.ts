@@ -82,6 +82,8 @@ export default abstract class AnnouncementSystem {
    */
   abstract readonly SYSTEM_TYPE: 'station' | 'train'
 
+  private static readonly SAMPLE_RATE = 48000
+
   /**
    * Generates a URL for the provided audio file ID.
    */
@@ -95,27 +97,49 @@ export default abstract class AnnouncementSystem {
    * Returns a promise which resolves when the last audio file has finished playing.
    *
    * @param fileIds Array of audio files to play.
+   * @param download Whether to save the concatenated audio to the device.
+   *
    * @returns Promise which resolves when the last audio file has finished playing.
    */
-  async playAudioFiles(fileIds: AudioItem[]): Promise<void> {
-    const crunker = new Crunker({ sampleRate: 48000 })
-
-    const standardisedFileIds: (AudioItemObject & { uri: string })[] = fileIds.map(fileId => {
+  async playAudioFiles(fileIds: AudioItem[], download: boolean = false): Promise<void> {
+    const standardisedFileIds = fileIds.map(fileId => {
       if (typeof fileId === 'string') {
-        return { id: fileId, uri: this.generateAudioFileUrl(fileId) }
+        return { id: fileId }
       } else {
-        return { ...fileId, uri: this.generateAudioFileUrl(fileId.id) }
+        return fileId
       }
     })
 
-    const audioBuffers_P = crunker.fetchAudio(...standardisedFileIds.map(file => file.uri))
-    const shortPause = this.createSilence(100)
+    const crunker = new Crunker({ sampleRate: AnnouncementSystem.SAMPLE_RATE })
+    const audio = await this.concatSoundClips(standardisedFileIds)
+
+    if (audio.numberOfChannels > 1) {
+      // This is stereo. We need to mux it to mono.
+
+      audio.copyToChannel(audio.getChannelData(0), 1, 0)
+    }
+
+    if (download) {
+      crunker.download(crunker.export(audio).blob, 'announcement')
+    } else {
+      const source = crunker.play(audio)
+
+      return new Promise<void>(resolve => {
+        source.addEventListener('ended', () => resolve())
+      })
+    }
+  }
+
+  async concatSoundClips(files: AudioItemObject[]): Promise<AudioBuffer> {
+    const crunker = new Crunker({ sampleRate: AnnouncementSystem.SAMPLE_RATE })
+
+    const filesWithUris: (AudioItemObject & { uri: string })[] = files.map(file => ({ ...file, uri: this.generateAudioFileUrl(file.id) }))
+
+    const audioBuffers_P = crunker.fetchAudio(...filesWithUris.map(file => file.uri))
 
     const audioBuffers = (await audioBuffers_P).reduce((acc, curr, i) => {
-      if (standardisedFileIds[i].opts?.delayStart) {
-        acc.push(this.createSilence(standardisedFileIds[i].opts.delayStart))
-      } else if (i > 0) {
-        acc.push(shortPause)
+      if (filesWithUris[i].opts?.delayStart !== undefined) {
+        acc.push(this.createSilence(filesWithUris[i].opts.delayStart))
       }
 
       acc.push(curr)
@@ -123,11 +147,7 @@ export default abstract class AnnouncementSystem {
       return acc
     }, [])
 
-    const audio = crunker.play(crunker.concatAudio(audioBuffers))
-
-    return new Promise<void>(resolve => {
-      audio.addEventListener('ended', () => resolve())
-    })
+    return crunker.concatAudio(audioBuffers)
   }
 
   private createSilence(msLength: number): AudioBuffer {

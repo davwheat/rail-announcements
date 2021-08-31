@@ -7,6 +7,7 @@
   "keywords": [
     "gatsby"
   ],
+  "browserslist": ["last 2 versions", "not dead"],
   "scripts": {
     "develop": "gatsby develop",
     "start": "gatsby develop",

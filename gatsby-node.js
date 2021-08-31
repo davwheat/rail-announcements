@@ -10,6 +10,19 @@ const path = require('path')
  * Customise webpack config.
  */
 exports.onCreateWebpackConfig = ({ stage, rules, loaders, plugins, actions }) => {
+  if (stage === 'build-html' || stage === 'develop-html') {
+    actions.setWebpackConfig({
+      module: {
+        rules: [
+          {
+            test: /crunker/,
+            use: loaders.null(),
+          },
+        ],
+      },
+    })
+  }
+
   actions.setWebpackConfig({
     module: {
       rules: [

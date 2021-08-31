@@ -1,5 +1,6 @@
 import type { ICustomAnnouncementPaneProps } from '@components/PanelPanes/CustomAnnouncementPane'
 import type { ICustomButtonPaneProps } from '@components/PanelPanes/CustomButtonPane'
+import Crunker from 'crunker'
 
 export interface IPlayOptions {
   delayStart: number
@@ -42,7 +43,12 @@ interface ICustomOptions {
   default: any
 }
 
-export type AudioItem = string | { id: string; opts?: Partial<IPlayOptions> }
+export type AudioItem = string | AudioItemObject
+
+interface AudioItemObject {
+  id: string
+  opts?: Partial<IPlayOptions>
+}
 
 export interface CustomAnnouncementTab {
   name: string
@@ -84,27 +90,6 @@ export default abstract class AnnouncementSystem {
   }
 
   /**
-   * Plays a single audio file with the provided playback options.
-   *
-   * Returns the HTML Audio Element used to play the audio file.
-   *
-   * @param fileId Audio file ID
-   * @param playOptions Playback options
-   * @returns HTML Audio Element used to play the audio
-   */
-  private playAudioFile(fileId: string, playOptions: Partial<IPlayOptions> = {}): HTMLAudioElement {
-    const audio = new Audio(this.generateAudioFileUrl(fileId))
-
-    if (playOptions.delayStart) {
-      setTimeout(() => audio.play(), playOptions.delayStart)
-    } else {
-      audio.play()
-    }
-
-    return audio
-  }
-
-  /**
    * Plays multiple audio files.
    *
    * Returns a promise which resolves when the last audio file has finished playing.
@@ -112,25 +97,44 @@ export default abstract class AnnouncementSystem {
    * @param fileIds Array of audio files to play.
    * @returns Promise which resolves when the last audio file has finished playing.
    */
-  playAudioFiles(fileIds: AudioItem[]): Promise<void> {
-    const that = this
+  async playAudioFiles(fileIds: AudioItem[]): Promise<void> {
+    const crunker = new Crunker({ sampleRate: 48000 })
 
-    return new Promise(resolve => {
-      function playAudioFile(index: number): void {
-        const d = fileIds[index]
-        const data = typeof d === 'string' ? { id: d } : d
+    const standardisedFileIds: (AudioItemObject & { uri: string })[] = fileIds.map(fileId => {
+      if (typeof fileId === 'string') {
+        return { id: fileId, uri: this.generateAudioFileUrl(fileId) }
+      } else {
+        return { ...fileId, uri: this.generateAudioFileUrl(fileId.id) }
+      }
+    })
 
-        const audio = that.playAudioFile(data.id, data.opts || {})
+    const audioBuffers_P = crunker.fetchAudio(...standardisedFileIds.map(file => file.uri))
+    const shortPause = this.createSilence(100)
 
-        if (index < fileIds.length - 1) {
-          audio.addEventListener('ended', playAudioFile.bind(this, index + 1))
-        } else {
-          audio.addEventListener('ended', () => resolve())
-        }
+    const audioBuffers = (await audioBuffers_P).reduce((acc, curr, i) => {
+      if (standardisedFileIds[i].opts?.delayStart) {
+        acc.push(this.createSilence(standardisedFileIds[i].opts.delayStart))
+      } else if (i > 0) {
+        acc.push(shortPause)
       }
 
-      playAudioFile(0)
+      acc.push(curr)
+
+      return acc
+    }, [])
+
+    const audio = crunker.play(crunker.concatAudio(audioBuffers))
+
+    return new Promise<void>(resolve => {
+      audio.addEventListener('ended', () => resolve())
     })
+  }
+
+  private createSilence(msLength: number): AudioBuffer {
+    const SAMPLE_RATE = 48000
+    const msToLength = (ms: number) => Math.ceil((ms / 1000) * SAMPLE_RATE)
+
+    return new AudioContext().createBuffer(1, msToLength(msLength), SAMPLE_RATE)
   }
 
   /**

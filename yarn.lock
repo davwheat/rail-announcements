@@ -3408,6 +3408,11 @@ cross-spawn@^6.0.0, cross-spawn@^6.0.5:
     shebang-command "^1.2.0"
     which "^1.2.9"
 
+crunker@^0.4.1:
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/crunker/-/crunker-0.4.1.tgz#4e0e1bc086b2c13e34837498f4081d4b8a48e96b"
+  integrity sha512-nFDMlpQexvd87CejQ58t80jaIHLl7IlTARsSTCwwcFP2QCbXMy2hD2nmiUQkp1Y28+l+uQ0Wxs3YOb0nj/tmUg==
+
 crypto-random-string@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/crypto-random-string/-/crypto-random-string-2.0.0.tgz#ef2a7a966ec11083388369baa02ebead229b30d5"

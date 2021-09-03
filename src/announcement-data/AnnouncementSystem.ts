@@ -168,4 +168,28 @@ export default abstract class AnnouncementSystem {
   }
 
   readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab> = {}
+
+  /**
+   * Takes an array of audio files, and adds an `and` audio file where needed.
+   *
+   * @example
+   * pluraliseAudioItems(['a', 'b', 'c']) // returns ['a', 'b', 'and', 'c']
+   *
+   * @example
+   * pluraliseAudioItems(['a']) // returns ['a']
+   *
+   * @example
+   * pluraliseAudioItems(['a', 'b']) // returns ['a', 'and', 'b']
+   *
+   * @param items Array of audio files
+   * @returns Pluralised array of audio files
+   */
+  protected pluraliseAudio(items: AudioItem[], delay: number = 0): AudioItem[] {
+    if (items.length > 1) {
+      items.splice(items.length - 1, 0, { id: 'and', opts: { delayStart: delay } })
+      return items
+    }
+
+    return items
+  }
 }

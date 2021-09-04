@@ -1,3 +1,4 @@
+import React from 'react'
 import CallingAtSelector from '@components/CallingAtSelector'
 import CustomAnnouncementPane from '@components/PanelPanes/CustomAnnouncementPane'
 import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
@@ -10,7 +11,6 @@ interface IApproachingStationAnnouncementOptions {
   isAto: boolean
   terminatesHere: boolean
   takeCareAsYouLeave: boolean
-  nearbyPOIs: string[]
   changeFor: string[]
 }
 interface IStoppedAtStationAnnouncementOptions {
@@ -18,8 +18,6 @@ interface IStoppedAtStationAnnouncementOptions {
   terminatesAtCode: string
   callingAtCodes: { crsCode: string; name: string; randomId: string }[]
   mindTheGap: boolean
-  nearbyPOIs: string[]
-  changeFor: string[]
 }
 interface IInitialDepartureAnnouncementOptions {
   terminatesAtCode: string
@@ -32,7 +30,12 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
   readonly FILE_PREFIX = 'TL/700'
   readonly SYSTEM_TYPE = 'train'
 
-  private readonly NearbyPointsOfInterest = [{ title: "St. Paul's Cathedral", value: 'st pauls cathedral' }]
+  private readonly StationsWithPointsOfInterest = ['BFR', 'CTK', 'LBG', 'STP']
+  private readonly StationsWithForcedChangeHere = {
+    LBG: { main: 'other national rail services', additional: 'LBG' },
+    STP: { main: 'STP' },
+    WIM: { main: 'WIM' },
+  }
 
   private readonly OtherServicesAvailable = [{ title: 'Other NR services', value: 'other national rail services' }]
 
@@ -54,7 +57,17 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
       files.push('we will shortly be arriving at', { id: `stations.low.${options.stationCode}`, opts: { delayStart: 500 } })
     }
 
-    if (options.changeFor.length > 0) {
+    if (Object.keys(this.StationsWithForcedChangeHere).includes(options.stationCode)) {
+      const manualChangeFor = this.StationsWithForcedChangeHere[options.stationCode]
+
+      // We force 'change here' announcements for these stations
+      files.push({ id: 'change here for', opts: { delayStart: 500 } })
+      files.push(`other-services.${manualChangeFor.main}`)
+
+      if (manualChangeFor.additional) {
+        files.push(`also-change.${manualChangeFor.additional}`)
+      }
+    } else if (options.changeFor.length > 0) {
       files.push({ id: 'change here for', opts: { delayStart: 500 } })
       files.push(
         ...this.pluraliseAudio(
@@ -64,14 +77,9 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
       )
     }
 
-    if (options.nearbyPOIs.length > 0) {
+    if (this.StationsWithPointsOfInterest.includes(options.stationCode)) {
       files.push('exit here for')
-      files.push(
-        ...this.pluraliseAudio(
-          options.nearbyPOIs.map(poi => `POIs.${poi}`),
-          50,
-        ),
-      )
+      files.push(`POIs.${options.stationCode}`)
     }
 
     if (options.takeCareAsYouLeave) {
@@ -96,22 +104,22 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
 
     files.push(
       { id: 'this station is', opts: { delayStart: options.mindTheGap ? 500 : 0 } },
-      { id: `stations.low.${thisStationCode}`, opts: { delayStart: 250 } },
+      { id: `stations.low.${thisStationCode}`, opts: { delayStart: 500 } },
     )
 
     if (thisStationCode === terminatesAtCode) {
       files.push(
-        { id: 'this train terminates here all change', opts: { delayStart: 1500 } },
+        { id: 'this train terminates here all change', opts: { delayStart: 4600 } },
         'please ensure you take all personal belongings with you when leaving the train',
       )
     } else if (callingAtCodes.length === 0) {
       if (!this.validateStationExists(terminatesAtCode, 'high')) return
 
-      files.push({ id: 'the next station is', opts: { delayStart: 3500 } }, `stations.high.${terminatesAtCode}`, `our final destination`)
+      files.push({ id: 'the next station is', opts: { delayStart: 4600 } }, `stations.high.${terminatesAtCode}`, `our final destination`)
     } else {
       if (!this.validateStationExists(terminatesAtCode, 'low')) return
 
-      files.push({ id: 'this train terminates at', opts: { delayStart: 3500 } }, `stations.low.${terminatesAtCode}`)
+      files.push({ id: 'this train terminates at', opts: { delayStart: 4600 } }, `stations.low.${terminatesAtCode}`)
 
       files.push({ id: 'we will be calling at', opts: { delayStart: 1000 } })
 
@@ -122,7 +130,7 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
         ...this.pluraliseAudio(
           [
             ...callingAtCodes.map(
-              ({ crsCode }, i): AudioItemObject => ({
+              ({ crsCode }): AudioItemObject => ({
                 id: `stations.high.${crsCode}`,
                 opts: { delayStart: 350 },
               }),
@@ -189,43 +197,120 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
 
   readonly AvailableStationNames = {
     high: [
+      'ABW',
       'BAB',
+      'BBL',
       'BDK',
+      'BEC',
       'BFR',
+      'BGM',
+      'BKL',
+      'BMS',
       'BTN',
       'BUG',
+      'CAT',
+      'CFT',
+      'CRI',
+      'CRW',
+      'CTF',
       'CTK',
+      'CTM',
+      'DEP',
+      'DFD',
+      'DMK',
       'ECR',
+      'ELD',
       'ELS',
+      'EPH',
+      'EYN',
+      'FGT',
       'FLT',
       'FPK',
+      'FTN',
+      'GLM',
+      'GNH',
+      'GNW',
+      'GRV',
       'GTW',
+      'HEN',
+      'HGM',
       'HHE',
       'HIT',
       'HLN',
+      'HNH',
+      'HOR',
       'HPD',
       'HSK',
+      'IFI',
+      'KTN',
       'LBG',
       'LEA',
       'LET',
+      'LGJ',
       'LTN',
       'LUT',
+      'LVN',
+      'MHM',
       'MIL',
+      'NFL',
+      'NHD',
+      'OTF',
+      'PET',
+      'PLU',
+      'PMR',
       'PRP',
+      'RDH',
       'RDT',
+      'RTR',
+      'RVB',
       'RYS',
       'SAC',
+      'SAF',
+      'SAY',
+      'SCG',
+      'SEH',
+      'SGR',
+      'SMY',
+      'SOO',
+      'SRT',
       'STP',
       'SVG',
+      'SWM',
       'TBD',
+      'TOO',
+      'TUH',
+      'WHP',
       'WVF',
       'ZFD',
-      'HOR',
-      'RDH',
-      'ELD',
-      'SAF',
     ],
-    low: ['BDM', 'BFR', 'BTN', 'BUG', 'CBG', 'CTK', 'HSK', 'LUT', 'PRP', 'WVF', 'RDH', 'GTW', 'ELD', 'HOR', 'SAF'],
+    low: [
+      'BDM',
+      'BFR',
+      'BTN',
+      'BUG',
+      'CBG',
+      'CTK',
+      'DMK',
+      'ELD',
+      'EPH',
+      'GTW',
+      'HOR',
+      'HRH',
+      'HSK',
+      'LBG',
+      'LUT',
+      'ORP',
+      'PRP',
+      'RAI',
+      'RDH',
+      'SAC',
+      'SAF',
+      'SEV',
+      'STP',
+      'WIM',
+      'WVF',
+      'ZFD',
+    ],
   }
 
   readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab> = {
@@ -280,17 +365,35 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
             default: false,
             type: 'boolean',
           },
+          changeForOverridden: {
+            type: 'customNoState',
+            component: ({ activeState }) => {
+              if (Object.keys(this.StationsWithForcedChangeHere).includes(activeState.stationCode as string)) {
+                return <p className="warningMessage">The "Change for" setting will have no effect for this station.</p>
+              }
+
+              return null
+            },
+          },
           changeFor: {
             name: 'Change for...',
             type: 'multiselect',
             options: this.OtherServicesAvailable,
             default: [],
           },
-          nearbyPOIs: {
-            name: 'Nearby POIs',
-            type: 'multiselect',
-            options: this.NearbyPointsOfInterest,
-            default: [],
+          poiMessage: {
+            type: 'customNoState',
+            component: ({ activeState }) => {
+              if (this.StationsWithPointsOfInterest.includes(activeState.stationCode as string)) {
+                return (
+                  <p className="infoMessage">
+                    This announcement will also contain additional information which cannot be modified, relating to local points of interest.
+                  </p>
+                )
+              }
+
+              return null
+            },
           },
         },
       },
@@ -327,18 +430,6 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
             default: false,
             type: 'boolean',
           },
-          // changeFor: {
-          //   name: 'Change for...',
-          //   type: 'multiselect',
-          //   options: this.OtherServicesAvailable,
-          //   default: [],
-          // },
-          // nearbyPOIs: {
-          //   name: 'Nearby POIs',
-          //   type: 'multiselect',
-          //   options: this.NearbyPointsOfInterest,
-          //   default: [],
-          // },
         },
       },
     },

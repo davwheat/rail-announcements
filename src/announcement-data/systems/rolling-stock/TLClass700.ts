@@ -10,7 +10,6 @@ interface IApproachingStationAnnouncementOptions {
   isAto: boolean
   terminatesHere: boolean
   takeCareAsYouLeave: boolean
-  nearbyPOIs: string[]
   changeFor: string[]
 }
 interface IStoppedAtStationAnnouncementOptions {
@@ -18,8 +17,6 @@ interface IStoppedAtStationAnnouncementOptions {
   terminatesAtCode: string
   callingAtCodes: { crsCode: string; name: string; randomId: string }[]
   mindTheGap: boolean
-  nearbyPOIs: string[]
-  changeFor: string[]
 }
 interface IInitialDepartureAnnouncementOptions {
   terminatesAtCode: string
@@ -32,7 +29,7 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
   readonly FILE_PREFIX = 'TL/700'
   readonly SYSTEM_TYPE = 'train'
 
-  private readonly NearbyPointsOfInterest = [{ title: "St. Paul's Cathedral", value: 'st pauls cathedral' }]
+  private readonly StationsWithPointsOfInterest = ['STP', 'CTK', 'BFR']
 
   private readonly OtherServicesAvailable = [{ title: 'Other NR services', value: 'other national rail services' }]
 
@@ -64,14 +61,9 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
       )
     }
 
-    if (options.nearbyPOIs.length > 0) {
+    if (this.StationsWithPointsOfInterest.includes(options.stationCode)) {
       files.push('exit here for')
-      files.push(
-        ...this.pluraliseAudio(
-          options.nearbyPOIs.map(poi => `POIs.${poi}`),
-          50,
-        ),
-      )
+      files.push(`POIs.${options.stationCode}`)
     }
 
     if (options.takeCareAsYouLeave) {
@@ -284,12 +276,6 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
             name: 'Change for...',
             type: 'multiselect',
             options: this.OtherServicesAvailable,
-            default: [],
-          },
-          nearbyPOIs: {
-            name: 'Nearby POIs',
-            type: 'multiselect',
-            options: this.NearbyPointsOfInterest,
             default: [],
           },
         },

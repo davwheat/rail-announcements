@@ -139,7 +139,7 @@ export default abstract class AnnouncementSystem {
     const audioBuffers_P = crunker.fetchAudio(...filesWithUris.map(file => file.uri))
 
     const audioBuffers = (await audioBuffers_P).reduce((acc, curr, i) => {
-      if (filesWithUris[i].opts?.delayStart !== undefined) {
+      if (filesWithUris[i].opts?.delayStart > 0) {
         acc.push(this.createSilence(filesWithUris[i].opts.delayStart))
       }
 

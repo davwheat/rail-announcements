@@ -2,13 +2,13 @@ import React from 'react'
 
 import { useRecoilState } from 'recoil'
 import { globalPersistentStateAtom } from '@atoms/globalStateAtom'
-import { AllTrainAnnouncementSystems } from '@announcement-data/AllSystems'
+import { AllAnnouncementSystems } from '@announcement-data/AllSystems'
 
 interface SystemListItem {
   id: string
   name: string
 }
-const AllAnnouncementSystems = AllTrainAnnouncementSystems.reduce((acc, sys) => {
+const allSystems = AllAnnouncementSystems.reduce((acc, sys) => {
   const system = new sys()
   return [...acc, { id: system.ID, name: system.NAME }]
 }, [] as SystemListItem[])
@@ -31,7 +31,7 @@ function MainSelector(): JSX.Element {
             None
           </option>
 
-          {AllAnnouncementSystems.map(({ id, name }) => (
+          {allSystems.map(({ id, name }) => (
             <option key={id} value={id}>
               {name}
             </option>

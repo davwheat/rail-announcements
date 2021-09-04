@@ -1,4 +1,4 @@
-import { AllTrainAnnouncementSystems } from '@announcement-data/AllSystems'
+import { AllAnnouncementSystems } from '@announcement-data/AllSystems'
 import { atom } from 'recoil'
 import { persistentAtom } from 'recoil-persistence/react'
 
@@ -19,7 +19,7 @@ export const globalPersistentStateAtom = persistentAtom<GlobalPersistState>(
   },
   {
     validator: state => {
-      if (!AllTrainAnnouncementSystems.some(sys => new sys().ID === state.systemId)) return false
+      if (!AllAnnouncementSystems.some(sys => new sys().ID === state.systemId)) return false
 
       return true
     },

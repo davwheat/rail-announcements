@@ -101,17 +101,17 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
 
     if (thisStationCode === terminatesAtCode) {
       files.push(
-        { id: 'this train terminates here all change', opts: { delayStart: 1500 } },
+        { id: 'this train terminates here all change', opts: { delayStart: 4600 } },
         'please ensure you take all personal belongings with you when leaving the train',
       )
     } else if (callingAtCodes.length === 0) {
       if (!this.validateStationExists(terminatesAtCode, 'high')) return
 
-      files.push({ id: 'the next station is', opts: { delayStart: 3500 } }, `stations.high.${terminatesAtCode}`, `our final destination`)
+      files.push({ id: 'the next station is', opts: { delayStart: 4600 } }, `stations.high.${terminatesAtCode}`, `our final destination`)
     } else {
       if (!this.validateStationExists(terminatesAtCode, 'low')) return
 
-      files.push({ id: 'this train terminates at', opts: { delayStart: 3500 } }, `stations.low.${terminatesAtCode}`)
+      files.push({ id: 'this train terminates at', opts: { delayStart: 4600 } }, `stations.low.${terminatesAtCode}`)
 
       files.push({ id: 'we will be calling at', opts: { delayStart: 1000 } })
 
@@ -122,7 +122,7 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
         ...this.pluraliseAudio(
           [
             ...callingAtCodes.map(
-              ({ crsCode }, i): AudioItemObject => ({
+              ({ crsCode }): AudioItemObject => ({
                 id: `stations.high.${crsCode}`,
                 opts: { delayStart: 350 },
               }),

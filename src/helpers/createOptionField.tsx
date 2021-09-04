@@ -6,6 +6,7 @@ interface OptionFieldOptions {
   onChange: (value: any) => void
   value: any
   key: string
+  activeState: Record<string, unknown>
 }
 
 export default function createOptionField(optionData: OptionsExplanation, options: OptionFieldOptions): JSX.Element {
@@ -56,5 +57,9 @@ export default function createOptionField(optionData: OptionsExplanation, option
     case 'custom':
       const Component = optionData.component
       return <Component key={options.key} onChange={options.onChange} value={options.value} {...optionData.props} />
+
+    case 'customNoState':
+      const Component2 = optionData.component
+      return <Component2 key={options.key} activeState={options.activeState} {...optionData.props} />
   }
 }

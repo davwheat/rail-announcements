@@ -33,7 +33,14 @@ function CustomAnnouncementPane({ options, playHandler }: ICustomAnnouncementPan
   if (!AnnouncementSystem) return null
 
   const [optionsState, setOptionsState] = React.useState<Record<string, unknown>>(
-    Object.entries(options).reduce((acc, [key, opt]) => ({ ...acc, [key]: opt.default }), {}),
+    Object.entries(options).reduce((acc, [key, opt]) => {
+      if (options[key].type === 'customNoState') return acc
+
+      // @ts-expect-error
+      acc[key] = opt.default
+
+      return acc
+    }, {}),
   )
   const [isDisabled, setIsDisabled] = useIsPlayingAnnouncement()
 
@@ -59,7 +66,7 @@ function CustomAnnouncementPane({ options, playHandler }: ICustomAnnouncementPan
 
         <>
           {Object.entries(options).map(([key, opt]) =>
-            createOptionField(opt, { onChange: createFieldUpdater(key), value: optionsState[key], key }),
+            createOptionField(opt, { onChange: createFieldUpdater(key), value: optionsState[key], key, activeState: optionsState }),
           )}
         </>
       </fieldset>

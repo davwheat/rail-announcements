@@ -11,7 +11,7 @@ interface IOptionsExplanation {
 }
 
 export type OptionsExplanation = IOptionsExplanation &
-  (IMultiselectOptions | ISelectOptions | IBooleanOptions | INumberOptions | ITimeOptions | ICustomOptions)
+  (IMultiselectOptions | ISelectOptions | IBooleanOptions | INumberOptions | ITimeOptions | ICustomOptions | ICustomNoStateOptions)
 
 interface IMultiselectOptions {
   type: 'multiselect'
@@ -41,6 +41,12 @@ interface ICustomOptions {
   component: (props: { onChange: (newVal: any) => void; value: any; [key: string]: any }) => JSX.Element
   props: Record<string, unknown>
   default: any
+}
+
+interface ICustomNoStateOptions {
+  type: 'customNoState'
+  component: (props: { activeState: Record<string, unknown>; [key: string]: any }) => JSX.Element
+  props: Record<string, unknown>
 }
 
 export type AudioItem = string | AudioItemObject

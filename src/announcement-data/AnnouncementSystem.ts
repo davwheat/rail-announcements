@@ -6,47 +6,55 @@ export interface IPlayOptions {
   delayStart: number
 }
 
-interface IOptionsExplanation {
-  name: string
-}
-
-export type OptionsExplanation = IOptionsExplanation &
-  (IMultiselectOptions | ISelectOptions | IBooleanOptions | INumberOptions | ITimeOptions | ICustomOptions | ICustomNoStateOptions)
+export type OptionsExplanation =
+  | IMultiselectOptions
+  | ISelectOptions
+  | IBooleanOptions
+  | INumberOptions
+  | ITimeOptions
+  | ICustomOptions
+  | ICustomNoStateOptions
 
 interface IMultiselectOptions {
+  name: string
   type: 'multiselect'
   default: string[]
   options: { title: string; value: string }[]
 }
 interface ISelectOptions {
+  name: string
   type: 'select'
   default: string
   options: { title: string; value: string }[]
 }
 interface IBooleanOptions {
+  name: string
   type: 'boolean'
   default: boolean
 }
 interface ITimeOptions {
+  name: string
   type: 'time'
   default: `${string}:${string}`
 }
 interface INumberOptions {
+  name: string
   type: 'number'
   default: number
 }
 
 interface ICustomOptions {
+  name: string
   type: 'custom'
   component: (props: { onChange: (newVal: any) => void; value: any; [key: string]: any }) => JSX.Element
-  props: Record<string, unknown>
+  props?: Record<string, unknown>
   default: any
 }
 
 interface ICustomNoStateOptions {
   type: 'customNoState'
   component: (props: { activeState: Record<string, unknown>; [key: string]: any }) => JSX.Element
-  props: Record<string, unknown>
+  props?: Record<string, unknown>
 }
 
 export type AudioItem = string | AudioItemObject

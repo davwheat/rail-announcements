@@ -1,3 +1,4 @@
+import React from 'react'
 import CallingAtSelector from '@components/CallingAtSelector'
 import CustomAnnouncementPane from '@components/PanelPanes/CustomAnnouncementPane'
 import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
@@ -29,7 +30,11 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
   readonly FILE_PREFIX = 'TL/700'
   readonly SYSTEM_TYPE = 'train'
 
-  private readonly StationsWithPointsOfInterest = ['STP', 'CTK', 'BFR']
+  private readonly StationsWithPointsOfInterest = ['BFR', 'CTK', 'LBG', 'STP']
+  private readonly StationsWithForcedChangeHere = {
+    LBG: { main: 'other national rail services', additional: 'LBG' },
+    STP: { main: 'STP' },
+  }
 
   private readonly OtherServicesAvailable = [{ title: 'Other NR services', value: 'other national rail services' }]
 
@@ -51,7 +56,17 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
       files.push('we will shortly be arriving at', { id: `stations.low.${options.stationCode}`, opts: { delayStart: 500 } })
     }
 
-    if (options.changeFor.length > 0) {
+    if (Object.keys(this.StationsWithForcedChangeHere).includes(options.stationCode)) {
+      const manualChangeFor = this.StationsWithForcedChangeHere[options.stationCode]
+
+      // We force 'change here' announcements for these stations
+      files.push({ id: 'change here for', opts: { delayStart: 500 } })
+      files.push(`other-services.${manualChangeFor.main}`)
+
+      if (manualChangeFor.additional) {
+        files.push(`also-change.${manualChangeFor.additional}`)
+      }
+    } else if (options.changeFor.length > 0) {
       files.push({ id: 'change here for', opts: { delayStart: 500 } })
       files.push(
         ...this.pluraliseAudio(
@@ -272,11 +287,35 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
             default: false,
             type: 'boolean',
           },
+          changeForOverridden: {
+            type: 'customNoState',
+            component: ({ activeState }) => {
+              if (Object.keys(this.StationsWithForcedChangeHere).includes(activeState.stationCode as string)) {
+                return <p className="warningMessage">The "Change for" setting will have no effect for this station.</p>
+              }
+
+              return null
+            },
+          },
           changeFor: {
             name: 'Change for...',
             type: 'multiselect',
             options: this.OtherServicesAvailable,
             default: [],
+          },
+          poiMessage: {
+            type: 'customNoState',
+            component: ({ activeState }) => {
+              if (this.StationsWithPointsOfInterest.includes(activeState.stationCode as string)) {
+                return (
+                  <p className="infoMessage">
+                    This announcement will also contain additional information which cannot be modified, relating to local points of interest.
+                  </p>
+                )
+              }
+
+              return null
+            },
           },
         },
       },
@@ -313,18 +352,6 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
             default: false,
             type: 'boolean',
           },
-          // changeFor: {
-          //   name: 'Change for...',
-          //   type: 'multiselect',
-          //   options: this.OtherServicesAvailable,
-          //   default: [],
-          // },
-          // nearbyPOIs: {
-          //   name: 'Nearby POIs',
-          //   type: 'multiselect',
-          //   options: this.NearbyPointsOfInterest,
-          //   default: [],
-          // },
         },
       },
     },

@@ -96,7 +96,7 @@ function CustomAnnouncementPane({ options, playHandler }: ICustomAnnouncementPan
         </button>
       </div>
 
-      {isDisabled && <p>Assembling announcement...</p>}
+      {isDisabled && <p style={{ marginTop: 8 }}>Assembling and playing announcement...</p>}
     </div>
   )
 }

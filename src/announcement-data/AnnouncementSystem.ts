@@ -121,7 +121,7 @@ export default abstract class AnnouncementSystem {
     }
 
     if (download) {
-      crunker.download(crunker.export(audio).blob, 'announcement')
+      crunker.download(crunker.export(audio, 'audio/wav').blob, 'announcement')
     } else {
       const source = crunker.play(audio)
 

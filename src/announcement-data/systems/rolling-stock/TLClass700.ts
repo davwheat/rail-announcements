@@ -2,8 +2,8 @@ import CallingAtSelector from '@components/CallingAtSelector'
 import CustomAnnouncementPane from '@components/PanelPanes/CustomAnnouncementPane'
 import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
 import { AllStationsTitleValueMap } from '@data/StationManipulators'
-import { AudioItem, AudioItemObject, CustomAnnouncementTab } from './AnnouncementSystem'
-import TrainAnnouncementSystem from './TrainAnnouncementSystem'
+import { AudioItem, AudioItemObject, CustomAnnouncementTab } from '../../AnnouncementSystem'
+import TrainAnnouncementSystem from '../../TrainAnnouncementSystem'
 
 interface IApproachingStationAnnouncementOptions {
   stationCode: string
@@ -55,21 +55,31 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
     }
 
     if (options.changeFor.length > 0) {
-      files.push('change here for')
-      files.push(...this.pluraliseAudio(options.changeFor.map(poi => `other-services.${poi}`)))
+      files.push({ id: 'change here for', opts: { delayStart: 500 } })
+      files.push(
+        ...this.pluraliseAudio(
+          options.changeFor.map(poi => `other-services.${poi}`),
+          50,
+        ),
+      )
     }
 
     if (options.nearbyPOIs.length > 0) {
       files.push('exit here for')
-      files.push(...this.pluraliseAudio(options.nearbyPOIs.map(poi => `POIs.${poi}`)))
+      files.push(
+        ...this.pluraliseAudio(
+          options.nearbyPOIs.map(poi => `POIs.${poi}`),
+          50,
+        ),
+      )
     }
 
     if (options.takeCareAsYouLeave) {
-      files.push('please make sure you have all your belongings and take care as you leave the train')
+      files.push({ id: 'please make sure you have all your belongings and take care as you leave the train', opts: { delayStart: 500 } })
     }
 
     if (options.isAto) {
-      files.push('the doors will open automatically at the next station')
+      files.push({ id: 'the doors will open automatically at the next station', opts: { delayStart: 500 } })
     }
 
     await this.playAudioFiles(files, download)
@@ -84,11 +94,14 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
       files.push('please mind the gap between the train and the platform')
     }
 
-    files.push({ id: 'this station is', opts: { delayStart: 500 } }, { id: `stations.low.${thisStationCode}`, opts: { delayStart: 250 } })
+    files.push(
+      { id: 'this station is', opts: { delayStart: options.mindTheGap ? 500 : 0 } },
+      { id: `stations.low.${thisStationCode}`, opts: { delayStart: 250 } },
+    )
 
     if (thisStationCode === terminatesAtCode) {
       files.push(
-        { id: 'this train terminates here all change', opts: { delayStart: 150 } },
+        { id: 'this train terminates here all change', opts: { delayStart: 1500 } },
         'please ensure you take all personal belongings with you when leaving the train',
       )
     } else if (callingAtCodes.length === 0) {

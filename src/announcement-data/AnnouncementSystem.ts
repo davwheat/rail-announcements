@@ -121,7 +121,7 @@ export default abstract class AnnouncementSystem {
     }
 
     if (download) {
-      crunker.download(crunker.export(audio).blob, 'announcement')
+      crunker.download(crunker.export(audio, 'audio/wav').blob, 'announcement')
     } else {
       const source = crunker.play(audio)
 
@@ -139,7 +139,7 @@ export default abstract class AnnouncementSystem {
     const audioBuffers_P = crunker.fetchAudio(...filesWithUris.map(file => file.uri))
 
     const audioBuffers = (await audioBuffers_P).reduce((acc, curr, i) => {
-      if (filesWithUris[i].opts?.delayStart !== undefined) {
+      if (filesWithUris[i].opts?.delayStart > 0) {
         acc.push(this.createSilence(filesWithUris[i].opts.delayStart))
       }
 
@@ -168,4 +168,28 @@ export default abstract class AnnouncementSystem {
   }
 
   readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab> = {}
+
+  /**
+   * Takes an array of audio files, and adds an `and` audio file where needed.
+   *
+   * @example
+   * pluraliseAudioItems(['a', 'b', 'c']) // returns ['a', 'b', 'and', 'c']
+   *
+   * @example
+   * pluraliseAudioItems(['a']) // returns ['a']
+   *
+   * @example
+   * pluraliseAudioItems(['a', 'b']) // returns ['a', 'and', 'b']
+   *
+   * @param items Array of audio files
+   * @returns Pluralised array of audio files
+   */
+  protected pluraliseAudio(items: AudioItem[], delay: number = 0): AudioItem[] {
+    if (items.length > 1) {
+      items.splice(items.length - 1, 0, { id: 'and', opts: { delayStart: delay } })
+      return items
+    }
+
+    return items
+  }
 }

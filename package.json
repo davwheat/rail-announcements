@@ -46,7 +46,7 @@
     "@types/react-beautiful-dnd": "^13.1.2",
     "@types/react-tabs": "^2.3.3",
     "cross-env": "^7.0.3",
-    "gatsby-plugin-webpack-bundle-analyser-v2": "^1.1.24",
+    "gatsby-plugin-webpack-bundle-analyser-v2": "^1.1.25",
     "gh-pages": "^3.2.3",
     "prettier": "^2.3.2",
     "typescript": "^4.4.2"

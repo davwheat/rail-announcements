@@ -6,14 +6,15 @@ import { AllStationsTitleValueMap } from '@data/StationManipulators'
 import { AudioItem, AudioItemObject, CustomAnnouncementTab } from '../../AnnouncementSystem'
 
 interface INextTrainAnnouncementOptions {
-  platform: typeof AVAILABLE_PLATFORMS[number]
+  chime: '3' | '4' | 'none'
+  platform: typeof AVAILABLE_ALPHANUMBERS[number]
   hour: typeof AVAILABLE_HOURS[number]
   min: typeof AVAILABLE_MINUTES[number]
   toc: typeof AVAILABLE_TOCS[number]
   terminatingStationCode: typeof AVAILABLE_STATIONS['low'][number]
   via: typeof AVAILABLE_STATIONS['low'][number] | 'none'
   callingAt: { crsCode: string; name: string; randomId: string }[]
-  coaches: typeof AVAILABLE_COACHES[number]
+  coaches: typeof AVAILABLE_NUMBERS[number]
 }
 
 interface IDepartingStationAnnouncementOptions {
@@ -21,15 +22,39 @@ interface IDepartingStationAnnouncementOptions {
   nextStationCode: string
 }
 
-const AVAILABLE_PLATFORMS = ['2', '2a', '3b', '4', '5', '8', '9', '11b'] as const
+const AVAILABLE_ALPHANUMBERS = ['2', '2a', '3b', '4', '5', '8', '9', '11b'] as const
 const AVAILABLE_HOURS = ['09', '12', '13', '14', '16'] as const
 const AVAILABLE_MINUTES = ['01', '07', '10', '13', '16', '24', '28', '30', '32', '33', '34'] as const
 const AVAILABLE_TOCS = ['Arriva Trains Wales', 'London Midland', 'Virgin Pendolino', 'Southern', 'South West Trains'] as const
-const AVAILABLE_COACHES = ['2', '4', '5', '8', '9'] as const
+const AVAILABLE_NUMBERS: string[] = AVAILABLE_ALPHANUMBERS.filter(x => /^\d+$/.test(x))
 const AVAILABLE_STATIONS = {
-  low: ['AYW', 'BHM', 'BTN', 'CLJ', 'CSD', 'DKG', 'EPS', 'EUS', 'FNB', 'HMC', 'POO', 'RDC', 'SGB', 'SOU', 'STW', 'VIC', 'WAT', 'WIM'],
+  low: [
+    'AYW',
+    'BHM',
+    'BTN',
+    'CLJ',
+    'CSD',
+    'DDG',
+    'DKG',
+    'EPS',
+    'EUS',
+    'FNB',
+    'HMC',
+    'MYB',
+    'POO',
+    'RDC',
+    'SAV',
+    'SGB',
+    'SOU',
+    'STW',
+    'VIC',
+    'WAT',
+    'WIM',
+    'WTE',
+  ],
   high: [
     'ABH',
+    'ACG',
     'AHD',
     'ALV',
     'ANF',
@@ -37,6 +62,9 @@ const AVAILABLE_STATIONS = {
     'AVY',
     'AYW',
     'BAA',
+    'BAN',
+    'BCF',
+    'BCS',
     'BHI',
     'BHM',
     'BKA',
@@ -50,7 +78,6 @@ const AVAILABLE_STATIONS = {
     'CCH',
     'CLA',
     'CLG',
-    'CLJ',
     'COV',
     'CRW',
     'CSA',
@@ -59,25 +86,33 @@ const AVAILABLE_STATIONS = {
     'DUR',
     'DVY',
     'DYF',
+    'DZY',
     'EAD',
     'ECR',
     'EFF',
     'EMS',
     'EPS',
     'ESL',
+    'EWD',
     'EWW',
     'FLE',
     'FRB',
     'FRM',
     'FWY',
     'GBS',
+    'GER',
     'GLD',
     'GTW',
     'HAV',
+    'HDM',
+    'HLG',
+    'HNL',
     'HOV',
     'HRH',
     'HRL',
     'HSY',
+    'HTN',
+    'HWY',
     'HYW',
     'KNG',
     'KNN',
@@ -87,7 +122,9 @@ const AVAILABLE_STATIONS = {
     'LIT',
     'LLC',
     'LLW',
+    'LMS',
     'LOB',
+    'LPW',
     'LRD',
     'MCN',
     'MFA',
@@ -95,18 +132,20 @@ const AVAILABLE_STATIONS = {
     'MOT',
     'NFD',
     'NWT',
+    'OLT',
     'PES',
     'PHG',
     'PLD',
     'PMH',
     'PNC',
     'PRH',
+    'PRR',
     'PTC',
     'PTM',
     'PWL',
     'RAY',
     'SAL',
-    'SBS',
+    'SDR',
     'SHR',
     'SHW',
     'SLY',
@@ -114,23 +153,37 @@ const AVAILABLE_STATIONS = {
     'SNW',
     'SOA',
     'SOB',
+    'SOL',
+    'SRI',
+    'SRL',
+    'STY',
     'SUR',
     'SWK',
     'TAL',
     'TBD',
     'TFC',
+    'TLK',
     'TTN',
     'TYW',
     'UNI',
     'WCP',
+    'WDE',
     'WFJ',
     'WIM',
     'WLN',
     'WLP',
+    'WMC',
+    'WMR',
     'WOK',
     'WRH',
+    'WRP',
+    'WRW',
+    'WTE',
     'WVH',
     'WWO',
+    'WWW',
+    'WYT',
+    'YRD',
   ],
 } as const
 
@@ -155,7 +208,9 @@ export default class KeTechPhil extends StationAnnouncementSystem {
 
     if (!this.validateOptions({ platform: options.platform, hour: options.hour, minute: options.min, toc: options.toc })) return
 
-    files.push('3 chime', 'platform', `platforms.${options.platform}`, 'for the', `times.hour.${options.hour}`, `times.mins.${options.min}`, {
+    if (options.chime !== 'none') files.push(`${options.chime} chime`)
+
+    files.push('platform', `numbers.${options.platform}`, 'for the', `times.hour.${options.hour}`, `times.mins.${options.min}`, {
       id: `tocs.${options.toc.toLowerCase()} service to`,
       opts: { delayStart: 150 },
     })
@@ -170,17 +225,21 @@ export default class KeTechPhil extends StationAnnouncementSystem {
 
     files.push({ id: 'calling at', opts: { delayStart: 750 } })
 
+    // if (options.callingAt.length === 0) {
+    //   files.push(`stations.high.${options.terminatingStationCode}`, 'only')
+    // } else {
     const callingAtStops = options.callingAt.map(stn => stn.crsCode)
     if (!this.validateOptions({ stationsHigh: callingAtStops })) return
     files.push(...this.pluraliseAudio([...callingAtStops.map(stn => `stations.high.${stn}`), `stations.low.${options.terminatingStationCode}`]))
+    // }
 
     // Platforms share the same audio as coach numbers
     if (!this.validateOptions({ coaches: options.coaches })) return
-    files.push('this train is formed of', `platforms.${options.coaches}`, 'coaches')
+    files.push('this train is formed of', `numbers.${options.coaches}`, 'coaches')
 
     files.push(
       { id: 'platform', opts: { delayStart: 750 } },
-      `platforms.${options.platform}`,
+      `numbers.${options.platform}`,
       'for the',
       `times.hour.${options.hour}`,
       `times.mins.${options.min}`,
@@ -200,8 +259,8 @@ export default class KeTechPhil extends StationAnnouncementSystem {
   }
 
   private validateOptions({ stationsHigh, stationsLow, hour, minute, toc, platform, coaches }: Partial<IValidateOptions>): boolean {
-    if (platform && !(AVAILABLE_PLATFORMS as any as string[]).includes(platform)) {
-      this.showAudioNotExistsError(`platforms.${platform}`)
+    if (platform && !(AVAILABLE_ALPHANUMBERS as any as string[]).includes(platform)) {
+      this.showAudioNotExistsError(`numbers.${platform}`)
       return false
     }
 
@@ -220,8 +279,8 @@ export default class KeTechPhil extends StationAnnouncementSystem {
       return false
     }
 
-    if (coaches && !(AVAILABLE_COACHES as any as string[]).includes(coaches)) {
-      this.showAudioNotExistsError(`platforms.${coaches}`)
+    if (coaches && !(AVAILABLE_NUMBERS as any as string[]).includes(coaches)) {
+      this.showAudioNotExistsError(`numbers.${coaches}`)
       return false
     }
 
@@ -253,10 +312,20 @@ export default class KeTechPhil extends StationAnnouncementSystem {
       props: {
         playHandler: this.playNextTrainAnnouncement.bind(this),
         options: {
+          chime: {
+            name: 'Chime',
+            type: 'select',
+            default: '3',
+            options: [
+              { title: '3 chimes', value: '3' },
+              { title: '4 chimes', value: '4' },
+              { title: 'No chime', value: 'none' },
+            ],
+          },
           platform: {
             name: 'Platform',
-            default: AVAILABLE_PLATFORMS[0],
-            options: AVAILABLE_PLATFORMS.map(p => ({ title: `Platform ${p}`, value: p })),
+            default: AVAILABLE_ALPHANUMBERS[0],
+            options: AVAILABLE_ALPHANUMBERS.map(p => ({ title: `Platform ${p}`, value: p })),
             type: 'select',
           },
           hour: {
@@ -303,8 +372,8 @@ export default class KeTechPhil extends StationAnnouncementSystem {
           },
           coaches: {
             name: 'Coach count',
-            default: AVAILABLE_COACHES[0],
-            options: AVAILABLE_COACHES.map(c => ({ title: c, value: c })),
+            default: AVAILABLE_NUMBERS[0],
+            options: AVAILABLE_NUMBERS.filter(x => parseInt(x) > 1).map(c => ({ title: c, value: c })),
             type: 'select',
           },
         },
@@ -328,19 +397,5 @@ export default class KeTechPhil extends StationAnnouncementSystem {
         ],
       },
     },
-  }
-
-  private async playDepartingStationAnnouncement(options: IDepartingStationAnnouncementOptions): Promise<void> {
-    const files: AudioItem[] = []
-    files.push('bing bong')
-
-    files.push(
-      'this train is the southern service to',
-      `stations.${options.terminatesAtCode}`,
-      'the next station is',
-      `stations.${options.nextStationCode}`,
-    )
-
-    await this.playAudioFiles(files)
   }
 }

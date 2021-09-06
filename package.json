@@ -21,7 +21,7 @@
   "dependencies": {
     "@material-ui/styles": "^4.11.4",
     "babel-plugin-transform-remove-console": "^6.9.4",
-    "crunker": "^1.1.0",
+    "crunker": "^1.2.0",
     "gatsby": "^3.13.0",
     "gatsby-plugin-less": "^5.13.0",
     "gatsby-plugin-manifest": "^3.13.0",

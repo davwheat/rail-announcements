@@ -3307,10 +3307,10 @@ cross-spawn@^6.0.0, cross-spawn@^6.0.5:
     shebang-command "^1.2.0"
     which "^1.2.9"
 
-crunker@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/crunker/-/crunker-1.1.0.tgz#6b8661c425bb695d6ffc203815df7fec20a6e325"
-  integrity sha512-1DmjE8pKTJZdFZ3sDLyWpH5vCAfpRme8ACaUPfMtMV2r5un2/SHXiolIv0ygcyVUL440Zeyg7E8rGpG/KAC48g==
+crunker@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/crunker/-/crunker-1.2.0.tgz#068ff50bf5c8e6faa1e420ae3ce4ffff54c497cc"
+  integrity sha512-XjL5RoZEIqhspHLSiDsYKrlZ8F2+hyjx6YuMn6dR7Ppd0Z1JaZ7P9u2foayxeZdifzeUwACsAuP7JRlThBED2Q==
 
 crypto-random-string@^2.0.0:
   version "2.0.0"

@@ -7,7 +7,10 @@
   "keywords": [
     "gatsby"
   ],
-  "browserslist": ["last 2 versions", "not dead"],
+  "browserslist": [
+    "last 2 versions",
+    "not dead"
+  ],
   "scripts": {
     "develop": "gatsby develop",
     "start": "gatsby develop",
@@ -20,6 +23,8 @@
   },
   "dependencies": {
     "@material-ui/styles": "^4.11.4",
+    "@sentry/gatsby": "^6.12.0",
+    "@sentry/tracing": "^6.12.0",
     "babel-plugin-transform-remove-console": "^6.9.4",
     "crunker": "^1.2.0",
     "gatsby": "^3.13.0",

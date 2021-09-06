@@ -67,7 +67,7 @@ export interface AudioItemObject {
 export interface CustomAnnouncementTab {
   name: string
   component: (props: ICustomAnnouncementPaneProps | ICustomButtonPaneProps) => JSX.Element
-  props: ICustomAnnouncementPaneProps | ICustomButtonPaneProps
+  props: Omit<ICustomAnnouncementPaneProps, 'name'> | ICustomButtonPaneProps
 }
 
 export interface CustomAnnouncementButton {

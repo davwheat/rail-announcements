@@ -1,3 +1,5 @@
+const { Integrations: TracingIntegrations } = require('@sentry/tracing')
+
 const __IS_DEV__ = process.env.NODE_ENV !== 'production'
 
 // These plugins will only be used in production builds
@@ -37,6 +39,15 @@ module.exports = {
         theme_color: `#ffa500`,
         display: `minimal-ui`,
         icon: `src/images/logo.png`, // This path is relative to the root of the site.
+      },
+    },
+    {
+      resolve: '@sentry/gatsby',
+      options: {
+        dsn: 'https://e2561f72b4484d0c874eecbde0ad297d@o991058.ingest.sentry.io/5947974',
+        sampleRate: __IS_DEV__ ? 1 : 0.7,
+        integrations: [new TracingIntegrations.BrowserTracing()],
+        tracesSampleRate: __IS_DEV__ ? 1 : 0.7,
       },
     },
   ],

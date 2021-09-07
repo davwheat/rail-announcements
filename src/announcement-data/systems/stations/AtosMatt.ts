@@ -6,14 +6,14 @@ import { AllStationsTitleValueMap } from '@data/StationManipulators'
 import { AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
 
 interface INextTrainAnnouncementOptions {
-  platform: typeof AVAILABLE_PLATFORMS['high'][number]
-  hour: typeof AVAILABLE_HOURS[number]
-  min: typeof AVAILABLE_MINUTES[number]
-  toc: typeof AVAILABLE_TOCS[number]
-  terminatingStationCode: typeof AVAILABLE_STATIONS['low'][number]
-  via: typeof AVAILABLE_STATIONS['low'][number] | 'none'
+  platform: string
+  hour: string
+  min: string
+  toc: string
+  terminatingStationCode: string
+  via: string | 'none'
   callingAt: { crsCode: string; name: string; randomId: string }[]
-  coaches: typeof AVAILABLE_NUMBERS[number]
+  coaches: string
 }
 
 interface IDepartingStationAnnouncementOptions {
@@ -270,16 +270,13 @@ export default class AtosMatt extends StationAnnouncementSystem {
           terminatingStationCode: {
             name: 'Terminating station',
             default: AVAILABLE_STATIONS.low[0],
-            options: AllStationsTitleValueMap.filter(s => AVAILABLE_STATIONS.low.includes(s.value as typeof AVAILABLE_STATIONS.low[number])),
+            options: AllStationsTitleValueMap.filter(s => AVAILABLE_STATIONS.low.includes(s.value)),
             type: 'select',
           },
           via: {
             name: 'Via... (optional)',
             default: 'none',
-            options: [
-              { title: 'NONE', value: 'none' },
-              ...AllStationsTitleValueMap.filter(s => AVAILABLE_STATIONS.low.includes(s.value as typeof AVAILABLE_STATIONS.low[number])),
-            ],
+            options: [{ title: 'NONE', value: 'none' }, ...AllStationsTitleValueMap.filter(s => AVAILABLE_STATIONS.low.includes(s.value))],
             type: 'select',
           },
           callingAt: {

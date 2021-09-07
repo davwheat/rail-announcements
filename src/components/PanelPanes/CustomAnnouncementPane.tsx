@@ -6,6 +6,8 @@ import createOptionField from '@helpers/createOptionField'
 import type { OptionsExplanation } from '@announcement-data/AnnouncementSystem'
 import useIsPlayingAnnouncement from '@helpers/useIsPlayingAnnouncement'
 
+import * as Sentry from '@sentry/gatsby'
+
 import PlayIcon from 'mdi-react/PlayIcon'
 import DownloadIcon from 'mdi-react/DownloadIcon'
 
@@ -24,13 +26,18 @@ const useStyles = makeStyles({
 export interface ICustomAnnouncementPaneProps {
   options: Record<string, OptionsExplanation>
   playHandler: (options: { [key: string]: any }, download?: boolean) => Promise<void>
+  name: string
 }
 
-function CustomAnnouncementPane({ options, playHandler }: ICustomAnnouncementPaneProps): JSX.Element {
+function CustomAnnouncementPane({ options, playHandler, name }: ICustomAnnouncementPaneProps): JSX.Element {
   const classes = useStyles()
 
   const AnnouncementSystem = getActiveSystem()
   if (!AnnouncementSystem) return null
+
+  const AnnouncementSystemInstance = new AnnouncementSystem()
+
+  const [playError, setPlayError] = React.useState<Error>(null)
 
   const [optionsState, setOptionsState] = React.useState<Record<string, unknown>>(
     Object.entries(options).reduce((acc, [key, opt]) => {
@@ -50,6 +57,10 @@ function CustomAnnouncementPane({ options, playHandler }: ICustomAnnouncementPan
 
       setOptionsState(prevState => ({ ...prevState, [field]: value }))
     }
+  }
+
+  if (playError) {
+    throw playError
   }
 
   return (
@@ -78,7 +89,23 @@ function CustomAnnouncementPane({ options, playHandler }: ICustomAnnouncementPan
             if (isDisabled) return
 
             setIsDisabled(true)
-            await playHandler(optionsState)
+
+            Sentry.addBreadcrumb({
+              category: 'announcement.play',
+              data: {
+                systemId: AnnouncementSystemInstance.ID,
+                type: 'constructed',
+                name,
+                options: optionsState,
+              },
+            })
+
+            try {
+              await playHandler(optionsState)
+            } catch (err) {
+              setPlayError(err)
+            }
+
             setIsDisabled(false)
           }, [isDisabled, playHandler, setIsDisabled, optionsState])}
         >
@@ -93,7 +120,23 @@ function CustomAnnouncementPane({ options, playHandler }: ICustomAnnouncementPan
             if (isDisabled) return
 
             setIsDisabled(true)
-            await playHandler(optionsState, true)
+
+            Sentry.addBreadcrumb({
+              category: 'announcement.download',
+              data: {
+                systemId: AnnouncementSystemInstance.ID,
+                type: 'constructed',
+                name,
+                options: optionsState,
+              },
+            })
+
+            try {
+              await playHandler(optionsState, true)
+            } catch (err) {
+              setPlayError(err)
+            }
+
             setIsDisabled(false)
           }, [isDisabled, playHandler, setIsDisabled, optionsState])}
           className="iconButton"

@@ -17,173 +17,107 @@ interface INextTrainAnnouncementOptions {
   coaches: typeof AVAILABLE_NUMBERS[number]
 }
 
-interface IDepartingStationAnnouncementOptions {
-  terminatesAtCode: string
-  nextStationCode: string
-}
-
-const AVAILABLE_ALPHANUMBERS = ['2', '2a', '3b', '4', '5', '8', '9', '11b'] as const
-const AVAILABLE_HOURS = ['09', '12', '13', '14', '16'] as const
-const AVAILABLE_MINUTES = ['01', '07', '10', '13', '16', '24', '28', '30', '32', '33', '34'] as const
-const AVAILABLE_TOCS = ['Arriva Trains Wales', 'London Midland', 'Virgin Pendolino', 'Southern', 'South West Trains'] as const
+const AVAILABLE_ALPHANUMBERS = ['1', '2', '3', '4', '4a', '5', '6'] as const
+const AVAILABLE_HOURS = ['08', '11', '12', '13', '14', '16', '18', '19'] as const
+const AVAILABLE_MINUTES = ['00', '06', '08', '13', '16', '17', '20', '24', '30', '35', '41', '42', '46', '50', '55'] as const
+const AVAILABLE_TOCS = [
+  'Arriva Trains Wales',
+  'Chiltern Railways',
+  'Cross Country',
+  'Great Western Railway',
+  'London Midland',
+  'Northern',
+  'South West Trains',
+  'Virgin Pendolino',
+  'West Midlands Railway',
+] as const
 const AVAILABLE_NUMBERS: string[] = AVAILABLE_ALPHANUMBERS.filter(x => /^\d+$/.test(x))
+
 const AVAILABLE_STATIONS = {
-  low: [
-    'AYW',
-    'BHM',
-    'BTN',
-    'CLJ',
-    'CSD',
-    'DDG',
-    'DKG',
-    'EPS',
-    'EUS',
-    'FNB',
-    'HMC',
-    'MYB',
-    'POO',
-    'RDC',
-    'SAV',
-    'SGB',
-    'SOU',
-    'STW',
-    'VIC',
-    'WAT',
-    'WIM',
-    'WTE',
-  ],
+  low: ['BHM', 'BMH', 'BSK', 'BSW', 'CDF', 'EDB', 'ESL', 'MAN', 'PMH', 'POO', 'SAL', 'SBJ', 'SHF', 'SOU', 'WAT', 'WOK'],
   high: [
-    'ABH',
-    'ACG',
-    'AHD',
-    'ALV',
+    'ADV',
+    'ALM',
     'ANF',
-    'ANG',
-    'AVY',
-    'AYW',
-    'BAA',
     'BAN',
-    'BCF',
-    'BCS',
+    'BCU',
+    'BEU',
     'BHI',
     'BHM',
-    'BKA',
-    'BOG',
-    'BRH',
+    'BMH',
+    'BNY',
+    'BOA',
     'BRI',
-    'BRV',
     'BSK',
-    'BTG',
-    'CCC',
-    'CCH',
-    'CLA',
-    'CLG',
+    'BSM',
+    'BSW',
+    'BTH',
+    'CDF',
+    'CFR',
+    'CHR',
+    'CLJ',
+    'CLN',
     'COV',
-    'CRW',
+    'CRA',
     'CSA',
-    'CSD',
-    'CWS',
-    'DUR',
-    'DVY',
-    'DYF',
-    'DZY',
-    'EAD',
-    'ECR',
-    'EFF',
-    'EMS',
-    'EPS',
+    'DAR',
+    'DBY',
+    'DHM',
+    'DOR',
+    'DRT',
+    'ELR',
     'ESL',
-    'EWD',
-    'EWW',
+    'EUS',
+    'FIT',
     'FLE',
-    'FRB',
     'FRM',
-    'FWY',
-    'GBS',
-    'GER',
-    'GLD',
-    'GTW',
-    'HAV',
-    'HDM',
-    'HLG',
-    'HNL',
-    'HOV',
-    'HRH',
-    'HRL',
-    'HSY',
-    'HTN',
-    'HWY',
-    'HYW',
-    'KNG',
-    'KNN',
-    'LBR',
-    'LDN',
-    'LHD',
-    'LIT',
-    'LLC',
-    'LLW',
+    'FTN',
+    'GRN',
+    'HNA',
+    'HSG',
+    'HXX',
+    'JEQ',
+    'LDS',
+    'LGG',
+    'LIV',
     'LMS',
-    'LOB',
-    'LPW',
-    'LRD',
-    'MCN',
-    'MFA',
-    'MFF',
-    'MOT',
-    'NFD',
-    'NWT',
-    'OLT',
-    'PES',
-    'PHG',
-    'PLD',
-    'PMH',
-    'PNC',
-    'PRH',
-    'PRR',
-    'PTC',
-    'PTM',
-    'PWL',
-    'RAY',
-    'SAL',
-    'SDR',
-    'SHR',
+    'LYE',
+    'MAC',
+    'MHS',
+    'NCL',
+    'NWM',
+    'NWP',
+    'OHL',
+    'OXF',
+    'PKS',
+    'PMS',
+    'POK',
+    'RDG',
+    'ROM',
+    'ROW',
+    'SDN',
+    'SGB',
+    'SHF',
     'SHW',
-    'SLY',
-    'SNL',
-    'SNW',
     'SOA',
-    'SOB',
-    'SOL',
-    'SRI',
-    'SRL',
-    'STY',
-    'SUR',
-    'SWK',
-    'TAL',
-    'TBD',
-    'TFC',
-    'TLK',
+    'SOT',
+    'SOU',
+    'SPT',
+    'STA',
+    'STJ',
+    'SWG',
+    'SWY',
+    'THW',
+    'TRO',
     'TTN',
-    'TYW',
-    'UNI',
-    'WCP',
-    'WDE',
-    'WFJ',
-    'WIM',
-    'WLN',
-    'WLP',
-    'WMC',
-    'WMR',
-    'WOK',
-    'WRH',
-    'WRP',
-    'WRW',
-    'WTE',
+    'WIN',
+    'WKF',
+    'WMN',
+    'WOM',
+    'WSB',
     'WVH',
-    'WWO',
-    'WWW',
-    'WYT',
-    'YRD',
+    'YRK',
+    'YVJ',
   ],
 } as const
 
@@ -197,10 +131,10 @@ interface IValidateOptions {
   coaches: string
 }
 
-export default class KeTechPhil extends StationAnnouncementSystem {
-  readonly NAME = 'KeTech - Phil Sayer'
-  readonly ID = 'KETECH_PHIL_V1'
-  readonly FILE_PREFIX = 'station/ketech/phil'
+export default class KeTechCelia extends StationAnnouncementSystem {
+  readonly NAME = 'KeTech - Celia Drummond'
+  readonly ID = 'KETECH_CELIA_V1'
+  readonly FILE_PREFIX = 'station/ketech/celia'
   readonly SYSTEM_TYPE = 'station'
 
   private async playNextTrainAnnouncement(options: INextTrainAnnouncementOptions, download: boolean = false): Promise<void> {
@@ -215,25 +149,28 @@ export default class KeTechPhil extends StationAnnouncementSystem {
       opts: { delayStart: 150 },
     })
 
-    if (options.via !== 'none') {
-      if (!this.validateOptions({ stationsHigh: [options.terminatingStationCode], stationsLow: [options.via] })) return
-      files.push(`stations.high.${options.terminatingStationCode}`, 'via', `stations.low.${options.via}`)
-    } else {
-      if (!this.validateOptions({ stationsLow: [options.terminatingStationCode] })) return
-      files.push(`stations.low.${options.terminatingStationCode}`)
-    }
+    if (options.via !== 'none') alert("'via' is not available for Celia at the moment.")
+
+    // if (options.via !== 'none') {
+    //   if (!this.validateOptions({ stationsHigh: [options.terminatingStationCode], stationsLow: [options.via] })) return
+    //   files.push(`stations.high.${options.terminatingStationCode}`, 'via', `stations.low.${options.via}`)
+    // } else {
+    if (!this.validateOptions({ stationsLow: [options.terminatingStationCode] })) return
+    files.push(`stations.low.${options.terminatingStationCode}`)
+    // }
 
     files.push({ id: 'calling at', opts: { delayStart: 750 } })
 
-    // if (options.callingAt.length === 0) {
-    //   files.push(`stations.high.${options.terminatingStationCode}`, 'only')
-    // } else {
-    const callingAtStops = options.callingAt.map(stn => stn.crsCode)
-    if (!this.validateOptions({ stationsHigh: callingAtStops })) return
-    files.push(...this.pluraliseAudio([...callingAtStops.map(stn => `stations.high.${stn}`), `stations.low.${options.terminatingStationCode}`]))
-    // }
+    if (options.callingAt.length === 0) {
+      files.push(`stations.high.${options.terminatingStationCode}`, 'only')
+    } else {
+      const callingAtStops = options.callingAt.map(stn => stn.crsCode)
+      if (!this.validateOptions({ stationsHigh: callingAtStops })) return
+      files.push(
+        ...this.pluraliseAudio([...callingAtStops.map(stn => `stations.high.${stn}`), `stations.low.${options.terminatingStationCode}`]),
+      )
+    }
 
-    // Platforms share the same audio as coach numbers
     if (!this.validateOptions({ coaches: options.coaches })) return
     files.push('this train is formed of', `numbers.${options.coaches}`, 'coaches')
 
@@ -315,7 +252,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
           chime: {
             name: 'Chime',
             type: 'select',
-            default: '3',
+            default: '4',
             options: [
               { title: '3 chimes', value: '3' },
               { title: '4 chimes', value: '4' },

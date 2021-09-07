@@ -3,6 +3,7 @@ import React from 'react'
 import { makeStyles } from '@material-ui/styles'
 import Tabs from './Tabs'
 import getActiveSystem from '@helpers/getActiveSystem'
+import AnnouncementTabErrorBoundary from './AnnouncementTabErrorBoundary'
 
 const useStyles = makeStyles({
   root: {
@@ -25,7 +26,11 @@ function AnnouncementPanel(): JSX.Element {
 
   const customTabs = AnnouncementSystemInstance.customAnnouncementTabs
 
-  const TabPanels = Object.values(customTabs).map(({ component: TabComponent, ...opts }) => <TabComponent {...opts.props} key={opts.name} />)
+  const TabPanels = Object.values(customTabs).map(({ component: TabComponent, ...opts }) => (
+    <AnnouncementTabErrorBoundary systemId={AnnouncementSystemInstance.ID} systemName={AnnouncementSystemInstance.NAME}>
+      <TabComponent {...opts.props} name={opts.name} key={opts.name} />
+    </AnnouncementTabErrorBoundary>
+  ))
 
   return (
     <div className={classes.root}>

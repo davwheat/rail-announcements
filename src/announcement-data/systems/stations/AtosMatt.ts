@@ -3,7 +3,7 @@ import CallingAtSelector from '@components/CallingAtSelector'
 import CustomAnnouncementPane from '@components/PanelPanes/CustomAnnouncementPane'
 import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
 import { AllStationsTitleValueMap } from '@data/StationManipulators'
-import { AudioItem, AudioItemObject, CustomAnnouncementTab } from '../../AnnouncementSystem'
+import { AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
 
 interface INextTrainAnnouncementOptions {
   platform: typeof AVAILABLE_PLATFORMS['high'][number]

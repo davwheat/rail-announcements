@@ -105,6 +105,7 @@ const AVAILABLE_STATIONS = {
     'ZFD',
   ],
 }
+const AVAILABLE_DISRUPTION_REASONS = ['a road vehicle colliding with a bridge earlier today', 'a speed restriction over defective track']
 
 interface IValidateOptions {
   stationsHigh: string[]
@@ -115,6 +116,7 @@ interface IValidateOptions {
   platformLow: string
   platformHigh: string
   number: string
+  disruptionReason: string
 }
 
 export default class AtosMatt extends StationAnnouncementSystem {
@@ -187,6 +189,7 @@ export default class AtosMatt extends StationAnnouncementSystem {
     platformLow,
     platformHigh,
     number,
+    disruptionReason,
   }: Partial<IValidateOptions>): boolean {
     if (platformLow && !AVAILABLE_PLATFORMS.low.includes(platformLow)) {
       this.showAudioNotExistsError(`platforms.low.platform ${platformLow}`)
@@ -214,6 +217,11 @@ export default class AtosMatt extends StationAnnouncementSystem {
 
     if (number && !AVAILABLE_NUMBERS.includes(number)) {
       this.showAudioNotExistsError(`numbers.${number}`)
+      return false
+    }
+
+    if (disruptionReason && !AVAILABLE_DISRUPTION_REASONS.includes(disruptionReason)) {
+      this.showAudioNotExistsError(`disruption-reasons.${disruptionReason}`)
       return false
     }
 

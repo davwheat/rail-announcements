@@ -1,5 +1,3 @@
-const { Integrations: TracingIntegrations } = require('@sentry/tracing')
-
 const __IS_DEV__ = process.env.NODE_ENV !== 'production'
 
 // These plugins will only be used in production builds
@@ -45,8 +43,8 @@ module.exports = {
       resolve: '@sentry/gatsby',
       options: {
         dsn: 'https://e2561f72b4484d0c874eecbde0ad297d@o991058.ingest.sentry.io/5947974',
+        environment: process.env.NODE_ENV,
         sampleRate: __IS_DEV__ ? 1 : 0.7,
-        integrations: [new TracingIntegrations.BrowserTracing()],
         tracesSampleRate: __IS_DEV__ ? 1 : 0.7,
       },
     },

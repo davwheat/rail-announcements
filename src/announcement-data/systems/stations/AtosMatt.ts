@@ -33,7 +33,7 @@ const AVAILABLE_PLATFORMS = {
   high: ['2', '3', '4'],
 }
 const AVAILABLE_STATIONS = {
-  low: ['BHM', 'BOG', 'BTN', 'EBN', 'FOD', 'HOV', 'LBG', 'LIT', 'LWS', 'NRB', 'NWD', 'NXG'],
+  low: ['BDM', 'BOG', 'BTN', 'EBN', 'FOD', 'HOV', 'LBG', 'LIT', 'LWS', 'NRB', 'NWD', 'NXG'],
   high: [
     'AGT',
     'AMY',

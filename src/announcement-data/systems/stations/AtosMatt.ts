@@ -439,23 +439,23 @@ export default class AtosMatt extends StationAnnouncementSystem {
         },
       },
     },
-    announcementButtons: {
-      name: 'Announcement buttons',
-      component: CustomButtonPane,
-      props: {
-        buttons: [
-          {
-            label: '3 chimes',
-            play: this.playAudioFiles.bind(this, ['3 chime']),
-            download: this.playAudioFiles.bind(this, ['3 chime'], true),
-          },
-          {
-            label: '4 chimes',
-            play: this.playAudioFiles.bind(this, ['4 chime']),
-            download: this.playAudioFiles.bind(this, ['4 chime'], true),
-          },
-        ],
-      },
-    },
+    // announcementButtons: {
+    //   name: 'Announcement buttons',
+    //   component: CustomButtonPane,
+    //   props: {
+    //     buttons: [
+    //       {
+    //         label: '3 chimes',
+    //         play: this.playAudioFiles.bind(this, ['3 chime']),
+    //         download: this.playAudioFiles.bind(this, ['3 chime'], true),
+    //       },
+    //       {
+    //         label: '4 chimes',
+    //         play: this.playAudioFiles.bind(this, ['4 chime']),
+    //         download: this.playAudioFiles.bind(this, ['4 chime'], true),
+    //       },
+    //     ],
+    //   },
+    // },
   }
 }

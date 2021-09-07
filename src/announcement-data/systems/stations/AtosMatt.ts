@@ -16,9 +16,8 @@ interface INextTrainAnnouncementOptions {
   coaches: string
 }
 
-interface IDepartingStationAnnouncementOptions {
-  terminatesAtCode: string
-  nextStationCode: string
+interface IThroughTrainAnnouncementOptions {
+  platform: string
 }
 
 const AVAILABLE_HOURS = ['07', '08', '13']
@@ -191,6 +190,22 @@ export default class AtosMatt extends StationAnnouncementSystem {
     await this.playAudioFiles(files, download)
   }
 
+  private async playThroughTrainAnnouncement(options: IThroughTrainAnnouncementOptions, download: boolean = false): Promise<void> {
+    const files: AudioItem[] = []
+
+    if (!this.validateOptions({ platformHigh: options.platform, platformLow: options.platform })) return
+
+    files.push(
+      'the train now approaching',
+      `platforms.high.platform ${options.platform}`,
+      'does not stop here',
+      'please stand well clear of the edge of',
+      `platforms.low.platform ${options.platform}`,
+    )
+
+    await this.playAudioFiles(files, download)
+  }
+
   private validateOptions({
     stationsHigh,
     stationsLow,
@@ -311,6 +326,21 @@ export default class AtosMatt extends StationAnnouncementSystem {
             name: 'Coach count',
             default: AVAILABLE_NUMBERS[0],
             options: AVAILABLE_NUMBERS.filter(x => parseInt(x) > 1).map(c => ({ title: c, value: c })),
+            type: 'select',
+          },
+        },
+      },
+    },
+    fastTrain: {
+      name: 'Fast train',
+      component: CustomAnnouncementPane,
+      props: {
+        playHandler: this.playThroughTrainAnnouncement.bind(this),
+        options: {
+          platform: {
+            name: 'Platform',
+            default: AVAILABLE_PLATFORMS.low.filter(x => AVAILABLE_PLATFORMS.high.includes(x))[0],
+            options: AVAILABLE_PLATFORMS.low.filter(x => AVAILABLE_PLATFORMS.high.includes(x)).map(p => ({ title: `Platform ${p}`, value: p })),
             type: 'select',
           },
         },

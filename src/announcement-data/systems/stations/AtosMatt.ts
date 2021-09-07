@@ -189,11 +189,11 @@ export default class AtosMatt extends StationAnnouncementSystem {
     number,
   }: Partial<IValidateOptions>): boolean {
     if (platformLow && !AVAILABLE_PLATFORMS.low.includes(platformLow)) {
-      this.showAudioNotExistsError(`platforms.low.${platformLow}`)
+      this.showAudioNotExistsError(`platforms.low.platform ${platformLow}`)
       return false
     }
     if (platformHigh && !AVAILABLE_PLATFORMS.high.includes(platformHigh)) {
-      this.showAudioNotExistsError(`platforms.high.${platformHigh}`)
+      this.showAudioNotExistsError(`platforms.high.platform ${platformHigh}`)
       return false
     }
 

@@ -128,10 +128,8 @@ export default class AtosMatt extends StationAnnouncementSystem {
   /**
    * @returns "Platform X for the HH:mm YYYYYY service to ZZZZ (via AAAA)."
    */
-  private assembleTrainInfo({ platform, hour, min, toc, via, terminatingStationCode }): AudioItem[] {
+  private assembleTrainInfo({ hour, min, toc, via, terminatingStationCode, destAllHigh = false }): AudioItem[] {
     const files = [
-      `platforms.high.platform ${platform}`,
-      'for the',
       `times.hour.${hour}`,
       `times.mins.${min}`,
       {
@@ -141,12 +139,22 @@ export default class AtosMatt extends StationAnnouncementSystem {
       `service to`,
     ]
 
-    if (via !== 'none') {
-      if (!this.validateOptions({ stationsHigh: [terminatingStationCode], stationsLow: [via] })) return
-      files.push(`stations.high.${terminatingStationCode}`, 'via', `stations.low.${via}`)
+    if (destAllHigh) {
+      if (via !== 'none') {
+        if (!this.validateOptions({ stationsHigh: [terminatingStationCode, via] })) return
+        files.push(`stations.high.${terminatingStationCode}`, 'via', `stations.high.${via}`)
+      } else {
+        if (!this.validateOptions({ stationsHigh: [terminatingStationCode] })) return
+        files.push(`stations.high.${terminatingStationCode}`)
+      }
     } else {
-      if (!this.validateOptions({ stationsLow: [terminatingStationCode] })) return
-      files.push(`stations.low.${terminatingStationCode}`)
+      if (via !== 'none') {
+        if (!this.validateOptions({ stationsHigh: [terminatingStationCode], stationsLow: [via] })) return
+        files.push(`stations.high.${terminatingStationCode}`, 'via', `stations.low.${via}`)
+      } else {
+        if (!this.validateOptions({ stationsLow: [terminatingStationCode] })) return
+        files.push(`stations.low.${terminatingStationCode}`)
+      }
     }
 
     return files
@@ -156,6 +164,8 @@ export default class AtosMatt extends StationAnnouncementSystem {
     const files: AudioItem[] = []
 
     if (!this.validateOptions({ platformHigh: options.platform, hour: options.hour, minute: options.min, toc: options.toc })) return
+
+    files.push(`platforms.high.platform ${options.platform}`, 'for the')
     files.push(...this.assembleTrainInfo(options))
 
     files.push({ id: 'calling at', opts: { delayStart: 750 } })
@@ -175,6 +185,7 @@ export default class AtosMatt extends StationAnnouncementSystem {
     if (!this.validateOptions({ number: options.coaches })) return
     files.push('this train is formed of', `numbers.${options.coaches}`, 'coaches')
 
+    files.push(`platforms.high.platform ${options.platform}`, 'for the')
     files.push(...this.assembleTrainInfo(options))
 
     await this.playAudioFiles(files, download)

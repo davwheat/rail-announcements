@@ -443,6 +443,11 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
             play: this.playAudioFiles.bind(this, ['safety information is provided on posters in every carriage']),
             download: this.playAudioFiles.bind(this, ['safety information is provided on posters in every carriage'], true),
           },
+          {
+            label: 'Held at red signal',
+            play: this.playAudioFiles.bind(this, ['this train is being held at a red signal and should be moving shortly']),
+            download: this.playAudioFiles.bind(this, ['this train is being held at a red signal and should be moving shortly'], true),
+          },
         ],
       },
     },

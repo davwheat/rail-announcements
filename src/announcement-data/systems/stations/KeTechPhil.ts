@@ -372,7 +372,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
           },
           coaches: {
             name: 'Coach count',
-            default: AVAILABLE_NUMBERS[0],
+            default: AVAILABLE_NUMBERS.filter(x => parseInt(x) > 1)[0],
             options: AVAILABLE_NUMBERS.filter(x => parseInt(x) > 1).map(c => ({ title: c, value: c })),
             type: 'select',
           },

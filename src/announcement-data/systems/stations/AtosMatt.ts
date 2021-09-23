@@ -194,9 +194,6 @@ export default class AtosMatt extends StationAnnouncementSystem {
     if (!this.validateOptions({ number: options.coaches })) return
     files.push('this train is formed of', `numbers.${options.coaches}`, 'coaches')
 
-    files.push(`platforms.high.platform ${options.platform}`, 'for the')
-    files.push(...this.assembleTrainInfo(options))
-
     await this.playAudioFiles(files, download)
   }
 

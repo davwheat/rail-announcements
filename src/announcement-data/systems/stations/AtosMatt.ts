@@ -30,8 +30,8 @@ interface IDelayedTrainAnnouncementOptions {
   disruptionReason: string
 }
 
-const AVAILABLE_HOURS = ['07', '08', '13']
-const AVAILABLE_MINUTES = ['03', '08', '27', '33', '36', '53', '57']
+const AVAILABLE_HOURS = ['07', '08', '09', '13']
+const AVAILABLE_MINUTES = ['03', '08', '25', '27', '33', '36', '40', '53', '57']
 const AVAILABLE_TOCS = ['Southern', 'Thameslink']
 const AVAILABLE_NUMBERS = ['4', '5', '6', '7', '8', '10', '12', '13', '14', '21']
 const AVAILABLE_PLATFORMS = {
@@ -193,9 +193,6 @@ export default class AtosMatt extends StationAnnouncementSystem {
     // Platforms share the same audio as coach numbers
     if (!this.validateOptions({ number: options.coaches })) return
     files.push('this train is formed of', `numbers.${options.coaches}`, 'coaches')
-
-    files.push(`platforms.high.platform ${options.platform}`, 'for the')
-    files.push(...this.assembleTrainInfo(options))
 
     await this.playAudioFiles(files, download)
   }
@@ -366,7 +363,7 @@ export default class AtosMatt extends StationAnnouncementSystem {
           },
           coaches: {
             name: 'Coach count',
-            default: AVAILABLE_NUMBERS[0],
+            default: AVAILABLE_NUMBERS.filter(x => parseInt(x) > 1)[0],
             options: AVAILABLE_NUMBERS.filter(x => parseInt(x) > 1).map(c => ({ title: c, value: c })),
             type: 'select',
           },

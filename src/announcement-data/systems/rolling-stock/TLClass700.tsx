@@ -448,6 +448,11 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
             play: this.playAudioFiles.bind(this, ['this train is being held at a red signal and should be moving shortly']),
             download: this.playAudioFiles.bind(this, ['this train is being held at a red signal and should be moving shortly'], true),
           },
+          {
+            label: 'You must wear a face covering',
+            play: this.playAudioFiles.bind(this, ['you must wear a face covering on your jouney unless you are exempt']),
+            download: this.playAudioFiles.bind(this, ['you must wear a face covering on your jouney unless you are exempt'], true),
+          },
         ],
       },
     },

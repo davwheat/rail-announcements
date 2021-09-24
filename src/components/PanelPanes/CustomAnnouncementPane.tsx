@@ -11,6 +11,8 @@ import * as Sentry from '@sentry/gatsby'
 import PlayIcon from 'mdi-react/PlayIcon'
 import DownloadIcon from 'mdi-react/DownloadIcon'
 
+import clsx from 'clsx'
+
 const useStyles = makeStyles({
   root: {
     padding: 16,
@@ -20,6 +22,23 @@ const useStyles = makeStyles({
     background: 'rgba(255, 0, 0, 0.15)',
     borderLeft: '#f00 4px solid',
     padding: '8px 16px',
+  },
+  optionsDisabled: {
+    position: 'relative',
+    '&::after': {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontSize: '2em',
+      content: '"Playing announcement..."',
+      position: 'absolute',
+      top: 0,
+      bottom: 0,
+      right: 0,
+      left: 0,
+      background: 'rgba(0, 0, 0, 0.25)',
+      zIndex: 1,
+    },
   },
 })
 
@@ -70,10 +89,11 @@ function CustomAnnouncementPane({ options, playHandler, name }: ICustomAnnouncem
           <strong>All options are disabled while an announcement is playing.</strong>
         </p>
       )}
-      <fieldset>
+
+      <fieldset className={clsx(isDisabled && classes.optionsDisabled)}>
         <h3>Options</h3>
 
-        {Object.keys(options).length === 0 && <p>No options</p>}
+        {Object.keys(options).length === 0 && <p>No options available</p>}
 
         <>
           {Object.entries(options).map(([key, opt]) =>

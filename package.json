@@ -26,6 +26,7 @@
     "@sentry/gatsby": "^6.13.2",
     "@sentry/tracing": "^6.13.2",
     "babel-plugin-transform-remove-console": "^6.9.4",
+    "clsx": "^1.1.1",
     "crunker": "^1.2.1",
     "gatsby": "^3.14.0",
     "gatsby-plugin-less": "^5.14.0",

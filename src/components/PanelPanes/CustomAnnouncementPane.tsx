@@ -9,6 +9,7 @@ import useIsPlayingAnnouncement from '@helpers/useIsPlayingAnnouncement'
 import * as Sentry from '@sentry/gatsby'
 
 import PlayIcon from 'mdi-react/PlayIcon'
+import PresetIcon from 'mdi-react/FolderTextOutlineIcon'
 import DownloadIcon from 'mdi-react/DownloadIcon'
 
 import clsx from 'clsx'
@@ -40,15 +41,26 @@ const useStyles = makeStyles({
       zIndex: 1,
     },
   },
+  presets: {
+    paddingBottom: 24,
+    marginBottom: 24,
+    borderBottom: '2px solid black',
+  },
 })
+
+export interface ICustomAnnouncementPreset {
+  name: string
+  state: Record<string, unknown>
+}
 
 export interface ICustomAnnouncementPaneProps {
   options: Record<string, OptionsExplanation>
   playHandler: (options: { [key: string]: any }, download?: boolean) => Promise<void>
   name: string
+  presets?: ICustomAnnouncementPreset[]
 }
 
-function CustomAnnouncementPane({ options, playHandler, name }: ICustomAnnouncementPaneProps): JSX.Element {
+function CustomAnnouncementPane({ options, playHandler, name, presets }: ICustomAnnouncementPaneProps): JSX.Element {
   const classes = useStyles()
 
   const AnnouncementSystem = getActiveSystem()
@@ -84,6 +96,26 @@ function CustomAnnouncementPane({ options, playHandler, name }: ICustomAnnouncem
 
   return (
     <div className={classes.root}>
+      {presets && (
+        <section className={classes.presets}>
+          <h3>Presets</h3>
+
+          {presets.map(preset => (
+            <button
+              disabled={isDisabled}
+              onClick={() => {
+                setOptionsState(preset.state)
+              }}
+            >
+              <span className="buttonLabel">
+                <PresetIcon />
+                {preset.name}
+              </span>
+            </button>
+          ))}
+        </section>
+      )}
+
       {isDisabled && (
         <p className={classes.disabledMessage}>
           <strong>All options are disabled while an announcement is playing.</strong>

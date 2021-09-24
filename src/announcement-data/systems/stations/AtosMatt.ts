@@ -1,9 +1,10 @@
 import StationAnnouncementSystem from '@announcement-data/StationAnnouncementSystem'
 import CallingAtSelector from '@components/CallingAtSelector'
-import CustomAnnouncementPane from '@components/PanelPanes/CustomAnnouncementPane'
+import CustomAnnouncementPane, { ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
 import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
 import { AllStationsTitleValueMap } from '@data/StationManipulators'
 import { AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
+import crsToStationItemMapper from '@helpers/crsToStationItemMapper'
 
 interface INextTrainAnnouncementOptions {
   platform: string
@@ -126,6 +127,45 @@ interface IValidateOptions {
   platformHigh: string
   number: string
   disruptionReason: string
+}
+
+const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {
+  nextTrain: [
+    {
+      name: '08:03 - BTN to BDM',
+      state: {
+        platform: '2',
+        hour: '08',
+        min: '03',
+        toc: 'thameslink',
+        terminatingStationCode: 'BDM',
+        via: 'none',
+        callingAt: [
+          'PRP',
+          'HSK',
+          'BUG',
+          'WVF',
+          'HHE',
+          'TBD',
+          'GTW',
+          'ECR',
+          'LBG',
+          'BFR',
+          'CTK',
+          'ZFD',
+          'STP',
+          'WHP',
+          'SAC',
+          'HPD',
+          'LTN',
+          'LUT',
+          'LEA',
+          'HLN',
+        ].map(crsToStationItemMapper),
+        coaches: '12',
+      },
+    },
+  ],
 }
 
 export default class AtosMatt extends StationAnnouncementSystem {
@@ -315,6 +355,7 @@ export default class AtosMatt extends StationAnnouncementSystem {
       component: CustomAnnouncementPane,
       props: {
         playHandler: this.playNextTrainAnnouncement.bind(this),
+        presets: AnnouncementPresets.nextTrain,
         options: {
           platform: {
             name: 'Platform',

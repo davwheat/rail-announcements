@@ -31,17 +31,18 @@ interface IDelayedTrainAnnouncementOptions {
   disruptionReason: string
 }
 
-const AVAILABLE_HOURS = ['07', '12', '15']
-const AVAILABLE_MINUTES = ['11', '28', '29', '44', '54']
+const AVAILABLE_HOURS = ['07', '12', '13', '15']
+const AVAILABLE_MINUTES = ['11', '12', '16', '28', '29', '44', '54']
 const AVAILABLE_TOCS = ['Southern', 'Thameslink', 'Arriva Trains Wales']
 const AVAILABLE_NUMBERS = ['2', '10', '12']
 const AVAILABLE_PLATFORMS = {
   /**
    * Used for the 'stand clear' announcement
    */
-  low: ['6'],
+  low: ['3', '6'],
   high: ['1', '3'],
 }
+const AVAILABLE_COACHES = ['8', '10', '12']
 const AVAILABLE_STATIONS = {
   low: ['BDM', 'CAT', 'CBG', 'STP', 'VIC'],
   high: [
@@ -93,6 +94,7 @@ interface IValidateOptions {
   platformHigh: string
   number: string
   disruptionReason: string
+  coaches: string
 }
 
 const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {
@@ -198,8 +200,8 @@ export default class AtosAnne extends StationAnnouncementSystem {
     }
 
     // Platforms share the same audio as coach numbers
-    if (!this.validateOptions({ number: options.coaches })) return
-    files.push('this train is formed of', `numbers.${options.coaches}`, 'coaches')
+    if (!this.validateOptions({ coaches: options.coaches })) return
+    files.push('this train is formed of', `coaches.${options.coaches} coaches`)
 
     await this.playAudioFiles(files, download)
   }
@@ -240,7 +242,7 @@ export default class AtosAnne extends StationAnnouncementSystem {
     if (delayTime === 'unknown') {
       alert("We can't handle unknown delays yet as we're missing some audio recordings.")
       return
-      // files.push('is being delayed', 'please listen for further announcements')
+      // files.push('is delayed', 'please listen for further announcements')
     } else {
       files.push('is delayed by approximately', `numbers.${delayTime}`, 'minutes')
     }
@@ -262,6 +264,7 @@ export default class AtosAnne extends StationAnnouncementSystem {
     platformHigh,
     number,
     disruptionReason,
+    coaches,
   }: Partial<IValidateOptions>): boolean {
     if (platformLow && !AVAILABLE_PLATFORMS.low.includes(platformLow)) {
       this.showAudioNotExistsError(`platforms.low.platform ${platformLow}`)
@@ -289,6 +292,11 @@ export default class AtosAnne extends StationAnnouncementSystem {
 
     if (number && !AVAILABLE_NUMBERS.includes(number)) {
       this.showAudioNotExistsError(`numbers.${number}`)
+      return false
+    }
+
+    if (coaches && !AVAILABLE_COACHES.includes(coaches)) {
+      this.showAudioNotExistsError(`coaches.${coaches} coaches`)
       return false
     }
 

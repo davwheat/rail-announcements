@@ -62,7 +62,7 @@ const useStyles = makeStyles({
   },
 })
 
-const Tabs: React.FC<TabProps> = ({ tabNames, tabItems, customKeyPrefix = '' }) => {
+const Tabs: React.FC<TabProps> = React.memo(({ tabNames, tabItems, customKeyPrefix = '' }) => {
   const classes = useStyles()
 
   if (tabNames.length !== tabItems.length) {
@@ -86,6 +86,6 @@ const Tabs: React.FC<TabProps> = ({ tabNames, tabItems, customKeyPrefix = '' }) 
       ))}
     </OGTabs>
   )
-}
+})
 
 export default Tabs

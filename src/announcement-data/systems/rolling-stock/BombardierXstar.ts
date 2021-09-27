@@ -45,6 +45,9 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
 
     const callingAtCodes = _callingAt.map(stop => stop.crsCode)
 
+    if (!this.validateStationExists(terminatesAtCode)) return
+    if (!this.validateStationExists(thisStationCode)) return
+
     const files: AudioItem[] = []
     files.push('bing bong')
     files.push('this is', `stations.${thisStationCode}`, 'this train is the southern service to', `stations.${terminatesAtCode}`)
@@ -55,7 +58,6 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
     ]
 
     if (callingAtCodes.some(code => !this.validateStationExists(code))) return
-    if (!this.validateStationExists(terminatesAtCode)) return
 
     if (remainingStops.length > 1) {
       // We are not at the termination point.

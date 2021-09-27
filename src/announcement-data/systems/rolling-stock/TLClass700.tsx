@@ -102,6 +102,8 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
       files.push('please mind the gap between the train and the platform')
     }
 
+    if (!this.validateStationExists(thisStationCode, 'low')) return
+
     files.push(
       { id: 'this station is', opts: { delayStart: options.mindTheGap ? 500 : 0 } },
       { id: `stations.low.${thisStationCode}`, opts: { delayStart: 500 } },

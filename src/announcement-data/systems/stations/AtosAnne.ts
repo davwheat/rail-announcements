@@ -82,7 +82,7 @@ const AVAILABLE_STATIONS = {
     'ZFD',
   ],
 }
-const AVAILABLE_DISRUPTION_REASONS = ['a road vehicle colliding with a bridge earlier today', 'a speed restriction over defective track']
+const AVAILABLE_DISRUPTION_REASONS = []
 
 interface IValidateOptions {
   stationsHigh: string[]
@@ -100,37 +100,18 @@ interface IValidateOptions {
 const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {
   nextTrain: [
     {
-      name: '07:11 - BTN to CBG',
+      name: '07:11 | Brighton to Cambridge',
       state: {
-        platform: '2',
-        hour: '08',
-        min: '03',
+        platform: '1',
+        hour: '07',
+        min: '11',
         toc: 'thameslink',
-        terminatingStationCode: 'BDM',
+        terminatingStationCode: 'CBG',
         via: 'none',
-        callingAt: [
-          'PRP',
-          'HSK',
-          'BUG',
-          'WVF',
-          'HHE',
-          'TBD',
-          'GTW',
-          'ECR',
-          'LBG',
-          'BFR',
-          'CTK',
-          'ZFD',
-          'STP',
-          'WHP',
-          'SAC',
-          'HPD',
-          'LTN',
-          'LUT',
-          'LEA',
-          'HLN',
-        ].map(crsToStationItemMapper),
-        coaches: '12',
+        callingAt: ['HHE', 'BAB', 'TBD', 'GTW', 'ECR', 'LBG', 'BFR', 'CTK', 'ZFD', 'STP', 'FPK', 'SVG', 'HIT', 'LET', 'BDK', 'RYS'].map(
+          crsToStationItemMapper,
+        ),
+        coaches: '8',
       },
     },
   ],
@@ -379,8 +360,8 @@ export default class AtosAnne extends StationAnnouncementSystem {
           },
           coaches: {
             name: 'Coach count',
-            default: AVAILABLE_NUMBERS.filter(x => parseInt(x) > 1)[0],
-            options: AVAILABLE_NUMBERS.filter(x => parseInt(x) > 1).map(c => ({ title: c, value: c })),
+            default: AVAILABLE_COACHES[0],
+            options: AVAILABLE_COACHES.map(c => ({ title: c, value: c })),
             type: 'select',
           },
         },

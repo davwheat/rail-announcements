@@ -1,9 +1,10 @@
 import StationAnnouncementSystem from '@announcement-data/StationAnnouncementSystem'
 import CallingAtSelector from '@components/CallingAtSelector'
-import CustomAnnouncementPane from '@components/PanelPanes/CustomAnnouncementPane'
+import CustomAnnouncementPane, { ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
 import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
 import { AllStationsTitleValueMap } from '@data/StationManipulators'
-import { AudioItem, AudioItemObject, CustomAnnouncementTab } from '../../AnnouncementSystem'
+import crsToStationItemMapper from '@helpers/crsToStationItemMapper'
+import { AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
 
 interface INextTrainAnnouncementOptions {
   chime: '3' | '4' | 'none'
@@ -17,9 +18,23 @@ interface INextTrainAnnouncementOptions {
   coaches: typeof AVAILABLE_NUMBERS[number]
 }
 
-interface IDepartingStationAnnouncementOptions {
-  terminatesAtCode: string
-  nextStationCode: string
+const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {
+  nextTrain: [
+    {
+      name: '12:28 | Littlehampton to Brighton',
+      state: {
+        chime: '3',
+        platform: '2',
+        hour: '12',
+        min: '28',
+        toc: 'southern',
+        terminatingStationCode: 'BTN',
+        via: 'none',
+        callingAt: ['ANG', 'GBS', 'DUR', 'WWO', 'WRH', 'SWK', 'PLD', 'HOV'].map(crsToStationItemMapper),
+        coaches: '8',
+      },
+    },
+  ],
 }
 
 const AVAILABLE_ALPHANUMBERS = ['2', '2a', '3b', '4', '5', '8', '9', '11b'] as const
@@ -310,6 +325,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
       name: 'Next train',
       component: CustomAnnouncementPane,
       props: {
+        presets: AnnouncementPresets.nextTrain,
         playHandler: this.playNextTrainAnnouncement.bind(this),
         options: {
           chime: {

@@ -30,7 +30,7 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
   readonly FILE_PREFIX = 'TL/700'
   readonly SYSTEM_TYPE = 'train'
 
-  private readonly StationsWithPointsOfInterest = ['BFR', 'CTK', 'LBG', 'STP']
+  private readonly StationsWithPointsOfInterest = ['BFR', 'CTK', 'LBG', 'STP', 'LTN']
   private readonly StationsWithForcedChangeHere = {
     LBG: { main: 'other national rail services', additional: 'LBG' },
     STP: { main: 'STP' },
@@ -198,17 +198,20 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
   readonly AvailableStationNames = {
     high: [
       'ABW',
+      'ARL',
       'BAB',
       'BBL',
       'BDK',
       'BEC',
       'BFR',
       'BGM',
+      'BIW',
       'BKL',
       'BMS',
       'BTN',
       'BUG',
       'CAT',
+      'CDS',
       'CFT',
       'CRI',
       'CRW',
@@ -241,6 +244,7 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
       'HOR',
       'HPD',
       'HSK',
+      'HUN',
       'IFI',
       'KTN',
       'LBG',
@@ -268,9 +272,11 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
       'SAF',
       'SAY',
       'SCG',
+      'SDY',
       'SEH',
       'SGR',
       'SMY',
+      'SNO',
       'SOO',
       'SRT',
       'STP',
@@ -298,8 +304,11 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
       'HRH',
       'HSK',
       'LBG',
+      'LTN',
       'LUT',
+      'LVN',
       'ORP',
+      'PBO',
       'PRP',
       'RAI',
       'RDH',
@@ -307,6 +316,7 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
       'SAF',
       'SEV',
       'STP',
+      'WHP',
       'WIM',
       'WVF',
       'ZFD',

@@ -46,6 +46,10 @@ const useStyles = makeStyles({
     marginBottom: 24,
     borderBottom: '2px solid black',
   },
+  presetButtonList: {
+    display: 'flex',
+    gap: 8,
+  },
 })
 
 export interface ICustomAnnouncementPreset {
@@ -100,19 +104,21 @@ function CustomAnnouncementPane({ options, playHandler, name, presets }: ICustom
         <section className={classes.presets}>
           <h3>Presets</h3>
 
-          {presets.map(preset => (
-            <button
-              disabled={isDisabled}
-              onClick={() => {
-                setOptionsState(preset.state)
-              }}
-            >
-              <span className="buttonLabel">
-                <PresetIcon />
-                {preset.name}
-              </span>
-            </button>
-          ))}
+          <div className={classes.presetButtonList}>
+            {presets.map(preset => (
+              <button
+                disabled={isDisabled}
+                onClick={() => {
+                  setOptionsState(preset.state)
+                }}
+              >
+                <span className="buttonLabel">
+                  <PresetIcon />
+                  {preset.name}
+                </span>
+              </button>
+            ))}
+          </div>
         </section>
       )}
 

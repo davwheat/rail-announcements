@@ -21,8 +21,8 @@ interface IDepartingStationAnnouncementOptions {
   nextStationCode: string
 }
 
-export default class SouthernClass377 extends TrainAnnouncementSystem {
-  readonly NAME = 'Southern Class 377'
+export default class BombardierXstar extends TrainAnnouncementSystem {
+  readonly NAME = 'Electrostar & Turbostar - Julie Berry'
   readonly ID = 'SN_CLASS_377_V1'
   readonly FILE_PREFIX = 'SN/377'
   readonly SYSTEM_TYPE = 'train'
@@ -68,14 +68,18 @@ export default class SouthernClass377 extends TrainAnnouncementSystem {
   }
 
   private RealAvailableStationNames = [
+    'AFK',
     'ANG',
     'ANZ',
+    'APD',
     'BCY',
     'BEX',
     'BRK',
     'CAT',
     'CBR',
     'CLJ',
+    'CLL',
+    'COB',
     'DUR',
     'EBN',
     'ECR',
@@ -87,6 +91,7 @@ export default class SouthernClass377 extends TrainAnnouncementSystem {
     'HGS',
     'HHE',
     'HMD',
+    'HMT',
     'HOV',
     'HPA',
     'HSK',
@@ -94,17 +99,23 @@ export default class SouthernClass377 extends TrainAnnouncementSystem {
     'LIT',
     'LWS',
     'MCB',
+    'NSB',
     'NWD',
+    'ORE',
+    'PEB',
     'PLD',
     'PLG',
     'PNW',
     'PRP',
     'PUO',
     'PUR',
+    'RYE',
     'SCY',
+    'SLQ',
     'SSE',
     'SYD',
     'TAT',
+    'TOK',
     'VIC',
     'WRH',
     'WVF',

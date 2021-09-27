@@ -31,87 +31,53 @@ interface IDelayedTrainAnnouncementOptions {
   disruptionReason: string
 }
 
-const AVAILABLE_HOURS = ['07', '08', '09', '13']
-const AVAILABLE_MINUTES = ['03', '08', '25', '27', '33', '36', '40', '53', '57']
-const AVAILABLE_TOCS = ['Southern', 'Thameslink']
-const AVAILABLE_NUMBERS = ['4', '5', '6', '7', '8', '10', '12', '13', '14', '21']
+const AVAILABLE_HOURS = ['07', '12', '15']
+const AVAILABLE_MINUTES = ['11', '28', '29', '44', '54']
+const AVAILABLE_TOCS = ['Southern', 'Thameslink', 'Arriva Trains Wales']
+const AVAILABLE_NUMBERS = ['2', '10', '12']
 const AVAILABLE_PLATFORMS = {
   /**
    * Used for the 'stand clear' announcement
    */
-  low: ['2'],
-  high: ['2', '3', '4'],
+  low: ['6'],
+  high: ['1', '3'],
 }
 const AVAILABLE_STATIONS = {
-  low: ['BDM', 'BOG', 'BTN', 'EBN', 'FOD', 'HOV', 'LBG', 'LIT', 'LWS', 'NRB', 'NWD', 'NXG'],
+  low: ['BDM', 'CAT', 'CBG', 'STP', 'VIC'],
   high: [
-    'AGT',
-    'AMY',
-    'ANG',
-    'ARU',
-    'BAA',
-    'BCY',
+    'BAB',
+    'BDK',
     'BDM',
     'BFR',
-    'BIG',
-    'BUG',
-    'CCH',
-    'CHH',
-    'CRW',
-    'CSA',
+    'CAT',
+    'CBG',
+    'CLJ',
     'CTK',
-    'DUR',
-    'EDW',
-    'EMS',
-    'EWR',
+    'ECR',
     'FLT',
-    'FOD',
-    'FOH',
-    'FRM',
-    'FSG',
-    'GBS',
+    'FPK',
     'GTW',
-    'HAV',
     'HHE',
+    'HIT',
     'HLN',
-    'HOV',
-    'HPA',
     'HPD',
-    'HRH',
-    'HSK',
-    'LAC',
+    'KLY',
     'LBG',
     'LEA',
-    'LIT',
+    'LET',
     'LTN',
     'LUT',
-    'NDL',
-    'NRB',
-    'NWD',
-    'PLD',
-    'PMR',
-    'PNW',
-    'PRP',
-    'PTC',
-    'PUL',
-    'QRP',
+    'PUR',
+    'RYS',
     'SAC',
-    'SBM',
     'SBS',
-    'SNW',
-    'SOB',
-    'SOU',
-    'SRC',
-    'SRS',
-    'STE',
     'STP',
-    'SWK',
-    'SYD',
+    'SVG',
     'TBD',
-    'TTH',
-    'TUH',
-    'WRH',
-    'WWO',
+    'VIC',
+    'WHP',
+    'WHS',
+    'WHY',
     'ZFD',
   ],
 }
@@ -132,7 +98,7 @@ interface IValidateOptions {
 const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {
   nextTrain: [
     {
-      name: '08:03 - BTN to BDM',
+      name: '07:11 - BTN to CBG',
       state: {
         platform: '2',
         hour: '08',
@@ -168,10 +134,10 @@ const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>>
   ],
 }
 
-export default class AtosMatt extends StationAnnouncementSystem {
-  readonly NAME = 'ATOS - Matt Streeton'
-  readonly ID = 'ATOS_MATT_V1'
-  readonly FILE_PREFIX = 'station/atos/matt'
+export default class AtosAnne extends StationAnnouncementSystem {
+  readonly NAME = 'ATOS - Anne'
+  readonly ID = 'ATOS_ANNE_V1'
+  readonly FILE_PREFIX = 'station/atos/anne'
   readonly SYSTEM_TYPE = 'station'
 
   /**
@@ -221,7 +187,8 @@ export default class AtosMatt extends StationAnnouncementSystem {
 
     if (options.callingAt.length === 0) {
       if (!this.validateOptions({ stationsHigh: [options.terminatingStationCode] })) return
-      files.push(`stations.high.${options.terminatingStationCode}`, 'only')
+      // TODO: only
+      files.push(`stations.high.${options.terminatingStationCode}` /*, 'only'*/)
     } else {
       const callingAtStops = options.callingAt.map(stn => stn.crsCode)
       if (!this.validateOptions({ stationsHigh: callingAtStops })) return
@@ -411,89 +378,84 @@ export default class AtosMatt extends StationAnnouncementSystem {
         },
       },
     },
-    fastTrain: {
-      name: 'Fast train',
-      component: CustomAnnouncementPane,
-      props: {
-        playHandler: this.playThroughTrainAnnouncement.bind(this),
-        options: {
-          platform: {
-            name: 'Platform',
-            default: AVAILABLE_PLATFORMS.low.filter(x => AVAILABLE_PLATFORMS.high.includes(x))[0],
-            options: AVAILABLE_PLATFORMS.low.filter(x => AVAILABLE_PLATFORMS.high.includes(x)).map(p => ({ title: `Platform ${p}`, value: p })),
-            type: 'select',
-          },
-        },
-      },
-    },
-    delayedTrain: {
-      name: 'Delayed train',
-      component: CustomAnnouncementPane,
-      props: {
-        playHandler: this.playDelayedTrainAnnouncement.bind(this),
-        options: {
-          hour: {
-            name: 'Hour',
-            default: AVAILABLE_HOURS[0],
-            options: AVAILABLE_HOURS.map(h => ({ title: h, value: h })),
-            type: 'select',
-          },
-          min: {
-            name: 'Minute',
-            default: AVAILABLE_MINUTES[0],
-            options: AVAILABLE_MINUTES.map(m => ({ title: m, value: m })),
-            type: 'select',
-          },
-          toc: {
-            name: 'TOC',
-            default: AVAILABLE_TOCS[0],
-            options: AVAILABLE_TOCS.map(m => ({ title: m, value: m.toLowerCase() })),
-            type: 'select',
-          },
-          terminatingStationCode: {
-            name: 'Terminating station',
-            default: AVAILABLE_STATIONS.high[0],
-            options: AllStationsTitleValueMap.filter(s => AVAILABLE_STATIONS.high.includes(s.value)),
-            type: 'select',
-          },
-          via: {
-            name: 'Via... (optional)',
-            default: 'none',
-            options: [{ title: 'NONE', value: 'none' }, ...AllStationsTitleValueMap.filter(s => AVAILABLE_STATIONS.high.includes(s.value))],
-            type: 'select',
-          },
-          delayTime: {
-            name: 'Delay time',
-            default: AVAILABLE_NUMBERS[0],
-            options: [{ title: 'Unknown', value: 'unknown' }, ...AVAILABLE_NUMBERS.map(h => ({ title: `${h} minute(s)`, value: h }))],
-            type: 'select',
-          },
-          disruptionReason: {
-            name: 'Delay reason',
-            default: 'unknown',
-            options: [{ title: 'Unknown', value: 'unknown' }, ...AVAILABLE_DISRUPTION_REASONS.map(h => ({ title: h, value: h.toLowerCase() }))],
-            type: 'select',
-          },
-        },
-      },
-    },
-    // announcementButtons: {
-    //   name: 'Announcement buttons',
-    //   component: CustomButtonPane,
+    // fastTrain: {
+    //   name: 'Fast train',
+    //   component: CustomAnnouncementPane,
     //   props: {
-    //     buttons: [
-    //       {
-    //         label: '3 chimes',
-    //         play: this.playAudioFiles.bind(this, ['3 chime']),
-    //         download: this.playAudioFiles.bind(this, ['3 chime'], true),
+    //     playHandler: this.playThroughTrainAnnouncement.bind(this),
+    //     options: {
+    //       platform: {
+    //         name: 'Platform',
+    //         default: AVAILABLE_PLATFORMS.low.filter(x => AVAILABLE_PLATFORMS.high.includes(x))[0],
+    //         options: AVAILABLE_PLATFORMS.low.filter(x => AVAILABLE_PLATFORMS.high.includes(x)).map(p => ({ title: `Platform ${p}`, value: p })),
+    //         type: 'select',
     //       },
-    //       {
-    //         label: '4 chimes',
-    //         play: this.playAudioFiles.bind(this, ['4 chime']),
-    //         download: this.playAudioFiles.bind(this, ['4 chime'], true),
-    //       },
-    //     ],
+    //     },
     //   },
     // },
+    // delayedTrain: {
+    //   name: 'Delayed train',
+    //   component: CustomAnnouncementPane,
+    //   props: {
+    //     playHandler: this.playDelayedTrainAnnouncement.bind(this),
+    //     options: {
+    //       hour: {
+    //         name: 'Hour',
+    //         default: AVAILABLE_HOURS[0],
+    //         options: AVAILABLE_HOURS.map(h => ({ title: h, value: h })),
+    //         type: 'select',
+    //       },
+    //       min: {
+    //         name: 'Minute',
+    //         default: AVAILABLE_MINUTES[0],
+    //         options: AVAILABLE_MINUTES.map(m => ({ title: m, value: m })),
+    //         type: 'select',
+    //       },
+    //       toc: {
+    //         name: 'TOC',
+    //         default: AVAILABLE_TOCS[0],
+    //         options: AVAILABLE_TOCS.map(m => ({ title: m, value: m.toLowerCase() })),
+    //         type: 'select',
+    //       },
+    //       terminatingStationCode: {
+    //         name: 'Terminating station',
+    //         default: AVAILABLE_STATIONS.high[0],
+    //         options: AllStationsTitleValueMap.filter(s => AVAILABLE_STATIONS.high.includes(s.value)),
+    //         type: 'select',
+    //       },
+    //       via: {
+    //         name: 'Via... (optional)',
+    //         default: 'none',
+    //         options: [{ title: 'NONE', value: 'none' }, ...AllStationsTitleValueMap.filter(s => AVAILABLE_STATIONS.high.includes(s.value))],
+    //         type: 'select',
+    //       },
+    //       delayTime: {
+    //         name: 'Delay time',
+    //         default: AVAILABLE_NUMBERS[0],
+    //         options: [{ title: 'Unknown', value: 'unknown' }, ...AVAILABLE_NUMBERS.map(h => ({ title: `${h} minute(s)`, value: h }))],
+    //         type: 'select',
+    //       },
+    //       disruptionReason: {
+    //         name: 'Delay reason',
+    //         default: 'unknown',
+    //         options: [{ title: 'Unknown', value: 'unknown' }, ...AVAILABLE_DISRUPTION_REASONS.map(h => ({ title: h, value: h.toLowerCase() }))],
+    //         type: 'select',
+    //       },
+    //     },
+    //   },
+    // },
+    announcementButtons: {
+      name: 'Announcement buttons',
+      component: CustomButtonPane,
+      props: {
+        buttons: [
+          {
+            label: 'BTP 61016',
+            play: this.playAudioFiles.bind(this, ['61016']),
+            download: this.playAudioFiles.bind(this, ['61016'], true),
+          },
+        ],
+      },
+    },
   }
 }

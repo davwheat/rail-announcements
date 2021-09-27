@@ -9,7 +9,10 @@ import useIsPlayingAnnouncement from '@helpers/useIsPlayingAnnouncement'
 import * as Sentry from '@sentry/gatsby'
 
 import PlayIcon from 'mdi-react/PlayIcon'
+import PresetIcon from 'mdi-react/FolderTextOutlineIcon'
 import DownloadIcon from 'mdi-react/DownloadIcon'
+
+import clsx from 'clsx'
 
 const useStyles = makeStyles({
   root: {
@@ -21,15 +24,47 @@ const useStyles = makeStyles({
     borderLeft: '#f00 4px solid',
     padding: '8px 16px',
   },
+  optionsDisabled: {
+    position: 'relative',
+    '&::after': {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontSize: '2em',
+      content: '"Playing announcement..."',
+      position: 'absolute',
+      top: 0,
+      bottom: 0,
+      right: 0,
+      left: 0,
+      background: 'rgba(0, 0, 0, 0.25)',
+      zIndex: 1,
+    },
+  },
+  presets: {
+    paddingBottom: 24,
+    marginBottom: 24,
+    borderBottom: '2px solid black',
+  },
+  presetButtonList: {
+    display: 'flex',
+    gap: 8,
+  },
 })
+
+export interface ICustomAnnouncementPreset {
+  name: string
+  state: Record<string, unknown>
+}
 
 export interface ICustomAnnouncementPaneProps {
   options: Record<string, OptionsExplanation>
   playHandler: (options: { [key: string]: any }, download?: boolean) => Promise<void>
   name: string
+  presets?: ICustomAnnouncementPreset[]
 }
 
-function CustomAnnouncementPane({ options, playHandler, name }: ICustomAnnouncementPaneProps): JSX.Element {
+function CustomAnnouncementPane({ options, playHandler, name, presets }: ICustomAnnouncementPaneProps): JSX.Element {
   const classes = useStyles()
 
   const AnnouncementSystem = getActiveSystem()
@@ -65,15 +100,38 @@ function CustomAnnouncementPane({ options, playHandler, name }: ICustomAnnouncem
 
   return (
     <div className={classes.root}>
+      {presets && (
+        <section className={classes.presets}>
+          <h3>Presets</h3>
+
+          <div className={classes.presetButtonList}>
+            {presets.map(preset => (
+              <button
+                disabled={isDisabled}
+                onClick={() => {
+                  setOptionsState(preset.state)
+                }}
+              >
+                <span className="buttonLabel">
+                  <PresetIcon />
+                  {preset.name}
+                </span>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
+
       {isDisabled && (
         <p className={classes.disabledMessage}>
           <strong>All options are disabled while an announcement is playing.</strong>
         </p>
       )}
-      <fieldset>
+
+      <fieldset className={clsx(isDisabled && classes.optionsDisabled)}>
         <h3>Options</h3>
 
-        {Object.keys(options).length === 0 && <p>No options</p>}
+        {Object.keys(options).length === 0 && <p>No options available</p>}
 
         <>
           {Object.entries(options).map(([key, opt]) =>

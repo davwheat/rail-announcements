@@ -26,11 +26,15 @@ function AnnouncementPanel(): JSX.Element {
 
   const customTabs = AnnouncementSystemInstance.customAnnouncementTabs
 
-  const TabPanels = Object.values(customTabs).map(({ component: TabComponent, ...opts }) => (
-    <AnnouncementTabErrorBoundary systemId={AnnouncementSystemInstance.ID} systemName={AnnouncementSystemInstance.NAME}>
-      <TabComponent {...opts.props} name={opts.name} key={opts.name} />
-    </AnnouncementTabErrorBoundary>
-  ))
+  const TabPanels = React.useMemo(
+    () =>
+      Object.values(customTabs).map(({ component: TabComponent, ...opts }) => (
+        <AnnouncementTabErrorBoundary key={opts.name} systemId={AnnouncementSystemInstance.ID} systemName={AnnouncementSystemInstance.NAME}>
+          <TabComponent {...opts.props} name={opts.name} />
+        </AnnouncementTabErrorBoundary>
+      )),
+    [customTabs],
+  )
 
   return (
     <div className={classes.root}>

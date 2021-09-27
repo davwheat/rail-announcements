@@ -1,7 +1,8 @@
 import CallingAtSelector from '@components/CallingAtSelector'
-import CustomAnnouncementPane from '@components/PanelPanes/CustomAnnouncementPane'
+import CustomAnnouncementPane, { ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
 import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
 import { AllStationsTitleValueMap } from '@data/StationManipulators'
+import crsToStationItemMapper from '@helpers/crsToStationItemMapper'
 import { AudioItem, AudioItemObject, CustomAnnouncementTab } from '../../AnnouncementSystem'
 import TrainAnnouncementSystem from '../../TrainAnnouncementSystem'
 
@@ -19,6 +20,35 @@ interface IStoppedAtStationAnnouncementOptions {
 interface IDepartingStationAnnouncementOptions {
   terminatesAtCode: string
   nextStationCode: string
+}
+
+const announcementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {
+  stopped: [
+    {
+      name: 'Haywards Heath to Ore',
+      state: {
+        thisStationCode: 'HHE',
+        terminatesAtCode: 'ORE',
+        callingAtCodes: ['WVF', 'PMP', 'LWS', 'PLG', 'EBN', 'HMD', 'PEB', 'COB', 'CLL', 'BEX', 'SLQ', 'HGS'].map(crsToStationItemMapper),
+      },
+    },
+    {
+      name: 'Preston Park to London Victoria',
+      state: {
+        thisStationCode: 'PRP',
+        terminatesAtCode: 'VIC',
+        callingAtCodes: ['HHE', 'GTW', 'ECR', 'CLJ'].map(crsToStationItemMapper),
+      },
+    },
+    {
+      name: 'Preston Park to Littlehampton',
+      state: {
+        thisStationCode: 'PRP',
+        terminatesAtCode: 'LIT',
+        callingAtCodes: ['HOV', 'PLD', 'SSE', 'LAC', 'WRH', 'WWO', 'DUR', 'GBS', 'ANG'].map(crsToStationItemMapper),
+      },
+    },
+  ],
 }
 
 export default class BombardierXstar extends TrainAnnouncementSystem {
@@ -45,6 +75,9 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
 
     const callingAtCodes = _callingAt.map(stop => stop.crsCode)
 
+    if (!this.validateStationExists(terminatesAtCode)) return
+    if (!this.validateStationExists(thisStationCode)) return
+
     const files: AudioItem[] = []
     files.push('bing bong')
     files.push('this is', `stations.${thisStationCode}`, 'this train is the southern service to', `stations.${terminatesAtCode}`)
@@ -55,7 +88,6 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
     ]
 
     if (callingAtCodes.some(code => !this.validateStationExists(code))) return
-    if (!this.validateStationExists(terminatesAtCode)) return
 
     if (remainingStops.length > 1) {
       // We are not at the termination point.
@@ -105,6 +137,7 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
     'PEB',
     'PLD',
     'PLG',
+    'PMP',
     'PNW',
     'PRP',
     'PUO',
@@ -153,6 +186,7 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
       component: CustomAnnouncementPane,
       props: {
         playHandler: this.playStoppedAtStationAnnouncement.bind(this),
+        presets: announcementPresets.stopped,
         options: {
           thisStationCode: {
             name: 'This station',

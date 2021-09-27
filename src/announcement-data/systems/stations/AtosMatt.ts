@@ -32,7 +32,7 @@ interface IDelayedTrainAnnouncementOptions {
 }
 
 const AVAILABLE_HOURS = ['07', '08', '09', '13']
-const AVAILABLE_MINUTES = ['03', '08', '25', '27', '33', '36', '40', '53', '57']
+const AVAILABLE_MINUTES = ['03', '04', '08', '25', '27', '33', '36', '40', '53', '57']
 const AVAILABLE_TOCS = ['Southern', 'Thameslink']
 const AVAILABLE_NUMBERS = ['4', '5', '6', '7', '8', '10', '12', '13', '14', '21']
 const AVAILABLE_PLATFORMS = {
@@ -40,10 +40,10 @@ const AVAILABLE_PLATFORMS = {
    * Used for the 'stand clear' announcement
    */
   low: ['2'],
-  high: ['2', '3', '4'],
+  high: ['1', '2', '3', '4'],
 }
 const AVAILABLE_STATIONS = {
-  low: ['BDM', 'BOG', 'BTN', 'EBN', 'FOD', 'HOV', 'LBG', 'LIT', 'LWS', 'NRB', 'NWD', 'NXG'],
+  low: ['ANG', 'BDM', 'BOG', 'BTN', 'DUR', 'EBN', 'FOD', 'GBS', 'HOV', 'LBG', 'LIT', 'LWS', 'NRB', 'NWD', 'NXG', 'ORE'],
   high: [
     'AGT',
     'AMY',
@@ -52,15 +52,19 @@ const AVAILABLE_STATIONS = {
     'BAA',
     'BCY',
     'BDM',
+    'BEX',
     'BFR',
     'BIG',
     'BUG',
     'CCH',
     'CHH',
+    'CLL',
+    'COB',
     'CRW',
     'CSA',
     'CTK',
     'DUR',
+    'EBN',
     'EDW',
     'EMS',
     'EWR',
@@ -72,8 +76,10 @@ const AVAILABLE_STATIONS = {
     'GBS',
     'GTW',
     'HAV',
+    'HGS',
     'HHE',
     'HLN',
+    'HMD',
     'HOV',
     'HPA',
     'HPD',
@@ -85,10 +91,14 @@ const AVAILABLE_STATIONS = {
     'LIT',
     'LTN',
     'LUT',
+    'LWS',
     'NDL',
     'NRB',
     'NWD',
+    'PEV',
     'PLD',
+    'PLG',
+    'PMP',
     'PMR',
     'PNW',
     'PRP',
@@ -98,6 +108,7 @@ const AVAILABLE_STATIONS = {
     'SAC',
     'SBM',
     'SBS',
+    'SLQ',
     'SNW',
     'SOB',
     'SOU',
@@ -111,6 +122,7 @@ const AVAILABLE_STATIONS = {
     'TTH',
     'TUH',
     'WRH',
+    'WVF',
     'WWO',
     'ZFD',
   ],
@@ -271,9 +283,8 @@ export default class AtosMatt extends StationAnnouncementSystem {
     files.push('we are sorry that the', ...this.assembleTrainInfo({ ...options, destAllHigh: true }))
 
     if (delayTime === 'unknown') {
-      alert("We can't handle unknown delays yet as we're missing some audio recordings.")
-      return
-      // files.push('is being delayed', 'please listen for further announcements')
+      // TODO: Add missing audio
+      files.push('is delayed' /*, 'please listen for further announcements'*/)
     } else {
       files.push('is delayed by approximately', `numbers.${delayTime}`, 'minutes')
     }

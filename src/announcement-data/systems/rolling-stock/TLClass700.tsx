@@ -25,7 +25,7 @@ interface IInitialDepartureAnnouncementOptions {
   callingAtCodes: { crsCode: string; name: string; randomId: string }[]
 }
 
-const presets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {
+const announcementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {
   stopped: [
     {
       name: 'Burgess Hill to Bedford',
@@ -456,7 +456,7 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
       name: 'Stopped at station',
       component: CustomAnnouncementPane,
       props: {
-        presets: presets.stopped,
+        presets: announcementPresets.stopped,
         playHandler: this.playStoppedAtStationAnnouncement.bind(this),
         options: {
           thisStationCode: {

@@ -31,17 +31,18 @@ interface IDelayedTrainAnnouncementOptions {
   disruptionReason: string
 }
 
-const AVAILABLE_HOURS = ['07', '12', '15']
-const AVAILABLE_MINUTES = ['11', '28', '29', '44', '54']
+const AVAILABLE_HOURS = ['07', '12', '13', '15']
+const AVAILABLE_MINUTES = ['11', '12', '16', '28', '29', '44', '54']
 const AVAILABLE_TOCS = ['Southern', 'Thameslink', 'Arriva Trains Wales']
 const AVAILABLE_NUMBERS = ['2', '10', '12']
 const AVAILABLE_PLATFORMS = {
   /**
    * Used for the 'stand clear' announcement
    */
-  low: ['6'],
+  low: ['3', '6'],
   high: ['1', '3'],
 }
+const AVAILABLE_COACHES = ['8', '10', '12']
 const AVAILABLE_STATIONS = {
   low: ['BDM', 'CAT', 'CBG', 'STP', 'VIC'],
   high: [
@@ -81,7 +82,7 @@ const AVAILABLE_STATIONS = {
     'ZFD',
   ],
 }
-const AVAILABLE_DISRUPTION_REASONS = ['a road vehicle colliding with a bridge earlier today', 'a speed restriction over defective track']
+const AVAILABLE_DISRUPTION_REASONS = []
 
 interface IValidateOptions {
   stationsHigh: string[]
@@ -93,42 +94,24 @@ interface IValidateOptions {
   platformHigh: string
   number: string
   disruptionReason: string
+  coaches: string
 }
 
 const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {
   nextTrain: [
     {
-      name: '07:11 - BTN to CBG',
+      name: '07:11 | Brighton to Cambridge',
       state: {
-        platform: '2',
-        hour: '08',
-        min: '03',
+        platform: '1',
+        hour: '07',
+        min: '11',
         toc: 'thameslink',
-        terminatingStationCode: 'BDM',
+        terminatingStationCode: 'CBG',
         via: 'none',
-        callingAt: [
-          'PRP',
-          'HSK',
-          'BUG',
-          'WVF',
-          'HHE',
-          'TBD',
-          'GTW',
-          'ECR',
-          'LBG',
-          'BFR',
-          'CTK',
-          'ZFD',
-          'STP',
-          'WHP',
-          'SAC',
-          'HPD',
-          'LTN',
-          'LUT',
-          'LEA',
-          'HLN',
-        ].map(crsToStationItemMapper),
-        coaches: '12',
+        callingAt: ['HHE', 'BAB', 'TBD', 'GTW', 'ECR', 'LBG', 'BFR', 'CTK', 'ZFD', 'STP', 'FPK', 'SVG', 'HIT', 'LET', 'BDK', 'RYS'].map(
+          crsToStationItemMapper,
+        ),
+        coaches: '8',
       },
     },
   ],
@@ -198,8 +181,8 @@ export default class AtosAnne extends StationAnnouncementSystem {
     }
 
     // Platforms share the same audio as coach numbers
-    if (!this.validateOptions({ number: options.coaches })) return
-    files.push('this train is formed of', `numbers.${options.coaches}`, 'coaches')
+    if (!this.validateOptions({ coaches: options.coaches })) return
+    files.push('this train is formed of', `coaches.${options.coaches} coaches`)
 
     await this.playAudioFiles(files, download)
   }
@@ -240,7 +223,7 @@ export default class AtosAnne extends StationAnnouncementSystem {
     if (delayTime === 'unknown') {
       alert("We can't handle unknown delays yet as we're missing some audio recordings.")
       return
-      // files.push('is being delayed', 'please listen for further announcements')
+      // files.push('is delayed', 'please listen for further announcements')
     } else {
       files.push('is delayed by approximately', `numbers.${delayTime}`, 'minutes')
     }
@@ -262,6 +245,7 @@ export default class AtosAnne extends StationAnnouncementSystem {
     platformHigh,
     number,
     disruptionReason,
+    coaches,
   }: Partial<IValidateOptions>): boolean {
     if (platformLow && !AVAILABLE_PLATFORMS.low.includes(platformLow)) {
       this.showAudioNotExistsError(`platforms.low.platform ${platformLow}`)
@@ -289,6 +273,11 @@ export default class AtosAnne extends StationAnnouncementSystem {
 
     if (number && !AVAILABLE_NUMBERS.includes(number)) {
       this.showAudioNotExistsError(`numbers.${number}`)
+      return false
+    }
+
+    if (coaches && !AVAILABLE_COACHES.includes(coaches)) {
+      this.showAudioNotExistsError(`coaches.${coaches} coaches`)
       return false
     }
 
@@ -371,8 +360,8 @@ export default class AtosAnne extends StationAnnouncementSystem {
           },
           coaches: {
             name: 'Coach count',
-            default: AVAILABLE_NUMBERS.filter(x => parseInt(x) > 1)[0],
-            options: AVAILABLE_NUMBERS.filter(x => parseInt(x) > 1).map(c => ({ title: c, value: c })),
+            default: AVAILABLE_COACHES[0],
+            options: AVAILABLE_COACHES.map(c => ({ title: c, value: c })),
             type: 'select',
           },
         },

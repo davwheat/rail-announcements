@@ -1,10 +1,11 @@
 import React from 'react'
 import CallingAtSelector from '@components/CallingAtSelector'
-import CustomAnnouncementPane from '@components/PanelPanes/CustomAnnouncementPane'
+import CustomAnnouncementPane, { ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
 import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
 import { AllStationsTitleValueMap } from '@data/StationManipulators'
 import { AudioItem, AudioItemObject, CustomAnnouncementTab } from '../../AnnouncementSystem'
 import TrainAnnouncementSystem from '../../TrainAnnouncementSystem'
+import crsToStationItemMapper from '@helpers/crsToStationItemMapper'
 
 interface IApproachingStationAnnouncementOptions {
   stationCode: string
@@ -22,6 +23,47 @@ interface IStoppedAtStationAnnouncementOptions {
 interface IInitialDepartureAnnouncementOptions {
   terminatesAtCode: string
   callingAtCodes: { crsCode: string; name: string; randomId: string }[]
+}
+
+const presets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {
+  stopped: [
+    {
+      name: 'Burgess Hill to Bedford',
+      state: {
+        thisStationCode: 'BUG',
+        terminatesAtCode: 'BDM',
+        callingAtCodes: [
+          'WVF',
+          'HHE',
+          'TBD',
+          'GTW',
+          'ECR',
+          'LBG',
+          'BFR',
+          'CTK',
+          'ZFD',
+          'STP',
+          'SAC',
+          'HPD',
+          'LTN',
+          'LUT',
+          'LEA',
+          'HLN',
+          'FLT',
+        ].map(crsToStationItemMapper),
+        mindTheGap: true,
+      },
+    },
+    {
+      name: 'Burgess Hill to Brighton',
+      state: {
+        thisStationCode: 'BUG',
+        terminatesAtCode: 'BTN',
+        callingAtCodes: ['HSK', 'PRP'].map(crsToStationItemMapper),
+        mindTheGap: true,
+      },
+    },
+  ],
 }
 
 export default class ThameslinkClass700 extends TrainAnnouncementSystem {
@@ -414,6 +456,7 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
       name: 'Stopped at station',
       component: CustomAnnouncementPane,
       props: {
+        presets: presets.stopped,
         playHandler: this.playStoppedAtStationAnnouncement.bind(this),
         options: {
           thisStationCode: {

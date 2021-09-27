@@ -105,6 +105,7 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
     'PEB',
     'PLD',
     'PLG',
+    'PMP',
     'PNW',
     'PRP',
     'PUO',

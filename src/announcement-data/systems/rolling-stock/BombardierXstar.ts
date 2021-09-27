@@ -21,8 +21,8 @@ interface IDepartingStationAnnouncementOptions {
   nextStationCode: string
 }
 
-export default class SouthernClass377 extends TrainAnnouncementSystem {
-  readonly NAME = 'Southern Class 377'
+export default class BombardierXstar extends TrainAnnouncementSystem {
+  readonly NAME = 'Electrostar & Turbostar - Julie Berry'
   readonly ID = 'SN_CLASS_377_V1'
   readonly FILE_PREFIX = 'SN/377'
   readonly SYSTEM_TYPE = 'train'

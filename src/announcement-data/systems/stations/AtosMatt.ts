@@ -127,7 +127,13 @@ const AVAILABLE_STATIONS = {
     'ZFD',
   ],
 }
-const AVAILABLE_DISRUPTION_REASONS = ['a road vehicle colliding with a bridge earlier today', 'a speed restriction over defective track']
+const AVAILABLE_DISRUPTION_REASONS = [
+  'a road vehicle colliding with a bridge earlier today',
+  'a speed restriction over defective track',
+  'a late running train being in front of this one',
+  'a shortage of train crew',
+  'a fault with the signalling system earlier today',
+].sort()
 
 interface IValidateOptions {
   stationsHigh: string[]

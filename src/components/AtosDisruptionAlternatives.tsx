@@ -3,9 +3,8 @@ import React from 'react'
 import { makeStyles } from '@material-ui/styles'
 
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd'
-import createOptionField from '@helpers/createOptionField'
 import { nanoid } from 'nanoid'
-import { AllStationsTitleValueMap, getStationByCrs } from '@data/StationManipulators'
+import { getStationByCrs } from '@data/StationManipulators'
 
 const useStyles = makeStyles({
   root: {

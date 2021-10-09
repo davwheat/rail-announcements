@@ -107,6 +107,7 @@ function CustomAnnouncementPane({ options, playHandler, name, presets }: ICustom
           <div className={classes.presetButtonList}>
             {presets.map(preset => (
               <button
+                key={preset.name}
                 disabled={isDisabled}
                 onClick={() => {
                   setOptionsState(preset.state)

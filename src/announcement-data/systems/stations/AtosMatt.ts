@@ -5,6 +5,8 @@ import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
 import { AllStationsTitleValueMap } from '@data/StationManipulators'
 import { AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
 import crsToStationItemMapper from '@helpers/crsToStationItemMapper'
+import AtosDisruptionAlternatives, { IAlternativeServicesState } from '@components/AtosDisruptionAlternatives'
+import { nanoid } from 'nanoid'
 
 interface INextTrainAnnouncementOptions {
   platform: string
@@ -29,6 +31,7 @@ interface IDelayedTrainAnnouncementOptions {
   via: string | 'none'
   delayTime: string
   disruptionReason: string
+  alternativeServices: IAlternativeServicesState
 }
 
 const AVAILABLE_HOURS = ['07', '08', '09', '13']
@@ -127,7 +130,13 @@ const AVAILABLE_STATIONS = {
     'ZFD',
   ],
 }
-const AVAILABLE_DISRUPTION_REASONS = ['a road vehicle colliding with a bridge earlier today', 'a speed restriction over defective track']
+const AVAILABLE_DISRUPTION_REASONS = [
+  'a road vehicle colliding with a bridge earlier today',
+  'a speed restriction over defective track',
+  'a late running train being in front of this one',
+  'a shortage of train crew',
+  'a fault with the signalling system earlier today',
+].sort()
 
 interface IValidateOptions {
   stationsHigh: string[]
@@ -175,6 +184,55 @@ const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>>
           'HLN',
         ].map(crsToStationItemMapper),
         coaches: '12',
+      },
+    },
+  ],
+  delayedTrain: [
+    {
+      name: '07:36 - BTN - +21 mins (signalling)',
+      state: {
+        hour: '07',
+        min: '36',
+        toc: 'thameslink',
+        terminatingStationCode: 'BTN',
+        via: 'none',
+        delayTime: '21',
+        disruptionReason: 'a fault with the signalling system earlier today',
+        alternativeServices: [
+          {
+            randomId: nanoid(),
+            passengersFor: ['WVF'].map(crsToStationItemMapper),
+            service: {
+              hour: '07',
+              minute: '33',
+              terminatingCrs: 'EBN',
+              via: 'LWS',
+              platform: '2',
+            },
+          },
+          {
+            randomId: nanoid(),
+            passengersFor: ['BUG', 'PRP'].map(crsToStationItemMapper),
+            service: {
+              hour: '07',
+              minute: '40',
+              terminatingCrs: 'LIT',
+              via: 'HOV',
+              platform: '2',
+            },
+          },
+          {
+            randomId: nanoid(),
+            passengersFor: ['HSK'].map(crsToStationItemMapper),
+            service: {
+              hour: '07',
+              minute: '57',
+              terminatingCrs: 'BTN',
+              via: 'none',
+              platform: '2',
+            },
+          },
+        ],
       },
     },
   ],
@@ -280,7 +338,7 @@ export default class AtosMatt extends StationAnnouncementSystem {
     )
       return
 
-    files.push('we are sorry that the', ...this.assembleTrainInfo({ ...options, destAllHigh: true }))
+    files.push('we are sorry that the', ...this.assembleTrainInfo({ ...options }))
 
     if (delayTime === 'unknown') {
       // TODO: Add missing audio
@@ -291,6 +349,41 @@ export default class AtosMatt extends StationAnnouncementSystem {
 
     if (disruptionReason !== 'unknown') {
       files.push('this is due to', `disruption-reasons.${disruptionReason}`)
+    }
+
+    if (options.alternativeServices.length > 0) {
+      options.alternativeServices.forEach(alternativeService => {
+        const { hour, minute, platform, terminatingCrs, via } = alternativeService.service
+
+        if (
+          !this.validateOptions({
+            hour,
+            minute,
+            platformLow: platform,
+            stationsHigh: alternativeService.passengersFor.map(stop => stop.crsCode),
+          })
+        )
+          return
+
+        files.push(
+          { id: 'passengers for', opts: { delayStart: 750 } },
+          ...this.pluraliseAudio(alternativeService.passengersFor.map(stop => `stations.high.${stop.crsCode}`)),
+          'your next fastest direct service is now expected to be the',
+          `times.hour.${hour}`,
+          `times.mins.${minute}`,
+          'to',
+        )
+
+        if (via !== 'none') {
+          if (!this.validateOptions({ stationsHigh: [terminatingCrs], stationsLow: [via] })) return
+          files.push(`stations.high.${terminatingCrs}`, 'via', `stations.low.${via}`)
+        } else {
+          if (!this.validateOptions({ stationsLow: [terminatingCrs] })) return
+          files.push(`stations.low.${terminatingCrs}`)
+        }
+
+        files.push('departing from', `platforms.low.platform ${platform}`)
+      })
     }
 
     await this.playAudioFiles(files, download)
@@ -442,6 +535,7 @@ export default class AtosMatt extends StationAnnouncementSystem {
       component: CustomAnnouncementPane,
       props: {
         playHandler: this.playDelayedTrainAnnouncement.bind(this),
+        presets: AnnouncementPresets.delayedTrain,
         options: {
           hour: {
             name: 'Hour',
@@ -463,14 +557,14 @@ export default class AtosMatt extends StationAnnouncementSystem {
           },
           terminatingStationCode: {
             name: 'Terminating station',
-            default: AVAILABLE_STATIONS.high[0],
-            options: AllStationsTitleValueMap.filter(s => AVAILABLE_STATIONS.high.includes(s.value)),
+            default: AVAILABLE_STATIONS.low[0],
+            options: AllStationsTitleValueMap.filter(s => AVAILABLE_STATIONS.low.includes(s.value)),
             type: 'select',
           },
           via: {
             name: 'Via... (optional)',
             default: 'none',
-            options: [{ title: 'NONE', value: 'none' }, ...AllStationsTitleValueMap.filter(s => AVAILABLE_STATIONS.high.includes(s.value))],
+            options: [{ title: 'NONE', value: 'none' }, ...AllStationsTitleValueMap.filter(s => AVAILABLE_STATIONS.low.includes(s.value))],
             type: 'select',
           },
           delayTime: {
@@ -484,6 +578,18 @@ export default class AtosMatt extends StationAnnouncementSystem {
             default: 'unknown',
             options: [{ title: 'Unknown', value: 'unknown' }, ...AVAILABLE_DISRUPTION_REASONS.map(h => ({ title: h, value: h.toLowerCase() }))],
             type: 'select',
+          },
+          alternativeServices: {
+            name: '',
+            type: 'custom',
+            component: AtosDisruptionAlternatives,
+            props: {
+              availableStations: AVAILABLE_STATIONS,
+              hours: AVAILABLE_HOURS,
+              mins: AVAILABLE_MINUTES,
+              platforms: AVAILABLE_PLATFORMS,
+            },
+            default: [],
           },
         },
       },

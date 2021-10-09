@@ -6,7 +6,7 @@ interface OptionFieldOptions {
   onChange: (value: any) => void
   value: any
   key: string
-  activeState: Record<string, unknown>
+  activeState?: Record<string, unknown>
 }
 
 export default function createOptionField(optionData: OptionsExplanation, options: OptionFieldOptions): JSX.Element {

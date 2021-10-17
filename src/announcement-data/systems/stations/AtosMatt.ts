@@ -110,7 +110,7 @@ const AVAILABLE_STATIONS = {
     'QRP',
     'SAC',
     'SBM',
-    'SBS',
+    'SSE',
     'SLQ',
     'SNW',
     'SOB',

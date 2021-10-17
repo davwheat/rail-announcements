@@ -1,3 +1,5 @@
+import React from 'react'
+
 import StationAnnouncementSystem from '@announcement-data/StationAnnouncementSystem'
 import CallingAtSelector from '@components/CallingAtSelector'
 import CustomAnnouncementPane, { ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
@@ -31,6 +33,8 @@ interface IDelayedTrainAnnouncementOptions {
   via: string | 'none'
   delayTime: string
   disruptionReason: string
+  disruptionType: 'delayed' | 'cancelled'
+  platform: string
   alternativeServices: IAlternativeServicesState
 }
 
@@ -110,7 +114,7 @@ const AVAILABLE_STATIONS = {
     'QRP',
     'SAC',
     'SBM',
-    'SBS',
+    'SSE',
     'SLQ',
     'SNW',
     'SOB',
@@ -153,51 +157,32 @@ interface IValidateOptions {
 const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {
   nextTrain: [
     {
-      name: '08:03 - BTN to BDM',
+      name: '08:03 - HHE to LIT',
       state: {
-        platform: '2',
-        hour: '08',
-        min: '03',
-        toc: 'thameslink',
-        terminatingStationCode: 'BDM',
-        via: 'none',
-        callingAt: [
-          'PRP',
-          'HSK',
-          'BUG',
-          'WVF',
-          'HHE',
-          'TBD',
-          'GTW',
-          'ECR',
-          'LBG',
-          'BFR',
-          'CTK',
-          'ZFD',
-          'STP',
-          'WHP',
-          'SAC',
-          'HPD',
-          'LTN',
-          'LUT',
-          'LEA',
-          'HLN',
-        ].map(crsToStationItemMapper),
-        coaches: '12',
+        platform: '1',
+        hour: '13',
+        min: '57',
+        toc: 'southern',
+        terminatingStationCode: 'LIT',
+        via: 'HOV',
+        callingAt: ['BUG', 'HSK', 'PRP', 'HOV', 'PLD', 'SSE', 'LAC', 'WRH', 'WWO', 'DUR', 'GBS', 'ANG'].map(crsToStationItemMapper),
+        coaches: '8',
       },
     },
   ],
-  delayedTrain: [
+  disruptedTrain: [
     {
-      name: '07:36 - BTN - +21 mins (signalling)',
+      name: '07:36 to BTN delay +21m',
       state: {
         hour: '07',
         min: '36',
         toc: 'thameslink',
         terminatingStationCode: 'BTN',
         via: 'none',
+        disruptionType: 'delayed',
         delayTime: '21',
         disruptionReason: 'a fault with the signalling system earlier today',
+        platform: '2',
         alternativeServices: [
           {
             randomId: nanoid(),
@@ -323,8 +308,8 @@ export default class AtosMatt extends StationAnnouncementSystem {
     await this.playAudioFiles(files, download)
   }
 
-  private async playDelayedTrainAnnouncement(options: IDelayedTrainAnnouncementOptions, download: boolean = false): Promise<void> {
-    const { delayTime, disruptionReason } = options
+  private async playDisruptedTrainAnnouncement(options: IDelayedTrainAnnouncementOptions, download: boolean = false): Promise<void> {
+    const { delayTime, disruptionReason, disruptionType, platform } = options
     const files: AudioItem[] = []
 
     if (
@@ -334,24 +319,37 @@ export default class AtosMatt extends StationAnnouncementSystem {
         toc: options.toc,
         number: delayTime !== 'unknown' ? delayTime : undefined,
         disruptionReason: disruptionReason !== 'unknown' ? disruptionReason : undefined,
+        platformLow: platform,
       })
     )
       return
 
-    files.push('we are sorry that the', ...this.assembleTrainInfo({ ...options }))
+    if (disruptionType === 'cancelled') {
+      files.push('may i have your attention please on', `platforms.low.platform ${platform}`)
+    }
 
-    if (delayTime === 'unknown') {
-      // TODO: Add missing audio
-      files.push('is delayed' /*, 'please listen for further announcements'*/)
-    } else {
-      files.push('is delayed by approximately', `numbers.${delayTime}`, 'minutes')
+    files.push(
+      disruptionReason === 'delayed' ? 'we are sorry that the' : 'we are sorry to announce that the',
+      ...this.assembleTrainInfo({ ...options }),
+    )
+
+    if (disruptionType === 'delayed') {
+      if (delayTime === 'unknown') {
+        // TODO: Add missing audio
+        files.push('is delayed' /*, 'please listen for further announcements'*/)
+      } else {
+        files.push('is delayed by approximately', `numbers.${delayTime}`, 'minutes')
+      }
+    } else if (disruptionType === 'cancelled') {
+      files.push('has been cancelled')
     }
 
     if (disruptionReason !== 'unknown') {
-      files.push('this is due to', `disruption-reasons.${disruptionReason}`)
+      files.push({ id: 'this is due to', opts: { delayStart: 250 } }, `disruption-reasons.${disruptionReason}`)
     }
 
-    if (options.alternativeServices.length > 0) {
+    // Only play if delay time is known or is cancelled, else the faster alternate services are not actually known
+    if ((delayTime !== 'unknown' || disruptionType === 'cancelled') && options.alternativeServices.length > 0) {
       options.alternativeServices.forEach(alternativeService => {
         const { hour, minute, platform, terminatingCrs, via } = alternativeService.service
 
@@ -366,7 +364,7 @@ export default class AtosMatt extends StationAnnouncementSystem {
           return
 
         files.push(
-          { id: 'passengers for', opts: { delayStart: 750 } },
+          { id: 'passengers for', opts: { delayStart: 400 } },
           ...this.pluraliseAudio(alternativeService.passengersFor.map(stop => `stations.high.${stop.crsCode}`)),
           'your next fastest direct service is now expected to be the',
           `times.hour.${hour}`,
@@ -530,12 +528,12 @@ export default class AtosMatt extends StationAnnouncementSystem {
         },
       },
     },
-    delayedTrain: {
-      name: 'Delayed train',
+    disruptedTrain: {
+      name: 'Delayed/cancelled train',
       component: CustomAnnouncementPane,
       props: {
-        playHandler: this.playDelayedTrainAnnouncement.bind(this),
-        presets: AnnouncementPresets.delayedTrain,
+        playHandler: this.playDisruptedTrainAnnouncement.bind(this),
+        presets: AnnouncementPresets.disruptedTrain,
         options: {
           hour: {
             name: 'Hour',
@@ -567,11 +565,107 @@ export default class AtosMatt extends StationAnnouncementSystem {
             options: [{ title: 'NONE', value: 'none' }, ...AllStationsTitleValueMap.filter(s => AVAILABLE_STATIONS.low.includes(s.value))],
             type: 'select',
           },
+          disruptionType: {
+            name: '',
+            type: 'custom',
+            default: 'delayed',
+            component: ({ value, onChange }) => {
+              return (
+                <fieldset>
+                  <legend>Disruption type</legend>
+                  <input
+                    type="radio"
+                    id="disruptionTypeDelay"
+                    checked={value === 'delayed'}
+                    name="disruptionType"
+                    onChange={e => {
+                      if (e.target.checked) {
+                        onChange('delayed')
+                      }
+                    }}
+                  />
+                  <label htmlFor="disruptionTypeDelay">Delay</label>
+                  <input
+                    type="radio"
+                    id="disruptionTypeCancel"
+                    checked={value === 'cancelled'}
+                    name="disruptionType"
+                    onChange={e => {
+                      if (e.target.checked) {
+                        onChange('cancelled')
+                      }
+                    }}
+                  />
+                  <label htmlFor="disruptionTypeCancel">Cancelled</label>
+                </fieldset>
+              )
+            },
+            props: {},
+          },
           delayTime: {
-            name: 'Delay time',
-            default: AVAILABLE_NUMBERS[0],
-            options: [{ title: 'Unknown', value: 'unknown' }, ...AVAILABLE_NUMBERS.map(h => ({ title: `${h} minute(s)`, value: h }))],
-            type: 'select',
+            name: '',
+            type: 'custom',
+            default: 'unknown',
+            component: ({ activeState, value, onChange, availableDelayTimes }) => {
+              if (activeState.disruptionType !== 'delayed') {
+                return null
+              }
+
+              return (
+                <label>
+                  Delay time
+                  <select
+                    value={value.delayTime}
+                    onChange={e => {
+                      onChange({ ...value, delayTime: e.target.value })
+                    }}
+                  >
+                    {availableDelayTimes.map(d => (
+                      <option key={d.value} value={d.value}>
+                        {d.title}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )
+            },
+            props: {
+              availableDelayTimes: [
+                { title: 'Unknown', value: 'unknown' },
+                ...AVAILABLE_NUMBERS.map(h => ({ title: `${h} minute(s)`, value: h })),
+              ],
+            },
+          },
+          platform: {
+            name: '',
+            type: 'custom',
+            default: AVAILABLE_PLATFORMS.high[0],
+            component: ({ activeState, value, onChange, availablePlatforms }) => {
+              if (activeState.disruptionType !== 'cancelled') {
+                return null
+              }
+
+              return (
+                <label>
+                  Platform
+                  <select
+                    value={value.delayTime}
+                    onChange={e => {
+                      onChange({ ...value, platform: e.target.value })
+                    }}
+                  >
+                    {availablePlatforms.map(d => (
+                      <option key={d.value} value={d.value}>
+                        {d.title}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )
+            },
+            props: {
+              availablePlatforms: AVAILABLE_PLATFORMS.low.map(p => ({ title: `Platform ${p}`, value: p })),
+            },
           },
           disruptionReason: {
             name: 'Delay reason',

@@ -198,14 +198,7 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
     const files: AudioItem[] = []
 
     if (!this.validateStationExists(terminatesAtCode, 'low')) return
-    files.push(
-      'welcome aboard this service to',
-      { id: `stations.low.${terminatesAtCode}`, opts: { delayStart: 250 } },
-      {
-        id: `safety information is provided on posters in every carriage`,
-        opts: { delayStart: 2000 },
-      },
-    )
+    files.push('welcome aboard this service to', { id: `stations.low.${terminatesAtCode}`, opts: { delayStart: 250 } })
 
     if (callingAtCodes.length === 0) {
       if (!this.validateStationExists(terminatesAtCode, 'high')) return
@@ -235,6 +228,11 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
         ),
       )
     }
+
+    files.push({
+      id: `safety information is provided on posters in every carriage`,
+      opts: { delayStart: 2000 },
+    })
 
     await this.playAudioFiles(files, download)
   }

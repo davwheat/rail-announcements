@@ -346,7 +346,7 @@ export default class AtosMatt extends StationAnnouncementSystem {
           return
 
         files.push(
-          { id: 'passengers for', opts: { delayStart: 750 } },
+          { id: 'passengers for', opts: { delayStart: 400 } },
           ...this.pluraliseAudio(alternativeService.passengersFor.map(stop => `stations.high.${stop.crsCode}`)),
           'your next fastest direct service is now expected to be the',
           `times.hour.${hour}`,

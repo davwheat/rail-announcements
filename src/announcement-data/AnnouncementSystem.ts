@@ -46,7 +46,7 @@ interface INumberOptions {
 interface ICustomOptions {
   name: string
   type: 'custom'
-  component: (props: { onChange: (newVal: any) => void; value: any; [key: string]: any }) => JSX.Element
+  component: (props: { activeState?: Record<string, unknown>; onChange: (newVal: any) => void; value: any; [key: string]: any }) => JSX.Element
   props?: Record<string, unknown>
   default: any
 }

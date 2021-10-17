@@ -56,7 +56,9 @@ export default function createOptionField(optionData: OptionsExplanation, option
 
     case 'custom':
       const Component = optionData.component
-      return <Component key={options.key} onChange={options.onChange} value={options.value} {...optionData.props} />
+      return (
+        <Component key={options.key} onChange={options.onChange} value={options.value} activeState={options.activeState} {...optionData.props} />
+      )
 
     case 'customNoState':
       const Component2 = optionData.component

@@ -330,7 +330,8 @@ export default class AtosMatt extends StationAnnouncementSystem {
       files.push('this is due to', `disruption-reasons.${disruptionReason}`)
     }
 
-    if (options.alternativeServices.length > 0) {
+    // Only play if delay time is known, else the faster alternate services are not really known
+    if (delayTime !== 'unknown' && options.alternativeServices.length > 0) {
       options.alternativeServices.forEach(alternativeService => {
         const { hour, minute, platform, terminatingCrs, via } = alternativeService.service
 

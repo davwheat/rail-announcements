@@ -319,12 +319,18 @@ export default class AtosMatt extends StationAnnouncementSystem {
         toc: options.toc,
         number: delayTime !== 'unknown' ? delayTime : undefined,
         disruptionReason: disruptionReason !== 'unknown' ? disruptionReason : undefined,
-        platformLow: platform,
       })
     )
       return
 
     if (disruptionType === 'cancelled') {
+      if (
+        !this.validateOptions({
+          platformLow: platform,
+        })
+      )
+        return
+
       files.push('may i have your attention please on', `platforms.low.platform ${platform}`)
     }
 
@@ -639,7 +645,7 @@ export default class AtosMatt extends StationAnnouncementSystem {
           platform: {
             name: '',
             type: 'custom',
-            default: AVAILABLE_PLATFORMS.high[0],
+            default: AVAILABLE_PLATFORMS.low[0],
             component: ({ activeState, value, onChange, availablePlatforms }) => {
               if (activeState.disruptionType !== 'cancelled') {
                 return null
@@ -649,7 +655,7 @@ export default class AtosMatt extends StationAnnouncementSystem {
                 <label>
                   Platform
                   <select
-                    value={value.delayTime}
+                    value={value.platform}
                     onChange={e => {
                       onChange({ ...value, platform: e.target.value })
                     }}

@@ -257,7 +257,7 @@ export default class AtosAnne extends StationAnnouncementSystem {
       files.push({ id: 'this is due to', opts: { delayStart: 250 } }, `disruption-reasons.${disruptionReason}`)
     }
 
-    if (delayTime === 'unknown') {
+    if (disruptionType === 'delayed' && delayTime === 'unknown') {
       files.push('please listen for further announcements')
     }
 
@@ -542,7 +542,7 @@ export default class AtosAnne extends StationAnnouncementSystem {
                 <label>
                   Delay time
                   <select
-                    value={value.delayTime}
+                    value={value}
                     onChange={e => {
                       onChange({ ...value, delayTime: e.target.value })
                     }}
@@ -576,7 +576,7 @@ export default class AtosAnne extends StationAnnouncementSystem {
                 <label>
                   Platform
                   <select
-                    value={value.platform}
+                    value={value}
                     onChange={e => {
                       onChange({ ...value, platform: e.target.value })
                     }}

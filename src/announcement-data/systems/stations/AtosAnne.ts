@@ -32,7 +32,7 @@ interface IDelayedTrainAnnouncementOptions {
 }
 
 const AVAILABLE_HOURS = ['07', '12', '13', '15']
-const AVAILABLE_MINUTES = ['11', '12', '16', '28', '29', '44', '54']
+const AVAILABLE_MINUTES = ['11', '12', '16', '28', '29', '44', '53', '54']
 const AVAILABLE_TOCS = ['Southern', 'Thameslink', 'Arriva Trains Wales']
 const AVAILABLE_NUMBERS = ['2', '10', '12']
 const AVAILABLE_PLATFORMS = {
@@ -62,6 +62,7 @@ const AVAILABLE_STATIONS = {
     'HIT',
     'HLN',
     'HPD',
+    'HRH',
     'KLY',
     'LBG',
     'LEA',
@@ -196,7 +197,7 @@ export default class AtosAnne extends StationAnnouncementSystem {
       'the train now approaching',
       `platforms.high.platform ${options.platform}`,
       'does not stop here',
-      'please stand well clear of the edge of',
+      { id: 'please stand well clear of the edge of', opts: { delayStart: 400 } },
       `platforms.low.platform ${options.platform}`,
     )
 
@@ -367,21 +368,21 @@ export default class AtosAnne extends StationAnnouncementSystem {
         },
       },
     },
-    // fastTrain: {
-    //   name: 'Fast train',
-    //   component: CustomAnnouncementPane,
-    //   props: {
-    //     playHandler: this.playThroughTrainAnnouncement.bind(this),
-    //     options: {
-    //       platform: {
-    //         name: 'Platform',
-    //         default: AVAILABLE_PLATFORMS.low.filter(x => AVAILABLE_PLATFORMS.high.includes(x))[0],
-    //         options: AVAILABLE_PLATFORMS.low.filter(x => AVAILABLE_PLATFORMS.high.includes(x)).map(p => ({ title: `Platform ${p}`, value: p })),
-    //         type: 'select',
-    //       },
-    //     },
-    //   },
-    // },
+    fastTrain: {
+      name: 'Fast train',
+      component: CustomAnnouncementPane,
+      props: {
+        playHandler: this.playThroughTrainAnnouncement.bind(this),
+        options: {
+          platform: {
+            name: 'Platform',
+            default: AVAILABLE_PLATFORMS.low.filter(x => AVAILABLE_PLATFORMS.high.includes(x))[0],
+            options: AVAILABLE_PLATFORMS.low.filter(x => AVAILABLE_PLATFORMS.high.includes(x)).map(p => ({ title: `Platform ${p}`, value: p })),
+            type: 'select',
+          },
+        },
+      },
+    },
     // delayedTrain: {
     //   name: 'Delayed train',
     //   component: CustomAnnouncementPane,

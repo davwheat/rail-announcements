@@ -220,6 +220,71 @@ const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>>
         ],
       },
     },
+    {
+      name: '16:38 to BTN delay +61m',
+      state: {
+        hour: '16',
+        min: '38',
+        toc: 'thameslink',
+        terminatingStationCode: 'BTN',
+        via: 'none',
+        disruptionType: 'delayed',
+        delayTime: '61',
+        disruptionReason: 'emergency services dealing with an incident near the railway',
+        platform: '1',
+        alternativeServices: [
+          {
+            randomId: nanoid(),
+            passengersFor: ['BUG'].map(crsToStationItemMapper),
+            service: {
+              hour: '16',
+              minute: '21',
+              terminatingCrs: 'BTN',
+              via: 'none',
+              platform: '2',
+            },
+          },
+        ],
+      },
+    },
+    {
+      name: '08:33 to LIT cancelled',
+      state: {
+        hour: '08',
+        min: '33',
+        toc: 'southern',
+        terminatingStationCode: 'LIT',
+        via: 'HOV',
+        disruptionType: 'cancelled',
+        delayTime: 'unknown',
+        disruptionReason: 'a road vehicle colliding with a bridge earlier today',
+        platform: '2',
+        alternativeServices: [
+          {
+            randomId: nanoid(),
+            passengersFor: ['BUG', 'HSK'].map(crsToStationItemMapper),
+            service: {
+              hour: '08',
+              minute: '36',
+              terminatingCrs: 'BTN',
+              via: 'none',
+              platform: '2',
+            },
+          },
+          {
+            randomId: nanoid(),
+            passengersFor: ['HOV', 'PLD', 'SSE', 'LAC', 'WRH', 'WWO', 'DUR', 'GBS', 'ANG'].map(crsToStationItemMapper),
+            service: {
+              hour: '09',
+              minute: '33',
+              terminatingCrs: 'LIT',
+              via: 'HOV',
+              platform: '2',
+            },
+          },
+        ],
+      },
+    },
   ],
 }
 

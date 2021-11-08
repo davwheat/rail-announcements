@@ -38,14 +38,11 @@ interface IDelayedTrainAnnouncementOptions {
   alternativeServices: IAlternativeServicesState
 }
 
-const AVAILABLE_HOURS = ['07', '08', '09', '13']
-const AVAILABLE_MINUTES = ['03', '04', '08', '25', '27', '33', '36', '40', '53', '57']
+const AVAILABLE_HOURS = ['07', '08', '09', '13', '16']
+const AVAILABLE_MINUTES = ['03', '04', '08', '21', '25', '27', '33', '36', '38', '40', '53', '57']
 const AVAILABLE_TOCS = ['Southern', 'Thameslink']
-const AVAILABLE_NUMBERS = ['4', '5', '6', '7', '8', '10', '12', '13', '14', '21']
+const AVAILABLE_NUMBERS = ['4', '5', '6', '7', '8', '10', '12', '13', '14', '21', '41', '45', '53', '55', '61']
 const AVAILABLE_PLATFORMS = {
-  /**
-   * Used for the 'stand clear' announcement
-   */
   low: ['2'],
   high: ['1', '2', '3', '4'],
 }
@@ -112,6 +109,7 @@ const AVAILABLE_STATIONS = {
     'PTC',
     'PUL',
     'QRP',
+    'RDH',
     'SAC',
     'SBM',
     'SSE',
@@ -140,6 +138,8 @@ const AVAILABLE_DISRUPTION_REASONS = [
   'a late running train being in front of this one',
   'a shortage of train crew',
   'a fault with the signalling system earlier today',
+  'the emergency services dealing with an incident',
+  'emergency services dealing with an incident near the railway',
 ].sort()
 
 interface IValidateOptions {
@@ -214,6 +214,71 @@ const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>>
               minute: '57',
               terminatingCrs: 'BTN',
               via: 'none',
+              platform: '2',
+            },
+          },
+        ],
+      },
+    },
+    {
+      name: '16:38 to BTN delay +61m',
+      state: {
+        hour: '16',
+        min: '38',
+        toc: 'thameslink',
+        terminatingStationCode: 'BTN',
+        via: 'none',
+        disruptionType: 'delayed',
+        delayTime: '61',
+        disruptionReason: 'emergency services dealing with an incident near the railway',
+        platform: '1',
+        alternativeServices: [
+          {
+            randomId: nanoid(),
+            passengersFor: ['BUG'].map(crsToStationItemMapper),
+            service: {
+              hour: '16',
+              minute: '21',
+              terminatingCrs: 'BTN',
+              via: 'none',
+              platform: '2',
+            },
+          },
+        ],
+      },
+    },
+    {
+      name: '08:33 to LIT cancelled',
+      state: {
+        hour: '08',
+        min: '33',
+        toc: 'southern',
+        terminatingStationCode: 'LIT',
+        via: 'HOV',
+        disruptionType: 'cancelled',
+        delayTime: 'unknown',
+        disruptionReason: 'a road vehicle colliding with a bridge earlier today',
+        platform: '2',
+        alternativeServices: [
+          {
+            randomId: nanoid(),
+            passengersFor: ['BUG', 'HSK'].map(crsToStationItemMapper),
+            service: {
+              hour: '08',
+              minute: '36',
+              terminatingCrs: 'BTN',
+              via: 'none',
+              platform: '2',
+            },
+          },
+          {
+            randomId: nanoid(),
+            passengersFor: ['HOV', 'PLD', 'SSE', 'LAC', 'WRH', 'WWO', 'DUR', 'GBS', 'ANG'].map(crsToStationItemMapper),
+            service: {
+              hour: '09',
+              minute: '33',
+              terminatingCrs: 'LIT',
+              via: 'HOV',
               platform: '2',
             },
           },
@@ -335,14 +400,13 @@ export default class AtosMatt extends StationAnnouncementSystem {
     }
 
     files.push(
-      disruptionReason === 'delayed' ? 'we are sorry that the' : 'we are sorry to announce that the',
+      disruptionType === 'delayed' ? 'we are sorry that the' : 'we are sorry to announce that the',
       ...this.assembleTrainInfo({ ...options }),
     )
 
     if (disruptionType === 'delayed') {
       if (delayTime === 'unknown') {
-        // TODO: Add missing audio
-        files.push('is delayed' /*, 'please listen for further announcements'*/)
+        files.push('is delayed')
       } else {
         files.push('is delayed by approximately', `numbers.${delayTime}`, 'minutes')
       }
@@ -352,6 +416,10 @@ export default class AtosMatt extends StationAnnouncementSystem {
 
     if (disruptionReason !== 'unknown') {
       files.push({ id: 'this is due to', opts: { delayStart: 250 } }, `disruption-reasons.${disruptionReason}`)
+    }
+
+    if (disruptionType === 'delayed' && delayTime === 'unknown') {
+      files.push('please listen for further announcements')
     }
 
     // Only play if delay time is known or is cancelled, else the faster alternate services are not actually known
@@ -621,8 +689,10 @@ export default class AtosMatt extends StationAnnouncementSystem {
                 <label>
                   Delay time
                   <select
-                    value={value.delayTime}
+                    value={value}
                     onChange={e => {
+                      console.log(e.target.value)
+
                       onChange({ ...value, delayTime: e.target.value })
                     }}
                   >
@@ -655,7 +725,7 @@ export default class AtosMatt extends StationAnnouncementSystem {
                 <label>
                   Platform
                   <select
-                    value={value.platform}
+                    value={value}
                     onChange={e => {
                       onChange({ ...value, platform: e.target.value })
                     }}

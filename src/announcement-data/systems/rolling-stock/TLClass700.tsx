@@ -332,11 +332,13 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
       'ZFD',
     ],
     low: [
+      'BAB',
       'BDM',
       'BFR',
       'BTN',
       'BUG',
       'CBG',
+      'CRW',
       'CTK',
       'DMK',
       'ELD',

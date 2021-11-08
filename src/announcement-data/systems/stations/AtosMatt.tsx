@@ -38,14 +38,11 @@ interface IDelayedTrainAnnouncementOptions {
   alternativeServices: IAlternativeServicesState
 }
 
-const AVAILABLE_HOURS = ['07', '08', '09', '13']
-const AVAILABLE_MINUTES = ['03', '04', '08', '25', '27', '33', '36', '40', '53', '57']
+const AVAILABLE_HOURS = ['07', '08', '09', '13', '16']
+const AVAILABLE_MINUTES = ['03', '04', '08', '21', '25', '27', '33', '36', '38', '40', '53', '57']
 const AVAILABLE_TOCS = ['Southern', 'Thameslink']
-const AVAILABLE_NUMBERS = ['4', '5', '6', '7', '8', '10', '12', '13', '14', '21']
+const AVAILABLE_NUMBERS = ['4', '5', '6', '7', '8', '10', '12', '13', '14', '21', '41', '45', '53', '55', '61']
 const AVAILABLE_PLATFORMS = {
-  /**
-   * Used for the 'stand clear' announcement
-   */
   low: ['2'],
   high: ['1', '2', '3', '4'],
 }
@@ -112,6 +109,7 @@ const AVAILABLE_STATIONS = {
     'PTC',
     'PUL',
     'QRP',
+    'RDH',
     'SAC',
     'SBM',
     'SSE',
@@ -140,6 +138,8 @@ const AVAILABLE_DISRUPTION_REASONS = [
   'a late running train being in front of this one',
   'a shortage of train crew',
   'a fault with the signalling system earlier today',
+  'the emergency services dealing with an incident',
+  'emergency services dealing with an incident near the railway',
 ].sort()
 
 interface IValidateOptions {
@@ -335,14 +335,13 @@ export default class AtosMatt extends StationAnnouncementSystem {
     }
 
     files.push(
-      disruptionReason === 'delayed' ? 'we are sorry that the' : 'we are sorry to announce that the',
+      disruptionType === 'delayed' ? 'we are sorry that the' : 'we are sorry to announce that the',
       ...this.assembleTrainInfo({ ...options }),
     )
 
     if (disruptionType === 'delayed') {
       if (delayTime === 'unknown') {
-        // TODO: Add missing audio
-        files.push('is delayed' /*, 'please listen for further announcements'*/)
+        files.push('is delayed')
       } else {
         files.push('is delayed by approximately', `numbers.${delayTime}`, 'minutes')
       }
@@ -352,6 +351,10 @@ export default class AtosMatt extends StationAnnouncementSystem {
 
     if (disruptionReason !== 'unknown') {
       files.push({ id: 'this is due to', opts: { delayStart: 250 } }, `disruption-reasons.${disruptionReason}`)
+    }
+
+    if (delayTime === 'unknown') {
+      files.push('please listen for further announcements')
     }
 
     // Only play if delay time is known or is cancelled, else the faster alternate services are not actually known
@@ -623,6 +626,8 @@ export default class AtosMatt extends StationAnnouncementSystem {
                   <select
                     value={value.delayTime}
                     onChange={e => {
+                      console.log(e.target.value)
+
                       onChange({ ...value, delayTime: e.target.value })
                     }}
                   >

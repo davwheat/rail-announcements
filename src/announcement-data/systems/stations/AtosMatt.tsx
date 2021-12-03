@@ -41,7 +41,7 @@ interface IDelayedTrainAnnouncementOptions {
 const AVAILABLE_HOURS = ['07', '08', '09', '13', '16']
 const AVAILABLE_MINUTES = ['03', '04', '08', '21', '25', '27', '33', '36', '38', '40', '53', '57']
 const AVAILABLE_TOCS = ['Southern', 'Thameslink']
-const AVAILABLE_NUMBERS = ['4', '5', '6', '7', '8', '10', '12', '13', '14', '21', '41', '45', '53', '55', '61']
+const AVAILABLE_NUMBERS = ['5', '6', '7', '8', '10', '12', '13', '14', '21', '41', '45', '53', '55', '61']
 const AVAILABLE_PLATFORMS = {
   low: ['2'],
   high: ['1', '2', '3', '4'],

@@ -19,6 +19,8 @@ interface INextTrainAnnouncementOptions {
   via: string | 'none'
   callingAt: { crsCode: string; name: string; randomId: string }[]
   coaches: string
+  seating: string
+  special: string[]
 }
 
 interface IThroughTrainAnnouncementOptions {
@@ -141,6 +143,13 @@ const AVAILABLE_DISRUPTION_REASONS = [
   'the emergency services dealing with an incident',
   'emergency services dealing with an incident near the railway',
 ].sort()
+const AVAILABLE_SEATING_AVAILABILITY = []
+const AVAILABLE_SPECIAL_REMARKS = [
+  {
+    title: 'GTR - You must wear a face covering',
+    value: 'you must wear a face covering whilst on the station and on the train unless you are exempt',
+  },
+]
 
 interface IValidateOptions {
   stationsHigh: string[]
@@ -152,12 +161,14 @@ interface IValidateOptions {
   platformHigh: string
   number: string
   disruptionReason: string
+  seating: string
+  special: string[]
 }
 
 const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {
   nextTrain: [
     {
-      name: '08:03 - HHE to LIT',
+      name: '13:57 | HHE to LIT',
       state: {
         platform: '1',
         hour: '13',
@@ -167,12 +178,14 @@ const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>>
         via: 'HOV',
         callingAt: ['BUG', 'HSK', 'PRP', 'HOV', 'PLD', 'SSE', 'LAC', 'WRH', 'WWO', 'DUR', 'GBS', 'ANG'].map(crsToStationItemMapper),
         coaches: '8',
+        seating: 'none',
+        special: [],
       },
     },
   ],
   disruptedTrain: [
     {
-      name: '07:36 to BTN delay +21m',
+      name: '07:36 | BTN (+21m)',
       state: {
         hour: '07',
         min: '36',
@@ -221,7 +234,7 @@ const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>>
       },
     },
     {
-      name: '16:38 to BTN delay +61m',
+      name: '16:38 | BTN (+61m)',
       state: {
         hour: '16',
         min: '38',
@@ -354,6 +367,18 @@ export default class AtosMatt extends StationAnnouncementSystem {
     if (!this.validateOptions({ number: options.coaches })) return
     files.push('this train is formed of', `numbers.${options.coaches}`, 'coaches')
 
+    if (options.seating && options.seating !== 'none') {
+      if (!this.validateOptions({ seating: options.seating })) return
+
+      files.push(`seating.${options.seating}`)
+    }
+
+    if (options.special) {
+      if (!this.validateOptions({ special: options.special })) return
+
+      files.push(...options.special.map(s => ({ id: `special.${s}`, opts: { delayStart: 750 } })))
+    }
+
     await this.playAudioFiles(files, download)
   }
 
@@ -471,6 +496,8 @@ export default class AtosMatt extends StationAnnouncementSystem {
     platformHigh,
     number,
     disruptionReason,
+    seating,
+    special,
   }: Partial<IValidateOptions>): boolean {
     if (platformLow && !AVAILABLE_PLATFORMS.low.includes(platformLow)) {
       this.showAudioNotExistsError(`platforms.low.platform ${platformLow}`)
@@ -506,6 +533,11 @@ export default class AtosMatt extends StationAnnouncementSystem {
       return false
     }
 
+    if (seating && !AVAILABLE_SEATING_AVAILABILITY.includes(seating)) {
+      this.showAudioNotExistsError(`seating.${seating}`)
+      return false
+    }
+
     if (stationsLow) {
       const stnLo = stationsLow.find(stn => !AVAILABLE_STATIONS.low.includes(stn))
       if (stnLo) {
@@ -518,6 +550,14 @@ export default class AtosMatt extends StationAnnouncementSystem {
       const stnHi = stationsHigh.find(stn => !AVAILABLE_STATIONS.high.includes(stn))
       if (stnHi) {
         this.showAudioNotExistsError(`stations.high.${stnHi}`)
+        return false
+      }
+    }
+
+    if (special) {
+      const specialF = special.find(s => !AVAILABLE_SPECIAL_REMARKS.find(r => r.value))
+      if (specialF) {
+        this.showAudioNotExistsError(`special.${specialF}`)
         return false
       }
     }
@@ -583,6 +623,18 @@ export default class AtosMatt extends StationAnnouncementSystem {
             default: AVAILABLE_NUMBERS.filter(x => parseInt(x) > 1)[0],
             options: AVAILABLE_NUMBERS.filter(x => parseInt(x) > 1).map(c => ({ title: c, value: c })),
             type: 'select',
+          },
+          seating: {
+            name: 'Seating availability',
+            default: 'none',
+            options: [{ title: '<not stated>', value: 'none' }, ...AVAILABLE_SEATING_AVAILABILITY.map(c => ({ title: c, value: c }))],
+            type: 'select',
+          },
+          special: {
+            name: 'Special remarks',
+            default: [],
+            options: AVAILABLE_SPECIAL_REMARKS,
+            type: 'multiselect',
           },
         },
       },

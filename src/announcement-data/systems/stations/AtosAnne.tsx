@@ -19,6 +19,7 @@ interface INextTrainAnnouncementOptions {
   callingAt: { crsCode: string; name: string; randomId: string }[]
   coaches: string
   seating: string
+  special: string[]
 }
 
 interface IThroughTrainAnnouncementOptions {
@@ -100,8 +101,14 @@ const AVAILABLE_STATIONS = {
     'ZFD',
   ],
 }
-const AVAILABLE_DISRUPTION_REASONS = ['a fault with the signalling system']
+const AVAILABLE_DISRUPTION_REASONS = ['a fault with the signalling system'].sort()
 const AVAILABLE_SEATING_AVAILABILITY = ['there are usually many seats available on this train']
+const AVAILABLE_SPECIAL_REMARKS = [
+  {
+    title: 'GTR - You must wear a face covering',
+    value: 'you must wear a face covering whilst on the station and on the train unless you are exempt',
+  },
+]
 
 interface IValidateOptions {
   stationsHigh: string[]
@@ -116,6 +123,7 @@ interface IValidateOptions {
   coaches: string
   delayTime: string
   seating: string
+  special: string[]
 }
 
 const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {
@@ -134,14 +142,15 @@ const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>>
         ),
         coaches: '8',
         seating: 'there are usually many seats available on this train',
+        special: [],
       },
     },
     {
-      name: '15:16 | Crawley to Peterborough',
+      name: '15:29 | Crawley to Peterborough',
       state: {
         platform: '3',
         hour: '15',
-        min: '11',
+        min: '29',
         toc: 'thameslink',
         terminatingStationCode: 'PBO',
         via: 'none',
@@ -169,6 +178,7 @@ const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>>
         ].map(crsToStationItemMapper),
         coaches: '12',
         seating: 'there are usually many seats available on this train',
+        special: [],
       },
     },
   ],
@@ -245,6 +255,12 @@ export default class AtosAnne extends StationAnnouncementSystem {
       if (!this.validateOptions({ seating: options.seating })) return
 
       files.push(`seating.${options.seating}`)
+    }
+
+    if (options.special) {
+      if (!this.validateOptions({ special: options.special })) return
+
+      files.push(...options.special.map(s => ({ id: `special.${s}`, opts: { delayStart: 750 } })))
     }
 
     await this.playAudioFiles(files, download)
@@ -367,6 +383,7 @@ export default class AtosAnne extends StationAnnouncementSystem {
     coaches,
     delayTime,
     seating,
+    special,
   }: Partial<IValidateOptions>): boolean {
     if (platformLow && !AVAILABLE_PLATFORMS.low.includes(platformLow)) {
       this.showAudioNotExistsError(`platforms.low.platform ${platformLow}`)
@@ -429,6 +446,14 @@ export default class AtosAnne extends StationAnnouncementSystem {
       const stnHi = stationsHigh.find(stn => !AVAILABLE_STATIONS.high.includes(stn))
       if (stnHi) {
         this.showAudioNotExistsError(`stations.high.${stnHi}`)
+        return false
+      }
+    }
+
+    if (special) {
+      const specialF = special.find(s => !AVAILABLE_SPECIAL_REMARKS.find(r => r.value))
+      if (specialF) {
+        this.showAudioNotExistsError(`special.${specialF}`)
         return false
       }
     }
@@ -500,6 +525,12 @@ export default class AtosAnne extends StationAnnouncementSystem {
             default: 'none',
             options: [{ title: '<not stated>', value: 'none' }, ...AVAILABLE_SEATING_AVAILABILITY.map(c => ({ title: c, value: c }))],
             type: 'select',
+          },
+          special: {
+            name: 'Special remarks',
+            default: [],
+            options: AVAILABLE_SPECIAL_REMARKS,
+            type: 'multiselect',
           },
         },
       },

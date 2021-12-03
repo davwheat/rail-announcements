@@ -140,8 +140,8 @@ const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>>
         callingAt: ['HHE', 'BAB', 'TBD', 'GTW', 'ECR', 'LBG', 'BFR', 'CTK', 'ZFD', 'STP', 'FPK', 'SVG', 'HIT', 'LET', 'BDK', 'RYS'].map(
           crsToStationItemMapper,
         ),
-        coaches: '8',
-        seating: 'there are usually many seats available on this train',
+        coaches: '12',
+        seating: 'none',
         special: [],
       },
     },

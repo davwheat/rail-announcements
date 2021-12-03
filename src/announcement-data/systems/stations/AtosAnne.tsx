@@ -18,6 +18,7 @@ interface INextTrainAnnouncementOptions {
   via: string | 'none'
   callingAt: { crsCode: string; name: string; randomId: string }[]
   coaches: string
+  seating: string
 }
 
 interface IThroughTrainAnnouncementOptions {
@@ -57,8 +58,8 @@ const AVAILABLE_STATIONS = {
     'BAB',
     'BDK',
     'BDM',
-    'BIW',
     'BFR',
+    'BIW',
     'CAT',
     'CBG',
     'CDS',
@@ -83,6 +84,7 @@ const AVAILABLE_STATIONS = {
     'LUT',
     'MHM',
     'PUR',
+    'RDH',
     'RYS',
     'SAC',
     'SBS',
@@ -99,6 +101,7 @@ const AVAILABLE_STATIONS = {
   ],
 }
 const AVAILABLE_DISRUPTION_REASONS = ['a fault with the signalling system']
+const AVAILABLE_SEATING_AVAILABILITY = ['there are usually many seats available on this train']
 
 interface IValidateOptions {
   stationsHigh: string[]
@@ -112,6 +115,7 @@ interface IValidateOptions {
   disruptionReason: string
   coaches: string
   delayTime: string
+  seating: string
 }
 
 const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {
@@ -129,6 +133,42 @@ const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>>
           crsToStationItemMapper,
         ),
         coaches: '8',
+        seating: 'there are usually many seats available on this train',
+      },
+    },
+    {
+      name: '15:16 | Crawley to Peterborough',
+      state: {
+        platform: '3',
+        hour: '15',
+        min: '11',
+        toc: 'thameslink',
+        terminatingStationCode: 'PBO',
+        via: 'none',
+        callingAt: [
+          'TBD',
+          'GTW',
+          'HOR',
+          'RDH',
+          'MHM',
+          'CDS',
+          'ECR',
+          'LBG',
+          'BFR',
+          'CTK',
+          'ZFD',
+          'STP',
+          'FPK',
+          'SVG',
+          'HIT',
+          'ARL',
+          'BIW',
+          'SDY',
+          'SNO',
+          'HUN',
+        ].map(crsToStationItemMapper),
+        coaches: '12',
+        seating: 'there are usually many seats available on this train',
       },
     },
   ],
@@ -200,6 +240,12 @@ export default class AtosAnne extends StationAnnouncementSystem {
     // Platforms share the same audio as coach numbers
     if (!this.validateOptions({ coaches: options.coaches })) return
     files.push('this train is formed of', `coaches.${options.coaches} coaches`)
+
+    if (options.seating && options.seating !== 'none') {
+      if (!this.validateOptions({ seating: options.seating })) return
+
+      files.push(`seating.${options.seating}`)
+    }
 
     await this.playAudioFiles(files, download)
   }
@@ -320,6 +366,7 @@ export default class AtosAnne extends StationAnnouncementSystem {
     disruptionReason,
     coaches,
     delayTime,
+    seating,
   }: Partial<IValidateOptions>): boolean {
     if (platformLow && !AVAILABLE_PLATFORMS.low.includes(platformLow)) {
       this.showAudioNotExistsError(`platforms.low.platform ${platformLow}`)
@@ -362,6 +409,11 @@ export default class AtosAnne extends StationAnnouncementSystem {
 
     if (disruptionReason && !AVAILABLE_DISRUPTION_REASONS.includes(disruptionReason)) {
       this.showAudioNotExistsError(`disruption-reasons.${disruptionReason}`)
+      return false
+    }
+
+    if (seating && !AVAILABLE_SEATING_AVAILABILITY.includes(seating)) {
+      this.showAudioNotExistsError(`seating.${seating}`)
       return false
     }
 
@@ -441,6 +493,12 @@ export default class AtosAnne extends StationAnnouncementSystem {
             name: 'Coach count',
             default: AVAILABLE_COACHES[0],
             options: AVAILABLE_COACHES.map(c => ({ title: c, value: c })),
+            type: 'select',
+          },
+          seating: {
+            name: 'Seating availability',
+            default: 'none',
+            options: [{ title: '<not stated>', value: 'none' }, ...AVAILABLE_SEATING_AVAILABILITY.map(c => ({ title: c, value: c }))],
             type: 'select',
           },
         },

@@ -67,7 +67,7 @@ const announcementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>>
 }
 
 export default class ThameslinkClass700 extends TrainAnnouncementSystem {
-  readonly NAME = 'Thameslink Class 700'
+  readonly NAME = 'Thameslink Class 700 - Julie & Matt'
   readonly ID = 'TL_CLASS_700_V1'
   readonly FILE_PREFIX = 'TL/700'
   readonly SYSTEM_TYPE = 'train'

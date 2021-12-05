@@ -193,9 +193,9 @@ export default class AtosAnne extends StationAnnouncementSystem {
   /**
    * @returns "Platform X for the HH:mm YYYYYY service to ZZZZ (via AAAA)."
    */
-  private assembleTrainInfo({ hour, min, toc, via, terminatingStationCode, destAllHigh = false }): AudioItem[] {
-    const files = [
-      `times.hour.${hour}`,
+  private assembleTrainInfo({ hour, min, toc, via, terminatingStationCode, destAllHigh = false, delayStart = 0 }): AudioItem[] {
+    const files: AudioItem[] = [
+      { id: `times.hour.${hour}`, opts: { delayStart } },
       `times.mins.${min}`,
       {
         id: `tocs.${toc.toLowerCase()}`,
@@ -309,8 +309,8 @@ export default class AtosAnne extends StationAnnouncementSystem {
     }
 
     files.push(
-      disruptionType === 'delayed' ? 'we are sorry that the' : 'we are sorry to announce that the',
-      ...this.assembleTrainInfo({ ...options, destAllHigh: true }),
+      disruptionType === 'delayed' ? 'we are sorry that the' : { id: 'we are sorry to announce that the', opts: { delayStart: 250 } },
+      ...this.assembleTrainInfo({ ...options, destAllHigh: true, delayStart: 100 }),
     )
 
     if (disruptionType === 'delayed') {
@@ -320,11 +320,11 @@ export default class AtosAnne extends StationAnnouncementSystem {
         files.push('is delayed by approximately', `delay-times.${delayTime} minutes`)
       }
     } else if (disruptionType === 'cancelled') {
-      files.push('has been cancelled')
+      files.push({ id: 'has been cancelled', opts: { delayStart: 100 } })
     }
 
     if (disruptionReason !== 'unknown') {
-      files.push({ id: 'this is due to', opts: { delayStart: 250 } }, `disruption-reasons.${disruptionReason}`)
+      files.push({ id: 'this is due to', opts: { delayStart: 500 } }, `disruption-reasons.${disruptionReason}`)
     }
 
     if (disruptionType === 'delayed' && delayTime === 'unknown') {
@@ -363,7 +363,7 @@ export default class AtosAnne extends StationAnnouncementSystem {
           files.push(`stations.low.${terminatingCrs}`)
         }
 
-        files.push('departing from', `platforms.low.platform ${platform}`)
+        files.push('departing from', { id: `platforms.low.platform ${platform}`, opts: { delayStart: 100 } })
       })
     }
 
@@ -551,8 +551,7 @@ export default class AtosAnne extends StationAnnouncementSystem {
       },
     },
     disruptedTrain: {
-      name: 'Delayed train',
-      // name: 'Delayed/cancelled train',
+      name: 'Delayed/cancelled train',
       component: CustomAnnouncementPane,
       props: {
         playHandler: this.playDisruptedTrainAnnouncement.bind(this),
@@ -608,7 +607,7 @@ export default class AtosAnne extends StationAnnouncementSystem {
                     }}
                   />
                   <label htmlFor="disruptionTypeDelay">Delay</label>
-                  {/* <input
+                  <input
                     type="radio"
                     id="disruptionTypeCancel"
                     checked={value === 'cancelled'}
@@ -619,7 +618,7 @@ export default class AtosAnne extends StationAnnouncementSystem {
                       }
                     }}
                   />
-                  <label htmlFor="disruptionTypeCancel">Cancelled</label> */}
+                  <label htmlFor="disruptionTypeCancel">Cancelled</label>
                 </fieldset>
               )
             },

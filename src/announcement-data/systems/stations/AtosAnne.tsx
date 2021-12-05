@@ -40,9 +40,9 @@ interface IDelayedTrainAnnouncementOptions {
 }
 
 const AVAILABLE_HOURS = ['07', '12', '13', '15']
-const AVAILABLE_MINUTES = ['11', '12', '16', '28', '29', '44', '53', '54']
+const AVAILABLE_MINUTES = ['06', '09', '11', '12', '16', '22', '28', '29', '44', '53', '54']
 const AVAILABLE_TOCS = ['Southern', 'Thameslink', 'Arriva Trains Wales']
-const AVAILABLE_DELAY_TIMES = ['17']
+const AVAILABLE_DELAY_TIMES = ['6', '17', '23']
 const AVAILABLE_NUMBERS = ['2', '10', '12']
 const AVAILABLE_PLATFORMS = {
   /**
@@ -101,7 +101,11 @@ const AVAILABLE_STATIONS = {
     'ZFD',
   ],
 }
-const AVAILABLE_DISRUPTION_REASONS = ['a fault with the signalling system'].sort()
+const AVAILABLE_DISRUPTION_REASONS = [
+  'a fault with the signalling system',
+  'earlier engineering works not being finished on time',
+  'engineering works not being finished on time',
+].sort()
 const AVAILABLE_SEATING_AVAILABILITY = ['there are usually many seats available on this train']
 const AVAILABLE_SPECIAL_REMARKS = [
   {

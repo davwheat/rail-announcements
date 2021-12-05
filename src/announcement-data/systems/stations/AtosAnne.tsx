@@ -678,7 +678,7 @@ export default class AtosAnne extends StationAnnouncementSystem {
                   <select
                     value={value}
                     onChange={e => {
-                      onChange({ ...value, platform: e.target.value })
+                      onChange(e.target.value)
                     }}
                   >
                     {availablePlatforms.map(d => (

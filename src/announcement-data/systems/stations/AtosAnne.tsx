@@ -489,7 +489,7 @@ export default class AtosAnne extends StationAnnouncementSystem {
           },
           toc: {
             name: 'TOC',
-            default: AVAILABLE_TOCS[0],
+            default: AVAILABLE_TOCS[0].toLowerCase(),
             options: AVAILABLE_TOCS.map(m => ({ title: m, value: m.toLowerCase() })),
             type: 'select',
           },
@@ -572,7 +572,7 @@ export default class AtosAnne extends StationAnnouncementSystem {
           },
           toc: {
             name: 'TOC',
-            default: AVAILABLE_TOCS[0],
+            default: AVAILABLE_TOCS[0].toLowerCase(),
             options: AVAILABLE_TOCS.map(m => ({ title: m, value: m.toLowerCase() })),
             type: 'select',
           },

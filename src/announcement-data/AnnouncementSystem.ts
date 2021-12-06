@@ -4,6 +4,7 @@ import Crunker from 'crunker'
 
 export interface IPlayOptions {
   delayStart: number
+  customPrefix: string
 }
 
 export type OptionsExplanation =
@@ -102,8 +103,8 @@ export default abstract class AnnouncementSystem {
   /**
    * Generates a URL for the provided audio file ID.
    */
-  generateAudioFileUrl(fileId: string): string {
-    return `/audio/${this.FILE_PREFIX}/${this.processAudioFileId(fileId).replace(/\./g, '/')}.mp3`
+  generateAudioFileUrl(fileId: string, customPrefix?: string): string {
+    return `/audio/${customPrefix || this.FILE_PREFIX}/${this.processAudioFileId(fileId).replace(/\./g, '/')}.mp3`
   }
 
   /**
@@ -148,7 +149,7 @@ export default abstract class AnnouncementSystem {
   async concatSoundClips(files: AudioItemObject[]): Promise<AudioBuffer> {
     const crunker = new Crunker({ sampleRate: AnnouncementSystem.SAMPLE_RATE })
 
-    const filesWithUris: (AudioItemObject & { uri: string })[] = files.map(file => ({ ...file, uri: this.generateAudioFileUrl(file.id) }))
+    const filesWithUris: (AudioItemObject & { uri: string })[] = files.map(file => ({ ...file, uri: this.generateAudioFileUrl(file.id, file?.opts?.customPrefix) }))
 
     const audioBuffers_P = crunker.fetchAudio(...filesWithUris.map(file => file.uri))
 

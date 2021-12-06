@@ -18,9 +18,10 @@ interface INextTrainAnnouncementOptions {
 }
 
 const AVAILABLE_ALPHANUMBERS = ['1', '2', '3', '4', '4a', '5', '6'] as const
-const AVAILABLE_HOURS = ['08', '11', '12', '13', '14', '16', '18', '19'] as const
-const AVAILABLE_MINUTES = ['00', '06', '08', '13', '16', '17', '20', '24', '30', '35', '41', '42', '46', '50', '55'] as const
+const AVAILABLE_HOURS = ['08', '11', '12', '13', '14', '15', '16', '18', '19'] as const
+const AVAILABLE_MINUTES = ['00', '06', '08', '13', '16', '17', '20', '24', '30', '35', '41', '42', '44', '46', '50', '55'] as const
 const AVAILABLE_TOCS = [
+  '<None>',
   'Arriva Trains Wales',
   'Chiltern Railways',
   'Cross Country',
@@ -34,7 +35,7 @@ const AVAILABLE_TOCS = [
 const AVAILABLE_NUMBERS: string[] = AVAILABLE_ALPHANUMBERS.filter(x => /^\d+$/.test(x))
 
 const AVAILABLE_STATIONS = {
-  low: ['BHM', 'BMH', 'BSK', 'BSW', 'CDF', 'EDB', 'ESL', 'MAN', 'PMH', 'POO', 'SAL', 'SBJ', 'SHF', 'SOU', 'WAT', 'WOK'],
+  low: ['BHM', 'BMH', 'BSK', 'BSW', 'CDF', 'EDB', 'ESL', 'LMS', 'MAN', 'PMH', 'POO', 'SAL', 'SBJ', 'SHF', 'SOU', 'WAT', 'WOK'],
   high: [
     'ADV',
     'ALM',
@@ -62,6 +63,7 @@ const AVAILABLE_STATIONS = {
     'CSA',
     'DAR',
     'DBY',
+    'DDG',
     'DHM',
     'DOR',
     'DRT',
@@ -75,6 +77,7 @@ const AVAILABLE_STATIONS = {
     'GRN',
     'HNA',
     'HSG',
+    'HTN',
     'HXX',
     'JEQ',
     'LDS',
@@ -114,6 +117,7 @@ const AVAILABLE_STATIONS = {
     'WKF',
     'WMN',
     'WOM',
+    'WRW',
     'WSB',
     'WVH',
     'YRK',
@@ -137,6 +141,10 @@ export default class KeTechCelia extends StationAnnouncementSystem {
   readonly FILE_PREFIX = 'station/ketech/celia'
   readonly SYSTEM_TYPE = 'station'
 
+  private getTocAudioId(toc: typeof AVAILABLE_TOCS[number]) {
+    return toc === '<None>' ? `tocs.service to` : `tocs.${toc.toLowerCase()} service to`
+  }
+
   private async playNextTrainAnnouncement(options: INextTrainAnnouncementOptions, download: boolean = false): Promise<void> {
     const files: AudioItem[] = []
 
@@ -145,19 +153,17 @@ export default class KeTechCelia extends StationAnnouncementSystem {
     if (options.chime !== 'none') files.push(`${options.chime} chime`)
 
     files.push('platform', `numbers.${options.platform}`, 'for the', `times.hour.${options.hour}`, `times.mins.${options.min}`, {
-      id: `tocs.${options.toc.toLowerCase()} service to`,
+      id: this.getTocAudioId(options.toc),
       opts: { delayStart: 150 },
     })
 
-    if (options.via !== 'none') alert("'via' is not available for Celia at the moment.")
-
-    // if (options.via !== 'none') {
-    //   if (!this.validateOptions({ stationsHigh: [options.terminatingStationCode], stationsLow: [options.via] })) return
-    //   files.push(`stations.high.${options.terminatingStationCode}`, 'via', `stations.low.${options.via}`)
-    // } else {
-    if (!this.validateOptions({ stationsLow: [options.terminatingStationCode] })) return
-    files.push(`stations.low.${options.terminatingStationCode}`)
-    // }
+    if (options.via && options.via !== 'none') {
+      if (!this.validateOptions({ stationsHigh: [options.terminatingStationCode], stationsLow: [options.via] })) return
+      files.push(`stations.high.${options.terminatingStationCode}`, 'via', `stations.low.${options.via}`)
+    } else {
+      if (!this.validateOptions({ stationsLow: [options.terminatingStationCode] })) return
+      files.push(`stations.low.${options.terminatingStationCode}`)
+    }
 
     files.push({ id: 'calling at', opts: { delayStart: 750 } })
 
@@ -174,19 +180,12 @@ export default class KeTechCelia extends StationAnnouncementSystem {
     if (!this.validateOptions({ coaches: options.coaches })) return
     files.push('this train is formed of', `numbers.${options.coaches}`, 'coaches')
 
-    files.push(
-      { id: 'platform', opts: { delayStart: 750 } },
-      `numbers.${options.platform}`,
-      'for the',
-      `times.hour.${options.hour}`,
-      `times.mins.${options.min}`,
-      {
-        id: `tocs.${options.toc.toLowerCase()} service to`,
-        opts: { delayStart: 150 },
-      },
-    )
+    files.push('platform', `numbers.${options.platform}`, 'for the', `times.hour.${options.hour}`, `times.mins.${options.min}`, {
+      id: this.getTocAudioId(options.toc),
+      opts: { delayStart: 150 },
+    })
 
-    if (options.via !== 'none') {
+    if (options.via && options.via !== 'none') {
       files.push(`stations.high.${options.terminatingStationCode}`, 'via', `stations.low.${options.via}`)
     } else {
       files.push(`stations.low.${options.terminatingStationCode}`)
@@ -279,8 +278,8 @@ export default class KeTechCelia extends StationAnnouncementSystem {
           },
           toc: {
             name: 'TOC',
-            default: AVAILABLE_TOCS[0].toLowerCase(),
-            options: AVAILABLE_TOCS.map(m => ({ title: m, value: m.toLowerCase() })),
+            default: AVAILABLE_TOCS[0],
+            options: AVAILABLE_TOCS.map(m => ({ title: m, value: m })),
             type: 'select',
           },
           terminatingStationCode: {
@@ -289,15 +288,15 @@ export default class KeTechCelia extends StationAnnouncementSystem {
             options: AllStationsTitleValueMap.filter(s => AVAILABLE_STATIONS.low.includes(s.value as typeof AVAILABLE_STATIONS.low[number])),
             type: 'select',
           },
-          via: {
-            name: 'Via... (optional)',
-            default: 'none',
-            options: [
-              { title: 'NONE', value: 'none' },
-              ...AllStationsTitleValueMap.filter(s => AVAILABLE_STATIONS.low.includes(s.value as typeof AVAILABLE_STATIONS.low[number])),
-            ],
-            type: 'select',
-          },
+          // via: {
+          //   name: 'Via... (optional)',
+          //   default: 'none',
+          //   options: [
+          //     { title: 'NONE', value: 'none' },
+          //     ...AllStationsTitleValueMap.filter(s => AVAILABLE_STATIONS.low.includes(s.value as typeof AVAILABLE_STATIONS.low[number])),
+          //   ],
+          //   type: 'select',
+          // },
           callingAt: {
             name: '',
             type: 'custom',

@@ -149,15 +149,13 @@ export default class KeTechCelia extends StationAnnouncementSystem {
       opts: { delayStart: 150 },
     })
 
-    if (options.via !== 'none') alert("'via' is not available for Celia at the moment.")
-
-    // if (options.via !== 'none') {
-    //   if (!this.validateOptions({ stationsHigh: [options.terminatingStationCode], stationsLow: [options.via] })) return
-    //   files.push(`stations.high.${options.terminatingStationCode}`, 'via', `stations.low.${options.via}`)
-    // } else {
-    if (!this.validateOptions({ stationsLow: [options.terminatingStationCode] })) return
-    files.push(`stations.low.${options.terminatingStationCode}`)
-    // }
+    if (options.via !== 'none') {
+      if (!this.validateOptions({ stationsHigh: [options.terminatingStationCode], stationsLow: [options.via] })) return
+      files.push(`stations.high.${options.terminatingStationCode}`, 'via', `stations.low.${options.via}`)
+    } else {
+      if (!this.validateOptions({ stationsLow: [options.terminatingStationCode] })) return
+      files.push(`stations.low.${options.terminatingStationCode}`)
+    }
 
     files.push({ id: 'calling at', opts: { delayStart: 750 } })
 
@@ -289,15 +287,15 @@ export default class KeTechCelia extends StationAnnouncementSystem {
             options: AllStationsTitleValueMap.filter(s => AVAILABLE_STATIONS.low.includes(s.value as typeof AVAILABLE_STATIONS.low[number])),
             type: 'select',
           },
-          via: {
-            name: 'Via... (optional)',
-            default: 'none',
-            options: [
-              { title: 'NONE', value: 'none' },
-              ...AllStationsTitleValueMap.filter(s => AVAILABLE_STATIONS.low.includes(s.value as typeof AVAILABLE_STATIONS.low[number])),
-            ],
-            type: 'select',
-          },
+          // via: {
+          //   name: 'Via... (optional)',
+          //   default: 'none',
+          //   options: [
+          //     { title: 'NONE', value: 'none' },
+          //     ...AllStationsTitleValueMap.filter(s => AVAILABLE_STATIONS.low.includes(s.value as typeof AVAILABLE_STATIONS.low[number])),
+          //   ],
+          //   type: 'select',
+          // },
           callingAt: {
             name: '',
             type: 'custom',

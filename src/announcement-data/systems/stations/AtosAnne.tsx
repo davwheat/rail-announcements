@@ -109,6 +109,10 @@ const AVAILABLE_DISRUPTION_REASONS = [
 const AVAILABLE_SEATING_AVAILABILITY = ['there are usually many seats available on this train']
 const AVAILABLE_SPECIAL_REMARKS = [
   {
+    title: 'Make sure you have the correct ticket',
+    value: 'please make sure you have the correct ticket to travel on this service',
+  },
+  {
     title: 'GTR - You must wear a face covering',
     value: 'you must wear a face covering whilst on the station and on the train unless you are exempt',
   },

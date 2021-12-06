@@ -18,8 +18,8 @@ interface INextTrainAnnouncementOptions {
 }
 
 const AVAILABLE_ALPHANUMBERS = ['1', '2', '3', '4', '4a', '5', '6'] as const
-const AVAILABLE_HOURS = ['08', '11', '12', '13', '14', '16', '18', '19'] as const
-const AVAILABLE_MINUTES = ['00', '06', '08', '13', '16', '17', '20', '24', '30', '35', '41', '42', '46', '50', '55'] as const
+const AVAILABLE_HOURS = ['08', '11', '12', '13', '14', '15', '16', '18', '19'] as const
+const AVAILABLE_MINUTES = ['00', '06', '08', '13', '16', '17', '20', '24', '30', '35', '41', '42', '44', '46', '50', '55'] as const
 const AVAILABLE_TOCS = [
   'Arriva Trains Wales',
   'Chiltern Railways',
@@ -34,7 +34,7 @@ const AVAILABLE_TOCS = [
 const AVAILABLE_NUMBERS: string[] = AVAILABLE_ALPHANUMBERS.filter(x => /^\d+$/.test(x))
 
 const AVAILABLE_STATIONS = {
-  low: ['BHM', 'BMH', 'BSK', 'BSW', 'CDF', 'EDB', 'ESL', 'MAN', 'PMH', 'POO', 'SAL', 'SBJ', 'SHF', 'SOU', 'WAT', 'WOK'],
+  low: ['BHM', 'BMH', 'BSK', 'BSW', 'CDF', 'EDB', 'ESL', 'LMS', 'MAN', 'PMH', 'POO', 'SAL', 'SBJ', 'SHF', 'SOU', 'WAT', 'WOK'],
   high: [
     'ADV',
     'ALM',
@@ -62,6 +62,7 @@ const AVAILABLE_STATIONS = {
     'CSA',
     'DAR',
     'DBY',
+    'DDG',
     'DHM',
     'DOR',
     'DRT',
@@ -75,6 +76,7 @@ const AVAILABLE_STATIONS = {
     'GRN',
     'HNA',
     'HSG',
+    'HTN',
     'HXX',
     'JEQ',
     'LDS',
@@ -114,6 +116,7 @@ const AVAILABLE_STATIONS = {
     'WKF',
     'WMN',
     'WOM',
+    'WRW',
     'WSB',
     'WVH',
     'YRK',

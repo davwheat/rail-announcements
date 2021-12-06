@@ -27,10 +27,11 @@ const useStyles = makeStyles({
 })
 
 export interface ICustomButtonPaneProps {
-  buttons: CustomAnnouncementButton[]
+  buttons?: CustomAnnouncementButton[]
+  buttonSections?: Record<string, CustomAnnouncementButton[]>
 }
 
-function CustomButtonPane({ buttons }: ICustomButtonPaneProps): JSX.Element {
+function CustomButtonPane({ buttons, buttonSections }: ICustomButtonPaneProps): JSX.Element {
   const classes = useStyles()
 
   const [playError, setPlayError] = useState<Error>(null)
@@ -68,6 +69,16 @@ function CustomButtonPane({ buttons }: ICustomButtonPaneProps): JSX.Element {
     throw playError
   }
 
+  buttonSections ||= {}
+
+  if (buttons?.length) {
+    if ('Announcements' in buttonSections && Array.isArray(buttonSections.Announcements)) {
+      buttonSections.Announcements.push(...buttons)
+    } else {
+      buttonSections.Announcements = buttons
+    }
+  }
+
   return (
     <div className={classes.root}>
       {isDisabled && (
@@ -75,43 +86,46 @@ function CustomButtonPane({ buttons }: ICustomButtonPaneProps): JSX.Element {
           <strong>All options are disabled while an announcement is playing.</strong>
         </p>
       )}
-      <fieldset>
-        <h3>Announcements</h3>
 
-        {buttons.length === 0 && <p>No announcements available</p>}
+      {Object.entries(buttonSections).map(([sectionName, sectionButtons]) => (
+        <fieldset key={sectionName}>
+          <h3>{sectionName}</h3>
 
-        <div className={classes.buttonList}>
-          {buttons.map(btn => (
-            <div key={btn.label} className="buttonGroup">
-              <button
-                disabled={isDisabled}
-                onClick={() =>
-                  createClickHandler(btn.play, btn.label, 'play')().catch(e => {
-                    setPlayError(e)
-                  })
-                }
-              >
-                <span className="buttonLabel">
-                  <PlayIcon />
-                  {btn.label}
-                </span>
-              </button>
-              <button
-                disabled={isDisabled}
-                onClick={() =>
-                  createClickHandler(btn.download, btn.label, 'download')().catch(e => {
-                    setPlayError(e)
-                  })
-                }
-                className="iconButton"
-                aria-label="Download announcement"
-              >
-                <DownloadIcon />
-              </button>
-            </div>
-          ))}
-        </div>
-      </fieldset>
+          {sectionButtons?.length === 0 && <p>No announcements available</p>}
+
+          <div className={classes.buttonList}>
+            {sectionButtons?.map?.(btn => (
+              <div key={btn.label} className="buttonGroup">
+                <button
+                  disabled={isDisabled}
+                  onClick={() =>
+                    createClickHandler(btn.play, btn.label, 'play')().catch(e => {
+                      setPlayError(e)
+                    })
+                  }
+                >
+                  <span className="buttonLabel">
+                    <PlayIcon />
+                    {btn.label}
+                  </span>
+                </button>
+                <button
+                  disabled={isDisabled}
+                  onClick={() =>
+                    createClickHandler(btn.download, btn.label, 'download')().catch(e => {
+                      setPlayError(e)
+                    })
+                  }
+                  className="iconButton"
+                  aria-label="Download announcement"
+                >
+                  <DownloadIcon />
+                </button>
+              </div>
+            ))}
+          </div>
+        </fieldset>
+      ))}
     </div>
   )
 }

@@ -8,6 +8,7 @@ import { AllStationsTitleValueMap } from '@data/StationManipulators'
 import { AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
 import crsToStationItemMapper from '@helpers/crsToStationItemMapper'
 import AtosDisruptionAlternatives, { IAlternativeServicesState } from '@components/AtosDisruptionAlternatives'
+import createAnnouncementButton from '@helpers/createAnnouncementButton'
 
 interface INextTrainAnnouncementOptions {
   platform: string
@@ -720,16 +721,58 @@ export default class AtosAnne extends StationAnnouncementSystem {
       },
     },
     announcementButtons: {
-      name: 'Announcement buttons',
+      name: 'Other announcements',
       component: CustomButtonPane,
       props: {
-        buttons: [
-          {
-            label: 'BTP 61016',
-            play: this.playAudioFiles.bind(this, ['61016']),
-            download: this.playAudioFiles.bind(this, ['61016'], true),
-          },
-        ],
+        buttonSections: {
+          General: [createAnnouncementButton(this.playAudioFiles.bind(this), 'BTP 61016', ['61016'])],
+          'GTR custom announcements': [
+            createAnnouncementButton(this.playAudioFiles.bind(this), 'Doors will close 30s before departure', [
+              {
+                id: 'gtr - doors will be closed and locked 30s prior',
+                opts: { customPrefix: 'station/atos/custom' },
+              },
+            ]),
+            createAnnouncementButton(this.playAudioFiles.bind(this), 'If you feel unwell, give staff a shout', [
+              {
+                id: 'gtr - if youre feeling unwell stay on the platform and give one of our colleagues a shout',
+                opts: { customPrefix: 'station/atos/custom' },
+              },
+            ]),
+            createAnnouncementButton(this.playAudioFiles.bind(this), 'Remain behind the yellow line', [
+              {
+                id: 'gtr - remain behind yellow line for safety',
+                opts: { customPrefix: 'station/atos/custom' },
+              },
+            ]),
+            createAnnouncementButton(this.playAudioFiles.bind(this), 'Surfaces may be slippery', [
+              {
+                id: 'gtr - slippery conditions',
+                opts: { customPrefix: 'station/atos/custom' },
+              },
+            ]),
+            createAnnouncementButton(this.playAudioFiles.bind(this), 'Very cold weather', [
+              {
+                id: 'gtr - very cold weather take care',
+                opts: { customPrefix: 'station/atos/custom' },
+              },
+            ]),
+          ],
+          'GTR engineering works': [
+            createAnnouncementButton(this.playAudioFiles.bind(this), '6/7 Nov 2021 - Three Bridges', [
+              {
+                id: 'gtr - 6 7 nov 2021 - engineering works three bridges',
+                opts: { customPrefix: 'station/atos/custom' },
+              },
+            ]),
+            createAnnouncementButton(this.playAudioFiles.bind(this), '28 May 2021 - No trains London Victoria', [
+              {
+                id: 'gtr - 28 may 2021 - this bank holiday no southern trains victoria',
+                opts: { customPrefix: 'station/atos/custom' },
+              },
+            ]),
+          ],
+        },
       },
     },
   }

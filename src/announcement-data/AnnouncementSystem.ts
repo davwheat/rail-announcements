@@ -149,7 +149,10 @@ export default abstract class AnnouncementSystem {
   async concatSoundClips(files: AudioItemObject[]): Promise<AudioBuffer> {
     const crunker = new Crunker({ sampleRate: AnnouncementSystem.SAMPLE_RATE })
 
-    const filesWithUris: (AudioItemObject & { uri: string })[] = files.map(file => ({ ...file, uri: this.generateAudioFileUrl(file.id, file?.opts?.customPrefix) }))
+    const filesWithUris: (AudioItemObject & { uri: string })[] = files.map(file => ({
+      ...file,
+      uri: this.generateAudioFileUrl(file.id, file?.opts?.customPrefix),
+    }))
 
     const audioBuffers_P = crunker.fetchAudio(...filesWithUris.map(file => file.uri))
 

@@ -649,7 +649,7 @@ export default class AtosAnne extends StationAnnouncementSystem {
                   <select
                     value={value}
                     onChange={e => {
-                      onChange({ ...value, delayTime: e.target.value })
+                      onChange(e.target.value)
                     }}
                   >
                     {availableDelayTimes.map(d => (

@@ -36,7 +36,7 @@
     "gatsby-plugin-react-head": "https://github.com/davwheat/gatsby-plugin-react-head",
     "gatsby-plugin-remove-console": "^0.0.2",
     "mdi-react": "^8.2.0",
-    "nanoid": "^3.1.30",
+    "nanoid": "^3.1.31",
     "preact": "^10.6.4",
     "preact-render-to-string": "^5.1.19",
     "react": "^17.0.2",

@@ -260,6 +260,11 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
             play: this.playAudioFiles.bind(this, ['you must wear a face covering on your jouney unless you are exempt']),
             download: this.playAudioFiles.bind(this, ['you must wear a face covering on your jouney unless you are exempt'], true),
           },
+          {
+            label: 'BTP 61016',
+            play: this.playAudioFiles.bind(this, ['61016']),
+            download: this.playAudioFiles.bind(this, ['61016'], true),
+          },
         ],
       },
     },

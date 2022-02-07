@@ -20,21 +20,22 @@ function AnnouncementPanel(): JSX.Element {
   const classes = useStyles()
   const AnnouncementSystem = getActiveSystem()
 
-  if (!AnnouncementSystem) return null
-
-  const AnnouncementSystemInstance = new AnnouncementSystem()
-
-  const customTabs = AnnouncementSystemInstance.customAnnouncementTabs
+  const AnnouncementSystemInstance = AnnouncementSystem ? new AnnouncementSystem() : null
+  const customTabs = AnnouncementSystemInstance?.customAnnouncementTabs
 
   const TabPanels = React.useMemo(
     () =>
-      Object.values(customTabs).map(({ component: TabComponent, ...opts }) => (
-        <AnnouncementTabErrorBoundary key={opts.name} systemId={AnnouncementSystemInstance.ID} systemName={AnnouncementSystemInstance.NAME}>
-          <TabComponent {...opts.props} name={opts.name} />
-        </AnnouncementTabErrorBoundary>
-      )),
-    [customTabs],
+      !AnnouncementSystem
+        ? null
+        : Object.values(customTabs).map(({ component: TabComponent, ...opts }) => (
+            <AnnouncementTabErrorBoundary key={opts.name} systemId={AnnouncementSystemInstance.ID} systemName={AnnouncementSystemInstance.NAME}>
+              <TabComponent {...opts.props} name={opts.name} />
+            </AnnouncementTabErrorBoundary>
+          )),
+    [customTabs, AnnouncementSystem],
   )
+
+  if (!AnnouncementSystem) return null
 
   return (
     <div className={classes.root}>

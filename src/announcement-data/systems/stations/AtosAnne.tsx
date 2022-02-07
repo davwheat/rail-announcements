@@ -54,7 +54,7 @@ const AVAILABLE_PLATFORMS = {
 }
 const AVAILABLE_COACHES = ['8', '10', '12']
 const AVAILABLE_STATIONS = {
-  low: ['BDM', 'CAT', 'CBG', 'PBO', 'STP', 'VIC'],
+  low: ['BDM', 'CAT', 'CBG', 'PBO', 'RDH', 'STP', 'VIC'],
   high: [
     'ARL',
     'BAB',
@@ -62,6 +62,7 @@ const AVAILABLE_STATIONS = {
     'BDM',
     'BFR',
     'BIW',
+    'BUG',
     'CAT',
     'CBG',
     'CDS',
@@ -99,6 +100,7 @@ const AVAILABLE_STATIONS = {
     'WHP',
     'WHS',
     'WHY',
+    'WVF',
     'ZFD',
   ],
 }
@@ -106,6 +108,7 @@ const AVAILABLE_DISRUPTION_REASONS = [
   'a fault with the signalling system',
   'earlier engineering works not being finished on time',
   'engineering works not being finished on time',
+  'the train making extra stops because a train was cancelled',
 ].sort()
 const AVAILABLE_SEATING_AVAILABILITY = ['there are usually many seats available on this train']
 const AVAILABLE_SPECIAL_REMARKS = [
@@ -754,6 +757,12 @@ export default class AtosAnne extends StationAnnouncementSystem {
             createAnnouncementButton(this.playAudioFiles.bind(this), 'Very cold weather', [
               {
                 id: 'gtr - very cold weather take care',
+                opts: { customPrefix: 'station/atos/custom' },
+              },
+            ]),
+            createAnnouncementButton(this.playAudioFiles.bind(this), 'Wear a face covering if you can', [
+              {
+                id: 'gtr - wear face covering if you can',
                 opts: { customPrefix: 'station/atos/custom' },
               },
             ]),

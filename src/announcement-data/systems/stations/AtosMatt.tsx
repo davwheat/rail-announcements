@@ -41,7 +41,7 @@ interface IDelayedTrainAnnouncementOptions {
 }
 
 const AVAILABLE_HOURS = ['07', '08', '09', '13', '16']
-const AVAILABLE_MINUTES = ['03', '04', '08', '21', '25', '27', '33', '36', '38', '40', '53', '57']
+const AVAILABLE_MINUTES = ['03', '04', '08', '11', '21', '25', '27', '33', '36', '38', '40', '53', '57']
 const AVAILABLE_TOCS = ['Southern', 'Thameslink']
 const AVAILABLE_NUMBERS = ['5', '6', '7', '8', '10', '12', '13', '14', '21', '41', '45', '53', '55', '61']
 const AVAILABLE_PLATFORMS = {
@@ -49,7 +49,7 @@ const AVAILABLE_PLATFORMS = {
   high: ['1', '2', '3', '4'],
 }
 const AVAILABLE_STATIONS = {
-  low: ['ANG', 'BDM', 'BOG', 'BTN', 'DUR', 'EBN', 'FOD', 'GBS', 'HOV', 'LBG', 'LIT', 'LWS', 'NRB', 'NWD', 'NXG', 'ORE'],
+  low: ['ANG', 'BDM', 'BOG', 'BTN', 'CBR', 'DUR', 'EBN', 'FOD', 'GBS', 'HOV', 'LBG', 'LIT', 'LWS', 'NRB', 'NWD', 'NXG', 'ORE'],
   high: [
     'AGT',
     'AMY',
@@ -142,9 +142,14 @@ const AVAILABLE_DISRUPTION_REASONS = [
   'a fault with the signalling system earlier today',
   'the emergency services dealing with an incident',
   'emergency services dealing with an incident near the railway',
+  'urgent repairs to the track',
 ].sort()
 const AVAILABLE_SEATING_AVAILABILITY = []
 const AVAILABLE_SPECIAL_REMARKS = [
+  {
+    title: 'Make sure you have the correct ticket',
+    value: 'please make sure you have the correct ticket to travel on this service',
+  },
   {
     title: 'GTR - You must wear a face covering',
     value: 'you must wear a face covering whilst on the station and on the train unless you are exempt',

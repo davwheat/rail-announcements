@@ -18,6 +18,19 @@ interface INextTrainAnnouncementOptions {
   coaches: typeof AVAILABLE_NUMBERS[number]
 }
 
+interface IStandingTrainAnnouncementOptions {
+  chime: '3' | '4' | 'none'
+  currentStation: typeof AVAILABLE_STATIONS['low'][number]
+  platform: typeof AVAILABLE_ALPHANUMBERS[number]
+  hour: typeof AVAILABLE_HOURS[number]
+  min: typeof AVAILABLE_MINUTES[number]
+  toc: typeof AVAILABLE_TOCS[number]
+  terminatingStationCode: typeof AVAILABLE_STATIONS['low'][number]
+  via: typeof AVAILABLE_STATIONS['low'][number] | 'none'
+  callingAt: { crsCode: string; name: string; randomId: string }[]
+  coaches: typeof AVAILABLE_NUMBERS[number]
+}
+
 const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {
   nextTrain: [
     {
@@ -35,6 +48,7 @@ const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>>
       },
     },
   ],
+  standingTrain: [],
 }
 
 const AVAILABLE_ALPHANUMBERS = ['2', '2a', '3b', '4', '5', '8', '9', '11b'] as const
@@ -273,6 +287,54 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     await this.playAudioFiles(files, download)
   }
 
+  private async playStandingTrainAnnouncement(options: IStandingTrainAnnouncementOptions, download: boolean = false): Promise<void> {
+    const files: AudioItem[] = []
+
+    if (!this.validateOptions({ platform: options.platform, hour: options.hour, minute: options.min, toc: options.toc })) return
+    if (!this.validateOptions({ stationsHigh: [options.currentStation], stationsLow: [options.currentStation] })) return
+
+    if (options.chime !== 'none') files.push(`${options.chime} chime`)
+
+    files.push(
+      `stations.high.${options.currentStation}`,
+      'this is',
+      `stations.low.${options.currentStation}`,
+      { id: 'the train now standing at platform', opts: { delayStart: 200 } },
+      `numbers.${options.platform}`,
+      'is the',
+      `times.hour.${options.hour}`,
+      `times.mins.${options.min}`,
+      {
+        id: `tocs.${options.toc.toLowerCase()} service to`,
+        opts: { delayStart: 150 },
+      },
+    )
+
+    if (options.via !== 'none') {
+      if (!this.validateOptions({ stationsHigh: [options.terminatingStationCode], stationsLow: [options.via] })) return
+      files.push(`stations.high.${options.terminatingStationCode}`, 'via', `stations.low.${options.via}`)
+    } else {
+      if (!this.validateOptions({ stationsLow: [options.terminatingStationCode] })) return
+      files.push(`stations.low.${options.terminatingStationCode}`)
+    }
+
+    files.push({ id: 'calling at', opts: { delayStart: 750 } })
+
+    // if (options.callingAt.length === 0) {
+    //   files.push(`stations.high.${options.terminatingStationCode}`, 'only')
+    // } else {
+    const callingAtStops = options.callingAt.map(stn => stn.crsCode)
+    if (!this.validateOptions({ stationsHigh: callingAtStops })) return
+    files.push(...this.pluraliseAudio([...callingAtStops.map(stn => `stations.high.${stn}`), `stations.low.${options.terminatingStationCode}`]))
+    // }
+
+    // Platforms share the same audio as coach numbers
+    if (!this.validateOptions({ coaches: options.coaches })) return
+    files.push('this train is formed of', `numbers.${options.coaches}`, 'coaches')
+
+    await this.playAudioFiles(files, download)
+  }
+
   private validateOptions({ stationsHigh, stationsLow, hour, minute, toc, platform, coaches }: Partial<IValidateOptions>): boolean {
     if (platform && !(AVAILABLE_ALPHANUMBERS as any as string[]).includes(platform)) {
       this.showAudioNotExistsError(`numbers.${platform}`)
@@ -337,6 +399,88 @@ export default class KeTechPhil extends StationAnnouncementSystem {
               { title: '4 chimes', value: '4' },
               { title: 'No chime', value: 'none' },
             ],
+          },
+          platform: {
+            name: 'Platform',
+            default: AVAILABLE_ALPHANUMBERS[0],
+            options: AVAILABLE_ALPHANUMBERS.map(p => ({ title: `Platform ${p}`, value: p })),
+            type: 'select',
+          },
+          hour: {
+            name: 'Hour',
+            default: AVAILABLE_HOURS[0],
+            options: AVAILABLE_HOURS.map(h => ({ title: h, value: h })),
+            type: 'select',
+          },
+          min: {
+            name: 'Minute',
+            default: AVAILABLE_MINUTES[0],
+            options: AVAILABLE_MINUTES.map(m => ({ title: m, value: m })),
+            type: 'select',
+          },
+          toc: {
+            name: 'TOC',
+            default: AVAILABLE_TOCS[0].toLowerCase(),
+            options: AVAILABLE_TOCS.map(m => ({ title: m, value: m.toLowerCase() })),
+            type: 'select',
+          },
+          terminatingStationCode: {
+            name: 'Terminating station',
+            default: AVAILABLE_STATIONS.low[0],
+            options: AllStationsTitleValueMap.filter(s => AVAILABLE_STATIONS.low.includes(s.value as typeof AVAILABLE_STATIONS.low[number])),
+            type: 'select',
+          },
+          via: {
+            name: 'Via... (optional)',
+            default: 'none',
+            options: [
+              { title: 'NONE', value: 'none' },
+              ...AllStationsTitleValueMap.filter(s => AVAILABLE_STATIONS.low.includes(s.value as typeof AVAILABLE_STATIONS.low[number])),
+            ],
+            type: 'select',
+          },
+          callingAt: {
+            name: '',
+            type: 'custom',
+            component: CallingAtSelector,
+            props: {
+              availableStations: AVAILABLE_STATIONS.high,
+            },
+            default: [],
+          },
+          coaches: {
+            name: 'Coach count',
+            default: AVAILABLE_NUMBERS.filter(x => parseInt(x) > 1)[0],
+            options: AVAILABLE_NUMBERS.filter(x => parseInt(x) > 1).map(c => ({ title: c, value: c })),
+            type: 'select',
+          },
+        },
+      },
+    },
+    standingTrain: {
+      name: 'Standing train',
+      component: CustomAnnouncementPane,
+      props: {
+        // presets: AnnouncementPresets.standingTrain,
+        playHandler: this.playStandingTrainAnnouncement.bind(this),
+        options: {
+          chime: {
+            name: 'Chime',
+            type: 'select',
+            default: 'none',
+            options: [
+              { title: '3 chimes', value: '3' },
+              { title: '4 chimes', value: '4' },
+              { title: 'No chime', value: 'none' },
+            ],
+          },
+          currentStation: {
+            name: 'Current station',
+            default: AVAILABLE_STATIONS.high.filter(x => AVAILABLE_STATIONS.low.includes(x as any))[0],
+            options: AllStationsTitleValueMap.filter(
+              s => AVAILABLE_STATIONS.low.includes(s.value as any) && AVAILABLE_STATIONS.high.includes(s.value as any),
+            ),
+            type: 'select',
           },
           platform: {
             name: 'Platform',

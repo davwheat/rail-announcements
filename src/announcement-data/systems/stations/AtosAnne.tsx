@@ -106,6 +106,7 @@ const AVAILABLE_DISRUPTION_REASONS = [
   'a fault with the signalling system',
   'earlier engineering works not being finished on time',
   'engineering works not being finished on time',
+  'the train making extra stops because a train was cancelled'
 ].sort()
 const AVAILABLE_SEATING_AVAILABILITY = ['there are usually many seats available on this train']
 const AVAILABLE_SPECIAL_REMARKS = [

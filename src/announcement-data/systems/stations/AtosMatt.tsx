@@ -142,9 +142,14 @@ const AVAILABLE_DISRUPTION_REASONS = [
   'a fault with the signalling system earlier today',
   'the emergency services dealing with an incident',
   'emergency services dealing with an incident near the railway',
+  'urgent repairs to the track',
 ].sort()
 const AVAILABLE_SEATING_AVAILABILITY = []
 const AVAILABLE_SPECIAL_REMARKS = [
+  {
+    title: 'Make sure you have the correct ticket',
+    value: 'please make sure you have the correct ticket to travel on this service',
+  },
   {
     title: 'GTR - You must wear a face covering',
     value: 'you must wear a face covering whilst on the station and on the train unless you are exempt',

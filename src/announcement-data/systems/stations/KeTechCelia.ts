@@ -476,6 +476,11 @@ export default class KeTechCelia extends StationAnnouncementSystem {
             play: this.playAudioFiles.bind(this, ['4 chime']),
             download: this.playAudioFiles.bind(this, ['4 chime'], true),
           },
+          {
+            label: 'Fanfare',
+            play: this.playAudioFiles.bind(this, ['fanfare']),
+            download: this.playAudioFiles.bind(this, ['fanfare'], true),
+          },
         ],
       },
     },

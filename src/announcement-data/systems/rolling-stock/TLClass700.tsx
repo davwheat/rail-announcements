@@ -494,6 +494,11 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
       props: {
         buttons: [
           {
+            label: 'Manual PA chime',
+            play: this.playAudioFiles.bind(this, ['pa chime']),
+            download: this.playAudioFiles.bind(this, ['pa chime'], true),
+          },
+          {
             label: 'Safety information',
             play: this.playAudioFiles.bind(this, ['safety information is provided on posters in every carriage']),
             download: this.playAudioFiles.bind(this, ['safety information is provided on posters in every carriage'], true),

@@ -1476,7 +1476,11 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
             {
               label: 'Being held at red signal',
               play: this.playAudioFiles.bind(this, ['disruption.this train is being held at a red signal and should be moving shortly']),
-              download: this.playAudioFiles.bind(this, ['disruption.this train is being held at a red signal and should be moving shortly'], true),
+              download: this.playAudioFiles.bind(
+                this,
+                ['disruption.this train is being held at a red signal and should be moving shortly'],
+                true,
+              ),
             },
             {
               label: 'Held due to congestion',
@@ -1485,10 +1489,9 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
             },
             {
               label: 'Held due to PASCOM',
-              play: this.playAudioFiles.bind(
-                this,
-                ['disruption.this train is being held here while our staff investigate the operation of a passenger']
-              ),
+              play: this.playAudioFiles.bind(this, [
+                'disruption.this train is being held here while our staff investigate the operation of a passenger',
+              ]),
               download: this.playAudioFiles.bind(
                 this,
                 ['disruption.this train is being held here while our staff investigate the operation of a passenger'],
@@ -1498,10 +1501,7 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
             {
               label: 'Being diverted',
               play: this.playAudioFiles.bind(this, ['disruption.we apologise this train is being diverted from its normal route']),
-              download: this.playAudioFiles.bind(
-              this,
-              ['disruption.we apologise this train is being diverted from its normal route'],
-              true),
+              download: this.playAudioFiles.bind(this, ['disruption.we apologise this train is being diverted from its normal route'], true),
             },
             {
               label: 'Technical fault - terminating early',
@@ -1516,10 +1516,9 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
             },
             {
               label: 'Engineering works - terminating early',
-              play: this.playAudioFiles.bind(
-                this,
-                ['disruption.we apologise that due to engineering works this train will terminate at the next station']
-              ),
+              play: this.playAudioFiles.bind(this, [
+                'disruption.we apologise that due to engineering works this train will terminate at the next station',
+              ]),
               download: this.playAudioFiles.bind(
                 this,
                 ['disruption.we apologise that due to engineering works this train will terminate at the next station'],

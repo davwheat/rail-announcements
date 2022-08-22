@@ -79,3 +79,5 @@ __temp_audio/
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+static/temp/

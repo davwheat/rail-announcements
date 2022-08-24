@@ -1498,33 +1498,6 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
                 true,
               ),
             },
-            {
-              label: 'Being diverted',
-              play: this.playAudioFiles.bind(this, ['disruption.we apologise this train is being diverted from its normal route']),
-              download: this.playAudioFiles.bind(this, ['disruption.we apologise this train is being diverted from its normal route'], true),
-            },
-            {
-              label: 'Technical fault - terminating early',
-              play: this.playAudioFiles.bind(this, [
-                'disruption.we apologise that due to a technical fault this train will be terminated at the next station',
-              ]),
-              download: this.playAudioFiles.bind(
-                this,
-                ['disruption.we apologise that due to a technical fault this train will be terminated at the next station'],
-                true,
-              ),
-            },
-            {
-              label: 'Engineering works - terminating early',
-              play: this.playAudioFiles.bind(this, [
-                'disruption.we apologise that due to engineering works this train will terminate at the next station',
-              ]),
-              download: this.playAudioFiles.bind(
-                this,
-                ['disruption.we apologise that due to engineering works this train will terminate at the next station'],
-                true,
-              ),
-            },
           ],
           Legacy: [
             {

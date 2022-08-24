@@ -43,6 +43,7 @@ exports.onCreateWebpackConfig = ({ stage, rules, loaders, plugins, actions }) =>
         '@atoms': path.resolve(__dirname, 'src/atoms'),
         '@helpers': path.resolve(__dirname, 'src/helpers'),
         '@announcement-data': path.resolve(__dirname, 'src/announcement-data'),
+        '@hooks': path.resolve(__dirname, 'src/hooks'),
       },
     },
   })

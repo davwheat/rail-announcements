@@ -7,6 +7,8 @@ interface TabProps {
   tabNames: string[]
   tabItems: React.ReactElement[]
   customKeyPrefix?: string
+  selectedTabIndex: number
+  onTabChange?: (index: number) => void
 }
 
 const useStyles = makeStyles({
@@ -62,7 +64,7 @@ const useStyles = makeStyles({
   },
 })
 
-const Tabs: React.FC<TabProps> = React.memo(({ tabNames, tabItems, customKeyPrefix = '' }) => {
+const Tabs: React.FC<TabProps> = React.memo(({ tabNames, tabItems, customKeyPrefix = '', selectedTabIndex, onTabChange }) => {
   const classes = useStyles()
 
   if (tabNames.length !== tabItems.length) {
@@ -70,7 +72,12 @@ const Tabs: React.FC<TabProps> = React.memo(({ tabNames, tabItems, customKeyPref
   }
 
   return (
-    <OGTabs>
+    <OGTabs
+      selectedIndex={selectedTabIndex}
+      onSelect={index => {
+        onTabChange?.(index)
+      }}
+    >
       <TabList className={classes.nav}>
         {tabNames.map(name => (
           <Tab key={name} className={classes.tab}>

@@ -53,15 +53,24 @@ interface ICallingAtSelectorProps {
   value: { crsCode: string; name: string; randomId: string }[]
   onChange: (newValue: { crsCode: string; name: string; randomId: string }[]) => void
   availableStations: string[]
+  additionalOptions?: { title: string; value: string }[]
 }
 
-function CallingAtSelector({ onChange, value, availableStations }: ICallingAtSelectorProps): JSX.Element {
+function CallingAtSelector({ onChange, value, availableStations, additionalOptions }: ICallingAtSelectorProps): JSX.Element {
   const classes = useStyles()
 
-  const AvailableStations = React.useMemo(
-    () => AllStationsTitleValueMap.filter(s => availableStations.includes(s.value)),
-    [availableStations, AllStationsTitleValueMap],
-  )
+  const AvailableStations = React.useMemo(() => {
+    const options = AllStationsTitleValueMap.filter(s => availableStations.includes(s.value))
+
+    if (additionalOptions) {
+      options.push(...additionalOptions)
+      options.sort((a, b) => a.title.localeCompare(b.title))
+
+      return options
+    }
+
+    return options
+  }, [availableStations, AllStationsTitleValueMap])
 
   return (
     <>
@@ -74,7 +83,7 @@ function CallingAtSelector({ onChange, value, availableStations }: ICallingAtSel
         },
         {
           onChange: newStop => {
-            onChange([...value, { crsCode: newStop, name: getStationByCrs(newStop).stationName, randomId: nanoid() }])
+            onChange([...value, { crsCode: newStop, name: AvailableStations.find(s => s.value === newStop).title, randomId: nanoid() }])
           },
           value: '',
           key: 'intermediaryStationCode',

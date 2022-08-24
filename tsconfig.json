@@ -10,13 +10,13 @@
     "outDir": "./dist", // not actually used
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "baseUrl": "src",
     "paths": {
-      "@components/*": ["components/*"],
-      "@data/*": ["data/*"],
-      "@atoms/*": ["atoms/*"],
-      "@helpers/*": ["helpers/*"],
-      "@announcement-data/*": ["announcement-data/*"]
+      "@components/*": ["./src/components/*"],
+      "@data/*": ["./src/data/*"],
+      "@atoms/*": ["./src/atoms/*"],
+      "@helpers/*": ["./src/helpers/*"],
+      "@announcement-data/*": ["./src/announcement-data/*"],
+      "@hooks": ["./src/hooks/*"]
     }
   },
   "exclude": ["node_modules", "build", "scripts", "acceptance-tests", "webpack", "jest", "src/setupTests.ts"]

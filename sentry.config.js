@@ -8,4 +8,5 @@ Sentry.init({
   // beforeSend(event) {
   //   return event
   // },
+  release: process.env.RELEASE,
 })

@@ -111,6 +111,8 @@ jobs:
 
       - name: Build site
         run: yarn build:ci
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
   deploy:
     name: Deploy site to production

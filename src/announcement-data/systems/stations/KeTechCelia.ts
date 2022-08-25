@@ -181,10 +181,11 @@ export default class KeTechCelia extends StationAnnouncementSystem {
     files.push({ id: 'calling at', opts: { delayStart: 750 } })
 
     if (options.callingAt.length === 0) {
+      if (!this.validateOptions({ stationsHigh: [options.terminatingStationCode] })) return
       files.push(`stations.high.${options.terminatingStationCode}`, 'only')
     } else {
       const callingAtStops = options.callingAt.map(stn => stn.crsCode)
-      if (!this.validateOptions({ stationsHigh: callingAtStops })) return
+      if (!this.validateOptions({ stationsHigh: callingAtStops, stationsLow: [options.terminatingStationCode] })) return
       files.push(
         ...this.pluraliseAudio([...callingAtStops.map(stn => `stations.high.${stn}`), `stations.low.${options.terminatingStationCode}`]),
       )

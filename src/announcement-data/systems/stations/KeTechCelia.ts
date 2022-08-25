@@ -39,7 +39,7 @@ const AVAILABLE_TOCS = [
   'Chiltern Railways',
   'Cross Country',
   'Great Western Railway',
-  'London Midland',
+  // 'London Midland',
   'Northern',
   'South West Trains',
   // 'Virgin Pendolino',

@@ -23,6 +23,17 @@ exports.onCreateWebpackConfig = ({ stage, rules, loaders, plugins, actions }) =>
     })
   }
 
+  const SentryPlugin = require('@sentry/webpack-plugin')
+
+  actions.setWebpackConfig({
+    plugins: [
+      new SentryPlugin({
+        include: 'public',
+        ignore: ['app-*', 'polyfill-*', 'framework-*', 'webpack-runtime-*'],
+      }),
+    ],
+  })
+
   actions.setWebpackConfig({
     module: {
       rules: [

@@ -155,7 +155,7 @@ function CustomAnnouncementPane({ options, playHandler, name, presets }: ICustom
                 systemId: AnnouncementSystemInstance.ID,
                 type: 'constructed',
                 name,
-                options: optionsState,
+                options: JSON.stringify(optionsState, null, 2),
               },
             })
 

@@ -42,7 +42,7 @@ const AVAILABLE_TOCS = [
   'London Midland',
   'Northern',
   'South West Trains',
-  'Virgin Pendolino',
+  // 'Virgin Pendolino',
   'West Midlands Railway',
 ] as const
 const AVAILABLE_NUMBERS: string[] = AVAILABLE_ALPHANUMBERS.filter(x => /^\d+$/.test(x))

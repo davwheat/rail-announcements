@@ -23,8 +23,8 @@
   },
   "dependencies": {
     "@material-ui/styles": "^4.11.5",
-    "@sentry/gatsby": "^6.19.7",
-    "@sentry/tracing": "^6.19.7",
+    "@sentry/gatsby": "^7.11.1",
+    "@sentry/tracing": "^7.11.1",
     "babel-plugin-transform-remove-console": "^6.9.4",
     "clsx": "^1.2.1",
     "crunker": "^1.3.0",
@@ -49,6 +49,7 @@
     "uk-railway-stations": "^1.3.0"
   },
   "devDependencies": {
+    "@sentry/webpack-plugin": "^1.19.0",
     "@types/react-beautiful-dnd": "^13.1.2",
     "@types/react-tabs": "^2.3.4",
     "cross-env": "^7.0.3",

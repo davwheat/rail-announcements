@@ -41,12 +41,6 @@ module.exports = {
     },
     {
       resolve: '@sentry/gatsby',
-      options: {
-        dsn: 'https://e2561f72b4484d0c874eecbde0ad297d@o991058.ingest.sentry.io/5947974',
-        environment: process.env.NODE_ENV,
-        sampleRate: __IS_DEV__ ? 1 : 0.7,
-        tracesSampleRate: __IS_DEV__ ? 1 : 0.7,
-      },
     },
   ],
 }

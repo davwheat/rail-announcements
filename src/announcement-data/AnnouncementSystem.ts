@@ -118,6 +118,8 @@ export default abstract class AnnouncementSystem {
    * @returns Promise which resolves when the last audio file has finished playing.
    */
   async playAudioFiles(fileIds: AudioItem[], download: boolean = false): Promise<void> {
+    window.__audio = fileIds
+
     const standardisedFileIds = fileIds.map(fileId => {
       if (typeof fileId === 'string') {
         return { id: fileId }
@@ -137,11 +139,15 @@ export default abstract class AnnouncementSystem {
 
     if (download) {
       crunker.download(crunker.export(audio, 'audio/wav').blob, 'announcement')
+      window.__audio = undefined
     } else {
       const source = crunker.play(audio)
 
       return new Promise<void>(resolve => {
-        source.addEventListener('ended', () => resolve())
+        source.addEventListener('ended', () => {
+          window.__audio = undefined
+          resolve()
+        })
       })
     }
   }

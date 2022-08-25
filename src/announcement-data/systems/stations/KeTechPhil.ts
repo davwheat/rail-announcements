@@ -254,7 +254,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
 
     files.push({ id: 'calling at', opts: { delayStart: 750 } })
 
-    // if (options.callingAt.length === 0) {  
+    // if (options.callingAt.length === 0) {
     //   if (!this.validateOptions({ stationsHigh: [options.terminatingStationCode] })) return
     //   files.push(`stations.high.${options.terminatingStationCode}`, 'only')
     // } else {

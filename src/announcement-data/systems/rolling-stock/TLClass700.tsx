@@ -101,7 +101,7 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
   private readonly StationsWithForcedChangeHere = {
     ABW: 'other national rail services',
     DMK: 'london overground and other national rail services',
-    ECR: 'other national rail and tramlink services alight',
+    ECR: 'other national rail and tramlink services',
     EPH: 'the bakerloo and northern lines',
     FPK: 'the piccadilly and victoria lines alight here for services to moorgate',
     LBG: 'other national rail services also change here for the jubilee and northern lines',

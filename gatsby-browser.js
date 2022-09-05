@@ -11,8 +11,8 @@ window.__audioDrivers = {}
 
 AllTrainAnnouncementSystems.forEach(system => (window.__audioDrivers[new system().ID] = system))
 
-export function onClientEntry() {
-  if (process.env.NODE_ENV === 'production') {
-    require(`preact/devtools`)
-  }
-}
+// export function onClientEntry() {
+//   if (process.env.NODE_ENV === 'production') {
+//     require(`preact/devtools`)
+//   }
+// }

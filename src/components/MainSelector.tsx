@@ -8,6 +8,7 @@ interface SystemListItem {
   id: string
   name: string
 }
+
 const allSystems = AllAnnouncementSystems.reduce((acc, sys) => {
   const system = new sys()
   return [...acc, { id: system.ID, name: system.NAME }]

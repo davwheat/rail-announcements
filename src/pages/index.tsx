@@ -34,6 +34,7 @@ function IndexPage({ location }): JSX.Element {
       </header>
       <main>
         <MainSelector />
+
         <AnnouncementPanel />
       </main>
     </Layout>

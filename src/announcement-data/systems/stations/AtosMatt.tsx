@@ -748,8 +748,6 @@ export default class AtosMatt extends StationAnnouncementSystem {
                   <select
                     value={value}
                     onChange={e => {
-                      console.log(e.target.value)
-
                       onChange({ ...value, delayTime: e.target.value })
                     }}
                   >

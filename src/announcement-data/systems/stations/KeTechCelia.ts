@@ -295,8 +295,6 @@ export default class KeTechCelia extends StationAnnouncementSystem {
     if (stationsHigh) {
       const stnHi = stationsHigh.find(stn => !(AVAILABLE_STATIONS.high as any as string[]).includes(stn))
       if (stnHi) {
-        console.log(stnHi)
-
         this.showAudioNotExistsError(`stations.high.${stnHi}`)
         return false
       }

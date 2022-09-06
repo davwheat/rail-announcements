@@ -3,7 +3,7 @@ import { atom } from 'recoil'
 import { persistentAtom } from 'recoil-persistence/react'
 
 interface GlobalPersistState {
-  systemId: null | string
+  systemId: null | { label: string; value: string }
 }
 
 interface GlobalState {
@@ -19,7 +19,17 @@ export const globalPersistentStateAtom = persistentAtom<GlobalPersistState>(
   },
   {
     validator: state => {
-      if (!AllAnnouncementSystems.some(sys => new sys().ID === state.systemId)) return false
+      if (typeof state.systemId !== 'object') return false
+
+      if (
+        !AllAnnouncementSystems.some(sys => {
+          const system = new sys()
+          const val = { value: system.ID, label: system.NAME }
+
+          return JSON.stringify(val) === JSON.stringify(state.systemId)
+        })
+      )
+        return false
 
       return true
     },

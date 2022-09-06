@@ -5,5 +5,5 @@ import { useRecoilValue } from 'recoil'
 export default function getActiveSystem() {
   const globalState = useRecoilValue(globalPersistentStateAtom)
 
-  return AllAnnouncementSystems.find(sys => new sys().ID === globalState.systemId)
+  return AllAnnouncementSystems.find(sys => new sys().ID === globalState.systemId.value)
 }

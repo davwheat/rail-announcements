@@ -3,16 +3,19 @@ import React from 'react'
 import { useRecoilState } from 'recoil'
 import { globalPersistentStateAtom } from '@atoms/globalStateAtom'
 import { AllAnnouncementSystems } from '@announcement-data/AllSystems'
-
-interface SystemListItem {
-  id: string
-  name: string
-}
+import Select, { Options } from 'react-select'
 
 const allSystems = AllAnnouncementSystems.reduce((acc, sys) => {
   const system = new sys()
-  return [...acc, { id: system.ID, name: system.NAME }]
-}, [] as SystemListItem[])
+  return [...acc, { value: system.ID, label: system.NAME }]
+}, [] as { label: string; value: string }[])
+
+const options = [{ label: 'None', value: 'none' }, ...allSystems]
+
+interface SystemOption {
+  readonly value: string
+  readonly label: string
+}
 
 function MainSelector(): JSX.Element {
   const [globalState, setGlobalState] = useRecoilState(globalPersistentStateAtom)
@@ -21,23 +24,14 @@ function MainSelector(): JSX.Element {
     <div>
       <label htmlFor="system-select">
         Choose a system
-        <select
+        <Select<SystemOption, false>
           id="system-select"
-          value={globalState.systemId || ''}
-          onChange={e => {
-            setGlobalState({ ...globalState, systemId: e.currentTarget.value })
+          value={globalState.systemId || { label: 'None', value: 'none' }}
+          onChange={val => {
+            setGlobalState({ ...globalState, systemId: val })
           }}
-        >
-          <option key="" value="none">
-            None
-          </option>
-
-          {allSystems.map(({ id, name }) => (
-            <option key={id} value={id}>
-              {name}
-            </option>
-          ))}
-        </select>
+          options={options}
+        />
       </label>
     </div>
   )

@@ -9,59 +9,23 @@ env:
   NODE_VERSION: 16.x
 
 jobs:
-  install:
-    runs-on: ubuntu-latest
-    name: Prepare repo
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v2
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-
-      - name: Cache node_modules for other runs
-        uses: actions/cache@v2
-        id: module-cache
-        with:
-          path: ./node_modules
-          key: ${{ runner.os }}-node-modules-${{ github.sha }}-${{ hashFiles('yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-${{ github.sha }}-
-            ${{ runner.os }}-node-modules-
-
-      - name: Install dependencies on cache miss
-        run: yarn install --frozen-lockfile
-        if: steps.yarn-cache.outputs.cache-hit != 'true'
-
-      - name: Install project dependencies from cache
-        run: yarn --prefer-offline --frozen-lockfile
-        if: steps.yarn-cache.outputs.cache-hit == 'true'
-
   formatting:
     runs-on: ubuntu-latest
-    needs: [install]
     name: Verify formatting
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
 
-      - name: Restore dependencies cache
-        uses: actions/cache@v2
-        id: module-cache
-        with:
-          path: ./node_modules
-          key: ${{ runner.os }}-node-modules-${{ github.sha }}-${{ hashFiles('yarn.lock') }}
+      - name: Install dependencies
+        run: |
+          yarn install --immutable
 
       - name: Verify formatting
         run: yarn format:check
@@ -69,86 +33,46 @@ jobs:
   build:
     name: Build site
     runs-on: ubuntu-latest
-    needs: [formatting]
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           persist-credentials: false
 
       - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
 
-      - name: Restore dependencies cache
-        uses: actions/cache@v2
-        id: module-cache
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@v2
+        if: github.ref == 'refs/heads/deploy' && github.event_name == 'push'
         with:
-          path: ./node_modules
-          key: ${{ runner.os }}-node-modules-${{ github.sha }}-${{ hashFiles('yarn.lock') }}
+          static_site_generator: gatsby
+
+      - name: Install dependencies
+        run: |
+          yarn install --immutable
 
       - name: Restore Gatsby cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: gatsbyCache
         with:
           path: ./.cache
-          key: ${{ runner.os }}-gatsby-cache-${{ hashFiles('yarn.lock') }}
+          key: ${{ runner.os }}-gatsby-cache-${{ secrets.CACHE_VERSION }}-${{ hashFiles('public') }}
           restore-keys: |
-            ${{ runner.os }}-gatsby-cache-
-
-      - name: Restore Gatsby build output
-        uses: actions/cache@v2
-        id: gatsbyOut
-        with:
-          path: ./public
-          key: ${{ runner.os }}-gatsby-out-${{ hashFiles('yarn.lock') }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-gatsby-out-${{ hashFiles('yarn.lock') }}
-            ${{ runner.os }}-gatsby-out-
+            ${{ runner.os }}-gatsby-cache-${{ secrets.CACHE_VERSION }}-
 
       - name: Build site
         run: yarn build:ci
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
-  deploy:
-    name: Deploy site to production
-    runs-on: ubuntu-latest
-    needs: [build, formatting, install]
-
-    # Only deploy on push to deploy branch
-    if: github.ref == 'refs/heads/deploy' && github.event_name == 'push'
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Restore Gatsby cache
-        uses: actions/cache@v2
-        id: gatsbyCache
-        with:
-          path: ./.cache
-          key: ${{ runner.os }}-gatsby-cache-${{ hashFiles('yarn.lock') }}
-
-      - name: Restore Gatsby output
-        uses: actions/cache@v2
-        id: gatsbyOut
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
+        if: github.ref == 'refs/heads/deploy' && github.event_name == 'push'
         with:
           path: ./public
-          key: ${{ runner.os }}-gatsby-out-${{ hashFiles('yarn.lock') }}-${{ github.sha }}
-
-      - name: Upload a compiled website
-        uses: actions/upload-artifact@v2
-        with:
-          name: Compiled website
-          path: public/
-
-      - name: Deploy to GitHub Pages 🚀
-        uses: JamesIves/github-pages-deploy-action@4.1.0
-        with:
-          branch: prod
-          folder: public
-          clean: true

@@ -23,10 +23,12 @@ The released files contain some errors:
 
 Some data from [the crowdsourced transcription effort](https://github.com/matteason/scotrail-announcements-june-2022) contains errors, too.
 
+- `1552.mp3` incorrectly transcribed as `is the delayed` instead of `for the delayed`
 - `1886.mp3` CRS code is misidentified as `AXL` instead of `ALX`
 - `2075.mp3` misidentified as `Lochluichart` when it's `Lochailort`
 - `2338.mp3` CRS code is misidentified as `RYV` instead of `RYB`
 - `2339.mp3` CRS code is misidentified as `RTU` instead of `RUT`
+- Various "engineering work(s)" messages miscategorised as "conjoining"
 
 These issues have since been fixed by myself on the
 [Google Sheet](https://docs.google.com/spreadsheets/d/1jAtNLBXLYwTraaC_IGAAs53jJWWEQUtFrocS5jW31JM/edit?usp=sharing).

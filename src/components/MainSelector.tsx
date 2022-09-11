@@ -3,7 +3,7 @@ import React from 'react'
 import { useRecoilState } from 'recoil'
 import { globalPersistentStateAtom } from '@atoms/globalStateAtom'
 import { AllAnnouncementSystems } from '@announcement-data/AllSystems'
-import Select, { Options } from 'react-select'
+import Select from 'react-select'
 
 const allSystems = AllAnnouncementSystems.reduce((acc, sys) => {
   const system = new sys()

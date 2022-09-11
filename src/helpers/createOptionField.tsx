@@ -1,12 +1,20 @@
 import React from 'react'
+import Select from 'react-select'
 
 import type { OptionsExplanation } from '@announcement-data/AnnouncementSystem'
+
+import './optionFields.less'
 
 interface OptionFieldOptions {
   onChange: (value: any) => void
   value: any
   key: string
   activeState?: Record<string, unknown>
+}
+
+interface Option {
+  readonly label: string
+  readonly value: string
 }
 
 export default function createOptionField(optionData: OptionsExplanation, options: OptionFieldOptions): JSX.Element {
@@ -40,17 +48,19 @@ export default function createOptionField(optionData: OptionsExplanation, option
       )
 
     case 'select':
-      return (
-        <label key={options.key}>
-          {optionData.name}
+      const opts = optionData.options.map(option => ({ value: option.value, label: option.title }))
 
-          <select value={options.value} onChange={e => options.onChange(e.currentTarget.value)}>
-            {optionData.options.map(option => (
-              <option value={option.value} key={option.value}>
-                {option.title}
-              </option>
-            ))}
-          </select>
+      return (
+        <label className="option-select" htmlFor="system-select">
+          {optionData.name}
+          <Select<Option, false>
+            id="system-select"
+            value={{ value: options.value, label: opts.find(option => option.value === options.value)?.label || '' }}
+            onChange={val => {
+              options.onChange(val.value)
+            }}
+            options={opts}
+          />
         </label>
       )
 

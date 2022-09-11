@@ -58,6 +58,7 @@ const AVAILABLE_TOCS = [
   'Southern',
   'Strathclyde Metro',
   'The Blue Pullman',
+  'The Bluebell Railway',
   'The Cathedrals Express',
   'The Cathedrals Express Special Steam Service',
   'The Cathedrals Express Steam Service',

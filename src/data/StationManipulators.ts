@@ -6,7 +6,7 @@ export const AllStationsCrsToNameMap: { [crs: string]: string } = AllStationsJSO
 }, {})
 
 export const AllStationsTitleValueMap: { title: string; value: string }[] = AllStationsJSON.reduce((acc, stn) => {
-  acc.push({ value: stn.crsCode, title: stn.stationName })
+  acc.push({ value: stn.crsCode, title: `${stn.stationName} (${stn.crsCode})` })
   return acc
 }, [])
 

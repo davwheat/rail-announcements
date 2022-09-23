@@ -1,8 +1,5 @@
-import React from 'react'
-import CallingAtSelector from '@components/CallingAtSelector'
 import CustomAnnouncementPane, { ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
 import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
-import { AllStationsTitleValueMap } from '@data/StationManipulators'
 import AnnouncementSystem, { AudioItem, AudioItemObject, CustomAnnouncementTab } from '../../AnnouncementSystem'
 
 interface IStationDataItem {
@@ -75,7 +72,7 @@ const StationData: IStationDataItem[] = [
   },
   {
     name: 'Finchley Road',
-    approachingFiles: ['finchley road', 'change for the met change hereplease mind the gap'],
+    approachingFiles: ['finchley road', 'change for the met change here please mind the gap'],
     standingFiles: ['finchley road change here'],
     canTerminate: true,
   },
@@ -105,7 +102,7 @@ const StationData: IStationDataItem[] = [
   },
   {
     name: 'Green Park',
-    approachingFiles: ['green park', 'change for the piccadilly and victoria lines change hereexit for buckingham palace'],
+    approachingFiles: ['green park', 'change for the piccadilly and victoria lines exit for buckingham palace'],
     standingFiles: ['green park change here'],
     canTerminate: true,
   },

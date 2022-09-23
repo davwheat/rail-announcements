@@ -21,27 +21,32 @@ interface IMultiselectOptions {
   type: 'multiselect'
   default: string[]
   options: { title: string; value: string }[]
+  onlyShowWhen?: (activeState: Record<string, unknown>) => boolean
 }
 interface ISelectOptions {
   name: string
   type: 'select'
   default: string
   options: { title: string; value: string }[]
+  onlyShowWhen?: (activeState: Record<string, unknown>) => boolean
 }
 interface IBooleanOptions {
   name: string
   type: 'boolean'
   default: boolean
+  onlyShowWhen?: (activeState: Record<string, unknown>) => boolean
 }
 interface ITimeOptions {
   name: string
   type: 'time'
   default: `${string}:${string}`
+  onlyShowWhen?: (activeState: Record<string, unknown>) => boolean
 }
 interface INumberOptions {
   name: string
   type: 'number'
   default: number
+  onlyShowWhen?: (activeState: Record<string, unknown>) => boolean
 }
 
 interface ICustomOptions {
@@ -50,12 +55,14 @@ interface ICustomOptions {
   component: (props: { activeState?: Record<string, unknown>; onChange: (newVal: any) => void; value: any; [key: string]: any }) => JSX.Element
   props?: Record<string, unknown>
   default: any
+  onlyShowWhen?: (activeState: Record<string, unknown>) => boolean
 }
 
 interface ICustomNoStateOptions {
   type: 'customNoState'
   component: (props: { activeState: Record<string, unknown>; [key: string]: any }) => JSX.Element
   props?: Record<string, unknown>
+  onlyShowWhen?: (activeState: Record<string, unknown>) => boolean
 }
 
 export type AudioItem = string | AudioItemObject

@@ -135,9 +135,13 @@ function CustomAnnouncementPane({ options, playHandler, name, presets }: ICustom
         {Object.keys(options).length === 0 && <p>No options available</p>}
 
         <>
-          {Object.entries(options).map(([key, opt]) =>
-            createOptionField(opt, { onChange: createFieldUpdater(key), value: optionsState[key], key, activeState: optionsState }),
-          )}
+          {Object.entries(options)
+            .map(([key, opt]) => {
+              if (opt.onlyShowWhen && !opt.onlyShowWhen(optionsState)) return null
+
+              return createOptionField(opt, { onChange: createFieldUpdater(key), value: optionsState[key], key, activeState: optionsState })
+            })
+            .filter(x => !!x)}
         </>
       </fieldset>
 

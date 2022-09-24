@@ -25,8 +25,8 @@ export default function NavBar() {
   return (
     <nav className={classes.root}>
       <Link to="/">Generator</Link>
-      {/* <Link to="/about">About</Link>
-      <Link to="/changelog">Latest changes</Link> */}
+      <Link to="/about">About</Link>
+      {/* <Link to="/changelog">Latest changes</Link> */}
     </nav>
   )
 }

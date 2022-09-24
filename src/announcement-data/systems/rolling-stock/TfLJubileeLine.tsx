@@ -7,6 +7,10 @@ interface IStationDataItem {
   canTerminate: boolean
   approachingFiles: readonly string[]
   standingFiles: readonly string[]
+  postEliz?: {
+    approachingFiles: readonly string[]
+    standingFiles: readonly string[]
+  }
 }
 
 const StationData: IStationDataItem[] = [
@@ -99,6 +103,10 @@ const StationData: IStationDataItem[] = [
     approachingFiles: ['bond street', 'change for the central line'],
     standingFiles: ['bond street change here'],
     canTerminate: false,
+    postEliz: {
+      approachingFiles: ['bond street', 'post eliz.change for the central line and the elizabeth line'],
+      standingFiles: ['post eliz.bond street change here'],
+    },
   },
   {
     name: 'Green Park',
@@ -147,6 +155,10 @@ const StationData: IStationDataItem[] = [
     approachingFiles: ['canary wharf', 'change for the dlr'],
     standingFiles: ['canary wharf change here'],
     canTerminate: true,
+    postEliz: {
+      approachingFiles: ['bond street', 'post eliz.change for the dlr and the elizabeth line'],
+      standingFiles: ['post eliz.canary wharf change here'],
+    },
   },
   {
     name: 'North Greenwich',
@@ -171,21 +183,29 @@ const StationData: IStationDataItem[] = [
     approachingFiles: ['stratford change for'],
     standingFiles: ['stratford change here'],
     canTerminate: true,
+    postEliz: {
+      approachingFiles: ['post eliz.stratford change for'],
+      standingFiles: ['post eliz.stratford change here'],
+    },
   },
 ]
 
 interface INextStationAnnouncementOptions {
   stationName: string
   doorDirection: 'left' | 'right'
+  usePostEliz: boolean
 }
 
 interface IAtStationAnnouncementOptions {
   stationName: string
+  usePostEliz: boolean
 }
 
 interface IDestinationInfoAnnouncementOptions {
   terminatingStationName: string
 }
+
+const elizAffectedStations = StationData.filter(station => station.postEliz).map(station => station.name)
 
 const announcementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {
   destinationInfo: [
@@ -236,7 +256,14 @@ export default class TfLJubileeLine extends AnnouncementSystem {
 
     files.push('the next station is')
 
-    const stnFiles: AudioItem[] = [...StationData.find(s => s.name === options.stationName).approachingFiles]
+    const stnFiles: AudioItem[] = []
+
+    if (elizAffectedStations.includes(options.stationName) && options.usePostEliz) {
+      stnFiles.push(...StationData.find(s => s.name === options.stationName).postEliz.approachingFiles)
+    } else {
+      stnFiles.push(...StationData.find(s => s.name === options.stationName).approachingFiles)
+    }
+
     stnFiles[0] = { id: stnFiles[0] as string, opts: { delayStart: 250 } }
 
     files.push(...stnFiles)
@@ -251,7 +278,14 @@ export default class TfLJubileeLine extends AnnouncementSystem {
 
     files.push('this station is')
 
-    const stnFiles: AudioItem[] = [...StationData.find(s => s.name === options.stationName).standingFiles]
+    const stnFiles: AudioItem[] = []
+
+    if (elizAffectedStations.includes(options.stationName) && options.usePostEliz) {
+      stnFiles.push(...StationData.find(s => s.name === options.stationName).postEliz.standingFiles)
+    } else {
+      stnFiles.push(...StationData.find(s => s.name === options.stationName).standingFiles)
+    }
+
     stnFiles[0] = { id: stnFiles[0] as string, opts: { delayStart: 250 } }
 
     files.push(...stnFiles)
@@ -297,6 +331,14 @@ export default class TfLJubileeLine extends AnnouncementSystem {
             ],
             type: 'select',
           },
+          usePostEliz: {
+            name: 'Use Elizabeth line version',
+            default: true,
+            type: 'boolean',
+            onlyShowWhen: ({ stationName }: { stationName: string }) => {
+              return elizAffectedStations.includes(stationName)
+            },
+          },
         },
       },
     },
@@ -311,6 +353,14 @@ export default class TfLJubileeLine extends AnnouncementSystem {
             default: StationData[0].name,
             options: StationData.map(s => ({ title: s.name, value: s.name })),
             type: 'select',
+          },
+          usePostEliz: {
+            name: 'Use Elizabeth line version',
+            default: true,
+            type: 'boolean',
+            onlyShowWhen: ({ stationName }: { stationName: string }) => {
+              return elizAffectedStations.includes(stationName)
+            },
           },
         },
       },

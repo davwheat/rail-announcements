@@ -158,6 +158,10 @@ const changelog: IChangelogVersion[] = [
     additions: ['[TfL Jubilee Line] Add post-Elizabeth line opening announcements for Canary Wharf and Stratford'],
     fixes: ['[TfL Jubilee Line] Fix next station announcement not working for Green Park and Finchley Road'],
   },
+  {
+    date: '2022-09-24',
+    additions: ['Add new About and Changelog pages'],
+  },
 ]
 
 export default changelog

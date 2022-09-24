@@ -23,6 +23,9 @@ module.exports = {
   },
   plugins: [
     ...prodPlugins,
+    `gatsby-plugin-image`,
+    `gatsby-plugin-sharp`,
+    `gatsby-transformer-sharp`,
     `gatsby-plugin-react-head`,
     `gatsby-plugin-material-ui`,
     `gatsby-plugin-less`,

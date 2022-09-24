@@ -2,6 +2,7 @@ import React from 'react'
 
 import Layout from '@components/Layout'
 import { Link } from 'gatsby'
+import NavBar from '@components/NavBar'
 
 function Error404Page({ location }): JSX.Element {
   return (
@@ -9,6 +10,9 @@ function Error404Page({ location }): JSX.Element {
       <header>
         <h1>Error 404 - Not found</h1>
       </header>
+
+      <NavBar />
+
       <main>
         <p>Oh no! Looks like this page couldn't be found.</p>
         <Link to="/">Go to home page</Link>

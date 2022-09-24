@@ -3,6 +3,7 @@ import React from 'react'
 import MainSelector from '@components/MainSelector'
 import Layout from '@components/Layout'
 import AnnouncementPanel from '@components/AnnouncementPanel'
+import NavBar from '@components/NavBar'
 
 // @ts-expect-error
 import LogoSmallUrl from '../images/logo_small.png'
@@ -32,6 +33,9 @@ function IndexPage({ location }): JSX.Element {
           <span>Rail announcements</span>
         </h1>
       </header>
+
+      <NavBar />
+
       <main>
         <MainSelector />
 

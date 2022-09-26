@@ -2,6 +2,109 @@ import CustomAnnouncementPane, { ICustomAnnouncementPreset } from '@components/P
 import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
 import AnnouncementSystem, { AudioItem, AudioItemObject, CustomAnnouncementTab } from '../../AnnouncementSystem'
 
+interface IDestination {
+  station: string
+  viaBank?: boolean
+  viaCharingCross?: boolean
+}
+
+const AvailableDestinations: IDestination[] = [
+  {
+    station: 'Archway',
+    viaBank: true,
+    viaCharingCross: true,
+  },
+  {
+    station: 'Battersea Power Station',
+    viaCharingCross: true,
+  },
+  {
+    station: 'Charing Cross',
+  },
+  {
+    station: 'Clapham Common',
+    viaBank: true,
+    viaCharingCross: true,
+  },
+  {
+    station: 'Colindale',
+    viaBank: true,
+    viaCharingCross: true,
+  },
+  {
+    station: 'East Finchley',
+    viaBank: true,
+    viaCharingCross: true,
+  },
+  {
+    station: 'Edgware',
+    viaBank: true,
+    viaCharingCross: true,
+  },
+  {
+    station: 'Euston',
+    viaBank: true,
+  },
+  {
+    station: 'Finchley Central',
+    viaBank: true,
+    viaCharingCross: true,
+  },
+  {
+    station: 'Golders Green',
+    viaBank: true,
+    viaCharingCross: true,
+  },
+  {
+    station: 'Hampstead',
+    viaBank: true,
+    viaCharingCross: true,
+  },
+  {
+    station: 'High Barnet',
+    viaBank: true,
+    viaCharingCross: true,
+  },
+  {
+    station: 'Kennington',
+    viaBank: true,
+    viaCharingCross: true,
+  },
+  {
+    station: 'Kings Cross',
+  },
+  {
+    station: 'Mill Hill East',
+    viaBank: true,
+    viaCharingCross: true,
+  },
+  {
+    station: 'Moorgate',
+  },
+  {
+    station: 'Morden',
+    viaBank: true,
+    viaCharingCross: true,
+  },
+  {
+    station: 'Mornington Crescent',
+  },
+  {
+    station: 'Nine Elms',
+    viaCharingCross: true,
+  },
+  {
+    station: 'Stockwell',
+    viaBank: true,
+    viaCharingCross: true,
+  },
+  {
+    station: 'Tooting Broadway',
+    viaBank: true,
+    viaCharingCross: true,
+  },
+]
+
 interface IStationDataItem {
   name: string
   canTerminate: boolean
@@ -13,15 +116,6 @@ interface IStationDataItem {
   }
 }
 
-const StationData: IStationDataItem[] = [
-  {
-    name: 'Stanmore',
-    approachingFiles: ['stanmore'],
-    standingFiles: ['stanmore'],
-    canTerminate: true,
-  },
-]
-
 interface INextStationAnnouncementOptions {
   stationName: string
   doorDirection: 'left' | 'right'
@@ -30,18 +124,15 @@ interface INextStationAnnouncementOptions {
 
 interface IAtStationAnnouncementOptions {
   stationName: string
-  usePostEliz: boolean
 }
 
 interface IDestinationInfoAnnouncementOptions {
-  terminatingStationName: string
+  stationName: string
 }
-
-const elizAffectedStations = StationData.filter(station => station.postEliz).map(station => station.name)
 
 const announcementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {}
 
-export default class TfLJubileeLine extends AnnouncementSystem {
+export default class TfLNorthernLine extends AnnouncementSystem {
   readonly NAME = 'TfL Northern Line'
   readonly ID = 'TFL_NORTHERN_LINE_V1'
   readonly FILE_PREFIX = 'TfL/Northern Line'
@@ -50,8 +141,7 @@ export default class TfLJubileeLine extends AnnouncementSystem {
   private async playDestinationInfoAnnouncement(options: IDestinationInfoAnnouncementOptions, download: boolean = false): Promise<void> {
     const files: AudioItem[] = []
 
-    files.push('anita.this train terminates at')
-    files.push('anita.' + options.terminatingStationName.toLowerCase().replace(/[^a-z ]/g, ''))
+    files.push('destination.' + options.stationName.toLowerCase().replace(/[^a-z \.]/g, ''))
 
     await this.playAudioFiles(files, download)
   }
@@ -59,21 +149,7 @@ export default class TfLJubileeLine extends AnnouncementSystem {
   private async playNextStationAnnouncement(options: INextStationAnnouncementOptions, download: boolean = false): Promise<void> {
     const files: AudioItem[] = []
 
-    files.push('the next station is')
-
-    const stnFiles: AudioItem[] = []
-
-    if (elizAffectedStations.includes(options.stationName) && options.usePostEliz) {
-      stnFiles.push(...StationData.find(s => s.name === options.stationName).postEliz.approachingFiles)
-    } else {
-      stnFiles.push(...StationData.find(s => s.name === options.stationName).approachingFiles)
-    }
-
-    stnFiles[0] = { id: stnFiles[0] as string, opts: { delayStart: 250 } }
-
-    files.push(...stnFiles)
-
-    files.push({ id: `doors will open on the ${options.doorDirection} hand side`, opts: { delayStart: 750 } })
+    files.push('conjoiner.the next station is')
 
     await this.playAudioFiles(files, download)
   }
@@ -81,19 +157,7 @@ export default class TfLJubileeLine extends AnnouncementSystem {
   private async playAtStationAnnouncement(options: IAtStationAnnouncementOptions, download: boolean = false): Promise<void> {
     const files: AudioItem[] = []
 
-    files.push('this station is')
-
-    const stnFiles: AudioItem[] = []
-
-    if (elizAffectedStations.includes(options.stationName) && options.usePostEliz) {
-      stnFiles.push(...StationData.find(s => s.name === options.stationName).postEliz.standingFiles)
-    } else {
-      stnFiles.push(...StationData.find(s => s.name === options.stationName).standingFiles)
-    }
-
-    stnFiles[0] = { id: stnFiles[0] as string, opts: { delayStart: 250 } }
-
-    files.push(...stnFiles)
+    files.push('conjoiner.this station is')
 
     await this.playAudioFiles(files, download)
   }
@@ -106,70 +170,66 @@ export default class TfLJubileeLine extends AnnouncementSystem {
         playHandler: this.playDestinationInfoAnnouncement.bind(this),
         presets: announcementPresets.destinationInfo,
         options: {
-          terminatingStationName: {
+          stationName: {
             name: 'Destination station',
-            default: StationData.filter(s => s.canTerminate)[0].name,
-            options: StationData.filter(s => s.canTerminate).map(s => ({ title: s.name, value: s.name })),
+            default: AvailableDestinations[0].station,
+            options: AvailableDestinations.reduce((acc, dest) => {
+              acc.push({ title: dest.station, value: dest.station })
+
+              if (dest.viaBank) {
+                acc.push({ title: `${dest.station} via Bank`, value: `via bank.${dest.station}` })
+              }
+
+              if (dest.viaCharingCross) {
+                acc.push({ title: `${dest.station} via Charing Cross`, value: `via charing cross.${dest.station}` })
+              }
+
+              return acc
+            }, [] as { title: string; value: string }[]),
             type: 'select',
           },
         },
       },
     },
-    nextStation: {
-      name: 'Next station',
-      component: CustomAnnouncementPane,
-      props: {
-        playHandler: this.playNextStationAnnouncement.bind(this),
-        options: {
-          stationName: {
-            name: 'Next station',
-            default: StationData[0].name,
-            options: StationData.map(s => ({ title: s.name, value: s.name })),
-            type: 'select',
-          },
-          doorDirection: {
-            name: 'Door direction',
-            default: 'right',
-            options: [
-              { title: 'Left', value: 'left' },
-              { title: 'Right', value: 'right' },
-            ],
-            type: 'select',
-          },
-          usePostEliz: {
-            name: 'Use Elizabeth line version',
-            default: true,
-            type: 'boolean',
-            onlyShowWhen: ({ stationName }: { stationName: string }) => {
-              return elizAffectedStations.includes(stationName)
-            },
-          },
-        },
-      },
-    },
-    thisStation: {
-      name: 'Stopped at station',
-      component: CustomAnnouncementPane,
-      props: {
-        playHandler: this.playAtStationAnnouncement.bind(this),
-        options: {
-          stationName: {
-            name: 'This station',
-            default: StationData[0].name,
-            options: StationData.map(s => ({ title: s.name, value: s.name })),
-            type: 'select',
-          },
-          usePostEliz: {
-            name: 'Use Elizabeth line version',
-            default: true,
-            type: 'boolean',
-            onlyShowWhen: ({ stationName }: { stationName: string }) => {
-              return elizAffectedStations.includes(stationName)
-            },
-          },
-        },
-      },
-    },
+    // nextStation: {
+    //   name: 'Next station',
+    //   component: CustomAnnouncementPane,
+    //   props: {
+    //     playHandler: this.playNextStationAnnouncement.bind(this),
+    //     options: {
+    //       stationName: {
+    //         name: 'Next station',
+    //         default: StationData[0].name,
+    //         options: StationData.map(s => ({ title: s.name, value: s.name })),
+    //         type: 'select',
+    //       },
+    //       doorDirection: {
+    //         name: 'Door direction',
+    //         default: 'right',
+    //         options: [
+    //           { title: 'Left', value: 'left' },
+    //           { title: 'Right', value: 'right' },
+    //         ],
+    //         type: 'select',
+    //       },
+    //     },
+    //   },
+    // },
+    // thisStation: {
+    //   name: 'Stopped at station',
+    //   component: CustomAnnouncementPane,
+    //   props: {
+    //     playHandler: this.playAtStationAnnouncement.bind(this),
+    //     options: {
+    //       stationName: {
+    //         name: 'This station',
+    //         default: StationData[0].name,
+    //         options: StationData.map(s => ({ title: s.name, value: s.name })),
+    //         type: 'select',
+    //       },
+    //     },
+    //   },
+    // },
     announcementButtons: {
       name: 'Announcement buttons',
       component: CustomButtonPane,

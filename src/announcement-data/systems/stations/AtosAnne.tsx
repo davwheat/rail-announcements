@@ -535,7 +535,7 @@ export default class AtosAnne extends StationAnnouncementSystem {
           seating: {
             name: 'Seating availability',
             default: 'none',
-            options: [{ title: '<not stated>', value: 'none' }, ...AVAILABLE_SEATING_AVAILABILITY.map(c => ({ title: c, value: c }))],
+            options: [{ title: '(not stated)', value: 'none' }, ...AVAILABLE_SEATING_AVAILABILITY.map(c => ({ title: c, value: c }))],
             type: 'select',
           },
           special: {

@@ -471,9 +471,14 @@ export default class TfLNorthernLine extends AnnouncementSystem {
         buttonSections: {
           Safety: [
             {
-              label: 'Please stand clear of the doors',
-              play: this.playAudioFiles.bind(this, ['please stand clear of the doors']),
-              download: this.playAudioFiles.bind(this, ['please stand clear of the doors'], true),
+              label: 'This train is about to depart',
+              play: this.playAudioFiles.bind(this, ['this train is about to depart']),
+              download: this.playAudioFiles.bind(this, ['this train is about to depart'], true),
+            },
+            {
+              label: 'Please mind the doors',
+              play: this.playAudioFiles.bind(this, ['please mind the doors']),
+              download: this.playAudioFiles.bind(this, ['please mind the doors'], true),
             },
             {
               label: 'Please mind the gap between the train and the platform',
@@ -481,63 +486,63 @@ export default class TfLNorthernLine extends AnnouncementSystem {
               download: this.playAudioFiles.bind(this, ['please mind the gap between the train and the platform'], true),
             },
           ],
-          General: [
-            {
-              label: 'Please keep your personal belongings with you at all times',
-              play: this.playAudioFiles.bind(this, ['please keep your personal belongings with you at all times']),
-              download: this.playAudioFiles.bind(this, ['please keep your personal belongings with you at all times'], true),
-            },
-          ],
+          // General: [
+          //   {
+          //     label: 'Please keep your personal belongings with you at all times',
+          //     play: this.playAudioFiles.bind(this, ['please keep your personal belongings with you at all times']),
+          //     download: this.playAudioFiles.bind(this, ['please keep your personal belongings with you at all times'], true),
+          //   },
+          // ],
           Informational: [
             {
-              label: 'Passengers are reminded that smoking is not permitted',
-              play: this.playAudioFiles.bind(this, ['passengers are reminded that smoking is not permitted']),
-              download: this.playAudioFiles.bind(this, ['passengers are reminded that smoking is not permitted'], true),
+              label: 'Smoking is not permitted',
+              play: this.playAudioFiles.bind(this, ['smoking is not permitted on any part of london underground']),
+              download: this.playAudioFiles.bind(this, ['smoking is not permitted on any part of london underground'], true),
             },
-            {
-              label: 'There are beggars and buskers operating on this train',
-              play: this.playAudioFiles.bind(this, ['there are beggars and buskers operating on this train']),
-              download: this.playAudioFiles.bind(this, ['there are beggars and buskers operating on this train'], true),
-            },
-            {
-              label: 'There may be pickpockets operating on this train',
-              play: this.playAudioFiles.bind(this, ['there may be pickpockets operating on this train']),
-              download: this.playAudioFiles.bind(this, ['there may be pickpockets operating on this train'], true),
-            },
+            //   {
+            //     label: 'There are beggars and buskers operating on this train',
+            //     play: this.playAudioFiles.bind(this, ['there are beggars and buskers operating on this train']),
+            //     download: this.playAudioFiles.bind(this, ['there are beggars and buskers operating on this train'], true),
+            //   },
+            //   {
+            //     label: 'There may be pickpockets operating on this train',
+            //     play: this.playAudioFiles.bind(this, ['there may be pickpockets operating on this train']),
+            //     download: this.playAudioFiles.bind(this, ['there may be pickpockets operating on this train'], true),
+            //   },
           ],
-          Operational: [
-            {
-              label: 'Passengers for Canning Town, West Ham and Stratford should change here',
-              play: this.playAudioFiles.bind(this, ['passengers for canning town west ham and stratford should change here']),
-              download: this.playAudioFiles.bind(this, ['passengers for canning town west ham and stratford should change here'], true),
-            },
-            {
-              label: 'The next station is closed. This train will not stop at the next station.',
-              play: this.playAudioFiles.bind(this, ['the next station is closed this train will not stop at the next station']),
-              download: this.playAudioFiles.bind(this, ['the next station is closed this train will not stop at the next station'], true),
-            },
-            {
-              label: 'There is restricted escalator service at the next station and you may wish to alight here',
-              play: this.playAudioFiles.bind(this, [
-                'there is restricted escalator service at the next station and you may wish to alight here',
-              ]),
-              download: this.playAudioFiles.bind(
-                this,
-                ['there is restricted escalator service at the next station and you may wish to alight here'],
-                true,
-              ),
-            },
-            {
-              label: 'There is no lift service at the next station and you may wish to alight here',
-              play: this.playAudioFiles.bind(this, ['there is no lift service at the next station and you may wish to alight here']),
-              download: this.playAudioFiles.bind(this, ['there is no lift service at the next station and you may wish to alight here'], true),
-            },
-            {
-              label: 'All change please. This train will now terminate here. All change please.',
-              play: this.playAudioFiles.bind(this, ['all change please this train will now terminate here all change please']),
-              download: this.playAudioFiles.bind(this, ['all change please this train will now terminate here all change please'], true),
-            },
-          ],
+          // Operational: [
+          //   {
+          //     label: 'Passengers for Canning Town, West Ham and Stratford should change here',
+          //     play: this.playAudioFiles.bind(this, ['passengers for canning town west ham and stratford should change here']),
+          //     download: this.playAudioFiles.bind(this, ['passengers for canning town west ham and stratford should change here'], true),
+          //   },
+          //   {
+          //     label: 'The next station is closed. This train will not stop at the next station.',
+          //     play: this.playAudioFiles.bind(this, ['the next station is closed this train will not stop at the next station']),
+          //     download: this.playAudioFiles.bind(this, ['the next station is closed this train will not stop at the next station'], true),
+          //   },
+          //   {
+          //     label: 'There is restricted escalator service at the next station and you may wish to alight here',
+          //     play: this.playAudioFiles.bind(this, [
+          //       'there is restricted escalator service at the next station and you may wish to alight here',
+          //     ]),
+          //     download: this.playAudioFiles.bind(
+          //       this,
+          //       ['there is restricted escalator service at the next station and you may wish to alight here'],
+          //       true,
+          //     ),
+          //   },
+          //   {
+          //     label: 'There is no lift service at the next station and you may wish to alight here',
+          //     play: this.playAudioFiles.bind(this, ['there is no lift service at the next station and you may wish to alight here']),
+          //     download: this.playAudioFiles.bind(this, ['there is no lift service at the next station and you may wish to alight here'], true),
+          //   },
+          //   {
+          //     label: 'All change please. This train will now terminate here. All change please.',
+          //     play: this.playAudioFiles.bind(this, ['all change please this train will now terminate here all change please']),
+          //     download: this.playAudioFiles.bind(this, ['all change please this train will now terminate here all change please'], true),
+          //   },
+          // ],
         },
       },
     },

@@ -162,6 +162,10 @@ const changelog: IChangelogVersion[] = [
     date: '2022-09-24',
     additions: ['Add new About and Changelog pages'],
   },
+  {
+    date: '2022-10-06',
+    additions: ['[TfL Northern Line] Add Northern Line announcement system (only destination and next station info)'],
+  },
 ]
 
 export default changelog

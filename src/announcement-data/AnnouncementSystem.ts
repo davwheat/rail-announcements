@@ -125,6 +125,11 @@ export default abstract class AnnouncementSystem {
    * @returns Promise which resolves when the last audio file has finished playing.
    */
   async playAudioFiles(fileIds: AudioItem[], download: boolean = false): Promise<void> {
+    if (fileIds.length === 0) {
+      console.warn('No audio files to play.')
+      return
+    }
+
     window.__audio = fileIds
 
     const standardisedFileIds = fileIds.map(fileId => {

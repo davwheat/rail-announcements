@@ -51,7 +51,7 @@ export default function createOptionField(optionData: OptionsExplanation, option
       const opts = optionData.options.map(option => ({ value: option.value, label: option.title }))
 
       return (
-        <label className="option-select" htmlFor="system-select">
+        <label key={options.key} className="option-select" htmlFor="system-select">
           {optionData.name}
           <Select<Option, false>
             id="system-select"

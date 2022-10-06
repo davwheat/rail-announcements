@@ -105,25 +105,231 @@ const AvailableDestinations: IDestination[] = [
   },
 ]
 
-interface IStationDataItem {
-  name: string
-  canTerminate: boolean
-  approachingFiles: readonly string[]
-  standingFiles: readonly string[]
-  postEliz?: {
-    approachingFiles: readonly string[]
-    standingFiles: readonly string[]
-  }
+interface NextStationItem {
+  label: string
+  /**
+   * Defaults to `['next station.<label>']` in lowercase, without special chars
+   */
+  audio?: AudioItem[]
+  terminatingAudio?: string[]
+  conditionalMindTheGap?: boolean
+  onlyTerminates?: boolean
 }
+
+const NextStationData: NextStationItem[] = [
+  { label: 'Angel' },
+  {
+    label: 'Archway',
+    terminatingAudio: ['next station.terminating.archway'],
+  },
+  { label: 'Balham' },
+  { label: 'Bank' },
+  {
+    label: 'Battersea Power Station (terminating)',
+    terminatingAudio: ['next station.terminating.battersea power station'],
+    onlyTerminates: true,
+  },
+  { label: 'Belsize Park' },
+  {
+    label: 'Borough',
+    audio: ['next station.borough', 'please mind the gap between the train and the platform'],
+  },
+  { label: 'Brent Cross' },
+  { label: 'Burnt Oak' },
+  {
+    label: 'Camden Town (Bank branch)',
+    audio: ['next station.camden town - bank'],
+  },
+  {
+    label: 'Camden Town (Charing Cross branch)',
+    audio: ['next station.camden town - charing cross'],
+  },
+  {
+    label: 'Camden Town (Edgware branch)',
+    audio: ['next station.camden town - edgware'],
+  },
+  {
+    label: 'Camden Town (High Barnet branch)',
+    audio: ['next station.camden town - high barnet'],
+  },
+  { label: 'Chalk Farm' },
+  {
+    label: 'Charing Cross',
+    audio: [
+      'conjoiner.the next station is',
+      'station.low.charing cross',
+      { id: 'sdo.upon arrival', opts: { delayStart: 250 } },
+      'sdo.the first',
+      'sdo.set of doors will not open',
+      'sdo.customers in',
+      'sdo.the first',
+      'sdo.carriage please move towards',
+      'sdo.the rear doors',
+      'sdo.to leave the train',
+    ],
+  },
+  {
+    label: 'Clapham Common',
+    audio: [
+      'next station.clapham common',
+      { id: 'sdo.upon arrival', opts: { delayStart: 250 } },
+      'sdo.the last',
+      'sdo.set of doors will not open',
+      'sdo.customers in',
+      'sdo.the last',
+      'sdo.carriage please move towards',
+      'sdo.the front doors',
+      'sdo.to leave the train',
+    ],
+  },
+  { label: 'Clapham North' },
+  { label: 'Clapham South' },
+  {
+    label: 'Colindale',
+    terminatingAudio: ['next station.terminating.colindale'],
+  },
+  { label: 'Colliers Wood' },
+  {
+    label: 'East Finchley',
+    terminatingAudio: ['next station.terminating.east finchley'],
+  },
+  {
+    label: 'Edgware (terminating)',
+    // audio: ['conjoiner.the next station is', 'station.low.edgware'],
+    onlyTerminates: true,
+    terminatingAudio: ['next station.terminating.edgware'],
+  },
+  { label: 'Elephant & Castle' },
+  {
+    label: 'Embankment',
+    audio: ['conjoiner.the next station is', 'station.low.embankment', 'please mind the gap between the train and the platform'],
+  },
+  {
+    label: 'Euston (Bank branch)',
+    audio: [
+      'next station.euston - bank',
+      { id: 'sdo.upon arrival', opts: { delayStart: 250 } },
+      'sdo.the last',
+      'sdo.set of doors will not open',
+      'sdo.customers in',
+      'sdo.the last',
+      'sdo.carriage please move towards',
+      'sdo.the front doors',
+      'sdo.to leave the train',
+    ],
+  },
+  {
+    label: 'Euston (Charing Cross branch)',
+    audio: ['conjoiner.the next station is', 'station.high.euston', 'routeing.charing cross branch'],
+  },
+  {
+    label: 'Finchley Central',
+    terminatingAudio: ['next station.terminating.finchley central'],
+  },
+  {
+    label: 'Finchley Central (change for Mill Hill East)',
+    audio: ['next station.finchley central change here mill hill east'],
+    terminatingAudio: ['next station.terminating.finchley central change here mill hill east high barnet'],
+  },
+  {
+    label: 'Golders Green',
+    audio: ['next station.golders green', 'please mind the gap between the train and the platform'],
+    terminatingAudio: ['next station.terminating.golders green'],
+  },
+  {
+    label: 'Goodge Street',
+    audio: ['conjoner.the next station is', 'station.low.goodge street'],
+  },
+  {
+    label: 'Hampstead',
+    audio: [
+      'next station.hampstead',
+      { id: 'sdo.upon arrival', opts: { delayStart: 250 } },
+      'sdo.the last',
+      'sdo.set of doors will not open',
+      'sdo.customers in',
+      'sdo.the last',
+      'sdo.carriage please move towards',
+      'sdo.the front doors',
+      'sdo.to leave the train',
+    ],
+    terminatingAudio: ['next station.terminating.hampstead'],
+  },
+  { label: 'Hendon Central' },
+  {
+    label: 'High Barnet (terminating)',
+    onlyTerminates: true,
+    // audio: ['conjoiner.the next station is', 'station.low.high barnet'],
+    terminatingAudio: ['next station.terminating.high barnet'],
+  },
+  { label: 'Highgate' },
+  {
+    label: 'Kennington',
+    terminatingAudio: ['next station.terminating.kennington'],
+  },
+  {
+    label: 'Kennington (change for southbound trains)',
+    audio: ['next station.kennington change here southbound trains morden'],
+  },
+  { label: 'Kentish Town' },
+  { label: 'Kings Cross St Pancras' },
+  { label: 'Leicester Square' },
+  { label: 'London Bridge' },
+  {
+    label: 'Mill Hill East',
+    terminatingAudio: ['next station.terminating.mill hill east'],
+  },
+  {
+    label: 'Moorgate',
+    audio: [
+      'conjoiner.the next station is',
+      'station.low.moorgate',
+      { id: 'sdo.upon arrival', opts: { delayStart: 250 } },
+      'sdo.the first',
+      'sdo.set of doors will not open',
+      'sdo.customers in',
+      'sdo.the first',
+      'sdo.carriage please move towards',
+      'sdo.the rear doors',
+      'sdo.to leave the train',
+      'please mind the gap between the train and the platform',
+    ],
+  },
+  {
+    label: 'Morden',
+    onlyTerminates: true,
+    terminatingAudio: ['next station.terminating.morden'],
+  },
+  { label: 'Mornington Crescent' },
+  {
+    label: 'Nine Elms',
+    terminatingAudio: ['next station.terminating.nine elms'],
+  },
+  { label: 'Old Street' },
+  { label: 'Oval' },
+  { label: 'South Wimbledon', conditionalMindTheGap: true },
+  { label: 'Stockwell' },
+  { label: 'Tooting Bec' },
+  { label: 'Tooting Broadway' },
+  { label: 'Tottenham Court Road' },
+  { label: 'Totteridge & Whetstone' },
+  { label: 'Tufnell Park' },
+  {
+    label: 'Warren Street',
+    audio: ['conjoiner.the next station is', 'station.low.warren street'],
+  },
+  {
+    label: 'Waterloo',
+    audio: ['conjoiner.the next station is', 'station.low.waterloo'],
+  },
+  { label: 'West Finchley' },
+  { label: 'Woodside Park' },
+]
 
 interface INextStationAnnouncementOptions {
-  stationName: string
-  doorDirection: 'left' | 'right'
-  usePostEliz: boolean
-}
-
-interface IAtStationAnnouncementOptions {
-  stationName: string
+  stationLabel: string
+  terminating: boolean
+  mindTheGap: boolean
 }
 
 interface IDestinationInfoAnnouncementOptions {
@@ -149,7 +355,26 @@ export default class TfLNorthernLine extends AnnouncementSystem {
   private async playNextStationAnnouncement(options: INextStationAnnouncementOptions, download: boolean = false): Promise<void> {
     const files: AudioItem[] = []
 
-    files.push('conjoiner.the next station is')
+    const nextStationData = NextStationData.find(item => item.label === options.stationLabel)
+
+    if (!nextStationData) {
+      alert('Invalid station')
+      return
+    }
+
+    if ((options.terminating && nextStationData.terminatingAudio) || nextStationData.onlyTerminates) {
+      files.push(...nextStationData.terminatingAudio)
+    } else {
+      if (!nextStationData.audio) {
+        files.push('next station.' + options.stationLabel.toLowerCase().replace(/[^a-z\& \.]/g, ''))
+      } else {
+        files.push(...nextStationData.audio)
+      }
+    }
+
+    if (options.mindTheGap && nextStationData.conditionalMindTheGap) {
+      files.push('please mind the gap between the train and the platform')
+    }
 
     await this.playAudioFiles(files, download)
   }
@@ -191,30 +416,39 @@ export default class TfLNorthernLine extends AnnouncementSystem {
         },
       },
     },
-    // nextStation: {
-    //   name: 'Next station',
-    //   component: CustomAnnouncementPane,
-    //   props: {
-    //     playHandler: this.playNextStationAnnouncement.bind(this),
-    //     options: {
-    //       stationName: {
-    //         name: 'Next station',
-    //         default: StationData[0].name,
-    //         options: StationData.map(s => ({ title: s.name, value: s.name })),
-    //         type: 'select',
-    //       },
-    //       doorDirection: {
-    //         name: 'Door direction',
-    //         default: 'right',
-    //         options: [
-    //           { title: 'Left', value: 'left' },
-    //           { title: 'Right', value: 'right' },
-    //         ],
-    //         type: 'select',
-    //       },
-    //     },
-    //   },
-    // },
+    nextStation: {
+      name: 'Next station',
+      component: CustomAnnouncementPane,
+      props: {
+        playHandler: this.playNextStationAnnouncement.bind(this),
+        options: {
+          stationLabel: {
+            name: 'Next station',
+            default: NextStationData[0].label,
+            options: NextStationData.map(s => ({ title: s.label, value: s.label })),
+            type: 'select',
+          },
+          terminating: {
+            name: 'Terminates here?',
+            default: false,
+            onlyShowWhen(activeState) {
+              const data = NextStationData.find(s => s.label === activeState.stationLabel)
+
+              return !!(data?.terminatingAudio && !data.onlyTerminates)
+            },
+            type: 'boolean',
+          },
+          mindTheGap: {
+            name: 'Mind the gap?',
+            default: true,
+            onlyShowWhen(activeState) {
+              return !!NextStationData.find(s => s.label === activeState.stationLabel)?.conditionalMindTheGap
+            },
+            type: 'boolean',
+          },
+        },
+      },
+    },
     // thisStation: {
     //   name: 'Stopped at station',
     //   component: CustomAnnouncementPane,

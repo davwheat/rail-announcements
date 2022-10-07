@@ -436,7 +436,7 @@ export default class TfLNorthernLine extends AnnouncementSystem {
           stationLabel: {
             name: 'Next station',
             default: NextStationData[0].label,
-            options: NextStationData.map(s => ({ title: s.label, value: s.label })),
+            options: NextStationData.map(s => ({ title: `${s.label}${s.terminatingAudio && !s.onlyTerminates ? ' (T)' : ''}`, value: s.label })),
             type: 'select',
           },
           terminating: {

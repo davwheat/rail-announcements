@@ -364,6 +364,17 @@ export default class TfLNorthernLine extends AnnouncementSystem {
 
     if ((options.terminating && nextStationData.terminatingAudio) || nextStationData.onlyTerminates) {
       files.push(...nextStationData.terminatingAudio)
+      files.push(
+        {
+          id: 'please ensure you have all your belongings with you',
+          opts: { delayStart: 250 },
+        },
+        'when you leave the train',
+        {
+          id: 'thank you for travelling on the northern line',
+          opts: { delayStart: 250 },
+        },
+      )
     } else {
       if (!nextStationData.audio) {
         files.push('next station.' + options.stationLabel.toLowerCase().replace(/[^a-z\& \.]/g, ''))
@@ -379,13 +390,13 @@ export default class TfLNorthernLine extends AnnouncementSystem {
     await this.playAudioFiles(files, download)
   }
 
-  private async playAtStationAnnouncement(options: IAtStationAnnouncementOptions, download: boolean = false): Promise<void> {
-    const files: AudioItem[] = []
+  // private async playAtStationAnnouncement(options: IAtStationAnnouncementOptions, download: boolean = false): Promise<void> {
+  //   const files: AudioItem[] = []
 
-    files.push('conjoiner.this station is')
+  //   files.push('conjoiner.this station is')
 
-    await this.playAudioFiles(files, download)
-  }
+  //   await this.playAudioFiles(files, download)
+  // }
 
   readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab> = {
     destinationInfo: {
@@ -425,7 +436,7 @@ export default class TfLNorthernLine extends AnnouncementSystem {
           stationLabel: {
             name: 'Next station',
             default: NextStationData[0].label,
-            options: NextStationData.map(s => ({ title: s.label, value: s.label })),
+            options: NextStationData.map(s => ({ title: `${s.label}${s.terminatingAudio && !s.onlyTerminates ? ' (T)' : ''}`, value: s.label })),
             type: 'select',
           },
           terminating: {

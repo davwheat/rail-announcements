@@ -269,7 +269,7 @@ const NextStationData: NextStationItem[] = [
   },
   {
     label: 'Kennington (change for southbound trains)',
-    audio: ['next station.kennington change here southbound trains morden'],
+    audio: ['next station.kennington change here southbound morden'],
   },
   { label: 'Kentish Town' },
   { label: 'Kings Cross St Pancras' },

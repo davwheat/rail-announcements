@@ -156,7 +156,7 @@ const StationData: IStationDataItem[] = [
     standingFiles: ['canary wharf change here'],
     canTerminate: true,
     postEliz: {
-      approachingFiles: ['bond street', 'post eliz.change for the dlr and the elizabeth line'],
+      approachingFiles: ['canary wharf', 'post eliz.change for the dlr and the elizabeth line'],
       standingFiles: ['post eliz.canary wharf change here'],
     },
   },

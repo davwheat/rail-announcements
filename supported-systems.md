@@ -1,5 +1,7 @@
 # List of supported announcement systems
 
+> Warning: This data is out of date.
+
 |    TOC     |        System         | Support state | Comments                  |
 | :--------: | :-------------------: | ------------- | ------------------------- |
 | Thameslink |       Class 700       | 🟡 Partial    | 🎤 More recordings needed |

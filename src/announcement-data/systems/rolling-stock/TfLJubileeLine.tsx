@@ -265,10 +265,11 @@ export default class TfLJubileeLine extends AnnouncementSystem {
     }
 
     stnFiles[0] = { id: stnFiles[0] as string, opts: { delayStart: 250 } }
+    stnFiles[1] &&= { id: stnFiles[1] as string, opts: { delayStart: 250 } }
 
     files.push(...stnFiles)
 
-    files.push({ id: `doors will open on the ${options.doorDirection} hand side`, opts: { delayStart: 750 } })
+    files.splice(2, 0, { id: `doors will open on the ${options.doorDirection} hand side`, opts: { delayStart: 250 } })
 
     await this.playAudioFiles(files, download)
   }

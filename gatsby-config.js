@@ -9,8 +9,6 @@ const prodPlugins = !__IS_DEV__
           exclude: ['error', 'warn'],
         },
       },
-      // Fixed hot reload in dev
-      // `gatsby-plugin-preact`,
     ]
   : []
 

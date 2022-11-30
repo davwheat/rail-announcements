@@ -268,6 +268,10 @@ const NextStationData: NextStationItem[] = [
     terminatingAudio: ['next station.terminating.kennington'],
   },
   {
+    label: 'Kennington',
+    terminatingAudio: ['next station.terminating.kennington'],
+  },
+  {
     label: 'Kennington (change for southbound trains)',
     audio: ['next station.kennington change here southbound morden'],
   },
@@ -326,6 +330,372 @@ const NextStationData: NextStationItem[] = [
   { label: 'Woodside Park' },
 ]
 
+interface ThisStationItem {
+  station: string
+  suffix?: string
+  branch: null | 'charing cross' | 'bank' | 'edgware' | 'high barnet'
+  extraInfo?: AudioItem[]
+}
+
+const ThisStationData: ThisStationItem[] = [
+  {
+    station: 'Angel',
+    branch: null,
+  },
+  {
+    station: 'Archway',
+    branch: null,
+  },
+  {
+    station: 'Balham',
+    branch: null,
+    extraInfo: ['conjoiner.change here for', 'connections.national rail services'],
+  },
+  {
+    station: 'Bank',
+    branch: null,
+    extraInfo: [
+      'conjoiner.change here for',
+      'connections.docklands light railway',
+      'connections.waterloo and city',
+      'connections.circle',
+      'connections.central',
+      'conjoiner.and',
+      'connections.district line',
+    ],
+  },
+  {
+    station: 'Battersea Power Station',
+    branch: null,
+  },
+  {
+    station: 'Belsize Park',
+    branch: null,
+  },
+  {
+    station: 'Borough',
+    branch: null,
+  },
+  {
+    station: 'Brent Cross',
+    branch: null,
+  },
+  {
+    station: 'Burnt Oak',
+    branch: null,
+  },
+  {
+    station: 'Camden Town',
+    branch: 'bank',
+    extraInfo: [
+      'conjoiner.change here for',
+      'connections.southbound northern line',
+      'conjoiner.service',
+      'routeing.high.via charing cross',
+      'conjoiner.and',
+      'connections.northbound',
+      'conjoiner.services',
+      'conjoiner.to',
+      'station.low.edgware',
+    ],
+  },
+  {
+    station: 'Camden Town',
+    branch: 'charing cross',
+    extraInfo: [
+      'conjoiner.change here for',
+      'connections.southbound northern line',
+      'conjoiner.service',
+      'routeing.high.via bank',
+      'conjoiner.and',
+      'connections.northbound',
+      'conjoiner.services',
+      'conjoiner.to',
+      'station.high.high barnet',
+      'conjoiner.and',
+      'station.low.mill hill east',
+    ],
+  },
+  {
+    station: 'Camden Town',
+    branch: 'edgware',
+    extraInfo: [
+      'conjoiner.change here for',
+      'conjoiner.all stations to',
+      'station.high.high barnet',
+      'conjoiner.and',
+      'station.high.mill hill east',
+      'connections.from platform 3',
+    ],
+  },
+  {
+    station: 'Camden Town',
+    branch: 'high barnet',
+    extraInfo: ['conjoiner.change here for', 'conjoiner.all stations to', 'station.high.edgware', 'connections.from platform 1'],
+  },
+  {
+    station: 'Chalk Farm',
+    branch: null,
+  },
+  {
+    station: 'Charing Cross',
+    branch: null,
+    extraInfo: ['conjoiner.change here for', 'connections.bakerloo line', 'connections.and national rail services'],
+  },
+  {
+    station: 'Clapham Common',
+    branch: null,
+  },
+  {
+    station: 'Clapham North',
+    branch: null,
+  },
+  {
+    station: 'Clapham South',
+    branch: null,
+  },
+  {
+    station: 'Colindale',
+    branch: null,
+  },
+  {
+    station: 'Colliers Wood',
+    branch: null,
+  },
+  {
+    station: 'East Finchley',
+    branch: null,
+  },
+  {
+    station: 'Edgware',
+    branch: null,
+  },
+  {
+    station: 'Elephant & Castle',
+    branch: null,
+    extraInfo: ['conjoiner.change here for', 'connections.bakerloo line', 'connections.and national rail services'],
+  },
+  {
+    station: 'Embankment',
+    branch: null,
+    extraInfo: ['conjoiner.change here for', 'connections.bakerloo', 'connections.circle', 'conjoiner.and', 'connections.district line'],
+  },
+  {
+    station: 'Euston',
+    branch: 'bank',
+    extraInfo: [
+      'conjoiner.change here for',
+      'connections.southbound northern line',
+      'conjoiner.services',
+      'routeing.high.via charing cross',
+      'connections.from platform 2',
+      'connections.high.victoria line',
+      'connections.and national rail services',
+    ],
+  },
+  {
+    station: 'Euston',
+    branch: 'charing cross',
+    extraInfo: [
+      'conjoiner.change here for',
+      'connections.southbound northern line',
+      'conjoiner.services',
+      'routeing.high.via bank',
+      'connections.from platform 6',
+      'connections.high.victoria line',
+      'connections.and national rail services',
+    ],
+  },
+  {
+    station: 'Finchley Central',
+    branch: null,
+    extraInfo: ['conjoiner.change here for', 'station.low.mill hill east'],
+  },
+  // {
+  //   label: 'Finchley Central (change for Mill Hill East)',
+  //   branch: null,
+  // },
+  {
+    station: 'Golders Green',
+    branch: null,
+  },
+  {
+    station: 'Goodge Street',
+    branch: null,
+  },
+  {
+    station: 'Hampstead',
+    branch: null,
+  },
+  {
+    station: 'Hendon Central',
+    branch: null,
+  },
+  {
+    station: 'High Barnet',
+    branch: null,
+  },
+  {
+    station: 'Highgate',
+    branch: null,
+  },
+  {
+    station: 'Kennington',
+    suffix: '(southbound)',
+    branch: null,
+  },
+  {
+    station: 'Kennington',
+    suffix: '(northbound)',
+    branch: 'bank',
+    extraInfo: [
+      'conjoiner.change here for',
+      'connections.northbound northern line',
+      'conjoiner.service',
+      'routeing.high.via charing cross',
+      'connections.from platform 1',
+    ],
+  },
+  {
+    station: 'Kennington',
+    suffix: '(northbound)',
+    branch: 'charing cross',
+    extraInfo: [
+      'conjoiner.change here for',
+      'connections.northbound northern line',
+      'conjoiner.service',
+      'routeing.high.via bank',
+      'connections.from platform 3',
+    ],
+  },
+  // {
+  //   label: 'Kennington (change for southbound trains)',
+  //   branch: null,
+  // },
+  {
+    station: 'Kentish Town',
+    branch: null,
+  },
+  {
+    station: 'Kings Cross St Pancras',
+    branch: null,
+    extraInfo: [
+      'conjoiner.change here for',
+      'connections.circle and hammersmith',
+      'connections.metropolitan',
+      'connections.piccadilly',
+      'conjoiner.and',
+      'connections.victoria lines',
+      'conjoiner.and',
+      'connections.national and international rail services',
+    ],
+  },
+  {
+    station: 'Leicester Square',
+    branch: null,
+    extraInfo: ['conjoiner.change here for', 'connections.piccadilly line'],
+  },
+  {
+    station: 'London Bridge',
+    branch: null,
+    extraInfo: ['conjoiner.change here for', 'connections.jubilee line', 'connections.and national rail services'],
+  },
+  {
+    station: 'Mill Hill East',
+    branch: null,
+  },
+  {
+    station: 'Moorgate',
+    branch: null,
+    extraInfo: [
+      'conjoiner.change here for',
+      'connections.circle',
+      'connections.hammersmith and city',
+      'connections.and metropolitan lines',
+      'connections.and national rail services',
+    ],
+  },
+  {
+    station: 'Morden',
+    branch: null,
+  },
+  {
+    station: 'Mornington Crescent',
+    branch: null,
+  },
+  {
+    station: 'Nine Elms',
+    branch: null,
+  },
+  {
+    station: 'Old Street',
+    branch: null,
+    extraInfo: ['conjoiner.change here for', 'poi.moorfields eye hospital', 'connections.and national rail services'],
+  },
+  {
+    station: 'Oval',
+    branch: null,
+  },
+  {
+    station: 'South Wimbledon',
+    branch: null,
+  },
+  {
+    station: 'Stockwell',
+    branch: null,
+    extraInfo: ['conjoiner.change here for', 'connections.victoria line'],
+  },
+  {
+    station: 'Tooting Bec',
+    branch: null,
+  },
+  {
+    station: 'Tooting Broadway',
+    branch: null,
+  },
+  {
+    station: 'Tottenham Court Road',
+    branch: null,
+    extraInfo: ['conjoiner.change here for', 'connections.central line'],
+  },
+  {
+    station: 'Totteridge & Whetstone',
+    branch: null,
+  },
+  {
+    station: 'Tufnell Park',
+    branch: null,
+  },
+  {
+    station: 'Warren Street',
+    branch: null,
+    extraInfo: ['conjoiner.change here for', 'connections.victoria line'],
+  },
+  {
+    station: 'Waterloo',
+    branch: null,
+    extraInfo: [
+      'conjoiner.change here for',
+      'connections.waterloo and city',
+      'connections.bakerloo',
+      'conjoiner.and',
+      'connections.jubilee lines',
+      'conjoiner.and',
+      'connections.district line',
+      'connections.and national rail services',
+    ],
+  },
+  {
+    station: 'West Finchley',
+    branch: null,
+    extraInfo: ['please mind the gap between the train and the platform'],
+  },
+  {
+    station: 'Woodside Park',
+    branch: null,
+  },
+]
+
 interface INextStationAnnouncementOptions {
   stationLabel: string
   terminating: boolean
@@ -336,6 +706,11 @@ interface IDestinationInfoAnnouncementOptions {
   stationName: string
 }
 
+interface IAtStationAnnouncementOptions {
+  stationNameIndex: string
+  terminatingStationName: string
+}
+
 const announcementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {}
 
 export default class TfLNorthernLine extends AnnouncementSystem {
@@ -344,12 +719,14 @@ export default class TfLNorthernLine extends AnnouncementSystem {
   readonly FILE_PREFIX = 'TfL/Northern Line'
   readonly SYSTEM_TYPE = 'train'
 
+  private assembleDestinationInfoSegments(stationName: string, delayStart: number = 0): AudioItem[] {
+    const parsed = stationName.toLowerCase().replace(/[^a-z \.]/g, '')
+
+    return [{ id: 'destination.' + parsed, opts: { delayStart } }]
+  }
+
   private async playDestinationInfoAnnouncement(options: IDestinationInfoAnnouncementOptions, download: boolean = false): Promise<void> {
-    const files: AudioItem[] = []
-
-    files.push('destination.' + options.stationName.toLowerCase().replace(/[^a-z \.]/g, ''))
-
-    await this.playAudioFiles(files, download)
+    await this.playAudioFiles(this.assembleDestinationInfoSegments(options.stationName), download)
   }
 
   private async playNextStationAnnouncement(options: INextStationAnnouncementOptions, download: boolean = false): Promise<void> {
@@ -390,13 +767,38 @@ export default class TfLNorthernLine extends AnnouncementSystem {
     await this.playAudioFiles(files, download)
   }
 
-  // private async playAtStationAnnouncement(options: IAtStationAnnouncementOptions, download: boolean = false): Promise<void> {
-  //   const files: AudioItem[] = []
+  private async playAtStationAnnouncement(options: IAtStationAnnouncementOptions, download: boolean = false): Promise<void> {
+    const files: AudioItem[] = []
 
-  //   files.push('conjoiner.this station is')
+    files.push('conjoiner.this station is')
 
-  //   await this.playAudioFiles(files, download)
-  // }
+    const stationInfo = ThisStationData[parseInt(options.stationNameIndex)]
+
+    files.push('station.low.' + stationInfo.station.toLowerCase().replace(/[^a-z\& \.]/g, ''))
+
+    if (stationInfo.branch) {
+      files.push(`routeing.${stationInfo.branch} branch`)
+    }
+
+    if (stationInfo.extraInfo) {
+      const extra = [...stationInfo.extraInfo]
+
+      let firstMsg = extra[0]
+
+      if (typeof firstMsg === 'string') {
+        firstMsg = { id: firstMsg }
+      }
+
+      firstMsg.opts ||= {}
+      firstMsg.opts.delayStart ||= 500
+
+      files.push(firstMsg, ...stationInfo.extraInfo.slice(1))
+    }
+
+    files.push(...this.assembleDestinationInfoSegments(options.terminatingStationName, 500))
+
+    await this.playAudioFiles(files, download)
+  }
 
   readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab> = {
     destinationInfo: {
@@ -460,21 +862,47 @@ export default class TfLNorthernLine extends AnnouncementSystem {
         },
       },
     },
-    // thisStation: {
-    //   name: 'Stopped at station',
-    //   component: CustomAnnouncementPane,
-    //   props: {
-    //     playHandler: this.playAtStationAnnouncement.bind(this),
-    //     options: {
-    //       stationName: {
-    //         name: 'This station',
-    //         default: StationData[0].name,
-    //         options: StationData.map(s => ({ title: s.name, value: s.name })),
-    //         type: 'select',
-    //       },
-    //     },
-    //   },
-    // },
+    thisStation: {
+      name: 'Stopped at station',
+      component: CustomAnnouncementPane,
+      props: {
+        playHandler: this.playAtStationAnnouncement.bind(this),
+        options: {
+          stationNameIndex: {
+            name: 'This station',
+            default: '0',
+            options: ThisStationData.map((s, i) => {
+              let label = s.station
+
+              if (s.branch) {
+                label += ` (${s.branch.replace(/(?:^|\s)\S/g, a => a.toUpperCase())} branch)`
+              }
+
+              return { title: label, value: i.toString() }
+            }),
+            type: 'select',
+          },
+          terminatingStationName: {
+            name: 'Destination station',
+            default: AvailableDestinations[0].station,
+            options: AvailableDestinations.reduce((acc, dest) => {
+              acc.push({ title: dest.station, value: dest.station })
+
+              if (dest.viaBank) {
+                acc.push({ title: `${dest.station} via Bank`, value: `via bank.${dest.station}` })
+              }
+
+              if (dest.viaCharingCross) {
+                acc.push({ title: `${dest.station} via Charing Cross`, value: `via charing cross.${dest.station}` })
+              }
+
+              return acc
+            }, [] as { title: string; value: string }[]),
+            type: 'select',
+          },
+        },
+      },
+    },
     announcementButtons: {
       name: 'Announcement buttons',
       component: CustomButtonPane,
@@ -510,6 +938,16 @@ export default class TfLNorthernLine extends AnnouncementSystem {
               play: this.playAudioFiles.bind(this, ['smoking is not permitted on any part of london underground']),
               download: this.playAudioFiles.bind(this, ['smoking is not permitted on any part of london underground'], true),
             },
+
+            {
+              label: 'Kennington Loop',
+              play: this.playAudioFiles.bind(this, [
+                'group.kennington loop.this train will arrive back at kennington station shortly',
+                'group.kennington loop.please stay on the train to alight at kennington',
+              ]),
+              download: this.playAudioFiles.bind(this, ['smoking is not permitted on any part of london underground'], true),
+            },
+
             //   {
             //     label: 'There are beggars and buskers operating on this train',
             //     play: this.playAudioFiles.bind(this, ['there are beggars and buskers operating on this train']),

@@ -1010,28 +1010,28 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
           Legacy: [
             {
               label: 'You must wear a face covering',
-              play: this.playAudioFiles.bind(this, ['matt.you must wear a face covering on your jouney unless you are exempt']),
-              download: this.playAudioFiles.bind(this, ['matt.you must wear a face covering on your jouney unless you are exempt'], true),
+              play: this.playAudioFiles.bind(this, ['special.you must wear a face covering on your jouney unless you are exempt']),
+              download: this.playAudioFiles.bind(this, ['special.you must wear a face covering on your jouney unless you are exempt'], true),
             },
             {
               label: 'Brighton Mainline Improvements (2018) - Geoff',
               play: this.playAudioFiles.bind(this, ['special.brighton mainline improvement 2018 geoff 1']),
-              download: this.playAudioFiles.bind(this, ['matt.brighton mainline improvement 2018 geoff 1'], true),
+              download: this.playAudioFiles.bind(this, ['special.brighton mainline improvement 2018 geoff 1'], true),
             },
             {
               label: 'Brighton Mainline Improvements (2018) - Geoff (Revised)',
               play: this.playAudioFiles.bind(this, ['special.brighton mainline improvement 2018 geoff revised generic']),
-              download: this.playAudioFiles.bind(this, ['matt.brighton mainline improvement 2018 geoff revised generic'], true),
+              download: this.playAudioFiles.bind(this, ['special.brighton mainline improvement 2018 geoff revised generic'], true),
             },
             {
               label: 'Brighton Mainline Improvements (2018) - Geoff (Revised and detailed)',
               play: this.playAudioFiles.bind(this, ['special.brighton mainline improvement 2018 geoff revised detailed']),
-              download: this.playAudioFiles.bind(this, ['matt.brighton mainline improvement 2018 geoff revised detailed'], true),
+              download: this.playAudioFiles.bind(this, ['special.brighton mainline improvement 2018 geoff revised detailed'], true),
             },
             {
               label: 'Railplan 2020 - Richard',
               play: this.playAudioFiles.bind(this, ['special.railplan 2020']),
-              download: this.playAudioFiles.bind(this, ['matt.railplan 2020'], true),
+              download: this.playAudioFiles.bind(this, ['special.railplan 2020'], true),
             },
           ],
         },

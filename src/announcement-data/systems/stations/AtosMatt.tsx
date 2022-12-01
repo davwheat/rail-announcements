@@ -748,7 +748,7 @@ export default class AtosMatt extends StationAnnouncementSystem {
                   <select
                     value={value}
                     onChange={e => {
-                      onChange({ ...value, delayTime: e.target.value })
+                      onChange(e.target.value)
                     }}
                   >
                     {availableDelayTimes.map(d => (
@@ -782,7 +782,7 @@ export default class AtosMatt extends StationAnnouncementSystem {
                   <select
                     value={value}
                     onChange={e => {
-                      onChange({ ...value, platform: e.target.value })
+                      onChange(e.target.value)
                     }}
                   >
                     {availablePlatforms.map(d => (

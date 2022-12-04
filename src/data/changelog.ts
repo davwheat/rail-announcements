@@ -175,23 +175,25 @@ const changelog: IChangelogVersion[] = [
   },
   {
     date: '2022-10-14',
-    additions: ['[TfL Northern Line] Fix "Kennington (change for southbound trains)" announcement'],
+    fixes: ['[TfL Northern Line] Fix "Kennington (change for southbound trains)" announcement'],
   },
   {
     date: '2022-11-21',
-    additions: ['[TfL Jubilee Line] Fix Canary Wharf Elizabeth Line playing Bond Street instead (thanks @00p513-dev)'],
+    fixes: ['[TfL Jubilee Line] Fix Canary Wharf Elizabeth Line playing Bond Street instead (thanks @00p513-dev)'],
   },
   {
     date: '2022-11-30',
-    additions: ['[TfL Northern Line] Add stopped-at-station announcements', '[Class 700] Fix broken announcement button panel'],
+    additions: ['[TfL Northern Line] Add stopped-at-station announcements'],
+    fixes: ['[Class 700] Fix broken announcement button panel'],
   },
   {
     date: '2022-12-01',
-    additions: ['[Atos - Matt] Fix broken disruption options'],
+    fixes: ['[Atos - Matt] Fix broken disruption options'],
   },
   {
     date: '2022-12-04',
     additions: ['[TfL Northern Line] Use re-recorded Northern Line Extension and Elizabeth Line announcements for applicable stations'],
+    otherChanges: ['Upgrade to Gatsby 5 and React 18'],
   },
 ]
 

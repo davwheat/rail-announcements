@@ -33,9 +33,7 @@ interface StationInfo {
   changeFor: ChangeOption[]
 }
 
-const AllStations: StationInfo[] = [
-  
-]
+const AllStations: StationInfo[] = []
 
 interface INextStationAnnouncementOptions {
   stationLabel: string

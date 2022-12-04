@@ -111,7 +111,7 @@ interface NextStationItem {
    * Defaults to `['next station.<label>']` in lowercase, without special chars
    */
   audio?: AudioItem[]
-  terminatingAudio?: string[]
+  terminatingAudio?: AudioItem[]
   conditionalMindTheGap?: boolean
   onlyTerminates?: boolean
 }
@@ -123,10 +123,13 @@ const NextStationData: NextStationItem[] = [
     terminatingAudio: ['next station.terminating.archway'],
   },
   { label: 'Balham' },
-  { label: 'Bank' },
+  {
+    label: 'Bank',
+    audio: ['northern line extension.next station.bank change here'],
+  },
   {
     label: 'Battersea Power Station (terminating)',
-    terminatingAudio: ['next station.terminating.battersea power station'],
+    terminatingAudio: ['northern line extension.next station.battersea power station terminates'],
     onlyTerminates: true,
   },
   { label: 'Belsize Park' },
@@ -264,16 +267,32 @@ const NextStationData: NextStationItem[] = [
   },
   { label: 'Highgate' },
   {
-    label: 'Kennington',
-    terminatingAudio: ['next station.terminating.kennington'],
+    label: 'Kennington (southbound via Bank)',
+    terminatingAudio: ['northern line extension.next station.kennington terminates change here southbound morden plat 4 bps plat 2'],
+    audio: ['northern line extension.next station.kennington change here southbound bps plat 2'],
   },
   {
-    label: 'Kennington',
-    terminatingAudio: ['next station.terminating.kennington'],
+    label: 'Kennington (northbound via Bank)',
+    audio: ['northern line extension.next station.kennington change here northbound via xc plat 1 southbound bps plat 2'],
   },
   {
-    label: 'Kennington (change for southbound trains)',
-    audio: ['next station.kennington change here southbound morden'],
+    label: 'Kennington (southbound via Charing Cross, to BPS)',
+    terminatingAudio: ['northern line extension.next station.kennington terminates change here morden bps no train plat 4'],
+    audio: ['northern line extension.next station.kennington change here southbound morden'],
+  },
+  {
+    label: 'Kennington (southbound via Charing Cross, to Morden)',
+    terminatingAudio: ['northern line extension.next station.kennington terminates change here morden bps no train plat 4'],
+    audio: ['northern line extension.next station.kennington change here southbound bps plat 2'],
+  },
+  {
+    label: 'Kennington (northbound via Charing Cross, from BPS)',
+    audio: ['northern line extension.next station.kennington change here northbound via bank plat 3 morden plat 2'],
+  },
+  {
+    label: 'Kennington (terminating southbound)',
+    terminatingAudio: ['northern line extension.next station.kennington terminates change here southbound morden bps'],
+    onlyTerminates: true,
   },
   { label: 'Kentish Town' },
   { label: 'Kings Cross St Pancras' },
@@ -286,8 +305,19 @@ const NextStationData: NextStationItem[] = [
   {
     label: 'Moorgate',
     audio: [
-      'conjoiner.the next station is',
-      'station.low.moorgate',
+      'northern line extension.next station.moorgate change here',
+      { id: 'sdo.upon arrival', opts: { delayStart: 250 } },
+      'sdo.the first',
+      'sdo.set of doors will not open',
+      'sdo.customers in',
+      'sdo.the first',
+      'sdo.carriage please move towards',
+      'sdo.the rear doors',
+      'sdo.to leave the train',
+      'please mind the gap between the train and the platform',
+    ],
+    terminatingAudio: [
+      'northern line extension.next station.moorgate terminates change here',
       { id: 'sdo.upon arrival', opts: { delayStart: 250 } },
       'sdo.the first',
       'sdo.set of doors will not open',
@@ -307,7 +337,8 @@ const NextStationData: NextStationItem[] = [
   { label: 'Mornington Crescent' },
   {
     label: 'Nine Elms',
-    terminatingAudio: ['next station.terminating.nine elms'],
+    terminatingAudio: ['northern line extension.next station.nine elms terminates'],
+    audio: ['northern line extension.next station.nine elms'],
   },
   { label: 'Old Street' },
   { label: 'Oval' },
@@ -315,7 +346,10 @@ const NextStationData: NextStationItem[] = [
   { label: 'Stockwell' },
   { label: 'Tooting Bec' },
   { label: 'Tooting Broadway' },
-  { label: 'Tottenham Court Road' },
+  {
+    label: 'Tottenham Court Road',
+    audio: ['northern line extension.next station.tottenham court road change here'],
+  },
   { label: 'Totteridge & Whetstone' },
   { label: 'Tufnell Park' },
   {
@@ -335,6 +369,7 @@ interface ThisStationItem {
   suffix?: string
   branch: null | 'charing cross' | 'bank' | 'edgware' | 'high barnet'
   extraInfo?: AudioItem[]
+  fullAudio?: AudioItem[]
 }
 
 const ThisStationData: ThisStationItem[] = [
@@ -354,19 +389,12 @@ const ThisStationData: ThisStationItem[] = [
   {
     station: 'Bank',
     branch: null,
-    extraInfo: [
-      'conjoiner.change here for',
-      'connections.docklands light railway',
-      'connections.waterloo and city',
-      'connections.circle',
-      'connections.central',
-      'conjoiner.and',
-      'connections.district line',
-    ],
+    fullAudio: ['northern line extension.this station.bank change here'],
   },
   {
     station: 'Battersea Power Station',
     branch: null,
+    fullAudio: ['northern line extension.this station.battersea power station exit here'],
   },
   {
     station: 'Belsize Park',
@@ -541,37 +569,49 @@ const ThisStationData: ThisStationItem[] = [
   },
   {
     station: 'Kennington',
-    suffix: '(southbound)',
-    branch: null,
-  },
-  {
-    station: 'Kennington',
-    suffix: '(northbound)',
+    suffix: '(southbound, terminating)',
     branch: 'bank',
-    extraInfo: [
-      'conjoiner.change here for',
-      'connections.northbound northern line',
-      'conjoiner.service',
-      'routeing.high.via charing cross',
-      'connections.from platform 1',
-    ],
+    // Change platform for morden bank branch as on charing cross branch
+    fullAudio: ['northern line extension.this station.kennington change here southbound morden plat 2'],
   },
   {
     station: 'Kennington',
-    suffix: '(northbound)',
-    branch: 'charing cross',
-    extraInfo: [
-      'conjoiner.change here for',
-      'connections.northbound northern line',
-      'conjoiner.service',
-      'routeing.high.via bank',
-      'connections.from platform 3',
-    ],
+    suffix: '(southbound, to Morden)',
+    branch: 'bank',
+    // Change platform for BPS as on charing cross branch
+    fullAudio: ['northern line extension.this station.kennington change here southbound bps plat 2'],
   },
-  // {
-  //   label: 'Kennington (change for southbound trains)',
-  //   branch: null,
-  // },
+  {
+    station: 'Kennington',
+    suffix: '(northbound, from Morden)',
+    branch: 'bank',
+    fullAudio: ['northern line extension.this station.kennington change here northbound via xc plat 1 southbound bps plat 2'],
+  },
+  {
+    station: 'Kennington',
+    suffix: '(southbound, to Battersea Power Station)',
+    branch: 'charing cross',
+    // Same platform for Morden when on charing cross branch
+    fullAudio: ['northern line extension.this station.kennington change here southbound morden'],
+  },
+  {
+    station: 'Kennington',
+    suffix: '(northbound, from Battersea Power Station)',
+    branch: 'charing cross',
+    fullAudio: ['northern line extension.this station.kennington change here northbound via bank plat 3 southbound morden plat 2'],
+  },
+  {
+    station: 'Kennington',
+    suffix: '(northbound, from Morden)',
+    branch: 'charing cross',
+    fullAudio: ['northern line extension.this station.kennington change here northbound via bank plat 3 southbound bps plat 2'],
+  },
+  {
+    station: 'Kennington',
+    suffix: '(generic)',
+    branch: null,
+    fullAudio: ['northern line extension.this station.kennington change here northern other dest'],
+  },
   {
     station: 'Kentish Town',
     branch: null,
@@ -607,13 +647,7 @@ const ThisStationData: ThisStationItem[] = [
   {
     station: 'Moorgate',
     branch: null,
-    extraInfo: [
-      'conjoiner.change here for',
-      'connections.circle',
-      'connections.hammersmith and city',
-      'connections.and metropolitan lines',
-      'connections.and national rail services',
-    ],
+    fullAudio: ['northern line extension.this station.moorgate change here'],
   },
   {
     station: 'Morden',
@@ -626,6 +660,7 @@ const ThisStationData: ThisStationItem[] = [
   {
     station: 'Nine Elms',
     branch: null,
+    fullAudio: ['northern line extension.this station.nine elms'],
   },
   {
     station: 'Old Street',
@@ -656,7 +691,7 @@ const ThisStationData: ThisStationItem[] = [
   {
     station: 'Tottenham Court Road',
     branch: null,
-    extraInfo: ['conjoiner.change here for', 'connections.central line'],
+    fullAudio: ['northern line extension.this station.tottenham court road change here'],
   },
   {
     station: 'Totteridge & Whetstone',
@@ -770,9 +805,22 @@ export default class TfLNorthernLine extends AnnouncementSystem {
   private async playAtStationAnnouncement(options: IAtStationAnnouncementOptions, download: boolean = false): Promise<void> {
     const files: AudioItem[] = []
 
-    files.push('conjoiner.this station is')
-
     const stationInfo = ThisStationData[parseInt(options.stationNameIndex)]
+    const isTerminating = options.terminatingStationName.endsWith(stationInfo.station)
+
+    if (stationInfo.fullAudio) {
+      files.push(...stationInfo.fullAudio)
+
+      if (isTerminating) {
+        files.push({ id: 'this train terminates here', opts: { delayStart: 500 } }, { id: 'all change please', opts: { delayStart: 500 } })
+      } else {
+        files.push(...this.assembleDestinationInfoSegments(options.terminatingStationName, 500))
+      }
+
+      return await this.playAudioFiles(files, download)
+    }
+
+    files.push('conjoiner.this station is')
 
     files.push('station.low.' + stationInfo.station.toLowerCase().replace(/[^a-z\& \.]/g, ''))
 
@@ -795,7 +843,11 @@ export default class TfLNorthernLine extends AnnouncementSystem {
       files.push(firstMsg, ...stationInfo.extraInfo.slice(1))
     }
 
-    files.push(...this.assembleDestinationInfoSegments(options.terminatingStationName, 500))
+    if (isTerminating) {
+      files.push({ id: 'this train terminates here', opts: { delayStart: 500 } }, { id: 'all change please', opts: { delayStart: 500 } })
+    } else {
+      files.push(...this.assembleDestinationInfoSegments(options.terminatingStationName, 500))
+    }
 
     await this.playAudioFiles(files, download)
   }
@@ -876,6 +928,10 @@ export default class TfLNorthernLine extends AnnouncementSystem {
 
               if (s.branch) {
                 label += ` (${s.branch.replace(/(?:^|\s)\S/g, a => a.toUpperCase())} branch)`
+              }
+
+              if (s.suffix) {
+                label += ` ${s.suffix}`
               }
 
               return { title: label, value: i.toString() }

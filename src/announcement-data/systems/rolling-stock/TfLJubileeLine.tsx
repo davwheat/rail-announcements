@@ -11,6 +11,7 @@ interface IStationDataItem {
     approachingFiles: readonly string[]
     standingFiles: readonly string[]
   }
+  fullMessages?: true
 }
 
 const StationData: IStationDataItem[] = [
@@ -168,9 +169,12 @@ const StationData: IStationDataItem[] = [
   },
   {
     name: 'Canning Town',
-    approachingFiles: ['canning town', 'change for the dlr including excel and london city'],
-    standingFiles: ['canning town change here'],
+    // approachingFiles: ['canning town', 'change for the dlr including excel and london city'],
+    // standingFiles: ['canning town change here'],
+    approachingFiles: ['parnell.next canning town RHS change for'],
+    standingFiles: ['parnell.this canning town change here'],
     canTerminate: false,
+    fullMessages: true,
   },
   {
     name: 'West Ham',
@@ -254,14 +258,22 @@ export default class TfLJubileeLine extends AnnouncementSystem {
   private async playNextStationAnnouncement(options: INextStationAnnouncementOptions, download: boolean = false): Promise<void> {
     const files: AudioItem[] = []
 
+    const stationData = StationData.find(s => s.name === options.stationName)
+
+    if (stationData.fullMessages) {
+      files.push(...stationData.approachingFiles)
+
+      return await this.playAudioFiles(files, download)
+    }
+
     files.push('the next station is')
 
     const stnFiles: AudioItem[] = []
 
     if (elizAffectedStations.includes(options.stationName) && options.usePostEliz) {
-      stnFiles.push(...StationData.find(s => s.name === options.stationName).postEliz.approachingFiles)
+      stnFiles.push(...stationData.postEliz.approachingFiles)
     } else {
-      stnFiles.push(...StationData.find(s => s.name === options.stationName).approachingFiles)
+      stnFiles.push(...stationData.approachingFiles)
     }
 
     stnFiles[0] = { id: stnFiles[0] as string, opts: { delayStart: 250 } }
@@ -277,14 +289,22 @@ export default class TfLJubileeLine extends AnnouncementSystem {
   private async playAtStationAnnouncement(options: IAtStationAnnouncementOptions, download: boolean = false): Promise<void> {
     const files: AudioItem[] = []
 
+    const stationData = StationData.find(s => s.name === options.stationName)
+
+    if (stationData.fullMessages) {
+      files.push(...stationData.standingFiles)
+
+      return await this.playAudioFiles(files, download)
+    }
+
     files.push('this station is')
 
     const stnFiles: AudioItem[] = []
 
     if (elizAffectedStations.includes(options.stationName) && options.usePostEliz) {
-      stnFiles.push(...StationData.find(s => s.name === options.stationName).postEliz.standingFiles)
+      stnFiles.push(...stationData.postEliz.standingFiles)
     } else {
-      stnFiles.push(...StationData.find(s => s.name === options.stationName).standingFiles)
+      stnFiles.push(...stationData.standingFiles)
     }
 
     stnFiles[0] = { id: stnFiles[0] as string, opts: { delayStart: 250 } }
@@ -331,6 +351,11 @@ export default class TfLJubileeLine extends AnnouncementSystem {
               { title: 'Right', value: 'right' },
             ],
             type: 'select',
+            onlyShowWhen: ({ stationName }: { stationName: string }) => {
+              const stationData = StationData.find(s => s.name === stationName)
+
+              return !stationData.fullMessages
+            },
           },
           usePostEliz: {
             name: 'Use Elizabeth line version',

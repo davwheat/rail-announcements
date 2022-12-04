@@ -189,6 +189,10 @@ const changelog: IChangelogVersion[] = [
     date: '2022-12-01',
     additions: ['[Atos - Matt] Fix broken disruption options'],
   },
+  {
+    date: '2022-12-04',
+    additions: ['[TfL Northern Line] Use re-recorded Northern Line Extension and Elizabeth Line announcements for applicable stations'],
+  },
 ]
 
 export default changelog

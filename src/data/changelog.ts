@@ -166,6 +166,29 @@ const changelog: IChangelogVersion[] = [
     date: '2022-10-06',
     additions: ['[TfL Northern Line] Add Northern Line announcement system (only destination and next station info)'],
   },
+  {
+    date: '2022-10-07',
+    additions: [
+      '[TfL Northern Line] Add thank you messages to terminating announcements',
+      '[TfL Northern Line] Add "T" to show stations where trains can terminate',
+    ],
+  },
+  {
+    date: '2022-10-14',
+    additions: ['[TfL Northern Line] Fix "Kennington (change for southbound trains)" announcement'],
+  },
+  {
+    date: '2022-11-21',
+    additions: ['[TfL Jubilee Line] Fix Canary Wharf Elizabeth Line playing Bond Street instead (thanks @00p513-dev)'],
+  },
+  {
+    date: '2022-11-30',
+    additions: ['[TfL Northern Line] Add stopped-at-station announcements', '[Class 700] Fix broken announcement button panel'],
+  },
+  {
+    date: '2022-12-01',
+    additions: ['[Atos - Matt] Fix broken disruption options'],
+  },
 ]
 
 export default changelog

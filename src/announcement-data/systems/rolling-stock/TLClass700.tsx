@@ -32,6 +32,7 @@ interface IStoppedAtStationAnnouncementOptions {
 interface IInitialDepartureAnnouncementOptions {
   terminatesAtCode: string
   callingAtCodes: { crsCode: string; name: string; randomId: string }[]
+  isSoutheastern: boolean
 }
 
 const announcementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {
@@ -237,7 +238,11 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
     const files: AudioItem[] = []
 
     if (!this.validateStationExists(terminatesAtCode, 'low')) return
-    files.push('welcome aboard this service to', { id: `stations.low.${terminatesAtCode}`, opts: { delayStart: 250 } })
+    if (options.isSoutheastern) {
+      files.push('welcome aboard this southeastern service to', { id: `stations.low.${terminatesAtCode}`, opts: { delayStart: 250 } })
+    } else {
+      files.push('welcome aboard this service to', { id: `stations.low.${terminatesAtCode}`, opts: { delayStart: 250 } })
+    }
 
     if (callingAtCodes.length === 0) {
       if (!this.validateStationExists(terminatesAtCode, 'high')) return
@@ -835,6 +840,11 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
               additionalOptions: AdditionalStationsTitleValueMap,
             },
             default: [],
+          },
+          isSoutheastern: {
+            name: 'Southeastern service?',
+            default: false,
+            type: 'boolean',
           },
         },
       },

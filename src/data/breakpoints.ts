@@ -31,10 +31,10 @@ type BreakpointNames = keyof typeof pixelValues
  */
 interface Breakpoints {
   upTo: {
-    [T in BreakpointNames]: `@media (max-width: ${typeof oneBelowPixelValues[T]}px)`
+    [T in BreakpointNames]: `@media (max-width: ${(typeof oneBelowPixelValues)[T]}px)`
   }
   downTo: {
-    [T in BreakpointNames]: `@media (min-width: ${typeof pixelValues[T]}px)`
+    [T in BreakpointNames]: `@media (min-width: ${(typeof pixelValues)[T]}px)`
   }
   between: {
     [T in BreakpointNames]: {
@@ -43,7 +43,10 @@ interface Breakpoints {
          * If first breakpoint is greater than second, the value shown by your IDE will be wrong,
          * but the output value will be correct.
          */
-        [K in Exclude<BreakpointNames, T>]: `@media (min-width: ${typeof pixelValues[T]}px) and (max-width: ${typeof oneBelowPixelValues[K]}px)`
+        [K in Exclude<
+          BreakpointNames,
+          T
+        >]: `@media (min-width: ${(typeof pixelValues)[T]}px) and (max-width: ${(typeof oneBelowPixelValues)[K]}px)`
       }
     }
   }

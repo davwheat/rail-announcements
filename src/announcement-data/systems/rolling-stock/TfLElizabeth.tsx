@@ -20,7 +20,7 @@ const ChangeOptions = [
   'Elizabeth',
 ] as const
 
-type ChangeOption = typeof ChangeOptions[number]
+type ChangeOption = (typeof ChangeOptions)[number]
 
 interface StationInfo {
   name: string

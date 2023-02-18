@@ -8,27 +8,27 @@ import { AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
 
 interface INextTrainAnnouncementOptions {
   chime: '3' | '4' | 'none'
-  platform: typeof AVAILABLE_ALPHANUMBERS[number]
-  hour: typeof AVAILABLE_HOURS[number]
-  min: typeof AVAILABLE_MINUTES[number]
-  toc: typeof AVAILABLE_TOCS[number]
-  terminatingStationCode: typeof AVAILABLE_STATIONS['low'][number]
-  via: typeof AVAILABLE_STATIONS['low'][number] | 'none'
+  platform: (typeof AVAILABLE_ALPHANUMBERS)[number]
+  hour: (typeof AVAILABLE_HOURS)[number]
+  min: (typeof AVAILABLE_MINUTES)[number]
+  toc: (typeof AVAILABLE_TOCS)[number]
+  terminatingStationCode: (typeof AVAILABLE_STATIONS)['low'][number]
+  via: (typeof AVAILABLE_STATIONS)['low'][number] | 'none'
   callingAt: { crsCode: string; name: string; randomId: string }[]
-  coaches: typeof AVAILABLE_NUMBERS[number]
+  coaches: (typeof AVAILABLE_NUMBERS)[number]
 }
 
 interface IStandingTrainAnnouncementOptions {
   chime: '3' | '4' | 'none'
-  currentStation: typeof AVAILABLE_STATIONS['low'][number]
-  platform: typeof AVAILABLE_ALPHANUMBERS[number]
-  hour: typeof AVAILABLE_HOURS[number]
-  min: typeof AVAILABLE_MINUTES[number]
-  toc: typeof AVAILABLE_TOCS[number]
-  terminatingStationCode: typeof AVAILABLE_STATIONS['low'][number]
-  via: typeof AVAILABLE_STATIONS['low'][number] | 'none'
+  currentStation: (typeof AVAILABLE_STATIONS)['low'][number]
+  platform: (typeof AVAILABLE_ALPHANUMBERS)[number]
+  hour: (typeof AVAILABLE_HOURS)[number]
+  min: (typeof AVAILABLE_MINUTES)[number]
+  toc: (typeof AVAILABLE_TOCS)[number]
+  terminatingStationCode: (typeof AVAILABLE_STATIONS)['low'][number]
+  via: (typeof AVAILABLE_STATIONS)['low'][number] | 'none'
   callingAt: { crsCode: string; name: string; randomId: string }[]
-  coaches: typeof AVAILABLE_NUMBERS[number]
+  coaches: (typeof AVAILABLE_NUMBERS)[number]
 }
 
 const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {
@@ -426,7 +426,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
           terminatingStationCode: {
             name: 'Terminating station',
             default: AVAILABLE_STATIONS.low[0],
-            options: AllStationsTitleValueMap.filter(s => AVAILABLE_STATIONS.low.includes(s.value as typeof AVAILABLE_STATIONS.low[number])),
+            options: AllStationsTitleValueMap.filter(s => AVAILABLE_STATIONS.low.includes(s.value as (typeof AVAILABLE_STATIONS.low)[number])),
             type: 'select',
           },
           via: {
@@ -434,7 +434,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
             default: 'none',
             options: [
               { title: 'NONE', value: 'none' },
-              ...AllStationsTitleValueMap.filter(s => AVAILABLE_STATIONS.low.includes(s.value as typeof AVAILABLE_STATIONS.low[number])),
+              ...AllStationsTitleValueMap.filter(s => AVAILABLE_STATIONS.low.includes(s.value as (typeof AVAILABLE_STATIONS.low)[number])),
             ],
             type: 'select',
           },
@@ -508,7 +508,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
           terminatingStationCode: {
             name: 'Terminating station',
             default: AVAILABLE_STATIONS.low[0],
-            options: AllStationsTitleValueMap.filter(s => AVAILABLE_STATIONS.low.includes(s.value as typeof AVAILABLE_STATIONS.low[number])),
+            options: AllStationsTitleValueMap.filter(s => AVAILABLE_STATIONS.low.includes(s.value as (typeof AVAILABLE_STATIONS.low)[number])),
             type: 'select',
           },
           via: {
@@ -516,7 +516,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
             default: 'none',
             options: [
               { title: 'NONE', value: 'none' },
-              ...AllStationsTitleValueMap.filter(s => AVAILABLE_STATIONS.low.includes(s.value as typeof AVAILABLE_STATIONS.low[number])),
+              ...AllStationsTitleValueMap.filter(s => AVAILABLE_STATIONS.low.includes(s.value as (typeof AVAILABLE_STATIONS.low)[number])),
             ],
             type: 'select',
           },

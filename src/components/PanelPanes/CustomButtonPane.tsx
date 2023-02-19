@@ -94,35 +94,42 @@ function CustomButtonPane({ buttons, buttonSections }: ICustomButtonPaneProps): 
           {sectionButtons?.length === 0 && <p>No announcements available</p>}
 
           <div className={classes.buttonList}>
-            {sectionButtons?.map?.(btn => (
-              <div key={btn.label} className="buttonGroup">
-                <button
-                  disabled={isDisabled}
-                  onClick={() =>
-                    createClickHandler(btn.play, btn.label, 'play')().catch(e => {
-                      setPlayError(e)
-                    })
-                  }
-                >
-                  <span className="buttonLabel">
-                    <PlayIcon />
-                    {btn.label}
-                  </span>
-                </button>
-                <button
-                  disabled={isDisabled}
-                  onClick={() =>
-                    createClickHandler(btn.download, btn.label, 'download')().catch(e => {
-                      setPlayError(e)
-                    })
-                  }
-                  className="iconButton"
-                  aria-label="Download announcement"
-                >
-                  <DownloadIcon />
-                </button>
-              </div>
-            ))}
+            {sectionButtons?.map?.(btn => {
+              if (btn.files) {
+                btn.play ||= () => AnnouncementSystemInstance.playAudioFiles(btn.files)
+                btn.download ||= () => AnnouncementSystemInstance.playAudioFiles(btn.files, true)
+              }
+
+              return (
+                <div key={btn.label} className="buttonGroup">
+                  <button
+                    disabled={isDisabled}
+                    onClick={() =>
+                      createClickHandler(btn.play, btn.label, 'play')().catch(e => {
+                        setPlayError(e)
+                      })
+                    }
+                  >
+                    <span className="buttonLabel">
+                      <PlayIcon />
+                      {btn.label}
+                    </span>
+                  </button>
+                  <button
+                    disabled={isDisabled}
+                    onClick={() =>
+                      createClickHandler(btn.download, btn.label, 'download')().catch(e => {
+                        setPlayError(e)
+                      })
+                    }
+                    className="iconButton"
+                    aria-label="Download announcement"
+                  >
+                    <DownloadIcon />
+                  </button>
+                </div>
+              )
+            })}
           </div>
         </fieldset>
       ))}

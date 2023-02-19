@@ -1,5 +1,6 @@
-import BombardierXstar from './systems/rolling-stock/BombardierXstar'
 import ThameslinkClass700 from './systems/rolling-stock/TLClass700'
+import BombardierXstar from './systems/rolling-stock/BombardierXstar'
+import TfWTrainFx from './systems/rolling-stock/TfWTrainFx'
 
 import KeTechPhil from './systems/stations/KeTechPhil'
 import KeTechCelia from './systems/stations/KeTechCelia'
@@ -14,7 +15,7 @@ import TrainAnnouncementSystem from './TrainAnnouncementSystem'
 import StationAnnouncementSystem from './StationAnnouncementSystem'
 import AnnouncementSystem from './AnnouncementSystem'
 
-export const AllTrainAnnouncementSystems: { new (): TrainAnnouncementSystem }[] = [ThameslinkClass700, BombardierXstar]
+export const AllTrainAnnouncementSystems: { new (): TrainAnnouncementSystem }[] = [ThameslinkClass700, BombardierXstar, TfWTrainFx]
 
 export const AllStationAnnouncementSystems: { new (): StationAnnouncementSystem }[] = [AtosMatt, AtosAnne, KeTechPhil, KeTechCelia, ScotRail]
 

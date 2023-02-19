@@ -20,10 +20,15 @@ interface IStoppedAtStationAnnouncementOptions {
   terminatesAtCode: string
 }
 
-interface IInitialDepartureAnnouncementOptions {
+interface IDepartingStopAnnouncementOptions {
+  nextStationCode: string
   terminatesAtCode: string
-  callingAtCodes: { crsCode: string; name: string; randomId: string }[]
-  isSoutheastern: boolean
+}
+
+interface IApproachingStopAnnouncementOptions {
+  nextStationCode: string
+  terminatesAtCode: string
+  gapType: 'gap' | 'step' | 'step down' | 'none'
 }
 
 // const announcementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {
@@ -51,7 +56,7 @@ export default class TfWTrainFx extends TrainAnnouncementSystem {
 
     const files: AudioItem[] = []
 
-    if (!this.validateStationExists(thisStationCode, 'high') || !this.validateStationExists(terminatesAtCode, 'high')) {
+    if (!this.validateStationExists(thisStationCode, 'high')) {
       return
     }
 
@@ -60,16 +65,105 @@ export default class TfWTrainFx extends TrainAnnouncementSystem {
     if (thisStationCode === terminatesAtCode) {
       files.push('conjoiners.our final station')
     } else {
-      files.push(
-        {
-          id: 'conjoiners.this train is for',
-          opts: { delayStart: 750 },
-        },
-        `stations.high.${terminatesAtCode}`,
-      )
+      files.push(...this.getTerminationInfo(terminatesAtCode, 'high'))
     }
 
     await this.playAudioFiles(files, download)
+  }
+
+  private async playDepartingStopAnnouncement(options: IDepartingStopAnnouncementOptions, download: boolean = false): Promise<void> {
+    const { nextStationCode, terminatesAtCode } = options
+
+    const files: AudioItem[] = []
+
+    if (!this.validateStationExists(nextStationCode, 'high')) {
+      return
+    }
+
+    files.push(...this.getTerminationInfo(terminatesAtCode, 'low'))
+
+    files.push(
+      {
+        id: 'conjoiners.the next stop is',
+        opts: { delayStart: 750 },
+      },
+      `stations.high.${nextStationCode}`,
+    )
+
+    if (nextStationCode === terminatesAtCode) {
+      files.push('conjoiners.our final station')
+    }
+
+    files.push({
+      id: 'conjoiners.thank you',
+      opts: { delayStart: 750 },
+    })
+
+    await this.playAudioFiles(files, download)
+  }
+
+  private async playApproachingStopAnnouncement(options: IApproachingStopAnnouncementOptions, download: boolean = false): Promise<void> {
+    const { nextStationCode, gapType } = options
+
+    const files: AudioItem[] = []
+
+    if (!this.validateStationExists(nextStationCode, 'high')) {
+      return
+    }
+
+    files.push('conjoiners.we will shortly be arriving at slower', `stations.high.${nextStationCode}`, 'conjoiners.thank you')
+
+    switch (gapType) {
+      case 'none':
+      default:
+        break
+
+      case 'gap':
+        files.push('safety.gap between the train and the platform')
+        break
+
+      case 'step':
+        files.push('safety.large step between train and platform')
+        break
+
+      case 'step down':
+        files.push('safety.large step down from the train')
+        break
+    }
+
+    // files.push('conjoiners.this train is for', `stations.low.${terminatesAtCode}`)
+
+    // files.push(
+    //   {
+    //     id: 'conjoiners.the next stop is',
+    //     opts: { delayStart: 750 },
+    //   },
+    //   `stations.high.${nextStationCode}`,
+    // )
+
+    // if (nextStationCode === terminatesAtCode) {
+    //   files.push('conjoiners.our final station')
+    // }
+
+    // files.push({
+    //   id: 'conjoiners.thank you',
+    //   opts: { delayStart: 750 },
+    // })
+
+    await this.playAudioFiles(files, download)
+  }
+
+  getTerminationInfo(stationCode: string, pitch: 'high' | 'low', delay: number = 0): AudioItem[] {
+    if (stationCode.startsWith('^^')) {
+      // Custom destination message
+      return this.AvailableDestinatons.find(d => d.label === stationCode.substring(2))?.customFiles ?? []
+    }
+
+    if (!this.validateStationExists(stationCode, pitch)) {
+      return
+    }
+
+    return [{ id: 'conjoiners.this train is for', opts: { delayStart: delay } }, `stations.${pitch}.${stationCode}`]
   }
 
   readonly AllAvailableStationNames: string[] = [
@@ -356,6 +450,64 @@ export default class TfWTrainFx extends TrainAnnouncementSystem {
     high: this.AllAvailableStationNames.map(crsToStationItemMapper).map(item => ({ value: item.crsCode, title: item.name })),
   }
 
+  readonly AvailableDestinatons: { label: string; customFiles?: AudioItem[]; divCrs?: string }[] = (
+    [
+      {
+        label: 'Aberystwyth and Pwllheli, dividing Machynlleth',
+        customFiles: ['dividing.AYW and PWL div MCN'],
+        divCrs: 'SHR',
+      },
+      {
+        label: 'Birmingham Intl, dividing Shrewsbury',
+        customFiles: ['dividing.BHI div SHR'],
+        divCrs: 'SHR',
+      },
+      {
+        label: 'Birmingham New Street, dividing Shrewsbury',
+        customFiles: ['dividing.BHM div SHR'],
+        divCrs: 'SHR',
+      },
+      {
+        label: 'Chester and Aberystwyth, dividing Shrewsbury',
+        customFiles: ['dividing.CTR and AYW div SHR'],
+        divCrs: 'CTR',
+      },
+      {
+        label: 'Holyhead, dividing Chester',
+        customFiles: ['dividing.HHD div CTR'],
+        divCrs: 'CTR',
+      },
+      {
+        label: 'Holyhead, dividing Llandudno Junction',
+        customFiles: ['dividing.HHD div LLJ'],
+        divCrs: 'LLJ',
+      },
+      {
+        label: 'Holyhead, dividing Shrewsbury',
+        customFiles: ['dividing.HHD div SHR'],
+        divCrs: 'SHR',
+      },
+    ] as { label: string; customFiles?: AudioItem[]; divCrs?: string }[]
+  ).concat(
+    this.AllAvailableStationNames.map(crs => ({
+      label: crs,
+    })),
+  )
+
+  readonly AvailableDestinationOptions: { title: string; value: string }[] = this.AvailableDestinatons.map(item => {
+    if (item.customFiles) {
+      return {
+        title: item.label,
+        value: '^^' + item.label,
+      }
+    }
+
+    return {
+      title: getStationByCrs(item.label).stationName,
+      value: item.label,
+    }
+  })
+
   readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab> = {
     stoppedAtStation: {
       name: 'At station',
@@ -371,8 +523,85 @@ export default class TfWTrainFx extends TrainAnnouncementSystem {
           },
           terminatesAtCode: {
             name: 'Terminates at',
+            default: this.AvailableDestinationOptions[0].value,
+            options: this.AvailableDestinationOptions,
+            type: 'select',
+          },
+          // callingAtCodes: {
+          //   name: '',
+          //   type: 'custom',
+          //   component: CallingAtSelector,
+          //   props: {
+          //     availableStations: this.AllAvailableStationNames,
+          //   },
+          //   default: [],
+          // },
+        },
+      },
+    },
+    departingStop: {
+      name: 'Departing stop',
+      component: CustomAnnouncementPane,
+      props: {
+        playHandler: this.playDepartingStopAnnouncement.bind(this),
+        options: {
+          nextStationCode: {
+            name: 'Next station',
             default: this.AvailableStationItemMaps.high[0].value,
             options: this.AvailableStationItemMaps.high,
+            type: 'select',
+          },
+          terminatesAtCode: {
+            name: 'Terminates at',
+            default: this.AvailableDestinationOptions[0].value,
+            options: this.AvailableDestinationOptions,
+            type: 'select',
+          },
+          // callingAtCodes: {
+          //   name: '',
+          //   type: 'custom',
+          //   component: CallingAtSelector,
+          //   props: {
+          //     availableStations: this.AllAvailableStationNames,
+          //   },
+          //   default: [],
+          // },
+        },
+      },
+    },
+    approachingStation: {
+      name: 'Approaching stop',
+      component: CustomAnnouncementPane,
+      props: {
+        playHandler: this.playApproachingStopAnnouncement.bind(this),
+        options: {
+          nextStationCode: {
+            name: 'Next station',
+            default: this.AvailableStationItemMaps.high[0].value,
+            options: this.AvailableStationItemMaps.high,
+            type: 'select',
+          },
+          gapType: {
+            name: 'Gap type',
+            default: 'none',
+            options: [
+              {
+                title: 'None',
+                value: 'none',
+              },
+              {
+                title: 'Large step between',
+                value: 'step',
+              },
+              {
+                title: 'Large step down',
+                value: 'step down',
+              },
+              {
+                title: 'Gap between',
+                value: 'gap',
+              },
+            ],
             type: 'select',
           },
           // callingAtCodes: {

@@ -78,11 +78,18 @@ export interface CustomAnnouncementTab {
   props: Omit<ICustomAnnouncementPaneProps, 'name'> | ICustomButtonPaneProps
 }
 
-export interface CustomAnnouncementButton {
+export type CustomAnnouncementButton = {
   label: string
-  play: () => Promise<void>
-  download: () => Promise<void>
-}
+} & (
+  | {
+      play: () => Promise<void>
+      download: () => Promise<void>
+      files?: AudioItem[]
+    }
+  | {
+      files: AudioItem[]
+    }
+)
 
 export default abstract class AnnouncementSystem {
   /**
@@ -150,6 +157,7 @@ export default abstract class AnnouncementSystem {
     }
 
     if (download) {
+      debugger
       crunker.download(crunker.export(audio, 'audio/wav').blob, 'announcement')
       window.__audio = undefined
     } else {

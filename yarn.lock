@@ -11849,7 +11849,7 @@ __metadata:
     recoil: ^0.7.6
     recoil-persistence: ^0.3.0-beta.1
     typescript: ^4.9.3
-    uk-railway-stations: ^1.3.0
+    uk-railway-stations: ^1.4.0
   languageName: unknown
   linkType: soft
 
@@ -13805,10 +13805,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"uk-railway-stations@npm:^1.3.0":
-  version: 1.3.0
-  resolution: "uk-railway-stations@npm:1.3.0"
-  checksum: 31fcdbb90e222041ab5cbb83732bac534d526229212e4c2ccaff1d11fabc4fbd348f026cf239b5c600b5977f1d3b9f1f039dead94c525aa14c61eff2091b9f16
+"uk-railway-stations@npm:^1.4.0":
+  version: 1.4.0
+  resolution: "uk-railway-stations@npm:1.4.0"
+  checksum: 44910d4844677c29bab05230f9bc79358a051a6e4814a9d882c04d601abcb6549a17beb913314878cc607b195a1d4798689a0301b4ecc026120a1131da499005
   languageName: node
   linkType: hard
 

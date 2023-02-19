@@ -1,19 +1,10 @@
 import React from 'react'
-import CallingAtSelector from '@components/CallingAtSelector'
-import CustomAnnouncementPane, { ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
+import CustomAnnouncementPane from '@components/PanelPanes/CustomAnnouncementPane'
 import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
-import { AllStationsTitleValueMap, getStationByCrs } from '@data/StationManipulators'
-import { AudioItem, AudioItemObject, CustomAnnouncementTab } from '../../AnnouncementSystem'
+import { getStationByCrs } from '@data/StationManipulators'
+import { AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
 import TrainAnnouncementSystem from '../../TrainAnnouncementSystem'
 import crsToStationItemMapper from '@helpers/crsToStationItemMapper'
-
-interface IApproachingStationAnnouncementOptions {
-  stationCode: string
-  isAto: boolean
-  terminatesHere: boolean
-  takeCareAsYouLeave: boolean
-  changeFor: string[]
-}
 
 interface IStoppedAtStationAnnouncementOptions {
   thisStationCode: string
@@ -30,20 +21,6 @@ interface IApproachingStopAnnouncementOptions {
   terminatesAtCode: string
   gapType: 'gap' | 'step' | 'step down' | 'none'
 }
-
-// const announcementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {
-//   stopped: [
-//     {
-//       name: 'Burgess Hill to Brighton',
-//       state: {
-//         thisStationCode: 'BUG',
-//         terminatesAtCode: 'BTN',
-//         callingAtCodes: ['HSK', 'PRP'].map(crsToStationItemMapper),
-//         mindTheGap: true,
-//       },
-//     },
-//   ],
-// }
 
 export default class TfWTrainFx extends TrainAnnouncementSystem {
   readonly NAME = 'Transport for Wales - TrainFX'
@@ -130,25 +107,6 @@ export default class TfWTrainFx extends TrainAnnouncementSystem {
         files.push('safety.large step down from the train')
         break
     }
-
-    // files.push('conjoiners.this train is for', `stations.low.${terminatesAtCode}`)
-
-    // files.push(
-    //   {
-    //     id: 'conjoiners.the next stop is',
-    //     opts: { delayStart: 750 },
-    //   },
-    //   `stations.high.${nextStationCode}`,
-    // )
-
-    // if (nextStationCode === terminatesAtCode) {
-    //   files.push('conjoiners.our final station')
-    // }
-
-    // files.push({
-    //   id: 'conjoiners.thank you',
-    //   opts: { delayStart: 750 },
-    // })
 
     await this.playAudioFiles(files, download)
   }
@@ -527,15 +485,6 @@ export default class TfWTrainFx extends TrainAnnouncementSystem {
             options: this.AvailableDestinationOptions,
             type: 'select',
           },
-          // callingAtCodes: {
-          //   name: '',
-          //   type: 'custom',
-          //   component: CallingAtSelector,
-          //   props: {
-          //     availableStations: this.AllAvailableStationNames,
-          //   },
-          //   default: [],
-          // },
         },
       },
     },
@@ -557,15 +506,6 @@ export default class TfWTrainFx extends TrainAnnouncementSystem {
             options: this.AvailableDestinationOptions,
             type: 'select',
           },
-          // callingAtCodes: {
-          //   name: '',
-          //   type: 'custom',
-          //   component: CallingAtSelector,
-          //   props: {
-          //     availableStations: this.AllAvailableStationNames,
-          //   },
-          //   default: [],
-          // },
         },
       },
     },
@@ -604,15 +544,6 @@ export default class TfWTrainFx extends TrainAnnouncementSystem {
             ],
             type: 'select',
           },
-          // callingAtCodes: {
-          //   name: '',
-          //   type: 'custom',
-          //   component: CallingAtSelector,
-          //   props: {
-          //     availableStations: this.AllAvailableStationNames,
-          //   },
-          //   default: [],
-          // },
         },
       },
     },

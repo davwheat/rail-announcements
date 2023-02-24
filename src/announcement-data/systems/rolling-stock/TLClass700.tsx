@@ -108,7 +108,7 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
     LBG: 'other national rail services also change here for the jubilee and northern lines',
     KTN: 'the northern line',
     MIJ: 'other national rail and tramlink services',
-    NWD: 'london overground and other national rail services',
+    NWD: 'london overground services',
     PMR: 'london overground and other national rail services',
     STP: 'other national rail services including eurostar services to mainland europe',
     WIM: 'other national rail tramlink services and the district line',

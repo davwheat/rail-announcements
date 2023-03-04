@@ -91,6 +91,12 @@ export type CustomAnnouncementButton = {
     }
 )
 
+export interface PluraliseOptions {
+  andId: string
+  prefix?: string
+  finalPrefix?: string
+}
+
 export default abstract class AnnouncementSystem {
   /**
    * Display name for the announcement system.
@@ -231,9 +237,35 @@ export default abstract class AnnouncementSystem {
    * @param items Array of audio files
    * @returns Pluralised array of audio files
    */
-  protected pluraliseAudio(items: AudioItem[], delay: number = 0): AudioItem[] {
+  protected pluraliseAudio(items: AudioItem[], delay: number = 0, options: PluraliseOptions = { andId: 'and' }): AudioItem[] {
+    items = items
+      .map(item => {
+        if (typeof item === 'string') {
+          return { id: item }
+        } else {
+          return item
+        }
+      })
+      .map((item, i) => {
+        if (items.length - 1 === i) {
+          if (options.finalPrefix) {
+            item.id = `${options.finalPrefix}${item.id}`
+
+            return item
+          }
+        } else {
+          if (options.prefix) {
+            item.id = `${options.prefix}${item.id}`
+
+            return item
+          }
+        }
+
+        return item
+      })
+
     if (items.length > 1) {
-      items.splice(items.length - 1, 0, { id: 'and', opts: { delayStart: delay } })
+      items.splice(items.length - 1, 0, { id: options.andId, opts: { delayStart: delay } })
       return items
     }
 

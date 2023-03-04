@@ -49,7 +49,7 @@
     "react-tabs": "^6.0.0",
     "recoil": "^0.7.7",
     "recoil-persistence": "^0.3.0-beta.1",
-    "uk-railway-stations": "^1.4.0"
+    "uk-railway-stations": "^1.4.1"
   },
   "devDependencies": {
     "@sentry/webpack-plugin": "^1.20.0",

@@ -114,6 +114,10 @@ export default abstract class AnnouncementSystem {
 
   private static readonly SAMPLE_RATE = 48000
 
+  headerComponent(): React.ReactNode {
+    return null
+  }
+
   /**
    * Generates a URL for the provided audio file ID.
    */
@@ -157,7 +161,6 @@ export default abstract class AnnouncementSystem {
     }
 
     if (download) {
-      debugger
       crunker.download(crunker.export(audio, 'audio/wav').blob, 'announcement')
       window.__audio = undefined
     } else {

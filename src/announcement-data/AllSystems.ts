@@ -14,12 +14,13 @@ import TfLNorthernLine from './systems/rolling-stock/TfLNorthernLine'
 import TrainAnnouncementSystem from './TrainAnnouncementSystem'
 import StationAnnouncementSystem from './StationAnnouncementSystem'
 import AnnouncementSystem from './AnnouncementSystem'
+import TfLElizabethLine from './systems/rolling-stock/TfLElizabeth'
 
 export const AllTrainAnnouncementSystems: { new (): TrainAnnouncementSystem }[] = [ThameslinkClass700, BombardierXstar, TfWTrainFx]
 
 export const AllStationAnnouncementSystems: { new (): StationAnnouncementSystem }[] = [AtosMatt, AtosAnne, KeTechPhil, KeTechCelia, ScotRail]
 
-export const AllOtherAnnouncementSystems: { new (): AnnouncementSystem }[] = [TfLJubileeLine, TfLNorthernLine]
+export const AllOtherAnnouncementSystems: { new (): AnnouncementSystem }[] = [TfLJubileeLine, TfLNorthernLine, TfLElizabethLine]
 
 export const AllAnnouncementSystems: { new (): TrainAnnouncementSystem | StationAnnouncementSystem | AnnouncementSystem }[] = [
   ...AllStationAnnouncementSystems,

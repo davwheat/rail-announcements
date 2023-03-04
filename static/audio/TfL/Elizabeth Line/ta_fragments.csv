@@ -1,0 +1,301 @@
+﻿c,TA_9501,This train terminates here.  All change please.
+b,TA_9502,This is the train to
+b,TA_9503,Next station
+e,TA_9504,where this train terminates.
+b,TA_9505,New train destination.  Train to
+b,TA_9506,This train will not stop at
+b,TA_9507,This train will no longer stop at
+b,TA_9508,This is the service to
+b,TA_9509,Next stop
+b,TA_9510,Approaching
+b,TA_9511,This train is now approaching
+b,TA_9512,This service is now approaching
+b,TA_9513,Service to
+b,TA_9514,The next station is
+b,TA_9515,The next stop is
+b,TA_9516,This is
+b,TA_9517,Abbey Wood
+b,TA_9518,Acton Main Line
+b,TA_9519,Bond Street
+b,TA_9520,Brentwood
+b,TA_9521,Burnham
+b,TA_9522,Canary Wharf
+b,TA_9523,Chadwell Heath
+b,TA_9524,Custom House
+b,TA_9525,Ealing Broadway
+b,TA_9526,Farringdon
+b,TA_9527,Forest Gate
+b,TA_9528,Gidea Park
+b,TA_9529,Goodmayes
+b,TA_9530,Hanwell
+b,TA_9531,Harold Wood
+b,TA_9532,Hayes & Harlington
+b,TA_9533,"Heathrow Terminals 1, 2, 3"
+b,TA_9534,Heathrow Central
+b,TA_9535,Heathrow Terminal 4
+b,TA_9536,Heathrow Terminal 5
+b,TA_9537,Ilford
+b,TA_9538,Iver
+b,TA_9539,Langley
+b,TA_9540,Liverpool Street
+b,TA_9541,Maidenhead
+b,TA_9542,Manor Park
+b,TA_9543,Maryland
+b,TA_9544,Paddington
+b,TA_9545,Reading
+b,TA_9546,Romford
+b,TA_9547,Seven Kings
+b,TA_9548,Shenfield
+b,TA_9549,Slough
+b,TA_9550,Southall
+b,TA_9551,Stratford
+b,TA_9552,Taplow
+b,TA_9553,Tottenham Court Road
+b,TA_9554,Twyford
+b,TA_9555,West Drayton
+b,TA_9556,West Ealing
+b,TA_9557,Whitechapel
+b,TA_9558,Woolwich
+b,TA_9559,Change for the
+e,TA_9560,line
+e,TA_9561,lines
+b,TA_9562,Change for
+m,TA_9563,trains to
+m,TA_9564,services to
+b,TA_9565,London Midland
+b,TA_9566,Southern
+b,TA_9567,Southeastern
+b,TA_9568,London Overground
+b,TA_9569,First Capital Connect
+b,TA_9570,London Underground
+b,TA_9571,C2C
+b,TA_9572,Chiltern
+b,TA_9573,Greater Anglia
+b,TA_9574,South West Trains
+b,TA_9575,Cross Country
+b,TA_9576,First Great Western
+b,TA_9577,Heathrow Connect
+b,TA_9578,Heathrow Express
+b,TA_9579,Virgin West Coast
+b,TA_9580,East Coast Trains
+b,TA_9581,(Reserved for) TfL W Anglia Services TfL West Anglia
+b,TA_9582,Network Rail
+b,TA_9583,Freight services
+b,TA_9584,Crossrail
+b,TA_9585,TfL rail service
+b,TA_9586,Transport for London Rail Service
+b,TA_9587,Bakerloo
+b,TA_9588,Central
+b,TA_9589,Circle
+b,TA_9590,Circle and District
+b,TA_9591,District
+b,TA_9592,Docklands Light Railway
+b,TA_9593,Hammersmith and City
+b,TA_9594,Jubilee
+b,TA_9595,Metropolitan
+b,TA_9596,Northern
+b,TA_9597,Picadilly
+b,TA_9598,Victoria
+b,TA_9599,Waterloo and City
+b,TA_9600,DLR
+b,TA_9601,National Rail Services
+b,TA_9602,London Overground Lines
+b,TA_9603,Richmond to Stratford
+b,TA_9604,Clapham Junction to Willesden Junction
+b,TA_9605,Clapham Junction to Highbury & Islington
+b,TA_9606,Watford Junction to Euston
+b,TA_9607,Gospel Oak to Barking
+b,TA_9608,West Croydon to Highbury & Islington
+b,TA_9609,Crystal Palace to Highbury & Islington
+b,TA_9610,Clapham Junction to Stratford
+b,TA_9611,Willesden Junction to New Cross
+b,TA_9612,Elizabeth
+b,TA_9613,Exit for
+b,TA_9614,Exit here for
+m,TA_9615,RailAir Bus Service to Heathrow Airport
+m,TA_9616,St Mary's Hospital
+m,TA_9617,Trains to Heathrow Airport
+m,TA_9618,Trains to Gatwick and Luton Airports
+m,TA_9619,Smithfield Market
+m,TA_9620,Spitalfields Market
+m,TA_9621,Trains to Stansted and Southend Airports
+m,TA_9622,The Royal London Hospital
+m,TA_9623,Billingsgate Market
+m,TA_9624,Excel London Exhibition Centre
+m,TA_9625,Queen Elizabeth Olympic Park
+m,TA_9626,Wanstead Park London Overground Station
+m,TA_9627,Woodgrange Park London Overground Station
+b,TA_9628,There are short platforms at
+c,TA_9629,The doors will not open on this carriage
+c,TA_9630,Only the front door will open on this carriage
+c,TA_9631,The front and centre doors will open on this carriage
+c,TA_9632,The centre door will not open on this carriage
+b,TA_9633,"To exit, move forward"
+c,TA_9634,To exit use the front door
+c,TA_9635,To exit use the front and centre doors
+e,TA_9636,carriage
+e,TA_9637,carriages
+b,TA_9638,there is no step-free access
+b,TA_9639,there will be no step-free access
+e,TA_9640,station is closed
+m,TA_9641,station will be closed
+m,TA_9642,until
+e,TA_9643,further notice
+b,TA_9644,all trains are terminating at
+b,TA_9645,there is no interchange with
+b,TA_9646,there are delays to
+b,TA_9647,there are severe delays
+b,TA_9648,there are minor delays
+m,TA_9649,is suspended in both directions
+m,TA_9650,is part suspended between
+m,TA_9651,is part suspended
+m,TA_9652,is suspended between
+m,TA_9653,is suspended
+b,TA_9654,There is a reduced escalator service at
+b,TA_9655,There is no escalator service at
+b,TA_9656,There is no up escalator service at
+b,TA_9657,There is no down escalator service at
+b,TA_9658,There is a reduced lift service at
+m,TA_9659,There is no lift service available at
+b,TA_9660,There is no step-free interchange between
+m,TA_9661,maintenance work
+b,TA_9662,please change at
+b,TA_9663,please travel to the next station
+b,TA_9664,please stay on this train and change at
+b,TA_9665,please follow instructions from station staff
+b,TA_9666,please use
+b,TA_9667,please use an alternative route to continue your journey
+b,TA_9668,please use alternative rail or bus routes
+b,TA_9669,please use other lines or buses to continue your journey
+m,TA_9670,rail replacement bus services
+e,TA_9671,replacement bus services are in operation
+e,TA_9672,please make alternative travel arrangements
+b,TA_9673,Passengers requiring
+b,TA_9674,please continue your journey at street level
+c,TA_9675,We are currently being held at a red signal.  We apologise for this delay
+c,TA_9676,We are sorry to announce that this train is currently being delayed. We are trying to find out the reason for this delay
+c,TA_9677,"We apologise for the delay,  this is due to a problem currently under investigation"
+c,TA_9678,"We apologise for the delay, this is due to a train fault"
+c,TA_9679,"We apologise for the delay, this is due to an operating incident"
+c,TA_9680,"We apologise for the delay, this is due to emergency services dealing with an incident"
+c,TA_9681,"We apologise for the delay, this is due to a person being hit by a train"
+c,TA_9682,"We apologise for the delay, this is due to speed restrictions"
+c,TA_9683,"We apologise for the delay, this is due to a broken down train"
+c,TA_9684,"We apologise for the delay, this is due to safety checks being made"
+c,TA_9685,"We apologise for the delay, this is due to a passenger being taken ill"
+c,TA_9686,"We apologise for the delay, this is due to signalling problems"
+c,TA_9687,"We apologise for the delay, this is due to electrical supply problems"
+c,TA_9688,"We apologise for the delay, this is due to a problem with line-side equipment"
+c,TA_9689,"We apologise for the delay, this is due to emergency engineering works"
+c,TA_9690,"We apologise for the delay, this is due to disruptive passengers"
+c,TA_9691,"We apologise for the delay, this is due to overhead wire problems"
+c,TA_9692,"We apologise for the delay, this is due to a vehicle striking a bridge"
+c,TA_9693,"We apologise for the delay, this is due to over-running engineering works"
+c,TA_9694,"We apologise for the delay, this is due to a trespass incident"
+c,TA_9695,"We apologise for the delay, this is due to vandalism"
+c,TA_9696,"We apologise for the delay, this is due to poor weather conditions"
+c,TA_9697,"We apologise for the delay, this is due to awaiting a vacant platform"
+c,TA_9698,Attention please: Will any medical personnel please contact the driver
+c,TA_9699,"Due to a fire on the train, please evacuate the train immediately"
+c,TA_9700,"Due to a security incident, please evacuate the train immediately"
+c,TA_9701,"Due to a security incident, this train will be terminating at the next station"
+c,TA_9702,"This train will now terminate, please evacuate the train immediately"
+c,TA_9703,"Due to a problem near the railway, this train is terminating at the next station"
+c,TA_9704,Due to an incident this train is terminating at the next station
+c,TA_9705,Due to a fatality this train is terminating at the next station
+m,TA_9706,A
+m,TA_9707,B
+m,TA_9708,2017 ('twenty' version)
+m,TA_9709,2018 ('twenty' version)
+m,TA_9710,2019 ('twenty' version)
+m,TA_9711,2020 ('twenty' version)
+m,TA_9712,2021 ('twenty' version)
+m,TA_9713,2022 ('twenty' version)
+m,TA_9714,2023 ('twenty' version)
+m,TA_9715,2024 ('twenty' version)
+m,TA_9716,2025 ('twenty' version)
+m,TA_9717,2026 ('twenty' version)
+m,TA_9718,2027 ('twenty' version)
+m,TA_9719,2028 ('twenty' version)
+m,TA_9720,2029 ('twenty' version)
+m,TA_9721,2030 ('twenty' version)
+m,TA_9722,2031 ('twenty' version)
+m,TA_9723,2032 ('twenty' version)
+m,TA_9724,2033 ('twenty' version)
+m,TA_9725,2034 ('twenty' version)
+m,TA_9726,2035 ('twenty' version)
+m,TA_9727,2036 ('twenty' version)
+m,TA_9728,2037 ('twenty' version)
+m,TA_9729,2038 ('twenty' version)
+m,TA_9730,2039 ('twenty' version)
+m,TA_9731,2040 ('twenty' version)
+m,TA_9732,2041 ('twenty' version)
+m,TA_9733,2042 ('twenty' version)
+m,TA_9734,2043 ('twenty' version)
+m,TA_9735,2044 ('twenty' version)
+m,TA_9736,2045 ('twenty' version)
+m,TA_9737,2046 ('twenty' version)
+m,TA_9738,2047 ('twenty' version)
+m,TA_9739,2048 ('twenty' version)
+m,TA_9740,2049 ('twenty' version)
+m,TA_9741,2050 ('twenty' version)
+m,TA_9742,2017 ('two thousand and' version)
+m,TA_9743,2018 ('two thousand and' version)
+m,TA_9744,2019 ('two thousand and' version)
+m,TA_9745,2020 ('two thousand and' version)
+m,TA_9746,2021 ('two thousand and' version)
+m,TA_9747,2022 ('two thousand and' version)
+m,TA_9748,2023 ('two thousand and' version)
+m,TA_9749,2024 ('two thousand and' version)
+m,TA_9750,2025 ('two thousand and' version)
+m,TA_9751,2026 ('two thousand and' version)
+m,TA_9752,2027 ('two thousand and' version)
+m,TA_9753,2028 ('two thousand and' version)
+m,TA_9754,2029 ('two thousand and' version)
+m,TA_9755,2030 ('two thousand and' version)
+m,TA_9756,2031 ('two thousand and' version)
+m,TA_9757,2032 ('two thousand and' version)
+m,TA_9758,2033 ('two thousand and' version)
+m,TA_9759,2034 ('two thousand and' version)
+m,TA_9760,2035 ('two thousand and' version)
+m,TA_9761,2036 ('two thousand and' version)
+m,TA_9762,2037 ('two thousand and' version)
+m,TA_9763,2038 ('two thousand and' version)
+m,TA_9764,2039 ('two thousand and' version)
+m,TA_9765,2040 ('two thousand and' version)
+m,TA_9766,2041 ('two thousand and' version)
+m,TA_9767,2042 ('two thousand and' version)
+m,TA_9768,2043 ('two thousand and' version)
+m,TA_9769,2044 ('two thousand and' version)
+m,TA_9770,2045 ('two thousand and' version)
+m,TA_9771,2046 ('two thousand and' version)
+m,TA_9772,2047 ('two thousand and' version)
+m,TA_9773,2048 ('two thousand and' version)
+m,TA_9774,2049 ('two thousand and' version)
+m,TA_9775,2050 ('two thousand and' version)
+m,TA_9776,Spring
+m,TA_9777,Summer
+m,TA_9778,Autumn
+m,TA_9779,Winter
+c,TA_9780,Please mind the gap between the train and the platform
+m,TA_9781,anti clockwise
+m,TA_9782,both directions
+m,TA_9783,clockwise
+m,TA_9784,east & westbound
+m,TA_9785,eastbound
+m,TA_9786,east or westbound
+m,TA_9787,north & southbound
+m,TA_9788,northbound
+m,TA_9789,north or southbound
+m,TA_9790,southbound
+m,TA_9791,westbound
+m,TA_9792,all weekend
+m,TA_9793,next weekend
+m,TA_9794,this week
+m,TA_9795,this weekend
+m,TA_9796,next week
+c,TA_9797,Please do not hold the doors open
+c,TA_9798,Please do not obstruct the closing doors
+c,TA_9799,Please do not obstruct the doors
+m,TA_9800,Cambridge Heath
+m,TA_9801,Hackney Downs

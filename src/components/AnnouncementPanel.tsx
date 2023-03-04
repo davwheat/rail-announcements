@@ -16,6 +16,9 @@ const useStyles = makeStyles({
   heading: {
     marginBottom: 16,
   },
+  instanceHeader: {
+    marginBottom: 16,
+  },
 })
 
 function AnnouncementPanel(): JSX.Element {
@@ -64,6 +67,8 @@ function AnnouncementPanel(): JSX.Element {
   return (
     <div className={classes.root}>
       <h2 className={classes.heading}>{AnnouncementSystemInstance.NAME}</h2>
+
+      <div className={classes.instanceHeader}>{AnnouncementSystemInstance.headerComponent()}</div>
 
       <Tabs
         selectedTabIndex={getSelectedTab()}

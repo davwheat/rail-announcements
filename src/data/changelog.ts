@@ -195,6 +195,18 @@ const changelog: IChangelogVersion[] = [
     additions: ['[TfL Northern Line] Use re-recorded Northern Line Extension and Elizabeth Line announcements for applicable stations'],
     otherChanges: ['Upgrade to Gatsby 5 and React 18'],
   },
+  {
+    date: '2022-12-09',
+    additions: ['[Class 700] Add option to be Southeastern service'],
+  },
+  {
+    date: '2023-02-19',
+    additions: ['[TfW TrainFX] Add new TrainFX announcement system for Transport for Wales trains'],
+  },
+  {
+    date: '2023-03-04',
+    additions: ['[TfL Elizabeth Line] Add new Elizabeth Line announcement system'],
+  },
 ]
 
 export default changelog

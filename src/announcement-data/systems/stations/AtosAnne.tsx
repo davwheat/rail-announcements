@@ -2613,7 +2613,7 @@ export default class AtosAnne extends StationAnnouncementSystem {
             name: '',
             type: 'custom',
             // default: 'unknown',
-            default: AVAILABLE_DELAY_TIMES[0],
+            default: AVAILABLE_DELAY_TIMES[0].toString(),
             component: ({ activeState, value, onChange, availableDelayTimes }) => {
               if (activeState.disruptionType !== 'delayed') {
                 return null

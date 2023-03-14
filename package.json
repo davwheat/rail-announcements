@@ -23,8 +23,8 @@
   },
   "dependencies": {
     "@material-ui/styles": "^4.11.5",
-    "@sentry/gatsby": "^7.40.0",
-    "@sentry/tracing": "^7.40.0",
+    "@sentry/gatsby": "^7.43.0",
+    "@sentry/tracing": "^7.43.0",
     "babel-plugin-transform-remove-console": "^6.9.4",
     "clsx": "^1.2.1",
     "crunker": "^2.1.0",

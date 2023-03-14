@@ -3,8 +3,14 @@ import React from 'react'
 import { makeStyles } from '@material-ui/styles'
 
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd'
+import Select from 'react-select'
 import { nanoid } from 'nanoid'
 import { getStationByCrs } from '@data/StationManipulators'
+
+interface Option {
+  readonly label: string
+  readonly value: string
+}
 
 const useStyles = makeStyles({
   root: {
@@ -46,7 +52,7 @@ interface ICallingAtSelectorProps {
   availableStations: { high: string[]; low: string[] }
   hours: string[]
   mins: string[]
-  platforms: { high: string[]; low: string[] }
+  platforms: string[]
 }
 
 function AtosDisruptionAlternatives({ onChange, value, availableStations, hours, mins, platforms }: ICallingAtSelectorProps): JSX.Element {
@@ -65,7 +71,7 @@ function AtosDisruptionAlternatives({ onChange, value, availableStations, hours,
               hour: hours[0],
               minute: mins[0],
               terminatingCrs: firstTerminatingStation,
-              platform: platforms.low[0],
+              platform: platforms[0],
               via: 'none',
             },
           })
@@ -142,7 +148,7 @@ interface IAtosDisruptionAlternativeServicePanelProps {
   availableStations: { high: string[]; low: string[] }
   hours: string[]
   mins: string[]
-  platforms: { high: string[]; low: string[] }
+  platforms: string[]
 }
 
 const useAltServiceStyles = makeStyles({
@@ -181,6 +187,7 @@ const useAltServiceStyles = makeStyles({
   },
   passengersFor: {
     marginBottom: 8,
+    maxWidth: 400,
   },
 })
 
@@ -207,7 +214,45 @@ function AtosDisruptionAlternativeServicePanel({
         </button>
       </div>
 
-      <select
+      <Select<Option, false>
+        className={classes.passengersFor}
+        value={{
+          value: 'none',
+          label: 'Select station...',
+        }}
+        onChange={val => {
+          const stn = getStationByCrs(val.value)
+          value.passengersFor.push({ crsCode: stn.crsCode, name: stn.stationName, randomId: nanoid() })
+          onChange(value)
+        }}
+        options={[
+          {
+            value: 'none',
+            label: 'Select station...',
+          },
+        ].concat(
+          availableStations.high
+            .filter(stn => !value.passengersFor.map(x => x.crsCode).includes(stn))
+            .sort()
+            .map(s => {
+              if (!getStationByCrs(s)) {
+                console.warn('No station found for', s)
+
+                return {
+                  value: s,
+                  label: s,
+                }
+              }
+
+              return {
+                value: s,
+                label: getStationByCrs(s).stationName,
+              }
+            }),
+        )}
+      />
+
+      {/* <select
         className={classes.passengersFor}
         value="none"
         onChange={e => {
@@ -221,12 +266,20 @@ function AtosDisruptionAlternativeServicePanel({
         {availableStations.high
           .filter(stn => !value.passengersFor.map(x => x.crsCode).includes(stn))
           .sort()
-          .map(s => (
-            <option key={s} value={s}>
-              {getStationByCrs(s).stationName}
-            </option>
-          ))}
-      </select>
+          .map(s => {
+            if (!getStationByCrs(s)) {
+              console.warn('No station found for', s)
+
+              return null
+            }
+
+            return (
+              <option key={s} value={s}>
+                {getStationByCrs(s).stationName}
+              </option>
+            )
+          })}
+      </select> */}
 
       <DragDropContext
         onDragEnd={result => {
@@ -372,7 +425,7 @@ function AtosDisruptionAlternativeServicePanel({
             onChange(value)
           }}
         >
-          {platforms.low.map(option => (
+          {platforms.map(option => (
             <option value={option} key={option}>
               {option}
             </option>

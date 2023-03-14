@@ -207,6 +207,10 @@ const changelog: IChangelogVersion[] = [
     date: '2023-03-04',
     additions: ['[TfL Elizabeth Line] Add new Elizabeth Line announcement system'],
   },
+  {
+    date: '2023-03-14',
+    additions: ['[Atos - Anne] Use real audio clips for announcements'],
+  },
 ]
 
 export default changelog

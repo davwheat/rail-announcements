@@ -2212,7 +2212,7 @@ export default class AtosAnne extends StationAnnouncementSystem {
       )
     }
 
-    if (options.transportType !== 'train') {
+    if (options.transportType === 'train') {
       files.push('this train has', `coaches.${options.coaches}`)
     }
 

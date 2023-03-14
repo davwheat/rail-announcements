@@ -9,6 +9,7 @@ import { AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
 import crsToStationItemMapper from '@helpers/crsToStationItemMapper'
 import AtosDisruptionAlternatives, { IAlternativeServicesState } from '@components/AtosDisruptionAlternatives'
 import createAnnouncementButton from '@helpers/createAnnouncementButton'
+import { nanoid } from 'nanoid'
 
 interface INextTrainAnnouncementOptions {
   platform: string
@@ -2026,7 +2027,7 @@ const AVAILABLE_DISRUPTION_REASONS = [
   'Earlier electrical supply problems',
   'Earlier emergency engineering works',
   'Earlier industrial action',
-  'Earlier operating diificulties',
+  'Earlier operating difficulties',
   'Earlier overhead wire problems',
   'Earlier overrunning engineering works',
   'Earlier signalling problems',
@@ -2034,7 +2035,7 @@ const AVAILABLE_DISRUPTION_REASONS = [
   'Electrical supply problems',
   'Emergency engineering works',
   'Emergency services attending an incident',
-  'Emergency services attending incident adj. railway',
+  'Emergency services attending incident adjacent to the railway',
   'Emergency services dealing with a prior incident',
   'Emergency services dealing with an incident',
   'Engineering works',
@@ -2153,6 +2154,139 @@ const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>>
         seating: 'there are usually many seats available on this train',
         special: [],
         transportType: 'train',
+      },
+    },
+    {
+      name: '13:57 | HHE to LIT',
+      state: {
+        platform: '1',
+        hour: '13',
+        min: '57',
+        toc: 'southern',
+        terminatingStationCode: 'LIT',
+        via: 'HOV',
+        callingAt: ['BUG', 'HSK', 'PRP', 'HOV', 'PLD', 'SSE', 'LAC', 'WRH', 'WWO', 'DUR', 'GBS', 'ANG'].map(crsToStationItemMapper),
+        coaches: '8 coaches',
+        seating: 'none',
+        special: [],
+        transportType: 'train',
+      },
+    },
+  ],
+
+  disruptedTrain: [
+    {
+      name: '07:36 | BTN (+21m)',
+      state: {
+        hour: '07',
+        min: '36',
+        toc: 'thameslink',
+        terminatingStationCode: 'BTN',
+        via: 'none',
+        disruptionType: 'delayed',
+        delayTime: '21',
+        disruptionReason: 'a failure of signalling equipment',
+        platform: '2',
+        alternativeServices: [
+          {
+            randomId: nanoid(),
+            passengersFor: ['WVF'].map(crsToStationItemMapper),
+            service: {
+              hour: '07',
+              minute: '33',
+              terminatingCrs: 'EBN',
+              via: 'LWS',
+              platform: '2',
+            },
+          },
+          {
+            randomId: nanoid(),
+            passengersFor: ['BUG', 'PRP'].map(crsToStationItemMapper),
+            service: {
+              hour: '07',
+              minute: '40',
+              terminatingCrs: 'LIT',
+              via: 'HOV',
+              platform: '2',
+            },
+          },
+          {
+            randomId: nanoid(),
+            passengersFor: ['HSK'].map(crsToStationItemMapper),
+            service: {
+              hour: '07',
+              minute: '57',
+              terminatingCrs: 'BTN',
+              via: 'none',
+              platform: '2',
+            },
+          },
+        ],
+      },
+    },
+    {
+      name: '16:38 | BTN (+61m)',
+      state: {
+        hour: '16',
+        min: '38',
+        toc: 'thameslink',
+        terminatingStationCode: 'BTN',
+        via: 'none',
+        disruptionType: 'delayed',
+        delayTime: '61',
+        disruptionReason: 'emergency services dealing with an incident',
+        platform: '1',
+        alternativeServices: [
+          {
+            randomId: nanoid(),
+            passengersFor: ['BUG'].map(crsToStationItemMapper),
+            service: {
+              hour: '16',
+              minute: '21',
+              terminatingCrs: 'BTN',
+              via: 'none',
+              platform: '2',
+            },
+          },
+        ],
+      },
+    },
+    {
+      name: '08:33 to LIT cancelled',
+      state: {
+        hour: '08',
+        min: '33',
+        toc: 'southern',
+        terminatingStationCode: 'LIT',
+        via: 'HOV',
+        disruptionType: 'cancelled',
+        delayTime: 'unknown',
+        disruptionReason: 'a road vehicle striking a bridge',
+        platform: '2',
+        alternativeServices: [
+          {
+            randomId: nanoid(),
+            passengersFor: ['BUG', 'HSK'].map(crsToStationItemMapper),
+            service: {
+              hour: '08',
+              minute: '36',
+              terminatingCrs: 'BTN',
+              via: 'none',
+              platform: '2',
+            },
+          },
+          {
+            randomId: nanoid(),
+            passengersFor: ['HOV', 'PLD', 'SSE', 'LAC', 'WRH', 'WWO', 'DUR', 'GBS', 'ANG'].map(crsToStationItemMapper),
+            service: {
+              hour: '09',
+              minute: '33',
+              terminatingCrs: 'LIT',
+              via: 'HOV',
+              platform: '2',
+            },
+          },
+        ],
       },
     },
   ],

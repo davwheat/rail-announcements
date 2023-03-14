@@ -2258,7 +2258,7 @@ export default class AtosAnne extends StationAnnouncementSystem {
       if (delayTime === 'unknown') {
         files.push('is delayed')
       } else {
-        files.push('is delayed by approximately', `delay-times.${delayTime} minutes`)
+        files.push('is delayed by approximately', `delay-times.${delayTime} ${delayTime === '1' ? 'minute' : 'minutes'}`)
       }
     } else if (disruptionType === 'cancelled') {
       files.push({ id: 'has been cancelled', opts: { delayStart: 100 } })
@@ -2506,7 +2506,7 @@ export default class AtosAnne extends StationAnnouncementSystem {
             props: {
               availableDelayTimes: [
                 { title: 'Unknown', value: 'unknown' },
-                ...AVAILABLE_DELAY_TIMES.map(h => ({ title: `${h} minute(s)`, value: h })),
+                ...AVAILABLE_DELAY_TIMES.map(h => ({ title: `${h} minute(s)`, value: h.toString() })),
               ],
             },
           },

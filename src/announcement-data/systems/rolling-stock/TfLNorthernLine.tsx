@@ -296,7 +296,10 @@ const NextStationData: NextStationItem[] = [
   },
   { label: 'Kentish Town' },
   { label: 'Kings Cross St Pancras' },
-  { label: 'Leicester Square' },
+  {
+    label: 'Leicester Square',
+    audio: ['conjoiner.the next station is', 'station.low.leicester square', 'conjoiner.change here for', 'connections.piccadilly line'],
+  },
   { label: 'London Bridge' },
   {
     label: 'Mill Hill East',

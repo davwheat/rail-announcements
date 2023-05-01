@@ -211,6 +211,14 @@ const changelog: IChangelogVersion[] = [
     date: '2023-03-14',
     additions: ['[Atos - Anne] Use real audio clips for announcements'],
   },
+  {
+    date: '2023-05-02',
+    fixes: [
+      '[TfL Northern Line] Next station announcement not working for Leicester Square',
+      '[TfL Elizabeth Line] Approaching station announcement not working for Whitechapel',
+      '[Bombardier XStar] Replace some audio snippets with higher quality versions',
+    ],
+  },
 ]
 
 export default changelog

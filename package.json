@@ -29,7 +29,7 @@
     "clsx": "^1.2.1",
     "crunker": "^2.1.0",
     "dayjs": "^1.11.7",
-    "gatsby": "^5.9.0",
+    "gatsby": "^5.9.1",
     "gatsby-plugin-image": "^3.9.0",
     "gatsby-plugin-less": "^7.9.0",
     "gatsby-plugin-manifest": "^5.9.0",

@@ -866,19 +866,22 @@ export default class TfLNorthernLine extends AnnouncementSystem {
           stationName: {
             name: 'Destination station',
             default: AvailableDestinations[0].station,
-            options: AvailableDestinations.reduce((acc, dest) => {
-              acc.push({ title: dest.station, value: dest.station })
+            options: AvailableDestinations.reduce(
+              (acc, dest) => {
+                acc.push({ title: dest.station, value: dest.station })
 
-              if (dest.viaBank) {
-                acc.push({ title: `${dest.station} via Bank`, value: `via bank.${dest.station}` })
-              }
+                if (dest.viaBank) {
+                  acc.push({ title: `${dest.station} via Bank`, value: `via bank.${dest.station}` })
+                }
 
-              if (dest.viaCharingCross) {
-                acc.push({ title: `${dest.station} via Charing Cross`, value: `via charing cross.${dest.station}` })
-              }
+                if (dest.viaCharingCross) {
+                  acc.push({ title: `${dest.station} via Charing Cross`, value: `via charing cross.${dest.station}` })
+                }
 
-              return acc
-            }, [] as { title: string; value: string }[]),
+                return acc
+              },
+              [] as { title: string; value: string }[],
+            ),
             type: 'select',
           },
         },
@@ -944,19 +947,22 @@ export default class TfLNorthernLine extends AnnouncementSystem {
           terminatingStationName: {
             name: 'Destination station',
             default: AvailableDestinations[0].station,
-            options: AvailableDestinations.reduce((acc, dest) => {
-              acc.push({ title: dest.station, value: dest.station })
+            options: AvailableDestinations.reduce(
+              (acc, dest) => {
+                acc.push({ title: dest.station, value: dest.station })
 
-              if (dest.viaBank) {
-                acc.push({ title: `${dest.station} via Bank`, value: `via bank.${dest.station}` })
-              }
+                if (dest.viaBank) {
+                  acc.push({ title: `${dest.station} via Bank`, value: `via bank.${dest.station}` })
+                }
 
-              if (dest.viaCharingCross) {
-                acc.push({ title: `${dest.station} via Charing Cross`, value: `via charing cross.${dest.station}` })
-              }
+                if (dest.viaCharingCross) {
+                  acc.push({ title: `${dest.station} via Charing Cross`, value: `via charing cross.${dest.station}` })
+                }
 
-              return acc
-            }, [] as { title: string; value: string }[]),
+                return acc
+              },
+              [] as { title: string; value: string }[],
+            ),
             type: 'select',
           },
         },

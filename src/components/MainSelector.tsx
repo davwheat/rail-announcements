@@ -5,10 +5,13 @@ import { globalPersistentStateAtom } from '@atoms/globalStateAtom'
 import { AllAnnouncementSystems } from '@announcement-data/AllSystems'
 import Select from 'react-select'
 
-const allSystems = AllAnnouncementSystems.reduce((acc, sys) => {
-  const system = new sys()
-  return [...acc, { value: system.ID, label: system.NAME }]
-}, [] as { label: string; value: string }[])
+const allSystems = AllAnnouncementSystems.reduce(
+  (acc, sys) => {
+    const system = new sys()
+    return [...acc, { value: system.ID, label: system.NAME }]
+  },
+  [] as { label: string; value: string }[],
+)
 
 const options = [{ label: 'None', value: 'none' }, ...allSystems]
 

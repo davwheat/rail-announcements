@@ -164,7 +164,7 @@ const StationData: IStationDataItem[] = [
   {
     name: 'North Greenwich',
     approachingFiles: ['north greenwich', 'exit here for the emirates airline and the o2'],
-    standingFiles: ['north greenwich', 'exit here for the emirates airline and the o2 '],
+    standingFiles: ['north greenwich', 'exit here for the emirates airline and the o2'],
     canTerminate: true,
   },
   {

@@ -15,11 +15,12 @@
     "develop": "gatsby develop",
     "start": "gatsby develop",
     "build": "gatsby build",
-    "build:ci": "cross-env NODE_ENV=production gatsby build --verbose",
+    "build:ci": "cross-env NODE_ENV=production gatsby build --verbose && yarn run sentry:sourcemaps",
     "serve": "gatsby serve",
     "clean": "gatsby clean",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md,less,mdx}\"",
-    "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,md,less,mdx}\""
+    "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,md,less,mdx}\"",
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org davwheat --project rail-announcements ./public && sentry-cli sourcemaps upload --org davwheat --project rail-announcements ./public"
   },
   "dependencies": {
     "@material-ui/styles": "^4.11.5",

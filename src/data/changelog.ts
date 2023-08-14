@@ -219,6 +219,18 @@ const changelog: IChangelogVersion[] = [
       '[Bombardier XStar] Replace some audio snippets with higher quality versions',
     ],
   },
+  {
+    date: '2023-07-24',
+    otherChanges: ['Updated list of all GB stations'],
+  },
+  {
+    date: '2023-07-26',
+    fixes: ['[TfL Jubilee Line] Fix standing at North Greenwich announcement'],
+  },
+  {
+    date: '2023-08-14',
+    fixes: ['[Atos - Anne] Fix bug where using alternative services would break the site'],
+  },
 ]
 
 export default changelog

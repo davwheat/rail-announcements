@@ -3017,7 +3017,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/cli@npm:^1.74.4, @sentry/cli@npm:^1.75.1":
+"@sentry/cli@npm:^1.74.4":
   version: 1.75.2
   resolution: "@sentry/cli@npm:1.75.2"
   dependencies:
@@ -3030,21 +3030,6 @@ __metadata:
   bin:
     sentry-cli: bin/sentry-cli
   checksum: a0f29b2766cc3054cf20741869ff6991c5543b36b355757babcee9e997182d8862caccc985a9cf360e59000a2be2adfae42d41e0f180e495329e5a41242620d7
-  languageName: node
-  linkType: hard
-
-"@sentry/cli@npm:latest":
-  version: 2.20.5
-  resolution: "@sentry/cli@npm:2.20.5"
-  dependencies:
-    https-proxy-agent: ^5.0.0
-    node-fetch: ^2.6.7
-    progress: ^2.0.3
-    proxy-from-env: ^1.1.0
-    which: ^2.0.2
-  bin:
-    sentry-cli: bin/sentry-cli
-  checksum: 4822e58e944e74b5982ea657c0d622d8ec40e9df371d4ba1da4f3c3a29b1c1e7a2556c0a8e63a92aee7e23d701ddf2311cbd0a6ae7751d3e7313b423f3430daf
   languageName: node
   linkType: hard
 
@@ -3133,16 +3118,6 @@ __metadata:
   dependencies:
     "@sentry/cli": ^1.74.4
   checksum: 08a48378e0177f175337ef41107734aa6c1fcc76a806067d099048e71508184ee1b5b9889cc2ff4b9b2ef49242d1649ba1a47f5073d4173231c9ab60643fdba8
-  languageName: node
-  linkType: hard
-
-"@sentry/webpack-plugin@npm:^1.20.1":
-  version: 1.20.1
-  resolution: "@sentry/webpack-plugin@npm:1.20.1"
-  dependencies:
-    "@sentry/cli": ^1.75.1
-    webpack-sources: ^2.0.0 || ^3.0.0
-  checksum: 2828c49f5447563682eec57f663cff7d1c59d35a19fce63a764b5308fa7c9f92c7ec4c4c072983dc0f0dcabddd07a10b32fe7ae8080ec161c8ab87db26fade9b
   languageName: node
   linkType: hard
 
@@ -12126,10 +12101,8 @@ __metadata:
   resolution: "rail-announcements@workspace:."
   dependencies:
     "@material-ui/styles": ^4.11.5
-    "@sentry/cli": latest
     "@sentry/gatsby": ^7.64.0
     "@sentry/tracing": ^7.64.0
-    "@sentry/webpack-plugin": ^1.20.1
     "@types/react-beautiful-dnd": ^13.1.4
     "@types/react-tabs": ^5.0.5
     babel-plugin-transform-remove-console: ^6.9.4
@@ -14567,7 +14540,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack-sources@npm:^2.0.0 || ^3.0.0, webpack-sources@npm:^3.2.3":
+"webpack-sources@npm:^3.2.3":
   version: 3.2.3
   resolution: "webpack-sources@npm:3.2.3"
   checksum: 989e401b9fe3536529e2a99dac8c1bdc50e3a0a2c8669cbafad31271eadd994bc9405f88a3039cd2e29db5e6d9d0926ceb7a1a4e7409ece021fe79c37d9c4607

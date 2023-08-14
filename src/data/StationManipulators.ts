@@ -11,7 +11,13 @@ export const AllStationsTitleValueMap: { title: string; value: string }[] = AllS
 }, [])
 
 export function getStationByCrs(crs: string): StationData | null {
-  return AllStationsJSON.find(station => station.crsCode === crs)
+  const stn = AllStationsJSON.find(station => station.crsCode === crs)
+
+  if (stn === null) {
+    console.warn(`Station with CRS code ${crs} not found`)
+  }
+
+  return stn
 }
 
 export function getStationByName(name: string): StationData | null {

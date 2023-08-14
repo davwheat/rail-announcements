@@ -157,7 +157,7 @@ const STATIONS = [
   'AFK',
   'AFV',
   'AGL',
-  'AGR',
+  // 'AGR', -- Closed 2019 so no longer in list of stations
   'AGT',
   'AGV',
   'AHD',

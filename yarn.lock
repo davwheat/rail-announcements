@@ -3033,6 +3033,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sentry/cli@npm:latest":
+  version: 2.20.5
+  resolution: "@sentry/cli@npm:2.20.5"
+  dependencies:
+    https-proxy-agent: ^5.0.0
+    node-fetch: ^2.6.7
+    progress: ^2.0.3
+    proxy-from-env: ^1.1.0
+    which: ^2.0.2
+  bin:
+    sentry-cli: bin/sentry-cli
+  checksum: 4822e58e944e74b5982ea657c0d622d8ec40e9df371d4ba1da4f3c3a29b1c1e7a2556c0a8e63a92aee7e23d701ddf2311cbd0a6ae7751d3e7313b423f3430daf
+  languageName: node
+  linkType: hard
+
 "@sentry/core@npm:7.64.0":
   version: 7.64.0
   resolution: "@sentry/core@npm:7.64.0"
@@ -12111,6 +12126,7 @@ __metadata:
   resolution: "rail-announcements@workspace:."
   dependencies:
     "@material-ui/styles": ^4.11.5
+    "@sentry/cli": latest
     "@sentry/gatsby": ^7.64.0
     "@sentry/tracing": ^7.64.0
     "@sentry/webpack-plugin": ^1.20.1

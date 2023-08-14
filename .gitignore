@@ -81,3 +81,6 @@ __temp_audio/
 !.yarn/versions
 
 static/temp/
+
+# Sentry Auth Token
+.sentryclirc

@@ -7,7 +7,7 @@ import Breakpoints from '@data/breakpoints'
 const useStyles = makeStyles({
   root: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)',
+    gridTemplateColumns: 'repeat(4, 1fr)',
     gap: 16,
     justifyItems: 'center',
     marginBlock: 24,
@@ -27,6 +27,7 @@ export default function NavBar() {
       <Link to="/">Generator</Link>
       <Link to="/about">About</Link>
       <Link to="/changelog">Latest changes</Link>
+      <Link to="/atos-worldline">Atos Worldline legal notice</Link>
     </nav>
   )
 }

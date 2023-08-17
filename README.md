@@ -9,8 +9,6 @@ A website to generate and play UK railway announcements.
 When Phil Sayer slowly begun leaving the railway, I wished I had gotten more recordings of his announcements. Because I didn't do that back then,
 I decided I'll do it proactively this time!
 
-[Full list of announcement systems and their support states.](supported-systems.md)
-
 ## Contributing
 
 > ⚠️ **Please follow these guidelines before submitting any files. If you don't, your PR may not be accepted.**

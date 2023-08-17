@@ -231,6 +231,12 @@ const changelog: IChangelogVersion[] = [
     date: '2023-08-14',
     fixes: ['[Atos - Anne] Fix bug where using alternative services would break the site'],
   },
+  {
+    date: '2023-08-17',
+    otherChanges: [
+      '[Atos - Anne] In response to a legal notice from Atos, I have had to remove the Anne announcement generator and audio files',
+    ],
+  },
 ]
 
 export default changelog

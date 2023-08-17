@@ -4,12 +4,16 @@
 
 A website to generate and play UK railway announcements.
 
+> **Info**
+>
+> Due to a legal notice by Worldline IT Services UK Limited, Atos Anne's audio recordings are no longer available.
+>
+> For more information, please visit https://rail-announcements.davwheat.dev/atos-worldline
+
 ## Introduction
 
 When Phil Sayer slowly begun leaving the railway, I wished I had gotten more recordings of his announcements. Because I didn't do that back then,
 I decided I'll do it proactively this time!
-
-[Full list of announcement systems and their support states.](supported-systems.md)
 
 ## Contributing
 

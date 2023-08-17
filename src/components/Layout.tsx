@@ -20,6 +20,7 @@ const useStyles = makeStyles({
 interface Props {
   description?: string
   location: LocationContext
+  children: React.ReactNode
 }
 
 const Layout: React.FC<Props> = ({ children, description, location }) => {

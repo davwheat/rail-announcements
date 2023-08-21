@@ -87,9 +87,8 @@ function AtosWorldlinePage({ location }: PageProps): JSX.Element {
 
           <p>
             On 17 August 2023, I received an email (found below) from Worldline's Northern Europe legal department. Attached was a letter titled
-            "Your use of Worldline intellectual property". This letter noted my usage of Worldline's intellectual property (referring to what I
-            believe are the recordings of Atos Anne's announcements) and requested that I remove access to and destroy copies of these
-            recordings.
+            "Your use of Worldline intellectual property". This letter noted my usage of Worldline's intellectual property (referring to the
+            recordings of Atos Anne and Matt's announcements) and requested that I remove access to and destroy copies of these recordings.
           </p>
 
           <p>
@@ -98,7 +97,7 @@ function AtosWorldlinePage({ location }: PageProps): JSX.Element {
           </p>
 
           <p>
-            I am disappointed that Worldline have chosen to take this action, as I believe that the recordings of Atos Anne's announcements are
+            I am disappointed that Worldline have chosen to take this action, as I believe that the recordings of Atos's announcements are
             important to the history of the UK rail network. It is unrealistic to claim that this website harms Wordline's ability to sell their
             announcement systems to train operating companies and infrastructure managers.
           </p>
@@ -214,6 +213,100 @@ function AtosWorldlinePage({ location }: PageProps): JSX.Element {
               &gt; Cheers,
               <br />
               &gt; David Wheatley
+            </pre>
+          </figure>
+
+          <figure className={classes.email}>
+            <figcaption>Worldline's reply</figcaption>
+            <pre style={{ fontFamily: 'Consolas, "Courier New", monospace' }}>
+              On 18 August 2023 09:06 BST, XXXX &lt;XXXX@worldline.com&gt; wrote:
+              <br />
+              &gt; Good morning David,
+              <br />
+              &gt;
+              <br />
+              &gt; Thanks for your prompt response and confirmation that you intend to remove the files from your websites. In addition to the
+              “ATOS Anne” files, the “ATOS – Matt Streeton” files are also Worldline proprietary and should therefore also be removed.
+              <br />
+              &gt;
+              <br />
+              &gt; Regards
+              <br />
+              &gt; XXXX
+            </pre>
+          </figure>
+
+          <figure className={classes.email}>
+            <figcaption>My reply</figcaption>
+            <pre style={{ fontFamily: 'Consolas, "Courier New", monospace' }}>
+              On 18 August 2023 10:04 BST, David Wheatley &lt;david@davwheat.dev&gt; wrote:
+              <br />
+              &gt; Hi XXXX,
+              <br />
+              &gt;
+              <br />
+              &gt; Is there some evidence you can provide for this?
+              <br />
+              &gt;
+              <br />
+              &gt; As I understand it, these recordings were made by an employee of Govia Thameslink Railway rather than one of your own
+              employees. I would understand that the technology that combines snippets would be your IP, but I don't understand how recordings
+              provided by an external organisation to yourselves would be.
+              <br />
+              &gt;
+              <br />
+              &gt; Additionally, all of the "Atos Matt" recordings have been made by myself, stitched together from videos taken in public,
+              rather than any other source.
+              <br />
+              &gt;
+              <br />
+              &gt; Cheers
+              <br />
+              &gt; David
+            </pre>
+          </figure>
+
+          <figure className={classes.email}>
+            <figcaption>Worldline's reply</figcaption>
+            <pre style={{ fontFamily: 'Consolas, "Courier New", monospace' }}>
+              On 21 August 2023 09:44 BST, XXXX &lt;XXXX@worldline.com&gt; wrote:
+              <br />
+              &gt; Good morning David,
+              <br />
+              &gt;
+              <br />
+              &gt; Regardless of how the recordings were obtained, the files contain Worldline IP. They were recorded using a script authored by
+              Worldline, at a studio provided by Worldline. The recordings were then edited by a Worldline team to make them fit for purpose and
+              Worldline’s proprietary software was then used to “assemble” the audio files in the correct format.
+              <br />
+              &gt;
+              <br />
+              &gt; Regards
+              <br />
+              &gt; XXXX
+            </pre>
+          </figure>
+
+          <figure className={classes.email}>
+            <figcaption>My reply</figcaption>
+            <pre style={{ fontFamily: 'Consolas, "Courier New", monospace' }}>
+              On 21 August 2023 11:00 BST, David Wheatley &lt;david@davwheat.dev&gt; wrote:
+              <br />
+              &gt; Hi XXXX,
+              <br />
+              &gt;
+              <br />
+              &gt; Many thanks for the clarification.
+              <br />
+              &gt;
+              <br />
+              &gt; I will remove these from the websites this afternoon, too.
+              <br />
+              &gt;
+              <br />
+              &gt; Cheers
+              <br />
+              &gt; David
             </pre>
           </figure>
         </section>

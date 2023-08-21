@@ -52,8 +52,8 @@ function IndexPage({ location }): JSX.Element {
           <h2>Notice about Atos Worldline announcements</h2>
 
           <p>
-            Following a legal notice from Worldline IT Services UK Limited, I have been forced to remove all copies of Atos Anne's recordings
-            from this website. I am disappointed by their decision to request this.
+            Following a legal notice from Worldline IT Services UK Limited, I have been forced to remove all copies of Atos Anne and Matt's
+            recordings from this website. I am disappointed by their decision to request this.
           </p>
 
           <p>

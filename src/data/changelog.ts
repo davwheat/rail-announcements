@@ -237,6 +237,12 @@ const changelog: IChangelogVersion[] = [
       '[Atos - Anne] In response to a legal notice from Atos, I have had to remove the Anne announcement generator and audio files',
     ],
   },
+  {
+    date: '2023-08-21',
+    otherChanges: [
+      '[Atos - Matt] In response to a legal notice from Atos, I have had to remove the Matt announcement generator and audio files',
+    ],
+  },
 ]
 
 export default changelog

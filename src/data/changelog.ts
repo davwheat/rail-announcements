@@ -243,6 +243,16 @@ const changelog: IChangelogVersion[] = [
       '[Atos - Matt] In response to a legal notice from Atos, I have had to remove the Matt announcement generator and audio files',
     ],
   },
+  {
+    date: '2023-08-23',
+    fixes: [
+      '[Bombardier XStar] Fix Waterloo (Merseyrail) appearing in the list of stations',
+      '[ScotRail] Fix error when using 1 coach for train formation',
+      '[KeTech - Celia] Fix error when playing announcement with no TOC selected',
+      '[TfW - TrainFX] Fix Fishguard and Goodwick snippet erroring sometimes',
+      '[TfL Northern Line] Fix next station Goodge Street not working',
+    ],
+  },
 ]
 
 export default changelog

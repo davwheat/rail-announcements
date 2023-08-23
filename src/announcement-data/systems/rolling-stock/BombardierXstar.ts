@@ -363,7 +363,6 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
     'WHI',
     'WLD',
     'WLI',
-    'WLO',
     'WMA',
     'WRH',
     'WRP',

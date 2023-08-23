@@ -77,7 +77,7 @@ const StationData: IStationDataItem[] = [
   },
   {
     name: 'Finchley Road',
-    approachingFiles: ['finchley road', 'change for the met change here please mind the gap'],
+    approachingFiles: ['finchley road', 'change for the met please mind the gap'],
     standingFiles: ['finchley road change here'],
     canTerminate: true,
   },

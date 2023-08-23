@@ -969,7 +969,7 @@ export default class ScotRail extends StationAnnouncementSystem {
       )
     }
 
-    files.push(`formation.this train is formed of ${options.coaches} ${options.coaches === '1' ? 'coach' : 'coaches'}.`)
+    files.push(`formation.this train is formed of ${options.coaches} ${options.coaches === '1' ? 'coach' : 'coaches'}`)
 
     await this.playAudioFiles(files, download)
   }

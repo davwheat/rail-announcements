@@ -155,7 +155,7 @@ export default class KeTechCelia extends StationAnnouncementSystem {
   readonly SYSTEM_TYPE = 'station'
 
   private getTocAudioId(toc: (typeof AVAILABLE_TOCS)[number]) {
-    return toc === '<None>' ? `tocs.service to` : `tocs.${toc.toLowerCase()} service to`
+    return toc.toLocaleLowerCase() === '<none>' ? `tocs.service to` : `tocs.${toc.toLowerCase()} service to`
   }
 
   private async playNextTrainAnnouncement(options: INextTrainAnnouncementOptions, download: boolean = false): Promise<void> {

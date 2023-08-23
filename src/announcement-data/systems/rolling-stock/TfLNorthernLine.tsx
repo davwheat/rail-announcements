@@ -241,7 +241,7 @@ const NextStationData: NextStationItem[] = [
   },
   {
     label: 'Goodge Street',
-    audio: ['conjoner.the next station is', 'station.low.goodge street'],
+    audio: ['conjoiner.the next station is', 'station.low.goodge street'],
   },
   {
     label: 'Hampstead',

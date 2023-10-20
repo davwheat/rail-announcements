@@ -255,9 +255,7 @@ const changelog: IChangelogVersion[] = [
   },
   {
     date: '2023-10-20',
-    fixes: [
-      '[TfW - TrainFX] Add start of journey announcement',
-    ],
+    fixes: ['[TfW - TrainFX] Add start of journey announcement'],
   },
 ]
 

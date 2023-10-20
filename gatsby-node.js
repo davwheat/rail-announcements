@@ -9,7 +9,7 @@ const path = require('path')
 /**
  * Customise webpack config.
  */
-exports.onCreateWebpackConfig = ({ stage, rules, loaders, plugins, actions }) => {
+exports.onCreateWebpackConfig = ({ stage, rules, loaders, plugins, actions, getConfig }) => {
   if (stage === 'build-html' || stage === 'develop-html') {
     actions.setWebpackConfig({
       module: {
@@ -47,4 +47,12 @@ exports.onCreateWebpackConfig = ({ stage, rules, loaders, plugins, actions }) =>
       },
     },
   })
+
+  actions.setWebpackConfig({
+    resolve: {
+       fallback: {
+         crypto: require.resolve('crypto-browserify'),
+       },
+     },
+   })
 }

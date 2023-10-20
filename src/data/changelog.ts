@@ -253,6 +253,12 @@ const changelog: IChangelogVersion[] = [
       '[TfL Northern Line] Fix next station Goodge Street not working',
     ],
   },
+  {
+    date: '2023-10-20',
+    fixes: [
+      '[TfW - TrainFX] Add start of journey announcement',
+    ],
+  },
 ]
 
 export default changelog

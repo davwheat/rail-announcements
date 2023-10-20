@@ -126,6 +126,7 @@ function CallingAtSelector({ onChange, value, availableStations, additionalOptio
                               onClick={() => {
                                 onChange(value.filter(s => s.randomId !== stop.randomId))
                               }}
+                              style={{ marginLeft: 'auto' }}
                             >
                               <svg viewBox="0 0 24 24">
                                 <path

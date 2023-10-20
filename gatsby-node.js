@@ -50,9 +50,9 @@ exports.onCreateWebpackConfig = ({ stage, rules, loaders, plugins, actions, getC
 
   actions.setWebpackConfig({
     resolve: {
-       fallback: {
-         crypto: require.resolve('crypto-browserify'),
-       },
-     },
-   })
+      fallback: {
+        crypto: require.resolve('crypto-browserify'),
+      },
+    },
+  })
 }

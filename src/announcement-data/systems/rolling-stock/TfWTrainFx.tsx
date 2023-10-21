@@ -18,12 +18,11 @@ interface IStoppedAtStationAnnouncementOptions {
 
 interface IDepartingStopAnnouncementOptions {
   nextStationCode: string
-  terminatesAtCode: string
+  terminatesHere: boolean
 }
 
 interface IApproachingStopAnnouncementOptions {
   nextStationCode: string
-  terminatesAtCode: string
   gapType: 'gap' | 'step' | 'step down' | 'none'
 }
 
@@ -75,15 +74,13 @@ export default class TfWTrainFx extends TrainAnnouncementSystem {
   }
 
   private async playDepartingStopAnnouncement(options: IDepartingStopAnnouncementOptions, download: boolean = false): Promise<void> {
-    const { nextStationCode, terminatesAtCode } = options
+    const { nextStationCode, terminatesHere } = options
 
     const files: AudioItem[] = []
 
     if (!this.validateStationExists(nextStationCode, 'high')) {
       return
     }
-
-    files.push(...this.getTerminationInfo(terminatesAtCode, 'low'))
 
     files.push(
       {
@@ -93,7 +90,7 @@ export default class TfWTrainFx extends TrainAnnouncementSystem {
       `stations.high.${nextStationCode}`,
     )
 
-    if (nextStationCode === terminatesAtCode) {
+    if (terminatesHere) {
       files.push('conjoiners.our final station')
     }
 
@@ -544,11 +541,10 @@ export default class TfWTrainFx extends TrainAnnouncementSystem {
             options: this.AvailableStationItemMaps.high,
             type: 'select',
           },
-          terminatesAtCode: {
-            name: 'Terminates at',
-            default: this.AvailableDestinationOptions[0].value,
-            options: this.AvailableDestinationOptions,
-            type: 'select',
+          terminatesHere: {
+            name: 'Terminates here',
+            default: false,
+            type: 'boolean',
           },
         },
       },

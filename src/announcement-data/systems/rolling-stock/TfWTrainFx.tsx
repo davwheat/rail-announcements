@@ -5,6 +5,11 @@ import { getStationByCrs } from '@data/StationManipulators'
 import { AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
 import TrainAnnouncementSystem from '../../TrainAnnouncementSystem'
 import crsToStationItemMapper from '@helpers/crsToStationItemMapper'
+import CallingAtSelector from '@components/CallingAtSelector'
+
+interface IStartOfJourneyAnnouncementOptions {
+  callingAtCodes: { crsCode: string; name: string; randomId: string }[]
+}
 
 interface IStoppedAtStationAnnouncementOptions {
   thisStationCode: string
@@ -27,6 +32,27 @@ export default class TfWTrainFx extends TrainAnnouncementSystem {
   readonly ID = 'TFW_TRAINFX_V1'
   readonly FILE_PREFIX = 'TfW/TrainFX'
   readonly SYSTEM_TYPE = 'train'
+
+  private async playStartOfJourneyAnnouncement(options: IStartOfJourneyAnnouncementOptions, download: boolean = false): Promise<void> {
+    const { callingAtCodes } = options
+
+    const files: AudioItem[] = []
+
+    files.push('conjoiners.welcome aboard', {
+      id: 'conjoiners.we will be calling at the following principal stations',
+      opts: { delayStart: 750 },
+    })
+
+    files.push(
+      ...this.pluraliseAudio(
+        callingAtCodes.map(stn => stn.crsCode),
+        0,
+        { andId: 'conjoiners.and', prefix: 'stations.high.', finalPrefix: 'stations.low.' },
+      ),
+    )
+
+    await this.playAudioFiles(files, download)
+  }
 
   private async playStoppedAtStationAnnouncement(options: IStoppedAtStationAnnouncementOptions, download: boolean = false): Promise<void> {
     const { thisStationCode, terminatesAtCode } = options
@@ -467,6 +493,24 @@ export default class TfWTrainFx extends TrainAnnouncementSystem {
   })
 
   readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab> = {
+    startOfJourney: {
+      name: 'Start of journey',
+      component: CustomAnnouncementPane,
+      props: {
+        playHandler: this.playStartOfJourneyAnnouncement.bind(this),
+        options: {
+          callingAtCodes: {
+            name: '',
+            type: 'custom',
+            component: CallingAtSelector,
+            props: {
+              availableStations: this.AvailableStationNames.high,
+            },
+            default: [],
+          },
+        },
+      },
+    },
     stoppedAtStation: {
       name: 'At station',
       component: CustomAnnouncementPane,

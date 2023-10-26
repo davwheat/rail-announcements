@@ -36,7 +36,7 @@ interface IStandingTrainAnnouncementOptions {
 const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {
   nextTrain: [
     {
-      name: '12:28 | Littlehampton to Brighton',
+      name: '12:28 | SN Littlehampton to Brighton',
       state: {
         chime: '3',
         platform: '2',
@@ -47,6 +47,22 @@ const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>>
         via: 'none',
         callingAt: ['ANG', 'GBS', 'DUR', 'WWO', 'WRH', 'SWK', 'PLD', 'HOV'].map(crsToStationItemMapper),
         coaches: '8 coaches',
+      },
+    },
+    {
+      name: '11:18 | VT Euston to Edinburgh',
+      state: {
+        chime: '3',
+        platform: '6',
+        hour: '11',
+        min: '18',
+        toc: 'virgin pendolino',
+        terminatingStationCode: 'EDB',
+        via: 'BHM',
+        callingAt: ['MKC', 'RUG', 'COV', 'BHI', 'BHM', 'SAD', 'WVH', 'STA', 'CRE', 'WBQ', 'WGN', 'PRE', 'LAN', 'PNR', 'CAR', 'HYM'].map(
+          crsToStationItemMapper,
+        ),
+        coaches: '11 coaches',
       },
     },
   ],
@@ -66,7 +82,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
 
     if (options.chime !== 'none') files.push(`${options.chime} chime`)
 
-    files.push('s.platform', `platform.m.${options.platform}`, 'm.for the', `hour.s.${options.hour}`, `mins.m.${options.min}`, {
+    files.push(`s.platform ${options.platform} for the`, `hour.s.${options.hour}`, `mins.m.${options.min}`, {
       id: `toc.m.${options.toc.toLowerCase()} service to`,
       opts: { delayStart: 150 },
     })
@@ -83,23 +99,20 @@ export default class KeTechPhil extends StationAnnouncementSystem {
       files.push(`station.m.${options.terminatingStationCode}`, 'e.only')
     } else {
       const callingAtStops = options.callingAt.map(stn => stn.crsCode)
-      files.push(...this.pluraliseAudio([...callingAtStops.map(stn => `station.m.${stn}`), `station.e.${options.terminatingStationCode}`]))
+      files.push(
+        ...this.pluraliseAudio([...callingAtStops.map(stn => `station.m.${stn}`), `station.e.${options.terminatingStationCode}`], 100, {
+          andId: 'm.and',
+        }),
+      )
     }
 
     // Platforms share the same audio as coach numbers
-    files.push('s.this train is formed of', `platform.m.${options.coaches.split(' ')[0]}`, 'e.coaches')
+    files.push('s.this train is formed of', `platform.s.${options.coaches.split(' ')[0]}`, 'e.coaches')
 
-    files.push(
-      { id: 's.platform', opts: { delayStart: 750 } },
-      `platform.m.${options.platform}`,
-      'm.for the',
-      `hour.s.${options.hour}`,
-      `mins.m.${options.min}`,
-      {
-        id: `toc.m.${options.toc.toLowerCase()} service to`,
-        opts: { delayStart: 150 },
-      },
-    )
+    files.push(`s.platform ${options.platform} for the`, `hour.s.${options.hour}`, `mins.m.${options.min}`, {
+      id: `toc.m.${options.toc.toLowerCase()} service to`,
+      opts: { delayStart: 150 },
+    })
 
     if (options.via !== 'none') {
       files.push(`station.m.${options.terminatingStationCode}`, 'm.via', `station.e.${options.via}`)

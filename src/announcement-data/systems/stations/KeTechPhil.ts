@@ -20,25 +20,12 @@ interface INextTrainAnnouncementOptions {
   coaches: string
 }
 
-interface IStandingTrainAnnouncementOptions {
-  chime: ChimeType
-  currentStation: string
-  platform: string
-  hour: string
-  min: string
-  toc: string
-  terminatingStationCode: string
-  via: string | 'none'
-  callingAt: { crsCode: string; name: string; randomId: string }[]
-  coaches: string
-}
-
 const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {
   nextTrain: [
     {
       name: '12:28 | SN Littlehampton to Brighton',
       state: {
-        chime: '3',
+        chime: '4',
         platform: '2',
         hour: '12',
         min: '28',
@@ -52,7 +39,7 @@ const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>>
     {
       name: '17:15 | GX Brighton to London Victoria',
       state: {
-        chime: '3',
+        chime: '4',
         platform: '5',
         hour: '17',
         min: '15',
@@ -66,7 +53,7 @@ const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>>
     {
       name: '11:18 | VT Euston to Edinburgh',
       state: {
-        chime: '3',
+        chime: '4',
         platform: '6',
         hour: '11',
         min: '18',
@@ -82,7 +69,7 @@ const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>>
     {
       name: '08:20 | XC Aberdeen to Penzance',
       state: {
-        chime: '3',
+        chime: '4',
         platform: '3',
         hour: '08',
         min: '20',
@@ -319,7 +306,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
   private async playNextTrainAnnouncement(options: INextTrainAnnouncementOptions, download: boolean = false): Promise<void> {
     const files: AudioItem[] = []
 
-    if (options.chime !== 'none') files.push(`${options.chime} chime`)
+    if (options.chime !== 'none') files.push(`sfx - ${options.chime} chimes`)
 
     files.push(`s.platform ${options.platform} for the`, `hour.s.${options.hour}`, `mins.m.${options.min}`, {
       id: `toc.m.${options.toc.toLowerCase()} service to`,
@@ -2895,10 +2882,10 @@ export default class KeTechPhil extends StationAnnouncementSystem {
           chime: {
             name: 'Chime',
             type: 'select',
-            default: '3',
+            default: '4',
             options: [
-              { title: '3 chimes', value: '3' },
-              { title: '4 chimes', value: '4' },
+              // { title: '3 chimes', value: 'three' },
+              { title: '4 chimes', value: 'four' },
               { title: 'No chime', value: 'none' },
             ],
           },

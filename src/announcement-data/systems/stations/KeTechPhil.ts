@@ -50,6 +50,20 @@ const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>>
       },
     },
     {
+      name: '17:15 | GX Brighton to London Victoria',
+      state: {
+        chime: '3',
+        platform: '5',
+        hour: '17',
+        min: '15',
+        toc: 'gatwick express',
+        terminatingStationCode: 'VIC',
+        via: 'GTW',
+        callingAt: ['BUG', 'HHE', 'GTW'].map(crsToStationItemMapper),
+        coaches: '8 coaches',
+      },
+    },
+    {
       name: '11:18 | VT Euston to Edinburgh',
       state: {
         chime: '3',
@@ -75,7 +89,178 @@ export default class KeTechPhil extends StationAnnouncementSystem {
   readonly FILE_PREFIX = 'station/ketech/phil'
   readonly SYSTEM_TYPE = 'station'
 
-  private AVAILABLE_TOCS = ['Arriva Trains Wales', 'London Midland', 'Virgin Pendolino', 'Southern', 'South West Trains'] as const
+  private AVAILABLE_TOCS = [
+    'a replacement bus',
+    'additional',
+    'additional Chiltern Railways',
+    'additional football special',
+    'Alphaline',
+    'Anglia Railways',
+    'Anglia Railways Train',
+    'Arriva Crosscountry',
+    'Arriva Trains Merseyside',
+    'Arriva Trains Northern',
+    'Arriva Trains Northern',
+    'Arriva Trains Wales',
+    'Blackheath and Woolwich',
+    'Blackheath and Woolwich Arsenal',
+    'Blackheath and Woolwich Arsenal Line',
+    'c2c',
+    'c2c Rail',
+    'Cardiff Railways',
+    'Central Trains',
+    'Charter',
+    'Chiltern Line',
+    'Chiltern Railway Company',
+    'Chiltern Railways',
+    'Chiselhurst and Maidstone East',
+    'Chiselhurst and Maidstone East Line',
+    'Chiselhurst Sevenoaks and Canterbury West',
+    'Chiselhurst Sevenoaks and Canterbury West Line',
+    'Connex',
+    'Connex Express',
+    'Connex Metro',
+    'Connex Racecourse Special',
+    'Connex Rail',
+    'Connex South Central',
+    'Connex South Eastern',
+    'Country',
+    'Crosscountry',
+    'diverted',
+    'East Midlands',
+    'Eurostar',
+    'express',
+    'First Capital Connect',
+    'First Great Western',
+    'First Great Western Adelante',
+    'First Great Western Atlantic Coast Express',
+    'First Great Western Bristolian',
+    'First Great Western Cathedrals Express',
+    'First Great Western Cheltenham Flier',
+    'First Great Western Cheltenham Spa Express',
+    'First Great Western Cornish Riviera',
+    'First Great Western Devon Belle',
+    'First Great Western Golden Hind',
+    'First Great Western Hibernian',
+    'First Great Western High Speed',
+    'First Great Western Intercity',
+    'First Great Western Link',
+    'First Great Western Mayflower',
+    'First Great Western Merchant Venturer',
+    'First Great Western Motorail',
+    'First Great Western Night Riviera',
+    'First Great Western Pembroke Coast Express',
+    'First Great Western Red Dragon',
+    'First Great Western Royal Duchy',
+    'First Great Western Royal Wessex',
+    'First Great Western St David',
+    'First Great Western Torbay Express',
+    'First Transpennine Express',
+    'First Transpennine Service',
+    'football special',
+    'for seat reservations holders only',
+    'Gatwick Express',
+    'GNER',
+    'Grand Central',
+    'Great Eastern',
+    'Great Eastern Railway',
+    'Great North Eastern Railway',
+    'Great North Eastern Railways',
+    'Great North Eastern Railways White Rose',
+    'Great North Eastern Railways Yorkshire Pullman',
+    'Great Northern',
+    'Great Western',
+    'Heathrow Express',
+    'Holidaymaker',
+    'Holidaymaker Express',
+    'Hull Trains',
+    'Island Line',
+    'London Midland',
+    'London Midland City',
+    'London Midland Express',
+    'London Overground',
+    'London Transport Buses',
+    'London Underground',
+    'LTS Rail',
+    'Maidstone East and Ashford International Line',
+    'Maidstone East and Ashford Line',
+    'Maidstone East and Canterbury West Line',
+    'Maidstone East and Dover Priory Line',
+    'Merseyside Electrics',
+    'Midland Mainline',
+    'Midland Mainline High Speed Train',
+    'Midland Mainline Turbostar',
+    'National Express',
+    'National Express East Coast',
+    'New Southern Railway',
+    'New Southern Railway Brighton Express',
+    'North London Railway',
+    'Northern Rail',
+    'Northern Spirit',
+    'One',
+    'One Anglia',
+    'Orient Express',
+    'private charter train',
+    'Racecourse Special',
+    'replacement bus',
+    'return charter train',
+    'rugby special',
+    'ScotRail',
+    'ScotRail Railways',
+    'Silverlink County',
+    'Silverlink Metro',
+    'South Central',
+    'South Central Trains',
+    'South West Trains',
+    'Southeastern',
+    'Southeastern Trains',
+    'Southern',
+    'Southern Railway',
+    'Southern Railway Brighton Express',
+    'special charter',
+    'Stansted Express',
+    'steam charter train',
+    'stopping',
+    'Tarka Line',
+    'Thames Trains',
+    'Thameslink',
+    'Thameslink City Flier',
+    'Thameslink City Metro',
+    'The Mid Hants Steam Railway',
+    'The National Express East Coast',
+    'The Swanage Railway',
+    'The Watercress Line',
+    'The Yorkshire Pullman',
+    'Tramlink',
+    'Tyne and Wear Metro',
+    'Valley Lines',
+    'Virgin Pendolino',
+    'Virgin Trains',
+    'Virgin Trains Armada',
+    'Virgin Trains Cornish Scot',
+    'Virgin Trains Cornishman',
+    'Virgin Trains Cross Country',
+    'Virgin Trains Devon Scot',
+    'Virgin Trains Devonian',
+    'Virgin Trains Dorset Scot',
+    'Virgin Trains Midland Scot',
+    'Virgin Trains Pines Express',
+    'Virgin Trains Sussex Scot',
+    'Virgin Trains Wessex Scot',
+    'Virgin Voyager',
+    'wagon',
+    'Wales and Borders',
+    'Wales and West',
+    'Wales and West Alphaline',
+    'Wales and West Weymouth Sand and Cycle Explorer',
+    'Wessex',
+    'West Anglia',
+    'West Anglia Great Northern Railway',
+    'West Anglia Great Northern Railways',
+    'West Coast Railway Company',
+    'White Rose',
+    'Yorkshire Pullman',
+  ] as const
 
   private async playNextTrainAnnouncement(options: INextTrainAnnouncementOptions, download: boolean = false): Promise<void> {
     const files: AudioItem[] = []
@@ -100,16 +285,20 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     } else {
       const callingAtStops = options.callingAt.map(stn => stn.crsCode)
       files.push(
-        ...this.pluraliseAudio([...callingAtStops.map(stn => `station.m.${stn}`), `station.e.${options.terminatingStationCode}`], 100, {
-          andId: 'm.and',
-        }),
+        ...this.pluraliseAudio(
+          [...callingAtStops.map(stn => ({ id: `station.m.${stn}`, opts: { delayStart: 100 } })), `station.e.${options.terminatingStationCode}`],
+          100,
+          {
+            andId: 'm.and',
+          },
+        ),
       )
     }
 
     // Platforms share the same audio as coach numbers
-    files.push('s.this train is formed of', `platform.s.${options.coaches.split(' ')[0]}`, 'e.coaches')
+    files.push({ id: 's.this train is formed of', opts: { delayStart: 250 } }, `platform.s.${options.coaches.split(' ')[0]}`, 'e.coaches')
 
-    files.push(`s.platform ${options.platform} for the`, `hour.s.${options.hour}`, `mins.m.${options.min}`, {
+    files.push({ id: `s.platform ${options.platform} for the`, opts: { delayStart: 250 } }, `hour.s.${options.hour}`, `mins.m.${options.min}`, {
       id: `toc.m.${options.toc.toLowerCase()} service to`,
       opts: { delayStart: 150 },
     })
@@ -119,47 +308,6 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     } else {
       files.push(`station.e.${options.terminatingStationCode}`)
     }
-
-    await this.playAudioFiles(files, download)
-  }
-
-  private async playStandingTrainAnnouncement(options: IStandingTrainAnnouncementOptions, download: boolean = false): Promise<void> {
-    const files: AudioItem[] = []
-
-    if (options.chime !== 'none') files.push(`sfx - ${options.chime} chime`)
-
-    files.push(
-      `station.m.${options.currentStation}`,
-      'this is',
-      `station.e.${options.currentStation}`,
-      { id: 'the train now standing at platform', opts: { delayStart: 200 } },
-      `numbers.${options.platform}`,
-      'is the',
-      `times.hour.${options.hour}`,
-      `times.mins.${options.min}`,
-      {
-        id: `tocs.${options.toc.toLowerCase()} service to`,
-        opts: { delayStart: 150 },
-      },
-    )
-
-    if (options.via !== 'none') {
-      files.push(`station.m.${options.terminatingStationCode}`, 'via', `station.e.${options.via}`)
-    } else {
-      files.push(`station.e.${options.terminatingStationCode}`)
-    }
-
-    files.push({ id: 'm.calling at', opts: { delayStart: 750 } })
-
-    if (options.callingAt.length === 0) {
-      files.push(`station.m.${options.terminatingStationCode}`, 'only')
-    } else {
-      const callingAtStops = options.callingAt.map(stn => stn.crsCode)
-      files.push(...this.pluraliseAudio([...callingAtStops.map(stn => `station.m.${stn}`), `station.e.${options.terminatingStationCode}`]))
-    }
-
-    // Platforms share the same audio as coach numbers
-    // files.push('this train is formed of', `numbers.${options.coaches}`, 'coaches')
 
     await this.playAudioFiles(files, download)
   }
@@ -2873,28 +3021,68 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     //     },
     //   },
     // },
-    // announcementButtons: {
-    //   name: 'Announcement buttons',
-    //   component: CustomButtonPane,
-    //   props: {
-    //     buttons: [
-    //       {
-    //         label: '3 chimes',
-    //         play: this.playAudioFiles.bind(this, ['3 chime']),
-    //         download: this.playAudioFiles.bind(this, ['3 chime'], true),
-    //       },
-    //       {
-    //         label: '4 chimes',
-    //         play: this.playAudioFiles.bind(this, ['4 chime']),
-    //         download: this.playAudioFiles.bind(this, ['4 chime'], true),
-    //       },
-    //       {
-    //         label: 'Fanfare',
-    //         play: this.playAudioFiles.bind(this, ['fanfare']),
-    //         download: this.playAudioFiles.bind(this, ['fanfare'], true),
-    //       },
-    //     ],
-    //   },
-    // },
+    announcementButtons: {
+      name: 'Announcement buttons',
+      component: CustomButtonPane,
+      props: {
+        buttonSections: {
+          General: [
+            {
+              label: '3 chimes',
+              play: this.playAudioFiles.bind(this, ['3 chime']),
+              download: this.playAudioFiles.bind(this, ['3 chime'], true),
+            },
+          ],
+          Emergency: [
+            {
+              label: 'Newton Aycliffe chemical emergency',
+              play: this.playAudioFiles.bind(this, [
+                's.this is an emergency announcement',
+                'e.for customers at newton aycliffe station',
+                { id: 's.there is an emergency at a nearby chemical works', opts: { delayStart: 300 } },
+                { id: 'm.please leave the station by the ramp from platform 1', opts: { delayStart: 300 } },
+                'e.and turning left make your way to a position of safety',
+                { id: 'e.listen for announcement by the emergency services', opts: { delayStart: 300 } },
+              ]),
+              download: this.playAudioFiles.bind(
+                this,
+                [
+                  's.this is an emergency announcement',
+                  'e.for customers at newton aycliffe station',
+                  { id: 's.there is an emergency at a nearby chemical works', opts: { delayStart: 300 } },
+                  { id: 'm.please leave the station by the ramp from platform 1', opts: { delayStart: 300 } },
+                  'e.and turning left make your way to a position of safety',
+                  { id: 'e.listen for announcement by the emergency services', opts: { delayStart: 300 } },
+                ],
+                true,
+              ),
+            },
+            {
+              label: 'Castleford chemical emergency',
+              play: this.playAudioFiles.bind(this, [
+                's.this is an emergency announcement',
+                'e.for customers at castleford station',
+                { id: 's.there is an emergency at a nearby chemical works', opts: { delayStart: 300 } },
+                { id: 'm.please leave the station by the main exit', opts: { delayStart: 300 } },
+                'e.and proceed to the town centre',
+                { id: 'e.listen for announcement by the emergency services', opts: { delayStart: 300 } },
+              ]),
+              download: this.playAudioFiles.bind(
+                this,
+                [
+                  's.this is an emergency announcement',
+                  'e.for customers at castleford station',
+                  { id: 's.there is an emergency at a nearby chemical works', opts: { delayStart: 300 } },
+                  { id: 'm.please leave the station by the main exit', opts: { delayStart: 300 } },
+                  'e.and proceed to the town centre',
+                  { id: 'e.listen for announcement by the emergency services', opts: { delayStart: 300 } },
+                ],
+                true,
+              ),
+            },
+          ],
+        },
+      },
+    },
   }
 }

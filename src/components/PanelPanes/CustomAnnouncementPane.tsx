@@ -49,6 +49,7 @@ const useStyles = makeStyles({
   presetButtonList: {
     display: 'flex',
     gap: 8,
+    flexWrap: 'wrap',
   },
 })
 

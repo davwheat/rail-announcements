@@ -137,6 +137,20 @@ const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>>
         coaches: '5 coaches',
       },
     },
+    {
+      name: '18:07 | Chiltern MYB - Stourbridge',
+      state: {
+        chime: 'four',
+        platform: '2',
+        hour: '18',
+        min: '07',
+        toc: 'chiltern railways',
+        terminatingStationCode: 'SBJ',
+        vias: [],
+        callingAt: ['HDM', 'BCS', 'BAN', 'LMS', 'WRW', 'WRP', 'DDG', 'SOL', 'BMO', 'BSW', 'ROW'].map(crsToStationItemMapper),
+        coaches: '5 coaches',
+      },
+    },
   ],
   standingTrain: [],
 }

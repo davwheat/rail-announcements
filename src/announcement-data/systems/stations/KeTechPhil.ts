@@ -15,7 +15,7 @@ interface INextTrainAnnouncementOptions {
   min: string
   toc: string
   terminatingStationCode: string
-  via: string | 'none'
+  vias: { crsCode: string; name: string; randomId: string }[]
   callingAt: { crsCode: string; name: string; randomId: string }[]
   coaches: string
 }
@@ -31,7 +31,7 @@ const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>>
         min: '28',
         toc: 'southern',
         terminatingStationCode: 'BTN',
-        via: 'none',
+        vias: [],
         callingAt: ['ANG', 'GBS', 'DUR', 'WWO', 'WRH', 'SWK', 'PLD', 'HOV'].map(crsToStationItemMapper),
         coaches: '8 coaches',
       },
@@ -45,8 +45,8 @@ const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>>
         min: '15',
         toc: 'gatwick express',
         terminatingStationCode: 'VIC',
-        via: 'GTW',
-        callingAt: ['BUG', 'HHE', 'GTW'].map(crsToStationItemMapper),
+        vias: ['GTW'].map(crsToStationItemMapper),
+        callingAt: ['PRP', 'HSK', 'BUG', 'HHE', 'GTW'].map(crsToStationItemMapper),
         coaches: '8 coaches',
       },
     },
@@ -59,7 +59,7 @@ const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>>
         min: '18',
         toc: 'virgin pendolino',
         terminatingStationCode: 'EDB',
-        via: 'BHM',
+        vias: ['BHM'].map(crsToStationItemMapper),
         callingAt: ['MKC', 'RUG', 'COV', 'BHI', 'BHM', 'SAD', 'WVH', 'STA', 'CRE', 'WBQ', 'WGN', 'PRE', 'LAN', 'PNR', 'CAR', 'HYM'].map(
           crsToStationItemMapper,
         ),
@@ -75,7 +75,7 @@ const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>>
         min: '20',
         toc: 'crosscountry',
         terminatingStationCode: 'PNZ',
-        via: 'LDS',
+        vias: ['LDS'].map(crsToStationItemMapper),
         callingAt: [
           'STN',
           'MTS',
@@ -117,6 +117,37 @@ const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>>
           'RED',
           'SER',
         ].map(crsToStationItemMapper),
+        coaches: '5 coaches',
+      },
+    },
+    {
+      // http://www.1s76.com/1S76%202008.htm
+      name: '08:20 | 1O23 XC Manchester to Brighton (2008)',
+      state: {
+        chime: 'four',
+        platform: '3',
+        hour: '08',
+        min: '20',
+        toc: 'crosscountry',
+        terminatingStationCode: 'BTN',
+        vias: ['BHM', 'KPA'].map(crsToStationItemMapper),
+        callingAt: ['SPT', 'MAC', 'CNG', 'SOT', 'WVH', 'BHM', 'LMS', 'BAN', 'OXF', 'RDG', 'KPA', 'ECR', 'GTW', 'HHE'].map(
+          crsToStationItemMapper,
+        ),
+        coaches: '5 coaches',
+      },
+    },
+    {
+      name: '18:07 | Chiltern MYB - Stourbridge',
+      state: {
+        chime: 'four',
+        platform: '2',
+        hour: '18',
+        min: '07',
+        toc: 'chiltern railways',
+        terminatingStationCode: 'SBJ',
+        vias: [],
+        callingAt: ['HDM', 'BCS', 'BAN', 'LMS', 'WRW', 'WRP', 'DDG', 'SOL', 'BMO', 'BSW', 'ROW'].map(crsToStationItemMapper),
         coaches: '5 coaches',
       },
     },
@@ -303,31 +334,70 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     'Yorkshire Pullman',
   ] as const
 
+  private async getFilesForBasicTrainInfo(
+    hour: string,
+    min: string,
+    toc: string,
+    vias: string[],
+    terminatingStation: string,
+  ): Promise<AudioItem[]> {
+    const files: AudioItem[] = [
+      `hour.s.${hour}`,
+      `mins.m.${min}`,
+      {
+        id: `toc.m.${toc.toLowerCase()} service to`,
+        opts: { delayStart: 150 },
+      },
+    ]
+
+    if (vias.length !== 0) {
+      files.push(
+        `station.m.${terminatingStation}`,
+        'm.via',
+        ...this.pluraliseAudio(
+          vias.map((stn, i) => ({
+            id: `station.${i === vias.length - 1 ? 'e' : 'm'}.${stn}`,
+          })),
+          100,
+          {
+            andId: 'm.and',
+          },
+        ),
+      )
+    } else {
+      files.push(`station.e.${terminatingStation}`)
+    }
+
+    return files
+  }
+
   private async playNextTrainAnnouncement(options: INextTrainAnnouncementOptions, download: boolean = false): Promise<void> {
     const files: AudioItem[] = []
 
     if (options.chime !== 'none') files.push(`sfx - ${options.chime} chimes`)
 
-    files.push(`s.platform ${options.platform} for the`, `hour.s.${options.hour}`, `mins.m.${options.min}`, {
-      id: `toc.m.${options.toc.toLowerCase()} service to`,
-      opts: { delayStart: 150 },
-    })
-
-    if (options.via !== 'none') {
-      files.push(`station.m.${options.terminatingStationCode}`, 'm.via', `station.e.${options.via}`)
-    } else {
-      files.push(`station.e.${options.terminatingStationCode}`)
-    }
+    files.push(
+      `s.platform ${options.platform} for the`,
+      ...(await this.getFilesForBasicTrainInfo(
+        options.hour,
+        options.min,
+        options.toc,
+        options.vias.map(s => s.crsCode),
+        options.terminatingStationCode,
+      )),
+    )
 
     files.push({ id: 'm.calling at', opts: { delayStart: 750 } })
 
     if (options.callingAt.length === 0) {
       files.push(`station.m.${options.terminatingStationCode}`, 'e.only')
     } else {
-      const callingAtStops = options.callingAt.map(stn => stn.crsCode)
       files.push(
         ...this.pluraliseAudio(
-          [...callingAtStops.map(stn => ({ id: `station.m.${stn}`, opts: { delayStart: 100 } })), `station.e.${options.terminatingStationCode}`],
+          [
+            ...options.callingAt.map(stn => ({ id: `station.m.${stn.crsCode}`, opts: { delayStart: 100 } })),
+            `station.e.${options.terminatingStationCode}`,
+          ],
           100,
           {
             andId: 'm.and',
@@ -345,16 +415,16 @@ export default class KeTechPhil extends StationAnnouncementSystem {
       `e.${coaches == '1' ? 'coach' : 'coaches'}`,
     )
 
-    files.push({ id: `s.platform ${options.platform} for the`, opts: { delayStart: 250 } }, `hour.s.${options.hour}`, `mins.m.${options.min}`, {
-      id: `toc.m.${options.toc.toLowerCase()} service to`,
-      opts: { delayStart: 150 },
-    })
-
-    if (options.via !== 'none') {
-      files.push(`station.m.${options.terminatingStationCode}`, 'm.via', `station.e.${options.via}`)
-    } else {
-      files.push(`station.e.${options.terminatingStationCode}`)
-    }
+    files.push(
+      { id: `s.platform ${options.platform} for the`, opts: { delayStart: 250 } },
+      ...(await this.getFilesForBasicTrainInfo(
+        options.hour,
+        options.min,
+        options.toc,
+        options.vias.map(s => s.crsCode),
+        options.terminatingStationCode,
+      )),
+    )
 
     await this.playAudioFiles(files, download)
   }
@@ -2952,11 +3022,17 @@ export default class KeTechPhil extends StationAnnouncementSystem {
             options: AllStationsTitleValueMap.filter(s => this.stations.includes(s.value)),
             type: 'select',
           },
-          via: {
-            name: 'Via... (optional)',
-            default: 'none',
-            options: [{ title: 'NONE', value: 'none' }, ...AllStationsTitleValueMap.filter(s => this.stations.includes(s.value))],
-            type: 'select',
+          vias: {
+            name: '',
+            type: 'custom',
+            component: CallingAtSelector,
+            props: {
+              availableStations: this.stations,
+              selectLabel: 'Via points',
+              placeholder: 'Add a via point...',
+              heading: 'Via... (optional)',
+            },
+            default: [],
           },
           callingAt: {
             name: '',
@@ -3075,9 +3151,9 @@ export default class KeTechPhil extends StationAnnouncementSystem {
         buttonSections: {
           General: [
             {
-              label: '3 chimes',
-              play: this.playAudioFiles.bind(this, ['3 chime']),
-              download: this.playAudioFiles.bind(this, ['3 chime'], true),
+              label: '4 chimes',
+              play: this.playAudioFiles.bind(this, ['sfx - four chimes']),
+              download: this.playAudioFiles.bind(this, ['sfx - four chimes'], true),
             },
           ],
           Emergency: [

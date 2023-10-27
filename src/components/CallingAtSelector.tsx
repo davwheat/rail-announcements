@@ -54,9 +54,20 @@ interface ICallingAtSelectorProps {
   onChange: (newValue: { crsCode: string; name: string; randomId: string }[]) => void
   availableStations: string[]
   additionalOptions?: { title: string; value: string }[]
+  selectLabel?: string
+  placeholder?: string
+  heading?: string
 }
 
-function CallingAtSelector({ onChange, value, availableStations, additionalOptions }: ICallingAtSelectorProps): JSX.Element {
+function CallingAtSelector({
+  onChange,
+  value,
+  availableStations,
+  additionalOptions,
+  selectLabel = 'Intermediary stops',
+  placeholder = 'Add a calling point...',
+  heading = 'Calling at... (excluding terminating station)',
+}: ICallingAtSelectorProps): JSX.Element {
   const classes = useStyles()
 
   const AvailableStations = React.useMemo(() => {
@@ -76,10 +87,10 @@ function CallingAtSelector({ onChange, value, availableStations, additionalOptio
     <>
       {createOptionField(
         {
-          name: 'Intermediary stops',
+          name: selectLabel,
           default: AvailableStations[0].value,
           type: 'select',
-          options: [{ value: '', title: 'Add a calling point...' }, ...AvailableStations],
+          options: [{ value: '', title: placeholder }, ...AvailableStations],
         },
         {
           onChange: newStop => {
@@ -91,7 +102,7 @@ function CallingAtSelector({ onChange, value, availableStations, additionalOptio
       )}
 
       <div className={classes.callingAtRoot}>
-        <label>Calling at... (excluding terminating station)</label>
+        <label>{heading}</label>
         {value.length > 0 && (
           <DragDropContext
             onDragEnd={result => {

@@ -3137,9 +3137,9 @@ export default class KeTechPhil extends StationAnnouncementSystem {
         buttonSections: {
           General: [
             {
-              label: '3 chimes',
-              play: this.playAudioFiles.bind(this, ['3 chime']),
-              download: this.playAudioFiles.bind(this, ['3 chime'], true),
+              label: '4 chimes',
+              play: this.playAudioFiles.bind(this, ['sfx - four chimes']),
+              download: this.playAudioFiles.bind(this, ['sfx - four chimes'], true),
             },
           ],
           Emergency: [

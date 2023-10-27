@@ -148,6 +148,7 @@ export default abstract class AnnouncementSystem {
     }
 
     window.__audio = fileIds
+    console.info('Playing audio files:', fileIds)
 
     const standardisedFileIds = fileIds.map(fileId => {
       if (typeof fileId === 'string') {

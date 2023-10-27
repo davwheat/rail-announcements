@@ -164,6 +164,8 @@ function CustomAnnouncementPane({ options, playHandler, name, presets }: ICustom
               },
             })
 
+            console.info('Playing announcement', name, optionsState)
+
             try {
               await playHandler(optionsState)
             } catch (err) {
@@ -191,9 +193,11 @@ function CustomAnnouncementPane({ options, playHandler, name, presets }: ICustom
                 systemId: AnnouncementSystemInstance.ID,
                 type: 'constructed',
                 name,
-                options: optionsState,
+                options: JSON.stringify(optionsState, null, 2),
               },
             })
+
+            console.info('Playing announcement', name, optionsState)
 
             try {
               await playHandler(optionsState, true)

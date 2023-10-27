@@ -2935,7 +2935,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
           min: {
             name: 'Minute',
             default: '33',
-            options: ['00 - hundred', '00 - hundred-hour']
+            options: ['00 - hundred', '00 - hundred-hours']
               .concat(new Array(59).fill(0).map((_, i) => (i + 2).toString()))
               .map(m => ({ title: m.toString().padStart(2, '0'), value: m.toString().padStart(2, '0') })),
             type: 'select',

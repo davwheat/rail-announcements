@@ -6,7 +6,7 @@ import { AllStationsTitleValueMap } from '@data/StationManipulators'
 import crsToStationItemMapper from '@helpers/crsToStationItemMapper'
 import { AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
 
-type ChimeType = /*'3' |*/ '4' | 'none'
+type ChimeType = /*'3' |*/ 'four' | 'none'
 
 interface INextTrainAnnouncementOptions {
   chime: ChimeType
@@ -25,7 +25,7 @@ const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>>
     {
       name: '12:28 | SN Littlehampton to Brighton',
       state: {
-        chime: '4',
+        chime: 'four',
         platform: '2',
         hour: '12',
         min: '28',
@@ -39,7 +39,7 @@ const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>>
     {
       name: '17:15 | GX Brighton to London Victoria',
       state: {
-        chime: '4',
+        chime: 'four',
         platform: '5',
         hour: '17',
         min: '15',
@@ -53,7 +53,7 @@ const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>>
     {
       name: '11:18 | VT Euston to Edinburgh',
       state: {
-        chime: '4',
+        chime: 'four',
         platform: '6',
         hour: '11',
         min: '18',
@@ -69,7 +69,7 @@ const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>>
     {
       name: '08:20 | XC Aberdeen to Penzance',
       state: {
-        chime: '4',
+        chime: 'four',
         platform: '3',
         hour: '08',
         min: '20',
@@ -2888,7 +2888,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
           chime: {
             name: 'Chime',
             type: 'select',
-            default: '4',
+            default: 'four',
             options: [
               // { title: '3 chimes', value: 'three' },
               { title: '4 chimes', value: 'four' },

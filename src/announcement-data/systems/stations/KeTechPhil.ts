@@ -120,6 +120,23 @@ const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>>
         coaches: '5 coaches',
       },
     },
+    {
+      // http://www.1s76.com/1S76%202008.htm
+      name: '08:20 | 1O23 XC Manchester to Brighton (2008)',
+      state: {
+        chime: 'four',
+        platform: '3',
+        hour: '08',
+        min: '20',
+        toc: 'crosscountry',
+        terminatingStationCode: 'BTN',
+        vias: ['BHM', 'KPA'].map(crsToStationItemMapper),
+        callingAt: ['SPT', 'MAC', 'CNG', 'SOT', 'WVH', 'BHM', 'LMS', 'BAN', 'OXF', 'RDG', 'KPA', 'ECR', 'GTW', 'HHE'].map(
+          crsToStationItemMapper,
+        ),
+        coaches: '5 coaches',
+      },
+    },
   ],
   standingTrain: [],
 }

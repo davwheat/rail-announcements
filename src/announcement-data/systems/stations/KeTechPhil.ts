@@ -336,8 +336,14 @@ export default class KeTechPhil extends StationAnnouncementSystem {
       )
     }
 
+    const coaches = options.coaches.split(' ')[0]
+
     // Platforms share the same audio as coach numbers
-    files.push({ id: 's.this train is formed of', opts: { delayStart: 250 } }, `platform.s.${options.coaches.split(' ')[0]}`, 'e.coaches')
+    files.push(
+      { id: 's.this train is formed of', opts: { delayStart: 250 } },
+      `platform.s.${coaches}`,
+      `e.${coaches == '1' ? 'coach' : 'coaches'}`,
+    )
 
     files.push({ id: `s.platform ${options.platform} for the`, opts: { delayStart: 250 } }, `hour.s.${options.hour}`, `mins.m.${options.min}`, {
       id: `toc.m.${options.toc.toLowerCase()} service to`,

@@ -700,6 +700,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     } catch (e) {
       if (e instanceof Error) {
         alert(e.message)
+        console.error(e)
         return
       }
     }

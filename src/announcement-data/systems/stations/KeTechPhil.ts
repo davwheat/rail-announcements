@@ -460,6 +460,26 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     return files
   }
 
+  private async getRequestStops(callingPoints: CallingAtPoint[]): Promise<AudioItem[]> {
+    const files: AudioItem[] = []
+
+    const reqStops = callingPoints.filter(s => s.requestStop)
+    if (reqStops.length === 0) return []
+
+    files.push(
+      ...this.pluraliseAudio(
+        reqStops.map((s, i) => ({ id: s.crsCode, opts: { delayStart: i === 0 ? 400 : 100 } })),
+        100,
+        { prefix: 'station.m.', finalPrefix: 'station.m.', andId: 'm.and' },
+      ),
+      reqStops.length === 1 ? 'm.is a request stop and customers for this station' : 'm.are request stops and customers for these stations',
+      'm.should ask the conductor on the train to arrange for the train to stop',
+      'e.to allow them to alight',
+    )
+
+    return files
+  }
+
   private async playNextTrainAnnouncement(options: INextTrainAnnouncementOptions, download: boolean = false): Promise<void> {
     const files: AudioItem[] = []
 
@@ -496,6 +516,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     }
 
     files.push(...(await this.getShortPlatforms(options.callingAt)))
+    files.push(...(await this.getRequestStops(options.callingAt)))
 
     const coaches = options.coaches.split(' ')[0]
 
@@ -3174,6 +3195,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
             props: {
               availableStations: this.stations,
               enableShortPlatforms: this.shortPlatforms,
+              enableRequestStops: true,
             },
             default: [],
           },

@@ -86,7 +86,7 @@ interface ICallingAtSelectorProps {
   /**
    * Whether request stops are enabled.
    */
-  requestStops?: boolean
+  enableRequestStops?: boolean
 }
 
 function CallingAtSelector({
@@ -98,7 +98,7 @@ function CallingAtSelector({
   placeholder = 'Add a calling point...',
   heading = 'Calling at... (excluding terminating station)',
   enableShortPlatforms = false,
-  requestStops = false,
+  enableRequestStops = false,
 }: ICallingAtSelectorProps): JSX.Element {
   const classes = useStyles()
 
@@ -191,7 +191,7 @@ function CallingAtSelector({
                                   },
                                 )}
 
-                              {requestStops &&
+                              {enableRequestStops &&
                                 createOptionField(
                                   {
                                     default: false,

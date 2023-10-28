@@ -259,7 +259,7 @@ function CallingAtSelector({
                                     },
                                   )}
 
-                                  <hr />
+                                  {stop.splitType === 'splits' && <hr />}
 
                                   {createOptionField(
                                     {

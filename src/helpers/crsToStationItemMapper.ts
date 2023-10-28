@@ -18,6 +18,9 @@ export function stationItemCompleter(point: string | (Partial<CallingAtPoint> & 
     name: p.name ?? getStationByCrs(p.crsCode)?.stationName ?? null,
     shortPlatform: p.shortPlatform ?? '',
     requestStop: p.requestStop ?? false,
+    splitType: p.splitType ?? 'none',
+    splitCallingPoints: p.splitCallingPoints ?? [],
+    splitForm: p.splitForm ?? '',
     randomId: nanoid(),
   }
 }

@@ -6,6 +6,7 @@ import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd'
 import createOptionField from '@helpers/createOptionField'
 import { nanoid } from 'nanoid'
 import { AllStationsTitleValueMap } from '@data/StationManipulators'
+import { clsx } from 'clsx'
 
 const useStyles = makeStyles({
   root: {
@@ -69,9 +70,13 @@ export interface CallingAtPoint {
   randomId: string
   shortPlatform?: string
   requestStop?: boolean
+  splitType?: 'none' | 'splits' | 'splitTerminates'
+  splitForm?: string
+  splitCallingPoints?: CallingAtPoint[]
 }
 
 interface ICallingAtSelectorProps {
+  className?: string
   value: CallingAtPoint[]
   onChange: (newValue: CallingAtPoint[]) => void
   availableStations: string[]
@@ -80,13 +85,17 @@ interface ICallingAtSelectorProps {
   placeholder?: string
   heading?: string
   /**
-   * If false, short platforms will be disabled. If an array, only the specified platforms will be enabled.
+   * If false, short platforms will be disabled. If an array, only the specified coach counts will be enabled.
    */
   enableShortPlatforms?: false | { title: string; value: string }[]
   /**
    * Whether request stops are enabled.
    */
   enableRequestStops?: boolean
+  /**
+   * If false, splits and joins will be disabled. If an array, only the specified coach counts (for detachments) will be enabled.
+   */
+  enableSplits?: false | { title: string; value: string }[]
 }
 
 function CallingAtSelector({
@@ -99,6 +108,8 @@ function CallingAtSelector({
   heading = 'Calling at... (excluding terminating station)',
   enableShortPlatforms = false,
   enableRequestStops = false,
+  enableSplits = false,
+  className,
 }: ICallingAtSelectorProps): JSX.Element {
   const classes = useStyles()
 
@@ -140,7 +151,7 @@ function CallingAtSelector({
         },
       )}
 
-      <div className={classes.callingAtRoot}>
+      <div className={clsx(classes.callingAtRoot, className)}>
         <label>{heading}</label>
         {value.length > 0 && (
           <DragDropContext
@@ -206,6 +217,77 @@ function CallingAtSelector({
                                     },
                                   },
                                 )}
+
+                              {enableSplits && (
+                                <>
+                                  {createOptionField(
+                                    {
+                                      default: 'none',
+                                      name: 'Splits?',
+                                      type: 'select',
+                                      options: [
+                                        { value: 'none', title: 'None' },
+                                        { value: 'splits', title: 'Divides here' },
+                                        { value: 'splitTerminates', title: 'Divides and terminates' },
+                                      ],
+                                    },
+                                    {
+                                      value: stop.splitType || 'none',
+                                      key: 'splitType',
+                                      onChange(v) {
+                                        onChange(value.map(s => (s.randomId === stop.randomId ? { ...s, splitType: v } : s)))
+                                      },
+                                    },
+                                  )}
+                                  {createOptionField(
+                                    {
+                                      default: 'none',
+                                      name: 'Split formation',
+                                      type: 'select',
+                                      options: enableSplits,
+                                      onlyShowWhen(activeState) {
+                                        return activeState.splitType !== 'none' && activeState.splitType !== undefined
+                                      },
+                                    },
+                                    {
+                                      value: stop.splitForm || enableSplits[0].value,
+                                      key: 'splitForm',
+                                      onChange(v) {
+                                        onChange(value.map(s => (s.randomId === stop.randomId ? { ...s, splitForm: v } : s)))
+                                      },
+                                      activeState: stop as any,
+                                    },
+                                  )}
+
+                                  <hr />
+
+                                  {createOptionField(
+                                    {
+                                      default: [],
+                                      name: '',
+                                      type: 'custom',
+                                      component: CallingAtSelector,
+                                      props: {
+                                        availableStations: availableStations,
+                                        selectLabel: 'Split calling points',
+                                        placeholder: 'Add a split calling point...',
+                                        heading: 'Calling points (INCLUDING terminating station)',
+                                      },
+                                      onlyShowWhen(activeState) {
+                                        return activeState.splitType === 'splits'
+                                      },
+                                    },
+                                    {
+                                      value: stop.splitCallingPoints || [],
+                                      key: 'splitCallingPoints',
+                                      onChange(v) {
+                                        onChange(value.map(s => (s.randomId === stop.randomId ? { ...s, splitCallingPoints: v } : s)))
+                                      },
+                                      activeState: stop as any,
+                                    },
+                                  )}
+                                </>
+                              )}
                             </div>
 
                             <button

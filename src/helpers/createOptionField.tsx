@@ -18,6 +18,10 @@ interface Option {
 }
 
 export default function createOptionField(optionData: OptionsExplanation, options: OptionFieldOptions): JSX.Element {
+  if (optionData.onlyShowWhen?.(options.activeState) === false) {
+    return null
+  }
+
   switch (optionData.type) {
     case 'boolean':
       return (

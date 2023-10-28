@@ -541,7 +541,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     await this.playAudioFiles(files, download)
   }
 
-  private platforms = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].flatMap(x => [`${x}`, `${x}a`, `${x}b`, `${x}c`, `${x}d`])
+  private platforms = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].flatMap(x => [`${x}`, `${x}a`, `${x}b`, `${x}c`, `${x}d`]).concat(['a', 'b'])
   private stations = [
     'AAP',
     'AAT',
@@ -3124,7 +3124,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
           platform: {
             name: 'Platform',
             default: this.platforms[0],
-            options: this.platforms.map(p => ({ title: `Platform ${p}`, value: p })),
+            options: this.platforms.map(p => ({ title: `Platform ${p.toUpperCase()}`, value: p })),
             type: 'select',
           },
           hour: {

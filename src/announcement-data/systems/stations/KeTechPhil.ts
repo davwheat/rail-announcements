@@ -536,7 +536,11 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     return files
   }
 
-  private async getCallingPointsWithSplits(callingPoints: CallingAtPoint[], overallLength: number): Promise<AudioItem[]> {
+  private async getCallingPointsWithSplits(
+    callingPoints: CallingAtPoint[],
+    terminatingStation: string,
+    overallLength: number,
+  ): Promise<AudioItem[]> {
     const files: AudioItem[] = []
 
     // If there are no splits, return an empty array
@@ -593,7 +597,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
         break
     }
 
-    const aPortionStops = new Set(stopsAfterFormationChange.map(s => s.crsCode))
+    const aPortionStops = new Set([...stopsAfterFormationChange.map(s => s.crsCode), terminatingStation])
     const bPortionStops = new Set(dividePoint.splitCallingPoints?.map(s => s.crsCode) ?? [])
     const anyPortionStops = new Set([
       ...stopsUntilFormationChange.map(s => s.crsCode),
@@ -646,7 +650,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
   private async getCallingPoints(callingPoints: CallingAtPoint[], terminatingStation: string, overallLength: number): Promise<AudioItem[]> {
     const files: AudioItem[] = []
 
-    const callingPointsWithSplits = await this.getCallingPointsWithSplits(callingPoints, overallLength)
+    const callingPointsWithSplits = await this.getCallingPointsWithSplits(callingPoints, terminatingStation, overallLength)
 
     if (callingPointsWithSplits.length !== 0) {
       files.push({ id: 'm.calling at', opts: { delayStart: 750 } }, ...callingPointsWithSplits)

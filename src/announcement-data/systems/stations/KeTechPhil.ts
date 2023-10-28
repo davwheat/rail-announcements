@@ -544,7 +544,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     const files: AudioItem[] = []
 
     // If there are no splits, return an empty array
-    if (callingPoints.every(p => p.splitType === 'none')) return []
+    if (callingPoints.every(p => p.splitType === 'none' || p.splitType === undefined)) return []
 
     const stopsUntilFormationChange: CallingAtPoint[] = []
     let dividePoint: CallingAtPoint | undefined = undefined

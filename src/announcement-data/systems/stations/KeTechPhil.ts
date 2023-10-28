@@ -389,8 +389,8 @@ export default class KeTechPhil extends StationAnnouncementSystem {
       `hour.s.${hour}`,
       `mins.m.${min}`,
       {
-        id: `toc.m.${toc.toLowerCase()} service to`,
-        opts: { delayStart: 150 },
+        id: toc === '' ? `m.service to` : `toc.m.${toc.toLowerCase()} service to`,
+        opts: { delayStart: toc === '' ? 50 : 150 },
       },
     ]
 
@@ -3168,8 +3168,8 @@ export default class KeTechPhil extends StationAnnouncementSystem {
           },
           toc: {
             name: 'TOC',
-            default: this.AVAILABLE_TOCS[0].toLowerCase(),
-            options: this.AVAILABLE_TOCS.map(m => ({ title: m, value: m.toLowerCase() })),
+            default: '',
+            options: [{ title: 'None', value: '' }].concat(this.AVAILABLE_TOCS.map(m => ({ title: m, value: m.toLowerCase() }))),
             type: 'select',
           },
           terminatingStationCode: {

@@ -1,9 +1,9 @@
 import StationAnnouncementSystem from '@announcement-data/StationAnnouncementSystem'
-import CallingAtSelector from '@components/CallingAtSelector'
+import CallingAtSelector, { CallingAtPoint } from '@components/CallingAtSelector'
 import CustomAnnouncementPane, { ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
 import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
 import { AllStationsTitleValueMap } from '@data/StationManipulators'
-import crsToStationItemMapper from '@helpers/crsToStationItemMapper'
+import crsToStationItemMapper, { stationItemCompleter } from '@helpers/crsToStationItemMapper'
 import { AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
 
 type ChimeType = /*'3' |*/ 'four' | 'none'
@@ -15,144 +15,9 @@ interface INextTrainAnnouncementOptions {
   min: string
   toc: string
   terminatingStationCode: string
-  vias: { crsCode: string; name: string; randomId: string }[]
-  callingAt: { crsCode: string; name: string; randomId: string }[]
+  vias: CallingAtPoint[]
+  callingAt: CallingAtPoint[]
   coaches: string
-}
-
-const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {
-  nextTrain: [
-    {
-      name: '12:28 | SN Littlehampton to Brighton',
-      state: {
-        chime: 'four',
-        platform: '2',
-        hour: '12',
-        min: '28',
-        toc: 'southern',
-        terminatingStationCode: 'BTN',
-        vias: [],
-        callingAt: ['ANG', 'GBS', 'DUR', 'WWO', 'WRH', 'SWK', 'PLD', 'HOV'].map(crsToStationItemMapper),
-        coaches: '8 coaches',
-      },
-    },
-    {
-      name: '17:15 | GX Brighton to London Victoria',
-      state: {
-        chime: 'four',
-        platform: '5',
-        hour: '17',
-        min: '15',
-        toc: 'gatwick express',
-        terminatingStationCode: 'VIC',
-        vias: ['GTW'].map(crsToStationItemMapper),
-        callingAt: ['PRP', 'HSK', 'BUG', 'HHE', 'GTW'].map(crsToStationItemMapper),
-        coaches: '8 coaches',
-      },
-    },
-    {
-      name: '11:18 | VT Euston to Edinburgh',
-      state: {
-        chime: 'four',
-        platform: '6',
-        hour: '11',
-        min: '18',
-        toc: 'virgin pendolino',
-        terminatingStationCode: 'EDB',
-        vias: ['BHM'].map(crsToStationItemMapper),
-        callingAt: ['MKC', 'RUG', 'COV', 'BHI', 'BHM', 'SAD', 'WVH', 'STA', 'CRE', 'WBQ', 'WGN', 'PRE', 'LAN', 'PNR', 'CAR', 'HYM'].map(
-          crsToStationItemMapper,
-        ),
-        coaches: '11 coaches',
-      },
-    },
-    {
-      name: '08:20 | XC Aberdeen to Penzance',
-      state: {
-        chime: 'four',
-        platform: '3',
-        hour: '08',
-        min: '20',
-        toc: 'crosscountry',
-        terminatingStationCode: 'PNZ',
-        vias: ['LDS'].map(crsToStationItemMapper),
-        callingAt: [
-          'STN',
-          'MTS',
-          'ARB',
-          'DEE',
-          'LEU',
-          'CUP',
-          'LDY',
-          'MNC',
-          'KDY',
-          'INK',
-          'HYM',
-          'EDB',
-          'BWK',
-          'ALM',
-          'NCL',
-          'DHM',
-          'DAR',
-          'YRK',
-          'LDS',
-          'WKF',
-          'SHF',
-          'DBY',
-          'BUT',
-          'BHM',
-          'CNM',
-          'BPW',
-          'BRI',
-          'TAU',
-          'TVP',
-          'EXD',
-          'NTA',
-          'TOT',
-          'PLY',
-          'LSK',
-          'BOD',
-          'SAU',
-          'TRU',
-          'RED',
-          'SER',
-        ].map(crsToStationItemMapper),
-        coaches: '5 coaches',
-      },
-    },
-    {
-      // http://www.1s76.com/1S76%202008.htm
-      name: '08:20 | 1O23 XC Manchester to Brighton (2008)',
-      state: {
-        chime: 'four',
-        platform: '3',
-        hour: '08',
-        min: '20',
-        toc: 'crosscountry',
-        terminatingStationCode: 'BTN',
-        vias: ['BHM', 'KPA'].map(crsToStationItemMapper),
-        callingAt: ['SPT', 'MAC', 'CNG', 'SOT', 'WVH', 'BHM', 'LMS', 'BAN', 'OXF', 'RDG', 'KPA', 'ECR', 'GTW', 'HHE'].map(
-          crsToStationItemMapper,
-        ),
-        coaches: '5 coaches',
-      },
-    },
-    {
-      name: '18:07 | Chiltern MYB - Stourbridge',
-      state: {
-        chime: 'four',
-        platform: '2',
-        hour: '18',
-        min: '07',
-        toc: 'chiltern railways',
-        terminatingStationCode: 'SBJ',
-        vias: [],
-        callingAt: ['HDM', 'BCS', 'BAN', 'LMS', 'WRW', 'WRP', 'DDG', 'SOL', 'BMO', 'BSW', 'ROW'].map(crsToStationItemMapper),
-        coaches: '5 coaches',
-      },
-    },
-  ],
-  standingTrain: [],
 }
 
 export default class KeTechPhil extends StationAnnouncementSystem {
@@ -160,6 +25,185 @@ export default class KeTechPhil extends StationAnnouncementSystem {
   readonly ID = 'KETECH_PHIL_V1'
   readonly FILE_PREFIX = 'station/ketech/phil'
   readonly SYSTEM_TYPE = 'station'
+
+  private get announcementPresets(): Readonly<Record<string, ICustomAnnouncementPreset[]>> {
+    return {
+      nextTrain: [
+        {
+          name: '12:28 | SN Littlehampton to Brighton',
+          state: {
+            chime: 'four',
+            platform: '2',
+            hour: '12',
+            min: '28',
+            toc: 'southern',
+            terminatingStationCode: 'BTN',
+            vias: [],
+            callingAt: ['ANG', 'GBS', 'DUR', 'WWO', 'WRH', 'SWK', 'PLD', 'HOV'].map(crsToStationItemMapper),
+            coaches: '8 coaches',
+          },
+        },
+        {
+          name: '17:15 | GX Brighton to London Victoria',
+          state: {
+            chime: 'four',
+            platform: '5',
+            hour: '17',
+            min: '15',
+            toc: 'gatwick express',
+            terminatingStationCode: 'VIC',
+            vias: ['GTW'].map(crsToStationItemMapper),
+            callingAt: ['PRP', 'HSK', 'BUG', 'HHE', 'GTW'].map(crsToStationItemMapper),
+            coaches: '8 coaches',
+          },
+        },
+        {
+          name: '11:18 | VT Euston to Edinburgh',
+          state: {
+            chime: 'four',
+            platform: '6',
+            hour: '11',
+            min: '18',
+            toc: 'virgin pendolino',
+            terminatingStationCode: 'EDB',
+            vias: ['BHM'].map(crsToStationItemMapper),
+            callingAt: [
+              'MKC',
+              'RUG',
+              'COV',
+              'BHI',
+              'BHM',
+              'SAD',
+              'WVH',
+              'STA',
+              'CRE',
+              'WBQ',
+              'WGN',
+              'PRE',
+              'LAN',
+              'PNR',
+              'CAR',
+              { crsCode: 'HYM', shortPlatform: this.getValueForShortPlatform('front 10 coaches') },
+            ].map(stationItemCompleter),
+            coaches: '11 coaches',
+          },
+        },
+        {
+          name: '08:20 | XC Aberdeen to Penzance',
+          state: {
+            chime: 'four',
+            platform: '3',
+            hour: '08',
+            min: '20',
+            toc: 'crosscountry',
+            terminatingStationCode: 'PNZ',
+            vias: ['LDS'].map(crsToStationItemMapper),
+            callingAt: [
+              'STN',
+              'MTS',
+              'ARB',
+              'DEE',
+              'LEU',
+              'CUP',
+              'LDY',
+              'MNC',
+              'KDY',
+              'INK',
+              'HYM',
+              'EDB',
+              'BWK',
+              'ALM',
+              'NCL',
+              'DHM',
+              'DAR',
+              'YRK',
+              'LDS',
+              'WKF',
+              'SHF',
+              'DBY',
+              'BUT',
+              'BHM',
+              'CNM',
+              'BPW',
+              'BRI',
+              'TAU',
+              'TVP',
+              'EXD',
+              'NTA',
+              'TOT',
+              'PLY',
+              'LSK',
+              'BOD',
+              'SAU',
+              'TRU',
+              'RED',
+              'SER',
+            ].map(crsToStationItemMapper),
+            coaches: '5 coaches',
+          },
+        },
+        {
+          // http://www.1s76.com/1S76%202008.htm
+          name: '08:20 | 1O23 XC Manchester to Brighton (2008)',
+          state: {
+            chime: 'four',
+            platform: '3',
+            hour: '08',
+            min: '20',
+            toc: 'crosscountry',
+            terminatingStationCode: 'BTN',
+            vias: ['BHM', 'KPA'].map(crsToStationItemMapper),
+            callingAt: ['SPT', 'MAC', 'CNG', 'SOT', 'WVH', 'BHM', 'LMS', 'BAN', 'OXF', 'RDG', 'KPA', 'ECR', 'GTW', 'HHE'].map(
+              crsToStationItemMapper,
+            ),
+            coaches: '5 coaches',
+          },
+        },
+        {
+          name: '18:07 | Chiltern MYB - Stourbridge',
+          state: {
+            chime: 'four',
+            platform: '2',
+            hour: '18',
+            min: '07',
+            toc: 'chiltern railways',
+            terminatingStationCode: 'SBJ',
+            vias: [],
+            callingAt: ['HDM', 'BCS', 'BAN', 'LMS', 'WRW', 'WRP', 'DDG', 'SOL', 'BMO', 'BSW', 'ROW'].map(crsToStationItemMapper),
+            coaches: '5 coaches',
+          },
+        },
+        {
+          name: '12:50 | SN Eastbourne - Ashford',
+          state: {
+            chime: 'four',
+            platform: '2',
+            hour: '12',
+            min: '50',
+            toc: 'southern',
+            terminatingStationCode: 'AFK',
+            vias: [],
+            callingAt: [
+              'HMD',
+              'COB',
+              'PEV',
+              'CLL',
+              'BEX',
+              'SLQ',
+              'HGS',
+              'ORE',
+              { crsCode: 'TOK', shortPlatform: this.getValueForShortPlatform('front coach') },
+              'WSE',
+              'RYE',
+              { crsCode: 'APD', shortPlatform: this.getValueForShortPlatform('front 2 coaches') },
+              'HMT',
+            ].map(stationItemCompleter),
+            coaches: '3 coaches',
+          },
+        },
+      ],
+    }
+  }
 
   private AVAILABLE_TOCS = [
     'a replacement bus',
@@ -345,8 +389,8 @@ export default class KeTechPhil extends StationAnnouncementSystem {
       `hour.s.${hour}`,
       `mins.m.${min}`,
       {
-        id: `toc.m.${toc.toLowerCase()} service to`,
-        opts: { delayStart: 150 },
+        id: toc === '' ? `m.service to` : `toc.m.${toc.toLowerCase()} service to`,
+        opts: { delayStart: toc === '' ? 50 : 150 },
       },
     ]
 
@@ -367,6 +411,71 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     } else {
       files.push(`station.e.${terminatingStation}`)
     }
+
+    return files
+  }
+
+  private async getShortPlatforms(callingPoints: CallingAtPoint[]): Promise<AudioItem[]> {
+    const files: AudioItem[] = []
+
+    const shortPlatforms = callingPoints.reduce(
+      (acc, curr) => {
+        if (!curr.shortPlatform) return acc
+
+        if (acc[curr.shortPlatform]) {
+          acc[curr.shortPlatform].push(curr.crsCode)
+        } else {
+          acc[curr.shortPlatform] = [curr.crsCode]
+        }
+
+        return acc
+      },
+      {} as Record<string, string[]>,
+    )
+
+    const order = this.shortPlatforms.map(x => x.value)
+
+    let firstAdded = false
+
+    order.forEach(s => {
+      if (!shortPlatforms[s]) return
+
+      files.push(
+        { id: firstAdded ? 's.customers for' : 's.due to short platforms customers for', opts: { delayStart: 200 } },
+        ...this.pluraliseAudio(
+          shortPlatforms[s].map(crs => ({ id: crs, opts: { delayStart: 100 } })),
+          100,
+          {
+            prefix: 'station.m.',
+            finalPrefix: 'station.m.',
+            andId: 'm.and',
+          },
+        ),
+        ...s.split(','),
+      )
+
+      firstAdded = true
+    })
+
+    return files
+  }
+
+  private async getRequestStops(callingPoints: CallingAtPoint[]): Promise<AudioItem[]> {
+    const files: AudioItem[] = []
+
+    const reqStops = callingPoints.filter(s => s.requestStop)
+    if (reqStops.length === 0) return []
+
+    files.push(
+      ...this.pluraliseAudio(
+        reqStops.map((s, i) => ({ id: s.crsCode, opts: { delayStart: i === 0 ? 400 : 100 } })),
+        100,
+        { prefix: 'station.m.', finalPrefix: 'station.m.', andId: 'm.and' },
+      ),
+      reqStops.length === 1 ? 'm.is a request stop and customers for this station' : 'm.are request stops and customers for these stations',
+      'm.should ask the conductor on the train to arrange for the train to stop',
+      'e.to allow them to alight',
+    )
 
     return files
   }
@@ -406,6 +515,9 @@ export default class KeTechPhil extends StationAnnouncementSystem {
       )
     }
 
+    files.push(...(await this.getShortPlatforms(options.callingAt)))
+    files.push(...(await this.getRequestStops(options.callingAt)))
+
     const coaches = options.coaches.split(' ')[0]
 
     // Platforms share the same audio as coach numbers
@@ -429,7 +541,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     await this.playAudioFiles(files, download)
   }
 
-  private platforms = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].flatMap(x => [`${x}`, `${x}a`, `${x}b`, `${x}c`, `${x}d`])
+  private platforms = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].flatMap(x => [`${x}`, `${x}a`, `${x}b`, `${x}c`, `${x}d`]).concat(['a', 'b'])
   private stations = [
     'AAP',
     'AAT',
@@ -1039,6 +1151,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     'CWN',
     'CWS',
     'CWU',
+    'CWX',
     'CYB',
     'CYK',
     'CYP',
@@ -2912,6 +3025,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     'WVF',
     'WVH',
     'WWA',
+    'WWC',
     'WWD',
     'WWI',
     'WWO',
@@ -2946,13 +3060,55 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     'ZFD',
     'ZLW',
   ]
+  private shortPlatforms = [
+    { value: 'e.should travel in the front coach of the train', title: 'front coach' },
+    { value: 'm.should travel in the front,platform.s.2,e.coaches of the train', title: 'front 2 coaches' },
+    { value: 'm.should travel in the front,platform.s.3,e.coaches of the train', title: 'front 3 coaches' },
+    { value: 'm.should travel in the front,platform.s.4,e.coaches of the train', title: 'front 4 coaches' },
+    { value: 'm.should travel in the front,platform.s.5,e.coaches of the train', title: 'front 5 coaches' },
+    { value: 'm.should travel in the front,platform.s.6,e.coaches of the train', title: 'front 6 coaches' },
+    { value: 'm.should travel in the front,platform.s.7,e.coaches of the train', title: 'front 7 coaches' },
+    { value: 'm.should travel in the front,platform.s.8,e.coaches of the train', title: 'front 8 coaches' },
+    { value: 'm.should travel in the front,platform.s.9,e.coaches of the train', title: 'front 9 coaches' },
+    { value: 'm.should travel in the front,platform.s.10,e.coaches of the train', title: 'front 10 coaches' },
+    { value: 'm.should travel in the front,platform.s.11,e.coaches of the train', title: 'front 11 coaches' },
+    { value: 'm.should travel in the front,platform.s.12,e.coaches of the train', title: 'front 12 coaches' },
+    { value: 'm.should travel in the middle coach of the train', title: 'middle coach' },
+    { value: 'm.should travel in the middle,platform.s.2,e.coaches of the train', title: 'middle 2 coaches' },
+    { value: 'm.should travel in the middle,platform.s.3,e.coaches of the train', title: 'middle 3 coaches' },
+    { value: 'm.should travel in the middle,platform.s.4,e.coaches of the train', title: 'middle 4 coaches' },
+    { value: 'm.should travel in the middle,platform.s.5,e.coaches of the train', title: 'middle 5 coaches' },
+    { value: 'm.should travel in the middle,platform.s.6,e.coaches of the train', title: 'middle 6 coaches' },
+    { value: 'm.should travel in the middle,platform.s.7,e.coaches of the train', title: 'middle 7 coaches' },
+    { value: 'm.should travel in the middle,platform.s.8,e.coaches of the train', title: 'middle 8 coaches' },
+    { value: 'm.should travel in the middle,platform.s.9,e.coaches of the train', title: 'middle 9 coaches' },
+    { value: 'm.should travel in the middle,platform.s.10,e.coaches of the train', title: 'middle 10 coaches' },
+    { value: 'm.should travel in the middle,platform.s.11,e.coaches of the train', title: 'middle 11 coaches' },
+    { value: 'm.should travel in the middle,platform.s.12,e.coaches of the train', title: 'middle 12 coaches' },
+    { value: 'm.should travel in the rear coach of the train', title: 'rear coach' },
+    { value: 'm.should travel in the rear,platform.s.2,e.coaches of the train', title: 'rear 2 coaches' },
+    { value: 'm.should travel in the rear,platform.s.3,e.coaches of the train', title: 'rear 3 coaches' },
+    { value: 'm.should travel in the rear,platform.s.4,e.coaches of the train', title: 'rear 4 coaches' },
+    { value: 'm.should travel in the rear,platform.s.5,e.coaches of the train', title: 'rear 5 coaches' },
+    { value: 'm.should travel in the rear,platform.s.6,e.coaches of the train', title: 'rear 6 coaches' },
+    { value: 'm.should travel in the rear,platform.s.7,e.coaches of the train', title: 'rear 7 coaches' },
+    { value: 'm.should travel in the rear,platform.s.8,e.coaches of the train', title: 'rear 8 coaches' },
+    { value: 'm.should travel in the rear,platform.s.9,e.coaches of the train', title: 'rear 9 coaches' },
+    { value: 'm.should travel in the rear,platform.s.10,e.coaches of the train', title: 'rear 10 coaches' },
+    { value: 'm.should travel in the rear,platform.s.11,e.coaches of the train', title: 'rear 11 coaches' },
+    { value: 'm.should travel in the rear,platform.s.12,e.coaches of the train', title: 'rear 12 coaches' },
+  ]
+
+  private getValueForShortPlatform(title: string): string | null {
+    return this.shortPlatforms.find(p => p.title === title)?.value ?? null
+  }
 
   readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab> = {
     nextTrain: {
       name: 'Next train',
       component: CustomAnnouncementPane,
       props: {
-        presets: AnnouncementPresets.nextTrain,
+        presets: this.announcementPresets.nextTrain,
         playHandler: this.playNextTrainAnnouncement.bind(this),
         options: {
           chime: {
@@ -2968,7 +3124,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
           platform: {
             name: 'Platform',
             default: this.platforms[0],
-            options: this.platforms.map(p => ({ title: `Platform ${p}`, value: p })),
+            options: this.platforms.map(p => ({ title: `Platform ${p.toUpperCase()}`, value: p })),
             type: 'select',
           },
           hour: {
@@ -3012,8 +3168,8 @@ export default class KeTechPhil extends StationAnnouncementSystem {
           },
           toc: {
             name: 'TOC',
-            default: this.AVAILABLE_TOCS[0].toLowerCase(),
-            options: this.AVAILABLE_TOCS.map(m => ({ title: m, value: m.toLowerCase() })),
+            default: '',
+            options: [{ title: 'None', value: '' }].concat(this.AVAILABLE_TOCS.map(m => ({ title: m, value: m.toLowerCase() }))),
             type: 'select',
           },
           terminatingStationCode: {
@@ -3040,6 +3196,8 @@ export default class KeTechPhil extends StationAnnouncementSystem {
             component: CallingAtSelector,
             props: {
               availableStations: this.stations,
+              enableShortPlatforms: this.shortPlatforms,
+              enableRequestStops: true,
             },
             default: [],
           },

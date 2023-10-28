@@ -5,7 +5,7 @@ import { makeStyles } from '@material-ui/styles'
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd'
 import createOptionField from '@helpers/createOptionField'
 import { nanoid } from 'nanoid'
-import { AllStationsTitleValueMap, getStationByCrs } from '@data/StationManipulators'
+import { AllStationsTitleValueMap } from '@data/StationManipulators'
 
 const useStyles = makeStyles({
   root: {
@@ -34,29 +34,59 @@ const useStyles = makeStyles({
     marginBottom: 8,
     display: 'flex',
     alignItems: 'center',
+    gap: 8,
+  },
+  mainInfo: {
+    display: 'flex',
+    flexDirection: 'column',
+    padding: '4px 0',
+    gap: 8,
 
-    '& > button': {
-      boxSizing: 'content-box',
-      padding: 8,
-      display: 'inline-block',
+    '& > :not(:first-child)': {
+      fontSize: 18,
+    },
+
+    '& > *': {
+      padding: 0,
+    },
+  },
+  deleteButton: {
+    boxSizing: 'content-box',
+    padding: 8,
+    display: 'inline-block',
+    height: '1em',
+    marginLeft: 'auto',
+
+    '& > svg': {
       height: '1em',
-      marginLeft: 8,
-
-      '& > svg': {
-        height: '1em',
-      },
     },
   },
 })
 
+export interface CallingAtPoint {
+  crsCode: string
+  name: string
+  randomId: string
+  shortPlatform?: string
+  requestStop?: boolean
+}
+
 interface ICallingAtSelectorProps {
-  value: { crsCode: string; name: string; randomId: string }[]
-  onChange: (newValue: { crsCode: string; name: string; randomId: string }[]) => void
+  value: CallingAtPoint[]
+  onChange: (newValue: CallingAtPoint[]) => void
   availableStations: string[]
   additionalOptions?: { title: string; value: string }[]
   selectLabel?: string
   placeholder?: string
   heading?: string
+  /**
+   * If false, short platforms will be disabled. If an array, only the specified platforms will be enabled.
+   */
+  enableShortPlatforms?: false | { title: string; value: string }[]
+  /**
+   * Whether request stops are enabled.
+   */
+  enableRequestStops?: boolean
 }
 
 function CallingAtSelector({
@@ -67,6 +97,8 @@ function CallingAtSelector({
   selectLabel = 'Intermediary stops',
   placeholder = 'Add a calling point...',
   heading = 'Calling at... (excluding terminating station)',
+  enableShortPlatforms = false,
+  enableRequestStops = false,
 }: ICallingAtSelectorProps): JSX.Element {
   const classes = useStyles()
 
@@ -94,7 +126,14 @@ function CallingAtSelector({
         },
         {
           onChange: newStop => {
-            onChange([...value, { crsCode: newStop, name: AvailableStations.find(s => s.value === newStop).title, randomId: nanoid() }])
+            onChange([
+              ...value,
+              {
+                crsCode: newStop,
+                name: AvailableStations.find(s => s.value === newStop).title,
+                randomId: nanoid(),
+              },
+            ])
           },
           value: '',
           key: 'intermediaryStationCode',
@@ -132,12 +171,48 @@ function CallingAtSelector({
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
                           >
-                            <span>{stop.name}</span>{' '}
+                            <div className={classes.mainInfo}>
+                              <span>{stop.name}</span>
+
+                              {enableShortPlatforms &&
+                                createOptionField(
+                                  {
+                                    default: 'none',
+                                    options: [{ value: '', title: 'No' }].concat(enableShortPlatforms),
+                                    name: 'Short platform',
+                                    type: 'select',
+                                  },
+                                  {
+                                    value: stop.shortPlatform || '',
+                                    key: 'shortPlatform',
+                                    onChange(v) {
+                                      onChange(value.map(s => (s.randomId === stop.randomId ? { ...s, shortPlatform: v } : s)))
+                                    },
+                                  },
+                                )}
+
+                              {enableRequestStops &&
+                                createOptionField(
+                                  {
+                                    default: false,
+                                    name: 'Request stop',
+                                    type: 'boolean',
+                                  },
+                                  {
+                                    value: stop.requestStop || false,
+                                    key: 'requestStop',
+                                    onChange(v) {
+                                      onChange(value.map(s => (s.randomId === stop.randomId ? { ...s, requestStop: v } : s)))
+                                    },
+                                  },
+                                )}
+                            </div>
+
                             <button
                               onClick={() => {
                                 onChange(value.filter(s => s.randomId !== stop.randomId))
                               }}
-                              style={{ marginLeft: 'auto' }}
+                              className={classes.deleteButton}
                             >
                               <svg viewBox="0 0 24 24">
                                 <path

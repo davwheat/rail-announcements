@@ -44,6 +44,40 @@ export default class KeTechPhil extends StationAnnouncementSystem {
           },
         },
         {
+          name: '16:05 | SN Victoria to Portsmouth & Bognor',
+          state: {
+            chime: 'four',
+            platform: '12',
+            hour: '16',
+            min: '05',
+            toc: 'southern',
+            terminatingStationCode: 'PMS',
+            vias: [],
+            callingAt: [
+              'CLJ',
+              'ECR',
+              'GTW',
+              'TBD',
+              'CRW',
+              {
+                crsCode: 'HRH',
+                splitType: 'splits' as const,
+                splitForm: 'rear.4',
+                splitCallingPoints: ['CHH', 'PUL', 'AMY', 'ARU', 'FOD', 'BAA', 'BOG'].map(crsToStationItemMapper),
+              },
+              'BAA',
+              'CCH',
+              'FSB',
+              'BOH',
+              'SOB',
+              'EMS',
+              'HAV',
+              'FTN',
+            ].map(stationItemCompleter),
+            coaches: '8 coaches',
+          },
+        },
+        {
           name: '17:15 | GX Brighton to London Victoria',
           state: {
             chime: 'four',
@@ -83,7 +117,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
               'LAN',
               'PNR',
               'CAR',
-              { crsCode: 'HYM', shortPlatform: this.getValueForShortPlatform('front 10 coaches') },
+              { crsCode: 'HYM', shortPlatform: this.getValueForShortPlatform('front 9 coaches') },
             ].map(stationItemCompleter),
             coaches: '11 coaches',
           },
@@ -384,6 +418,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     toc: string,
     vias: string[],
     terminatingStation: string,
+    callingPoints: CallingAtPoint[],
   ): Promise<AudioItem[]> {
     const files: AudioItem[] = [
       `hour.s.${hour}`,
@@ -394,22 +429,43 @@ export default class KeTechPhil extends StationAnnouncementSystem {
       },
     ]
 
-    if (vias.length !== 0) {
+    const dividesAt = callingPoints.find(s => s.splitType === 'splitTerminates' || s.splitType === 'splits')
+
+    if (dividesAt && dividesAt.splitCallingPoints.length > 0) {
+      const allDestinations = [terminatingStation, dividesAt.splitCallingPoints[dividesAt.splitCallingPoints.length - 1].crsCode]
+
       files.push(
-        `station.m.${terminatingStation}`,
-        'm.via',
         ...this.pluraliseAudio(
-          vias.map((stn, i) => ({
-            id: `station.${i === vias.length - 1 ? 'e' : 'm'}.${stn}`,
+          allDestinations.map((stn, i) => ({
+            id: stn,
+            opts: { delayStart: i === 0 ? 100 : 50 },
           })),
           100,
           {
+            prefix: 'station.m.',
+            finalPrefix: 'station.e.',
             andId: 'm.and',
           },
         ),
       )
     } else {
-      files.push(`station.e.${terminatingStation}`)
+      if (vias.length !== 0) {
+        files.push(
+          `station.m.${terminatingStation}`,
+          'm.via',
+          ...this.pluraliseAudio(
+            vias.map((stn, i) => ({
+              id: `station.${i === vias.length - 1 ? 'e' : 'm'}.${stn}`,
+            })),
+            100,
+            {
+              andId: 'm.and',
+            },
+          ),
+        )
+      } else {
+        files.push(`station.e.${terminatingStation}`)
+      }
     }
 
     return files
@@ -480,6 +536,148 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     return files
   }
 
+  private async getCallingPointsWithSplits(callingPoints: CallingAtPoint[], overallLength: number): Promise<AudioItem[]> {
+    const files: AudioItem[] = []
+
+    // If there are no splits, return an empty array
+    if (callingPoints.every(p => p.splitType === 'none')) return []
+
+    const stopsUntilFormationChange: CallingAtPoint[] = []
+    let dividePoint: CallingAtPoint | undefined = undefined
+    const stopsAfterFormationChange: CallingAtPoint[] = []
+
+    {
+      let preSplit = true
+      callingPoints.forEach((p, i) => {
+        if (preSplit) {
+          stopsUntilFormationChange.push(p)
+        } else {
+          dividePoint ||= callingPoints[i - 1]
+          stopsAfterFormationChange.push(p)
+        }
+
+        preSplit &&= p.splitType === 'none' || p.splitType === undefined
+      })
+    }
+
+    files.push(
+      ...this.pluraliseAudio(
+        stopsUntilFormationChange.map(s => ({ id: `station.m.${s.crsCode}`, opts: { delayStart: 100 } })),
+        100,
+        { andId: 'm.and' },
+      ),
+    )
+
+    const [bPos, bCount] = dividePoint.splitForm.split('.').map((x, i) => (i === 1 ? parseInt(x) : x)) as [string, number]
+    const aPos = bPos === 'front' ? 'rear' : 'front'
+    const aCount = Math.min(Math.max(1, overallLength - bCount), 12)
+
+    switch (dividePoint.splitType) {
+      case 'splitTerminates':
+        files.push(
+          'e.where the train will divide',
+          { id: 'w.please make sure you travel in the correct part of this train', opts: { delayStart: 400 } },
+          { id: `s.please note that the ${bPos}`, opts: { delayStart: 400 } },
+          `m.${bCount === 1 ? 'coach' : `${bCount} coaches`} will detach at`,
+          `station.e.${dividePoint.crsCode}`,
+        )
+        break
+
+      case 'splits':
+        files.push('e.where the train will divide', {
+          id: 'w.please make sure you travel in the correct part of this train',
+          opts: { delayStart: 400 },
+        })
+
+        if (!dividePoint.splitCallingPoints?.length) throw new Error("Splitting train doesn't have any calling points")
+        break
+    }
+
+    const aPortionStops = new Set(stopsAfterFormationChange.map(s => s.crsCode))
+    const bPortionStops = new Set(dividePoint.splitCallingPoints?.map(s => s.crsCode) ?? [])
+    const anyPortionStops = new Set([
+      ...stopsUntilFormationChange.map(s => s.crsCode),
+      ...Array.from(aPortionStops).filter(x => bPortionStops.has(x)),
+    ])
+
+    Array.from(anyPortionStops).forEach(s => {
+      if (aPortionStops.has(s)) aPortionStops.delete(s)
+      if (bPortionStops.has(s)) bPortionStops.delete(s)
+    })
+
+    const listStops = (stops: string[]): AudioItem[] => {
+      return [
+        { id: 's.customers for', opts: { delayStart: 400 } },
+        ...this.pluraliseAudio(
+          stops.map(s => ({ id: `station.m.${s}`, opts: { delayStart: 100 } })),
+          100,
+          { andId: 'm.and' },
+        ),
+      ]
+    }
+
+    if (anyPortionStops.size !== 0) files.push(...listStops(Array.from(anyPortionStops)), 'e.may travel in any part of the train')
+
+    const aFiles =
+      aPortionStops.size === 0
+        ? []
+        : [...listStops(Array.from(aPortionStops)), `m.should travel in the ${aPos}`, `platform.s.${aCount}`, 'e.coaches of the train']
+    const bFiles =
+      bPortionStops.size === 0
+        ? []
+        : [...listStops(Array.from(bPortionStops)), `m.should travel in the ${bPos}`, `platform.s.${bCount}`, 'e.coaches of the train']
+
+    if (aPos === 'front') {
+      files.push(...aFiles, ...bFiles)
+    } else {
+      files.push(...bFiles, ...aFiles)
+    }
+
+    switch (dividePoint.splitType) {
+      case 'splitTerminates':
+      case 'splits':
+        files.push('s.this train will divide at', `station.e.${dividePoint.crsCode}`)
+        break
+    }
+
+    return files
+  }
+
+  private async getCallingPoints(callingPoints: CallingAtPoint[], terminatingStation: string, overallLength: number): Promise<AudioItem[]> {
+    const files: AudioItem[] = []
+
+    const callingPointsWithSplits = await this.getCallingPointsWithSplits(callingPoints, overallLength)
+
+    if (callingPointsWithSplits.length !== 0) {
+      files.push({ id: 'm.calling at', opts: { delayStart: 750 } }, ...callingPointsWithSplits)
+      return files
+    }
+
+    files.push({ id: 'm.calling at', opts: { delayStart: 750 } })
+
+    if (callingPoints.length === 0) {
+      files.push(`station.m.${terminatingStation}`, 'e.only')
+    } else {
+      files.push(
+        ...this.pluraliseAudio(
+          [
+            ...callingPoints.map(stn => ({
+              id: `station.m.${stn.crsCode}`,
+              opts: { delayStart: 100 },
+            })),
+            `station.e.${terminatingStation}`,
+          ],
+          100,
+          {
+            andId: 'm.and',
+          },
+        ),
+      )
+    }
+
+    return files
+  }
+
   private async playNextTrainAnnouncement(options: INextTrainAnnouncementOptions, download: boolean = false): Promise<void> {
     const files: AudioItem[] = []
 
@@ -493,26 +691,17 @@ export default class KeTechPhil extends StationAnnouncementSystem {
         options.toc,
         options.vias.map(s => s.crsCode),
         options.terminatingStationCode,
+        options.callingAt,
       )),
     )
 
-    files.push({ id: 'm.calling at', opts: { delayStart: 750 } })
-
-    if (options.callingAt.length === 0) {
-      files.push(`station.m.${options.terminatingStationCode}`, 'e.only')
-    } else {
-      files.push(
-        ...this.pluraliseAudio(
-          [
-            ...options.callingAt.map(stn => ({ id: `station.m.${stn.crsCode}`, opts: { delayStart: 100 } })),
-            `station.e.${options.terminatingStationCode}`,
-          ],
-          100,
-          {
-            andId: 'm.and',
-          },
-        ),
-      )
+    try {
+      files.push(...(await this.getCallingPoints(options.callingAt, options.terminatingStationCode, parseInt(options.coaches.split(' ')[0]))))
+    } catch (e) {
+      if (e instanceof Error) {
+        alert(e.message)
+        return
+      }
     }
 
     files.push(...(await this.getShortPlatforms(options.callingAt)))
@@ -535,6 +724,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
         options.toc,
         options.vias.map(s => s.crsCode),
         options.terminatingStationCode,
+        options.callingAt,
       )),
     )
 
@@ -3099,6 +3289,45 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     { value: 'm.should travel in the rear,platform.s.12,e.coaches of the train', title: 'rear 12 coaches' },
   ]
 
+  private splits = [
+    { value: 'front.1', title: 'Front coach' },
+    { value: 'front.2', title: 'Front 2 coaches' },
+    { value: 'front.3', title: 'Front 3 coaches' },
+    { value: 'front.4', title: 'Front 4 coaches' },
+    { value: 'front.5', title: 'Front 5 coaches' },
+    { value: 'front.6', title: 'Front 6 coaches' },
+    { value: 'front.7', title: 'Front 7 coaches' },
+    { value: 'front.8', title: 'Front 8 coaches' },
+    { value: 'front.9', title: 'Front 9 coaches' },
+    { value: 'front.10', title: 'Front 10 coaches' },
+    { value: 'front.11', title: 'Front 11 coaches' },
+    { value: 'front.12', title: 'Front 12 coaches' },
+    // { value: 'middle.1', title: 'Middle coach' },
+    // { value: 'middle.2', title: 'Middle 2 coaches' },
+    // { value: 'middle.3', title: 'Middle 3 coaches' },
+    // { value: 'middle.4', title: 'Middle 4 coaches' },
+    // { value: 'middle.5', title: 'Middle 5 coaches' },
+    // { value: 'middle.6', title: 'Middle 6 coaches' },
+    // { value: 'middle.7', title: 'Middle 7 coaches' },
+    // { value: 'middle.8', title: 'Middle 8 coaches' },
+    // { value: 'middle.9', title: 'Middle 9 coaches' },
+    // { value: 'middle.10', title: 'Middle 10 coaches' },
+    // { value: 'middle.11', title: 'Middle 11 coaches' },
+    // { value: 'middle.12', title: 'Middle 12 coaches' },
+    { value: 'rear.1', title: 'Rear coach' },
+    { value: 'rear.2', title: 'Rear 2 coaches' },
+    { value: 'rear.3', title: 'Rear 3 coaches' },
+    { value: 'rear.4', title: 'Rear 4 coaches' },
+    { value: 'rear.5', title: 'Rear 5 coaches' },
+    { value: 'rear.6', title: 'Rear 6 coaches' },
+    { value: 'rear.7', title: 'Rear 7 coaches' },
+    { value: 'rear.8', title: 'Rear 8 coaches' },
+    { value: 'rear.9', title: 'Rear 9 coaches' },
+    { value: 'rear.10', title: 'Rear 10 coaches' },
+    { value: 'rear.11', title: 'Rear 11 coaches' },
+    { value: 'rear.12', title: 'Rear 12 coaches' },
+  ]
+
   private getValueForShortPlatform(title: string): string | null {
     return this.shortPlatforms.find(p => p.title === title)?.value ?? null
   }
@@ -3184,7 +3413,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
             component: CallingAtSelector,
             props: {
               availableStations: this.stations,
-              selectLabel: 'Via points',
+              selectLabel: 'Via points (non-splitting services only)',
               placeholder: 'Add a via point...',
               heading: 'Via... (optional)',
             },
@@ -3198,6 +3427,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
               availableStations: this.stations,
               enableShortPlatforms: this.shortPlatforms,
               enableRequestStops: true,
+              enableSplits: this.splits,
             },
             default: [],
           },

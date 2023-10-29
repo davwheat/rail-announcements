@@ -441,8 +441,8 @@ export default class KeTechPhil extends StationAnnouncementSystem {
 
     const dividesAt = callingPoints.find(s => s.splitType === 'splitTerminates' || s.splitType === 'splits')
 
-    if (dividesAt && dividesAt.splitCallingPoints.length > 0) {
-      const allDestinations = [terminatingStation, dividesAt.splitCallingPoints[dividesAt.splitCallingPoints.length - 1].crsCode]
+    if (dividesAt && (dividesAt.splitCallingPoints?.length ?? 0) > 0) {
+      const allDestinations = [terminatingStation, dividesAt.splitCallingPoints!![dividesAt.splitCallingPoints!!.length - 1].crsCode]
 
       files.push(
         ...this.pluraliseAudio(
@@ -662,12 +662,12 @@ export default class KeTechPhil extends StationAnnouncementSystem {
       }),
     )
 
-    const [bPos, bCount] = dividePoint.splitForm.split('.').map((x, i) => (i === 1 ? parseInt(x) : x)) as [string, number]
+    const [bPos, bCount] = (dividePoint!!.splitForm ?? 'front.1').split('.').map((x, i) => (i === 1 ? parseInt(x) : x)) as [string, number]
     const aPos = bPos === 'front' ? 'rear' : 'front'
     const aCount = Math.min(Math.max(1, overallLength - bCount), 12)
 
     return {
-      divideType: dividePoint.splitType,
+      divideType: dividePoint!!.splitType,
       stopsUpToSplit: stopsUntilFormationChange.map(p => ({
         crsCode: p.crsCode,
         shortPlatform: p.shortPlatform ?? '',
@@ -675,7 +675,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
         portion: { position: 'any', length: overallLength },
       })),
       splitB: {
-        stops: (dividePoint.splitCallingPoints ?? []).map(p => ({
+        stops: (dividePoint!!.splitCallingPoints ?? []).map(p => ({
           crsCode: p.crsCode,
           shortPlatform: p.shortPlatform ?? '',
           requestStop: p.requestStop ?? false,
@@ -725,8 +725,8 @@ export default class KeTechPhil extends StationAnnouncementSystem {
         files.push(
           'e.where the train will divide',
           { id: 'w.please make sure you travel in the correct part of this train', opts: { delayStart: 400 } },
-          { id: `s.please note that the ${splitData.splitB.position}`, opts: { delayStart: 400 } },
-          `m.${splitData.splitB.length === 1 ? 'coach' : `${splitData.splitB.length} coaches`} will detach at`,
+          { id: `s.please note that the ${splitData.splitB!!.position}`, opts: { delayStart: 400 } },
+          `m.${splitData.splitB!!.length === 1 ? 'coach' : `${splitData.splitB!!.length} coaches`} will detach at`,
           `station.e.${splitPoint.crsCode}`,
         )
         break
@@ -737,12 +737,12 @@ export default class KeTechPhil extends StationAnnouncementSystem {
           opts: { delayStart: 400 },
         })
 
-        if (!splitData.splitB.stops.length) throw new Error("Splitting train doesn't have any calling points")
+        if (!splitData.splitB!!.stops.length) throw new Error("Splitting train doesn't have any calling points")
         break
     }
 
-    const aPortionStops = new Set([...splitData.splitA.stops.map(s => s.crsCode)])
-    const bPortionStops = new Set([...splitData.splitB.stops.map(s => s.crsCode)])
+    const aPortionStops = new Set([...splitData.splitA!!.stops.map(s => s.crsCode)])
+    const bPortionStops = new Set([...splitData.splitB!!.stops.map(s => s.crsCode)])
     const anyPortionStops = new Set([
       ...splitData.stopsUpToSplit.map(s => s.crsCode),
       ...Array.from(aPortionStops).filter(x => bPortionStops.has(x)),
@@ -771,8 +771,8 @@ export default class KeTechPhil extends StationAnnouncementSystem {
         ? []
         : [
             ...listStops(Array.from(aPortionStops)),
-            `m.should travel in the ${splitData.splitA.position}`,
-            `platform.s.${splitData.splitA.length}`,
+            `m.should travel in the ${splitData.splitA!!.position}`,
+            `platform.s.${splitData.splitA!!.length}`,
             'e.coaches of the train',
           ]
     const bFiles =
@@ -780,12 +780,12 @@ export default class KeTechPhil extends StationAnnouncementSystem {
         ? []
         : [
             ...listStops(Array.from(bPortionStops)),
-            `m.should travel in the ${splitData.splitB.position}`,
-            `platform.s.${splitData.splitB.length}`,
+            `m.should travel in the ${splitData.splitB!!.position}`,
+            `platform.s.${splitData.splitB!!.length}`,
             'e.coaches of the train',
           ]
 
-    if (splitData.splitA.position === 'front') {
+    if (splitData.splitA!!.position === 'front') {
       files.push(...aFiles, ...bFiles)
     } else {
       files.push(...bFiles, ...aFiles)

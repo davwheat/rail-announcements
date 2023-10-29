@@ -2,7 +2,9 @@
   "compilerOptions": {
     "target": "ESNext" /* or at least ES2015 */,
     "module": "ESNext" /* or at least ES2015 */,
-    "lib": ["dom"] /* <-- required! */,
+    "lib": [
+      "dom"
+    ] /* <-- required! */,
     "jsx": "react" /* <-- required! */,
     "moduleResolution": "node" /* <-- required! */,
     "allowJs": true,
@@ -10,14 +12,35 @@
     "outDir": "./dist", // not actually used
     "resolveJsonModule": true,
     "esModuleInterop": true,
+    "strictNullChecks": true,
     "paths": {
-      "@components/*": ["./src/components/*"],
-      "@data/*": ["./src/data/*"],
-      "@atoms/*": ["./src/atoms/*"],
-      "@helpers/*": ["./src/helpers/*"],
-      "@announcement-data/*": ["./src/announcement-data/*"],
-      "@hooks/*": ["./src/hooks/*"]
+      "@components/*": [
+        "./src/components/*"
+      ],
+      "@data/*": [
+        "./src/data/*"
+      ],
+      "@atoms/*": [
+        "./src/atoms/*"
+      ],
+      "@helpers/*": [
+        "./src/helpers/*"
+      ],
+      "@announcement-data/*": [
+        "./src/announcement-data/*"
+      ],
+      "@hooks/*": [
+        "./src/hooks/*"
+      ]
     }
   },
-  "exclude": ["node_modules", "build", "scripts", "acceptance-tests", "webpack", "jest", "src/setupTests.ts"]
+  "exclude": [
+    "node_modules",
+    "build",
+    "scripts",
+    "acceptance-tests",
+    "webpack",
+    "jest",
+    "src/setupTests.ts"
+  ]
 }

@@ -2518,6 +2518,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     'NRN',
     'NRT',
     'NRW',
+    'NSB',
     'NSD',
     'NSG',
     'NSH',

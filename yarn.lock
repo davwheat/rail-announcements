@@ -4585,13 +4585,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"babel-plugin-transform-remove-console@npm:^6.9.4":
-  version: 6.9.4
-  resolution: "babel-plugin-transform-remove-console@npm:6.9.4"
-  checksum: 1123c3816c6f89c064752199c8796f30265d937f5d8e1e43d3837f1c0e87ed0e6bbd0afa6117ce021c8b93ec1de7154e158674bb22331c7ed6609d10121359df
-  languageName: node
-  linkType: hard
-
 "babel-preset-fbjs@npm:^3.4.0":
   version: 3.4.0
   resolution: "babel-preset-fbjs@npm:3.4.0"
@@ -7912,16 +7905,6 @@ __metadata:
     gatsby: ^3.1.0
     react-head: ^3.4.0
   checksum: ccbe4c5b8faac15ba0d59e7522ae6adf606d9bf2a2b4abb179cbfbabdff81b3a9a51416f787bb5785324b8be7871eda263e8c6619e4abcdfba4fce113a9ec6f4
-  languageName: node
-  linkType: hard
-
-"gatsby-plugin-remove-console@npm:^0.0.2":
-  version: 0.0.2
-  resolution: "gatsby-plugin-remove-console@npm:0.0.2"
-  peerDependencies:
-    babel-plugin-transform-remove-console: ^6.9.4
-    gatsby: ">=1"
-  checksum: f38afdcba5896de0bb7878ff7b3c4cbc9570c6e921589993565c9d97bf0ab18f9d1b0386246a11387d3275e47cd9788dd0ecea17b6b37d46df534ef0ebe9c19c
   languageName: node
   linkType: hard
 
@@ -12325,7 +12308,6 @@ __metadata:
     "@sentry/gatsby": ^7.74.1
     "@sentry/tracing": ^7.74.1
     "@types/react-beautiful-dnd": ^13.1.6
-    babel-plugin-transform-remove-console: ^6.9.4
     clsx: ^2.0.0
     cross-env: ^7.0.3
     crunker: ^2.1.0
@@ -12336,7 +12318,6 @@ __metadata:
     gatsby-plugin-manifest: ^5.12.2
     gatsby-plugin-material-ui: ^3.0.1
     gatsby-plugin-react-head: "https://github.com/davwheat/gatsby-plugin-react-head"
-    gatsby-plugin-remove-console: ^0.0.2
     gatsby-plugin-sharp: ^5.12.2
     gatsby-plugin-webpack-bundle-analyser-v2: ^1.1.31
     gatsby-source-filesystem: ^5.12.0

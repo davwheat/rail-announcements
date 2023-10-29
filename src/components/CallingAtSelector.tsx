@@ -272,6 +272,9 @@ function CallingAtSelector({
                                         selectLabel: 'Split calling points',
                                         placeholder: 'Add a split calling point...',
                                         heading: 'Calling points (INCLUDING terminating station)',
+                                        enableShortPlatforms: enableShortPlatforms,
+                                        enableRequestStops: enableRequestStops,
+                                        enableSplits: false,
                                       },
                                       onlyShowWhen(activeState) {
                                         return activeState.splitType === 'splits'

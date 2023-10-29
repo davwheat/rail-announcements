@@ -1,16 +1,7 @@
 const __IS_DEV__ = process.env.NODE_ENV !== 'production'
 
 // These plugins will only be used in production builds
-const prodPlugins = !__IS_DEV__
-  ? [
-      {
-        resolve: 'gatsby-plugin-remove-console',
-        options: {
-          exclude: ['error', 'warn'],
-        },
-      },
-    ]
-  : []
+const prodPlugins = !__IS_DEV__ ? [] : []
 
 module.exports = {
   siteMetadata: {

@@ -2024,6 +2024,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     'HSC',
     'HSD',
     'HSG',
+    'HSK',
     'HSL',
     'HST',
     'HSW',

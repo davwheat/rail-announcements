@@ -537,19 +537,44 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     let firstAdded = false
 
     order.forEach(s => {
-      files.push(
-        { id: firstAdded ? 's.customers for' : 's.due to short platforms customers for', opts: { delayStart: 200 } },
-        ...this.pluraliseAudio(
-          shortPlatforms[s].map(crs => ({ id: crs, opts: { delayStart: 100 } })),
-          100,
+      const plats = shortPlatforms[s]
+
+      if (!firstAdded) {
+        if (order.length === 1 && plats.length === 1) {
+          files.push('m.due to a short platform at', `station.m.${plats[0]}`, 'm.customers for this station', ...s.split(','))
+        } else {
+          files.push(
+            'm.due to short platforms customers for',
+            ...this.pluraliseAudio(
+              plats.map(crs => ({ id: crs, opts: { delayStart: 100 } })),
+              100,
+              {
+                prefix: 'station.m.',
+                finalPrefix: 'station.m.',
+                andId: 'm.and',
+              },
+            ),
+            ...s.split(','),
+          )
+        }
+      } else {
+        files.push(
           {
-            prefix: 'station.m.',
-            finalPrefix: 'station.m.',
-            andId: 'm.and',
+            id: 's.customers for',
+            opts: { delayStart: 200 },
           },
-        ),
-        ...s.split(','),
-      )
+          ...this.pluraliseAudio(
+            plats.map(crs => ({ id: crs, opts: { delayStart: 100 } })),
+            100,
+            {
+              prefix: 'station.m.',
+              finalPrefix: 'station.m.',
+              andId: 'm.and',
+            },
+          ),
+          ...s.split(','),
+        )
+      }
 
       firstAdded = true
     })

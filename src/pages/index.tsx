@@ -73,9 +73,9 @@ function IndexPage({ location }): JSX.Element {
           may still apply to these files, and may be held by either the respective TOCs, PIS/CIS manufacturers or even the voice artists.
         </p>
         <p>
-          You <u>must not</u> use the content on this site for commercial purposes. These files and systems are provided for personal use
-          only in an attempt to archive historial PIS/CIS systems. Abuse of the website and its contents could result in legal action against you
-          by copyright holders, and/or cause this site to be taken down.
+          You <u>must not</u> use the content on this site for commercial purposes. These files and systems are provided for personal use only in
+          an attempt to archive present-day and historical PIS/CIS systems. Abuse of the website and its contents could result in legal action
+          against you by copyright holders, and/or cause this site to be taken down.
         </p>
       </aside>
     </Layout>

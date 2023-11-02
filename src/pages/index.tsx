@@ -6,7 +6,7 @@ import AnnouncementPanel from '@components/AnnouncementPanel'
 import NavBar from '@components/NavBar'
 
 // @ts-expect-error
-import LogoSmallUrl from '../images/logo_small.png'
+import LogoUrl from '../images/logo.png'
 import { makeStyles } from '@material-ui/styles'
 import { Link } from 'gatsby'
 
@@ -48,7 +48,7 @@ function IndexPage({ location }): JSX.Element {
     <Layout location={location}>
       <header>
         <h1 className={classes.heading}>
-          <img alt="" role="presentation" className={classes.logo} src={LogoSmallUrl} />
+          <img alt="" role="presentation" className={classes.logo} src={LogoUrl} />
           <span>Rail announcements</span>
         </h1>
       </header>

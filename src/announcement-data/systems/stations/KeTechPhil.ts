@@ -2482,7 +2482,6 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     'NEM',
     'NES',
     'NET',
-    'NEW',
     'NFD',
     'NFL',
     'NFN',

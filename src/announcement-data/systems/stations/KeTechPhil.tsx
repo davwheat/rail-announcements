@@ -4083,7 +4083,7 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
         This is a beta feature, and isn't complete or fully functional. Please report any issues you face on GitHub.
       </p>
       <p style={{ margin: '16px 0' }}>
-        This page will auto-announce all departures in the next 10 minutes from the selected station. Departures outside this timeframe will
+        This page will auto-announce all departures in the next {MIN_TIME_TO_ANNOUNCE} minutes from the selected station. Departures outside this timeframe will
         appear on the board below, but won't be announced until closer to the time.
       </p>
       <p style={{ margin: '16px 0' }}>At the moment, we also won't announce services which:</p>

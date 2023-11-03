@@ -3978,7 +3978,9 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
           return false
         }
         if (calculateArrivalInMins(s.etd) > MIN_TIME_TO_ANNOUNCE) {
-          console.log(`[Live Trains] Skipping ${s.serviceIdGuid} (${s.std} to ${s.destination[0].locationName}) as it is more than ${MIN_TIME_TO_ANNOUNCE} mins away`)
+          console.log(
+            `[Live Trains] Skipping ${s.serviceIdGuid} (${s.std} to ${s.destination[0].locationName}) as it is more than ${MIN_TIME_TO_ANNOUNCE} mins away`,
+          )
           return false
         }
 

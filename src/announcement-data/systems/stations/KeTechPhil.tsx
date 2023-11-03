@@ -15,6 +15,7 @@ interface INextTrainAnnouncementOptions {
   platform: string
   hour: string
   min: string
+  isDelayed: boolean
   toc: string
   terminatingStationCode: string
   vias: CallingAtPoint[]
@@ -903,8 +904,23 @@ export default class KeTechPhil extends StationAnnouncementSystem {
 
     if (options.chime !== 'none') files.push(`sfx - ${options.chime} chimes`)
 
+    const plat = parseInt(options.platform)
+
+    const platFiles: AudioItem[] = []
+
+    if (plat <= 12) {
+      platFiles.push({ id: `s.platform ${options.platform} for the`, opts: { delayStart: 250 } })
+      if (options.isDelayed) platFiles.push('m.delayed')
+    } else {
+      platFiles.push(
+        { id: `s.platform`, opts: { delayStart: 250 } },
+        `platform.s.${options.platform}`,
+        options.isDelayed ? `m.for the delayed` : `m.for the`,
+      )
+    }
+
     files.push(
-      `s.platform ${options.platform} for the`,
+      ...platFiles,
       ...(await this.getFilesForBasicTrainInfo(
         options.hour,
         options.min,
@@ -958,7 +974,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     }
 
     files.push(
-      { id: `s.platform ${options.platform} for the`, opts: { delayStart: 250 } },
+      ...platFiles,
       ...(await this.getFilesForBasicTrainInfo(
         options.hour,
         options.min,
@@ -972,7 +988,9 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     await this.playAudioFiles(files, download)
   }
 
-  readonly platforms = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].flatMap(x => [`${x}`, `${x}a`, `${x}b`, `${x}c`, `${x}d`]).concat(['a', 'b'])
+  readonly platforms = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    .flatMap(x => [`${x}`, `${x}a`, `${x}b`, `${x}c`, `${x}d`])
+    .concat(['13', '14', '15', '16', '17', '18', '19', '20', 'a', 'b'])
   readonly stations = [
     'AAP',
     'AAT',
@@ -3632,6 +3650,11 @@ export default class KeTechPhil extends StationAnnouncementSystem {
               .concat(new Array(59).fill(0).map((_, i) => (i + 2).toString()))
               .map(m => ({ title: m.toString().padStart(2, '0'), value: m.toString().padStart(2, '0') })),
             type: 'select',
+          },
+          isDelayed: {
+            name: 'Delayed?',
+            default: false,
+            type: 'boolean',
           },
           toc: {
             name: 'TOC',

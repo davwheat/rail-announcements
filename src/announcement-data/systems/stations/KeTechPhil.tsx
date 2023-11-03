@@ -3873,15 +3873,41 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
     if (!hasRealEta) return 0
 
     const sTime = std.split(':')
-    console.log(sTime)
-
     const eTime = etd.split(':')
-    console.log(eTime)
 
     const [h, m] = sTime.map(x => parseInt(x))
     const [eH, eM] = eTime.map(x => parseInt(x))
 
     console.log(`[Delay Mins] ${h}:${m} (${std}) -> ${eH}:${eM} (${etd}) = ${eH * 60 + eM - (h * 60 + m)}`)
+
+    let delayMins = Math.abs(eH * 60 + eM - (h * 60 + m))
+
+    if (delayMins < 0) {
+      // crosses over midnight
+      return calculateDelayMins(std, '23:59') + calculateDelayMins('00:00', etd)
+    }
+
+    return delayMins
+  }
+
+  function calculateArrivalInMins(etd: string): number {
+    // HH:mm in UK
+    const std = new Date().toLocaleTimeString('en-GB', { hour12: false, timeZone: 'Europe/London' }).slice(0, 5)
+
+    const isDelayed = etd !== 'On time' && etd !== std
+    if (!isDelayed) return 0
+
+    const hasRealEta = (etd as string).includes(':')
+
+    if (!hasRealEta) return 0
+
+    const sTime = std.split(':')
+    const eTime = etd.split(':')
+
+    const [h, m] = sTime.map(x => parseInt(x))
+    const [eH, eM] = eTime.map(x => parseInt(x))
+
+    console.log(`[ETA mins] ${h}:${m} (${std}) -> ${eH}:${eM} (${etd}) = ${eH * 60 + eM - (h * 60 + m)}`)
 
     let delayMins = Math.abs(eH * 60 + eM - (h * 60 + m))
 
@@ -3945,6 +3971,10 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
         }
         if (s.platform === null) {
           console.log(`[Live Trains] Skipping ${s.serviceIdGuid} (${s.std} to ${s.destination[0].locationName}) as it has no confirmed platform`)
+          return false
+        }
+        if (calculateArrivalInMins(s.etd) > 10) {
+          console.log(`[Live Trains] Skipping ${s.serviceIdGuid} (${s.std} to ${s.destination[0].locationName}) as it is more than 10 mins away`)
           return false
         }
 

@@ -550,7 +550,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
           files.push('m.due to a short platform at', `station.m.${plats[0]}`, 'm.customers for this station', ...s.split(','))
         } else {
           files.push(
-            'm.due to short platforms customers for',
+            's.due to short platforms customers for',
             ...this.pluraliseAudio(
               plats.map(crs => ({ id: crs, opts: { delayStart: 100 } })),
               100,

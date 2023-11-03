@@ -3816,6 +3816,8 @@ const useLiveTrainsStyles = makeStyles({
   },
 })
 
+const MIN_TIME_TO_ANNOUNCE = 4
+
 function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncementsProps) {
   const classes = useLiveTrainsStyles()
 
@@ -3931,7 +3933,7 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
       console.log('[Live Trains] Checking for new services')
 
       const resp = await fetch(
-        `https://national-rail-api.davwheat.dev/departures/${selectedCrs}?expand=true&numServices=3&timeOffset=0&timeWindow=10`,
+        `https://national-rail-api.davwheat.dev/departures/${selectedCrs}?expand=true&numServices=3&timeOffset=0&timeWindow=${MIN_TIME_TO_ANNOUNCE}`,
       )
 
       if (!resp.ok) {
@@ -3973,8 +3975,8 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
           console.log(`[Live Trains] Skipping ${s.serviceIdGuid} (${s.std} to ${s.destination[0].locationName}) as it has no confirmed platform`)
           return false
         }
-        if (calculateArrivalInMins(s.etd) > 10) {
-          console.log(`[Live Trains] Skipping ${s.serviceIdGuid} (${s.std} to ${s.destination[0].locationName}) as it is more than 10 mins away`)
+        if (calculateArrivalInMins(s.etd) > MIN_TIME_TO_ANNOUNCE) {
+          console.log(`[Live Trains] Skipping ${s.serviceIdGuid} (${s.std} to ${s.destination[0].locationName}) as it is more than ${MIN_TIME_TO_ANNOUNCE} mins away`)
           return false
         }
 

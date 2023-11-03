@@ -3412,6 +3412,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     'WMW',
     'WNC',
     'WND',
+    'WNE',
     'WNF',
     'WNG',
     'WNH',

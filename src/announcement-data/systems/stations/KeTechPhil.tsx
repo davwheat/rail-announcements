@@ -3412,6 +3412,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     'WMW',
     'WNC',
     'WND',
+    'WNE',
     'WNF',
     'WNG',
     'WNH',
@@ -3934,6 +3935,8 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
 
       console.log('[Live Trains] Checking for new services')
 
+      let services
+
       try {
         const resp = await fetch(
           `https://national-rail-api.davwheat.dev/departures/${selectedCrs}?expand=true&numServices=3&timeOffset=0&timeWindow=${MIN_TIME_TO_ANNOUNCE}`,
@@ -3943,8 +3946,6 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
           console.warn("[Live Trains] Couldn't fetch data from API")
           return
         }
-
-        let services
 
         try {
           const data = await resp.json()

@@ -12328,6 +12328,7 @@ __metadata:
     react: ^18.2.0
     react-beautiful-dnd: ^13.1.1
     react-dom: ^18.2.0
+    react-fullscreen-crossbrowser: ^1.1.3
     react-head: ^3.4.2
     react-select: ^5.7.7
     react-tabs: ^6.0.2
@@ -12470,6 +12471,13 @@ __metadata:
   version: 6.0.11
   resolution: "react-error-overlay@npm:6.0.11"
   checksum: ce7b44c38fadba9cedd7c095cf39192e632daeccf1d0747292ed524f17dcb056d16bc197ddee5723f9dd888f0b9b19c3b486c430319e30504289b9296f2d2c42
+  languageName: node
+  linkType: hard
+
+"react-fullscreen-crossbrowser@npm:^1.1.3":
+  version: 1.1.3
+  resolution: "react-fullscreen-crossbrowser@npm:1.1.3"
+  checksum: bbf3ae87e22d3049d3605155d33b46632680b9a76d0911433ce245bb3636f52cfc99c0c0e8a1eb251fbcd0f63bdffae90cc3d447f74f1b616ac6e1f147c0b527
   languageName: node
   linkType: hard
 

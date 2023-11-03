@@ -1,10 +1,12 @@
+import React, { useEffect, useMemo, useState } from 'react'
 import StationAnnouncementSystem from '@announcement-data/StationAnnouncementSystem'
 import CallingAtSelector, { CallingAtPoint } from '@components/CallingAtSelector'
-import CustomAnnouncementPane, { ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
+import CustomAnnouncementPane, { ICustomAnnouncementPaneProps, ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
 import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
 import { AllStationsTitleValueMap } from '@data/StationManipulators'
 import crsToStationItemMapper, { stationItemCompleter } from '@helpers/crsToStationItemMapper'
 import { AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
+import FullscreenIcon from 'mdi-react/FullscreenIcon'
 
 type ChimeType = /*'3' |*/ 'four' | 'none'
 
@@ -249,7 +251,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     }
   }
 
-  private AVAILABLE_TOCS = [
+  readonly AVAILABLE_TOCS = [
     'a replacement bus',
     'additional',
     'additional Chiltern Railways',
@@ -890,8 +892,8 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     await this.playAudioFiles(files, download)
   }
 
-  private platforms = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].flatMap(x => [`${x}`, `${x}a`, `${x}b`, `${x}c`, `${x}d`]).concat(['a', 'b'])
-  private stations = [
+  readonly platforms = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].flatMap(x => [`${x}`, `${x}a`, `${x}b`, `${x}c`, `${x}d`]).concat(['a', 'b'])
+  readonly stations = [
     'AAP',
     'AAT',
     'ABA',
@@ -2482,7 +2484,6 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     'NEM',
     'NES',
     'NET',
-    'NEW',
     'NFD',
     'NFL',
     'NFN',
@@ -3610,85 +3611,14 @@ export default class KeTechPhil extends StationAnnouncementSystem {
         },
       },
     },
-    // standingTrain: {
-    //   name: 'Standing train',
-    //   component: CustomAnnouncementPane,
-    //   props: {
-    //     // presets: AnnouncementPresets.standingTrain,
-    //     playHandler: this.playStandingTrainAnnouncement.bind(this),
-    //     options: {
-    //       chime: {
-    //         name: 'Chime',
-    //         type: 'select',
-    //         default: 'none',
-    //         options: [
-    //           { title: '3 chimes', value: '3' },
-    //           { title: '4 chimes', value: '4' },
-    //           { title: 'No chime', value: 'none' },
-    //         ],
-    //       },
-    //       currentStation: {
-    //         name: 'Current station',
-    //         default: AVAILABLE_station.m.filter(x => AVAILABLE_station.e.includes(x as any))[0],
-    //         options: AllStationsTitleValueMap.filter(
-    //           s => AVAILABLE_station.e.includes(s.value as any) && AVAILABLE_station.m.includes(s.value as any),
-    //         ),
-    //         type: 'select',
-    //       },
-    //       platform: {
-    //         name: 'Platform',
-    //         default: AVAILABLE_ALPHANUMBERS[0],
-    //         options: AVAILABLE_ALPHANUMBERS.map(p => ({ title: `Platform ${p}`, value: p })),
-    //         type: 'select',
-    //       },
-    //       hour: {
-    //         name: 'Hour',
-    //         default: AVAILABLE_HOURS[0],
-    //         options: AVAILABLE_HOURS.map(h => ({ title: h, value: h })),
-    //         type: 'select',
-    //       },
-    //       min: {
-    //         name: 'Minute',
-    //         default: AVAILABLE_MINUTES[0],
-    //         options: AVAILABLE_MINUTES.map(m => ({ title: m, value: m })),
-    //         type: 'select',
-    //       },
-    //       toc: {
-    //         name: 'TOC',
-    //         default: this.AVAILABLE_TOCS[0].toLowerCase(),
-    //         options: this.AVAILABLE_TOCS.map(m => ({ title: m, value: m.toLowerCase() })),
-    //         type: 'select',
-    //       },
-    //       terminatingStationCode: {
-    //         name: 'Terminating station',
-    //         default: this.stations[1],
-    //         options: AllStationsTitleValueMap.filter(s => this.station.includes(s.value)),
-    //         type: 'select',
-    //       },
-    //       via: {
-    //         name: 'Via... (optional)',
-    //         default: 'none',
-    //         options: [{ title: 'NONE', value: 'none' }, ...AllStationsTitleValueMap.filter(s => this.station.includes(s.value))],
-    //         type: 'select',
-    //       },
-    //       callingAt: {
-    //         name: '',
-    //         type: 'custom',
-    //         component: CallingAtSelector,
-    //         props: {
-    //           availableStations: AVAILABLE_station.high,
-    //         },
-    //         default: [],
-    //       },
-    //       coaches: {
-    //         name: 'Coach count',
-    //         default: AVAILABLE_NUMBERS.filter(x => parseInt(x) > 1)[0],
-    //         options: AVAILABLE_NUMBERS.filter(x => parseInt(x) > 1).map(c => ({ title: c, value: c })),
-    //         type: 'select',
-    //       },
-    //     },
-    //   },
-    // },
+    liveTrains: {
+      name: 'Live trains (beta)',
+      component: LiveTrainAnnouncements,
+      props: {
+        nextTrainHandler: this.playNextTrainAnnouncement.bind(this),
+        system: this,
+      },
+    },
     announcementButtons: {
       name: 'Announcement buttons',
       component: CustomButtonPane,
@@ -3753,4 +3683,219 @@ export default class KeTechPhil extends StationAnnouncementSystem {
       },
     },
   }
+}
+
+interface LiveTrainAnnouncementsProps extends ICustomAnnouncementPaneProps {
+  system: KeTechPhil
+  nextTrainHandler: (options: INextTrainAnnouncementOptions) => Promise<void>
+}
+
+import FullScreen from 'react-fullscreen-crossbrowser'
+import { Option } from '@helpers/createOptionField'
+import Select from 'react-select'
+import { makeStyles } from '@material-ui/styles'
+
+const useLiveTrainsStyles = makeStyles({
+  fullscreenButton: {
+    display: 'flex',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  iframe: {
+    border: 'none',
+    width: '100%',
+    height: 400,
+
+    ':fullscreen &': {
+      height: '100%',
+    },
+  },
+})
+
+function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncementsProps) {
+  const classes = useLiveTrainsStyles()
+
+  const supportedStations: Option[] = useMemo(
+    () =>
+      system.stations.map(s => {
+        const r = crsToStationItemMapper(s)
+
+        return {
+          value: r.crsCode,
+          label: r.name,
+        }
+      }),
+    [system.stations],
+  )
+
+  const [isFullscreen, setFullscreen] = useState(false)
+  const [selectedCrs, setselectedCrs] = useState('ECR')
+  const [hasEnabledFeature, setHasEnabledFeature] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(false)
+
+  const [nextTrainAnnounced, setNextTrainAnnounced] = useState<Record<string, number>>({})
+
+  function removeOldIds() {
+    const now = Date.now()
+
+    setNextTrainAnnounced(prev => {
+      const newIds = Object.fromEntries(Object.entries(prev).filter(([_, v]) => now - v < 1000 * 60 * 60))
+
+      return newIds
+    })
+  }
+
+  function markTrainIdAnnounced(id: string) {
+    setNextTrainAnnounced(prev => ({
+      ...prev,
+      [id]: Date.now(),
+    }))
+  }
+
+  useEffect(() => {
+    const key = setInterval(removeOldIds, 1000 * 60 * 5)
+
+    return () => {
+      clearInterval(key)
+    }
+  }, [removeOldIds])
+
+  useEffect(() => {
+    if (!hasEnabledFeature) return
+
+    const checkAndPlay = async () => {
+      if (isPlaying) return
+
+      const resp = await fetch(
+        `https://national-rail-api.davwheat.dev/departures/${selectedCrs}?expand=true&numServices=3&timeOffset=0&timeWindow=10`,
+      )
+
+      if (!resp.ok) return
+
+      let services
+
+      try {
+        const data = await resp.json()
+        services = data.trainServices
+      } catch {
+        return
+      }
+
+      if (!services) return
+
+      const firstUnannounced = services.find(
+        s => !nextTrainAnnounced[s.rsid] && !s.isCancelled && s.etd !== 'Delayed' && s.platform !== null && !!s.length,
+      )
+      if (!firstUnannounced) return
+
+      console.log(firstUnannounced)
+
+      markTrainIdAnnounced(firstUnannounced.rsid)
+
+      const h = firstUnannounced.std.split(':')[0]
+      const m = firstUnannounced.std.split(':')[1]
+
+      const options: INextTrainAnnouncementOptions = {
+        chime: 'four',
+        hour: h === '00' ? '00 - midnight' : h,
+        min: m === '00' ? '00 - hundred' : m,
+        toc: system.AVAILABLE_TOCS.find(t => t.toLowerCase() === firstUnannounced.operator.toLowerCase()) ?? '',
+        coaches: `${firstUnannounced.length} coaches`,
+        platform: system.platforms.includes(firstUnannounced.platform.toLowerCase()) ? firstUnannounced.platform.toLowerCase() : '1',
+        terminatingStationCode: firstUnannounced.destination[0].crs,
+        vias: [],
+        callingAt: firstUnannounced.subsequentCallingPoints[0].callingPoint
+          .map((p): CallingAtPoint | null => {
+            if (p.isCancelled || p.et === 'Cancelled') return null
+            if (!system.stations.includes(p.crs)) return null
+
+            return {
+              crsCode: p.crs,
+              name: '',
+              randomId: '',
+            }
+          })
+          .filter(x => !!x),
+      }
+
+      console.log(options)
+
+      setIsPlaying(true)
+      try {
+        console.log('PLAYING')
+        await nextTrainHandler(options)
+      } catch (e) {
+        console.log('FAILED')
+        console.error(e)
+        setIsPlaying(false)
+      }
+      console.log('COMPLETE')
+      setIsPlaying(false)
+    }
+
+    const refreshInterval = setInterval(checkAndPlay, 30_000)
+    checkAndPlay()
+
+    return () => {
+      clearInterval(refreshInterval)
+    }
+  }, [hasEnabledFeature, nextTrainAnnounced, markTrainIdAnnounced, system, nextTrainHandler, selectedCrs, isPlaying, setIsPlaying])
+
+  return (
+    <div>
+      <label className="option-select" htmlFor="station-select">
+        Station
+        <Select<Option, false>
+          id="station-select"
+          value={{ value: selectedCrs, label: supportedStations.find(option => option.value === selectedCrs)?.label || '' }}
+          onChange={val => {
+            setselectedCrs(val!!.value)
+          }}
+          options={supportedStations}
+        />
+      </label>
+
+      <p style={{ margin: '16px 0' }}>
+        This is a beta feature, and isn't complete or fully functional. Please report any issues you face on GitHub.
+      </p>
+      <p style={{ margin: '16px 0' }}>
+        This page will auto-announce all departures in the next 10 minutes from the selected station. Departures outside this timeframe will
+        appear on the board below, but won't be announced until closer to the time.
+      </p>
+      <p style={{ margin: '16px 0' }}>
+        At the moment, we also won't announce services which:
+        <ul className="list">
+          <li>have no platform allocated in data feeds (common at larger stations, even at the time of departure)</li>
+          <li>have no train formation info (num of coaches)</li>
+          <li>are marked as cancelled or have an estimated time of "delayed"</li>
+          <li>have already been announced by the system in the last hour (only affects services which suddenly get delayed)</li>
+        </ul>
+      </p>
+      <p>
+        We also can't handle splits (we'll only announce the main portion), request stops, short platforms, delays (e.g., "for the delayed") and
+        many more features. As I said, it's a beta!
+      </p>
+
+      {!hasEnabledFeature ? (
+        <>
+          <button className={classes.fullscreenButton} onClick={() => setHasEnabledFeature(true)}>
+            Enable live trains
+          </button>
+        </>
+      ) : (
+        <>
+          <button className={classes.fullscreenButton} onClick={() => setFullscreen(true)}>
+            <FullscreenIcon style={{ marginRight: 4 }} /> Fullscreen
+          </button>
+
+          <FullScreen enabled={isFullscreen} onChange={setFullscreen}>
+            <iframe
+              className={classes.iframe}
+              src={`https://raildotmatrix.davwheat.dev/board/?type=gtr-new&station=${selectedCrs}&noBg=1&hideSettings=1`}
+            />
+          </FullScreen>
+        </>
+      )}
+    </div>
+  )
 }

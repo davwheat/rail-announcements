@@ -3863,17 +3863,54 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
     }
   }, [removeOldIds])
 
+  function calculateDelayMins(std: string, etd: string): number {
+    const isDelayed = etd !== 'On time' && etd !== std
+    if (!isDelayed) return 0
+
+    const hasRealEta = (etd as string).includes(':')
+
+    if (!hasRealEta) return 0
+
+    const sTime = std.split(':')
+    console.log(sTime)
+
+    const eTime = etd.split(':')
+    console.log(eTime)
+
+    const [h, m] = sTime.map(x => parseInt(x))
+    const [eH, eM] = eTime.map(x => parseInt(x))
+
+    console.log(`[Delay Mins] ${h}:${m} (${std}) -> ${eH}:${eM} (${etd}) = ${eH * 60 + eM - (h * 60 + m)}`)
+
+    let delayMins = Math.abs(eH * 60 + eM - (h * 60 + m))
+
+    if (delayMins < 0) {
+      // crosses over midnight
+      return calculateDelayMins(std, '23:59') + calculateDelayMins('00:00', etd)
+    }
+
+    return delayMins
+  }
+
   useEffect(() => {
     if (!hasEnabledFeature) return
 
     const checkAndPlay = async () => {
-      if (isPlaying) return
+      if (isPlaying) {
+        console.log('[Live Trains] Still playing an announcement; skipping this check')
+        return
+      }
+
+      console.log('[Live Trains] Checking for new services')
 
       const resp = await fetch(
         `https://national-rail-api.davwheat.dev/departures/${selectedCrs}?expand=true&numServices=3&timeOffset=0&timeWindow=10`,
       )
 
-      if (!resp.ok) return
+      if (!resp.ok) {
+        console.warn("[Live Trains] Couldn't fetch data from API")
+        return
+      }
 
       let services
 
@@ -3881,29 +3918,38 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
         const data = await resp.json()
         services = data.trainServices
       } catch {
+        console.warn("[Live Trains] Couldn't parse JSON from API")
         return
       }
 
-      if (!services) return
+      if (!services) {
+        console.log('[Live Trains] No services in API response')
+        return
+      }
+
+      console.log(`[Live Trains] ${services.length} services found`)
 
       const firstUnannounced = services.find(s => {
-        if (nextTrainAnnounced[s.rsid]) {
-          console.log(`[Live Trains] Skipping ${s.rsid} (${s.std} to ${s.destination[0].locationName}) as it was announced recently`)
+        if (nextTrainAnnounced[s.serviceIdGuid]) {
+          console.log(`[Live Trains] Skipping ${s.serviceIdGuid} (${s.std} to ${s.destination[0].locationName}) as it was announced recently`)
           return false
         }
         if (s.isCancelled) {
-          console.log(`[Live Trains] Skipping ${s.rsid} (${s.std} to ${s.destination[0].locationName}) as it is cancelled`)
+          console.log(`[Live Trains] Skipping ${s.serviceIdGuid} (${s.std} to ${s.destination[0].locationName}) as it is cancelled`)
           return false
         }
         if (s.etd === 'Delayed') {
-          console.log(`[Live Trains] Skipping ${s.rsid} (${s.std} to ${s.destination[0].locationName}) as it has no estimated time`)
+          console.log(`[Live Trains] Skipping ${s.serviceIdGuid} (${s.std} to ${s.destination[0].locationName}) as it has no estimated time`)
           return false
         }
         if (s.platform === null) {
-          console.log(`[Live Trains] Skipping ${s.rsid} (${s.std} to ${s.destination[0].locationName}) as it has no confirmed platform`)
+          console.log(`[Live Trains] Skipping ${s.serviceIdGuid} (${s.std} to ${s.destination[0].locationName}) as it has no confirmed platform`)
           return false
         }
+
+        return true
       })
+
       if (!firstUnannounced) {
         console.log('[Live Trains] No suitable unannounced services found')
         return
@@ -3911,15 +3957,20 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
 
       console.log(firstUnannounced)
 
-      markTrainIdAnnounced(firstUnannounced.rsid)
+      markTrainIdAnnounced(firstUnannounced.serviceIdGuid)
 
       const h = firstUnannounced.std.split(':')[0]
       const m = firstUnannounced.std.split(':')[1]
+
+      const delayMins = calculateDelayMins(firstUnannounced.std, firstUnannounced.etd)
+
+      console.log(`[Live Trains] Is delayed by ${delayMins} mins`)
 
       const options: INextTrainAnnouncementOptions = {
         chime: 'four',
         hour: h === '00' ? '00 - midnight' : h,
         min: m === '00' ? '00 - hundred' : m,
+        isDelayed: delayMins > 5,
         toc: system.AVAILABLE_TOCS.find(t => t.toLowerCase() === firstUnannounced.operator.toLowerCase()) ?? '',
         coaches: firstUnannounced.length ? `${firstUnannounced.length} coaches` : null,
         platform: system.platforms.includes(firstUnannounced.platform.toLowerCase()) ? firstUnannounced.platform.toLowerCase() : '1',
@@ -3946,24 +3997,36 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
 
       setIsPlaying(true)
       try {
-        console.log('PLAYING')
+        console.log(
+          `[Live Trains] Playing announcement for ${firstUnannounced.serviceIdGuid} (${firstUnannounced.std} to ${firstUnannounced.destination[0].locationName})`,
+        )
         await nextTrainHandler(options)
       } catch (e) {
-        console.log('FAILED')
+        console.warn(`[Live Trains] Error playing announcement for ${firstUnannounced.serviceIdGuid}; see below`)
         console.error(e)
         setIsPlaying(false)
       }
-      console.log('COMPLETE')
+      console.log(`[Live Trains] Announcement for ${firstUnannounced.serviceIdGuid} complete`)
       setIsPlaying(false)
     }
 
-    const refreshInterval = setInterval(checkAndPlay, 30_000)
+    const refreshInterval = setInterval(checkAndPlay, 10_000)
     checkAndPlay()
 
     return () => {
       clearInterval(refreshInterval)
     }
-  }, [hasEnabledFeature, nextTrainAnnounced, markTrainIdAnnounced, system, nextTrainHandler, selectedCrs, isPlaying, setIsPlaying])
+  }, [
+    hasEnabledFeature,
+    nextTrainAnnounced,
+    markTrainIdAnnounced,
+    system,
+    nextTrainHandler,
+    selectedCrs,
+    isPlaying,
+    setIsPlaying,
+    calculateDelayMins,
+  ])
 
   return (
     <div>
@@ -3986,14 +4049,12 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
         This page will auto-announce all departures in the next 10 minutes from the selected station. Departures outside this timeframe will
         appear on the board below, but won't be announced until closer to the time.
       </p>
-      <p style={{ margin: '16px 0' }}>
-        At the moment, we also won't announce services which:
-        <ul className="list">
-          <li>have no platform allocated in data feeds (common at larger stations, even at the time of departure)</li>
-          <li>are marked as cancelled or have an estimated time of "delayed"</li>
-          <li>have already been announced by the system in the last hour (only affects services which suddenly get delayed)</li>
-        </ul>
-      </p>
+      <p style={{ margin: '16px 0' }}>At the moment, we also won't announce services which:</p>
+      <ul className="list" style={{ margin: '16px 16px' }}>
+        <li>have no platform allocated in data feeds (common at larger stations, even at the time of departure)</li>
+        <li>are marked as cancelled or have an estimated time of "delayed"</li>
+        <li>have already been announced by the system in the last hour (only affects services which suddenly get delayed)</li>
+      </ul>
       <p>
         We also can't handle splits (we'll only announce the main portion), request stops, short platforms, delays (e.g., "for the delayed") and
         many more features. As I said, it's a beta!

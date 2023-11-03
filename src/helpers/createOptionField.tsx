@@ -12,7 +12,7 @@ interface OptionFieldOptions {
   activeState?: Record<string, unknown>
 }
 
-interface Option {
+export interface Option {
   readonly label: string
   readonly value: string
 }

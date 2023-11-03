@@ -3805,9 +3805,12 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
         terminatingStationCode: firstUnannounced.destination[0].crs,
         vias: [],
         callingAt: firstUnannounced.subsequentCallingPoints[0].callingPoint
-          .map((p): CallingAtPoint | null => {
+          .map((p, i): CallingAtPoint | null => {
             if (p.isCancelled || p.et === 'Cancelled') return null
             if (!system.stations.includes(p.crs)) return null
+
+            if (i === firstUnannounced.subsequentCallingPoints[0].callingPoint.length - 1 && p.crs === firstUnannounced.destination[0].crs)
+              return null
 
             return {
               crsCode: p.crs,

@@ -15,11 +15,12 @@ interface INextTrainAnnouncementOptions {
   platform: string
   hour: string
   min: string
+  isDelayed: boolean
   toc: string
   terminatingStationCode: string
   vias: CallingAtPoint[]
   callingAt: CallingAtPoint[]
-  coaches: string
+  coaches: string | null
 }
 
 interface SplitInfoStop {
@@ -27,8 +28,8 @@ interface SplitInfoStop {
   shortPlatform: string
   requestStop: boolean
   portion: {
-    position: 'any' | 'front' | 'middle' | 'rear'
-    length: number
+    position: 'any' | 'front' | 'middle' | 'rear' | 'unknown'
+    length: number | null
   }
 }
 
@@ -483,7 +484,11 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     return files
   }
 
-  private async getShortPlatforms(callingPoints: CallingAtPoint[], terminatingStation: string, overallLength: number): Promise<AudioItem[]> {
+  private async getShortPlatforms(
+    callingPoints: CallingAtPoint[],
+    terminatingStation: string,
+    overallLength: number | null,
+  ): Promise<AudioItem[]> {
     const files: AudioItem[] = []
 
     const splitData = this.getSplitInfo(callingPoints, terminatingStation, overallLength)
@@ -546,7 +551,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
           files.push('m.due to a short platform at', `station.m.${plats[0]}`, 'm.customers for this station', ...s.split(','))
         } else {
           files.push(
-            'm.due to short platforms customers for',
+            's.due to short platforms customers for',
             ...this.pluraliseAudio(
               plats.map(crs => ({ id: crs, opts: { delayStart: 100 } })),
               100,
@@ -584,7 +589,11 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     return files
   }
 
-  private async getRequestStops(callingPoints: CallingAtPoint[], terminatingStation: string, overallLength: number): Promise<AudioItem[]> {
+  private async getRequestStops(
+    callingPoints: CallingAtPoint[],
+    terminatingStation: string,
+    overallLength: number | null,
+  ): Promise<AudioItem[]> {
     const files: AudioItem[] = []
 
     const splitData = this.getSplitInfo(callingPoints, terminatingStation, overallLength)
@@ -610,19 +619,19 @@ export default class KeTechPhil extends StationAnnouncementSystem {
   private getSplitInfo(
     callingPoints: CallingAtPoint[],
     terminatingStation: string,
-    overallLength: number,
+    overallLength: number | null,
   ): {
     divideType: CallingAtPoint['splitType']
     stopsUpToSplit: SplitInfoStop[]
     splitA: {
       stops: SplitInfoStop[]
-      position: 'front' | 'middle' | 'rear'
-      length: number
+      position: 'front' | 'middle' | 'rear' | 'unknown'
+      length: number | null
     } | null
     splitB: {
       stops: SplitInfoStop[]
-      position: 'front' | 'middle' | 'rear'
-      length: number
+      position: 'front' | 'middle' | 'rear' | 'unknown'
+      length: number | null
     } | null
   } {
     // If there are no splits, return an empty array
@@ -664,6 +673,38 @@ export default class KeTechPhil extends StationAnnouncementSystem {
       }),
     )
 
+    if (overallLength === null) {
+      return {
+        divideType: dividePoint!!.splitType,
+        stopsUpToSplit: stopsUntilFormationChange.map(p => ({
+          crsCode: p.crsCode,
+          shortPlatform: p.shortPlatform ?? '',
+          requestStop: p.requestStop ?? false,
+          portion: { position: 'any', length: null },
+        })),
+        splitB: {
+          stops: (dividePoint!!.splitCallingPoints ?? []).map(p => ({
+            crsCode: p.crsCode,
+            shortPlatform: p.shortPlatform ?? '',
+            requestStop: p.requestStop ?? false,
+            portion: { position: 'unknown', length: null },
+          })),
+          position: 'unknown',
+          length: null,
+        },
+        splitA: {
+          stops: stopsAfterFormationChange.map(p => ({
+            crsCode: p.crsCode,
+            shortPlatform: p.shortPlatform ?? '',
+            requestStop: p.requestStop ?? false,
+            portion: { position: aPos, length: aCount },
+          })),
+          position: 'unknown',
+          length: null,
+        },
+      }
+    }
+
     const [bPos, bCount] = (dividePoint!!.splitForm ?? 'front.1').split('.').map((x, i) => (i === 1 ? parseInt(x) : x)) as [string, number]
     const aPos = bPos === 'front' ? 'rear' : 'front'
     const aCount = Math.min(Math.max(1, overallLength - bCount), 12)
@@ -702,7 +743,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
   private async getCallingPointsWithSplits(
     callingPoints: CallingAtPoint[],
     terminatingStation: string,
-    overallLength: number,
+    overallLength: number | null,
   ): Promise<AudioItem[]> {
     const files: AudioItem[] = []
 
@@ -724,13 +765,21 @@ export default class KeTechPhil extends StationAnnouncementSystem {
 
     switch (splitData.divideType) {
       case 'splitTerminates':
-        files.push(
-          'e.where the train will divide',
-          { id: 'w.please make sure you travel in the correct part of this train', opts: { delayStart: 400 } },
-          { id: `s.please note that the ${splitData.splitB!!.position}`, opts: { delayStart: 400 } },
-          `m.${splitData.splitB!!.length === 1 ? 'coach' : `${splitData.splitB!!.length} coaches`} will detach at`,
-          `station.e.${splitPoint.crsCode}`,
-        )
+        files.push('e.where the train will divide', {
+          id: 'w.please make sure you travel in the correct part of this train',
+          opts: { delayStart: 400 },
+        })
+
+        if (splitData.splitB!!.position === 'unknown') {
+          files.push({ id: `s.please note that`, opts: { delayStart: 400 } }, `m.coaches`, `m.will be detached and will terminate at`)
+        } else {
+          files.push(
+            { id: `s.please note that the ${splitData.splitB!!.position}`, opts: { delayStart: 400 } },
+            `m.${splitData.splitB!!.length === 1 ? 'coach' : `${splitData.splitB!!.length} coaches`} will detach at`,
+          )
+        }
+
+        files.push(`station.e.${splitPoint.crsCode}`)
         break
 
       case 'splits':
@@ -773,18 +822,26 @@ export default class KeTechPhil extends StationAnnouncementSystem {
         ? []
         : [
             ...listStops(Array.from(aPortionStops)),
-            `m.should travel in the ${splitData.splitA!!.position}`,
-            `platform.s.${splitData.splitA!!.length}`,
-            'e.coaches of the train',
+            ...(splitData.splitA!!.position === 'unknown'
+              ? ['w.please listen for announcements on board the train']
+              : [
+                  `m.should travel in the ${splitData.splitA!!.position}`,
+                  ...(splitData.splitA!!.length === null ? [] : [`platform.s.${splitData.splitA!!.length}`]),
+                  'e.coaches of the train',
+                ]),
           ]
     const bFiles =
       bPortionStops.size === 0
         ? []
         : [
             ...listStops(Array.from(bPortionStops)),
-            `m.should travel in the ${splitData.splitB!!.position}`,
-            `platform.s.${splitData.splitB!!.length}`,
-            'e.coaches of the train',
+            ...(splitData.splitB!!.position === 'unknown'
+              ? ['w.please listen for announcements on board the train']
+              : [
+                  `m.should travel in the ${splitData.splitB!!.position}`,
+                  ...(splitData.splitB!!.length === null ? [] : [`platform.s.${splitData.splitB!!.length}`]),
+                  'e.coaches of the train',
+                ]),
           ]
 
     if (splitData.splitA!!.position === 'front') {
@@ -803,7 +860,11 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     return files
   }
 
-  private async getCallingPoints(callingPoints: CallingAtPoint[], terminatingStation: string, overallLength: number): Promise<AudioItem[]> {
+  private async getCallingPoints(
+    callingPoints: CallingAtPoint[],
+    terminatingStation: string,
+    overallLength: number | null,
+  ): Promise<AudioItem[]> {
     const files: AudioItem[] = []
 
     const callingPointsWithSplits = await this.getCallingPointsWithSplits(callingPoints, terminatingStation, overallLength)
@@ -843,8 +904,23 @@ export default class KeTechPhil extends StationAnnouncementSystem {
 
     if (options.chime !== 'none') files.push(`sfx - ${options.chime} chimes`)
 
+    const plat = parseInt(options.platform)
+
+    const platFiles: AudioItem[] = []
+
+    if (plat <= 12) {
+      platFiles.push({ id: `s.platform ${options.platform} for the`, opts: { delayStart: 250 } })
+      if (options.isDelayed) platFiles.push('m.delayed')
+    } else {
+      platFiles.push(
+        { id: `s.platform`, opts: { delayStart: 250 } },
+        `platform.s.${options.platform}`,
+        options.isDelayed ? `m.for the delayed` : `m.for the`,
+      )
+    }
+
     files.push(
-      `s.platform ${options.platform} for the`,
+      ...platFiles,
       ...(await this.getFilesForBasicTrainInfo(
         options.hour,
         options.min,
@@ -856,7 +932,13 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     )
 
     try {
-      files.push(...(await this.getCallingPoints(options.callingAt, options.terminatingStationCode, parseInt(options.coaches.split(' ')[0]))))
+      files.push(
+        ...(await this.getCallingPoints(
+          options.callingAt,
+          options.terminatingStationCode,
+          options.coaches ? parseInt(options.coaches.split(' ')[0]) : null,
+        )),
+      )
     } catch (e) {
       if (e instanceof Error) {
         alert(e.message)
@@ -865,20 +947,34 @@ export default class KeTechPhil extends StationAnnouncementSystem {
       }
     }
 
-    files.push(...(await this.getShortPlatforms(options.callingAt, options.terminatingStationCode, parseInt(options.coaches.split(' ')[0]))))
-    files.push(...(await this.getRequestStops(options.callingAt, options.terminatingStationCode, parseInt(options.coaches.split(' ')[0]))))
-
-    const coaches = options.coaches.split(' ')[0]
-
-    // Platforms share the same audio as coach numbers
     files.push(
-      { id: 's.this train is formed of', opts: { delayStart: 250 } },
-      `platform.s.${coaches}`,
-      `e.${coaches == '1' ? 'coach' : 'coaches'}`,
+      ...(await this.getShortPlatforms(
+        options.callingAt,
+        options.terminatingStationCode,
+        options.coaches ? parseInt(options.coaches.split(' ')[0]) : null,
+      )),
+    )
+    files.push(
+      ...(await this.getRequestStops(
+        options.callingAt,
+        options.terminatingStationCode,
+        options.coaches ? parseInt(options.coaches.split(' ')[0]) : null,
+      )),
     )
 
+    if (options.coaches) {
+      const coaches = options.coaches.split(' ')[0]
+
+      // Platforms share the same audio as coach numbers
+      files.push(
+        { id: 's.this train is formed of', opts: { delayStart: 250 } },
+        `platform.s.${coaches}`,
+        `e.${coaches == '1' ? 'coach' : 'coaches'}`,
+      )
+    }
+
     files.push(
-      { id: `s.platform ${options.platform} for the`, opts: { delayStart: 250 } },
+      ...platFiles,
       ...(await this.getFilesForBasicTrainInfo(
         options.hour,
         options.min,
@@ -892,7 +988,9 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     await this.playAudioFiles(files, download)
   }
 
-  readonly platforms = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].flatMap(x => [`${x}`, `${x}a`, `${x}b`, `${x}c`, `${x}d`]).concat(['a', 'b'])
+  readonly platforms = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    .flatMap(x => [`${x}`, `${x}a`, `${x}b`, `${x}c`, `${x}d`])
+    .concat(['13', '14', '15', '16', '17', '18', '19', '20', 'a', 'b'])
   readonly stations = [
     'AAP',
     'AAT',
@@ -3553,6 +3651,11 @@ export default class KeTechPhil extends StationAnnouncementSystem {
               .map(m => ({ title: m.toString().padStart(2, '0'), value: m.toString().padStart(2, '0') })),
             type: 'select',
           },
+          isDelayed: {
+            name: 'Delayed?',
+            default: false,
+            type: 'boolean',
+          },
           toc: {
             name: 'TOC',
             default: '',
@@ -3760,17 +3863,54 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
     }
   }, [removeOldIds])
 
+  function calculateDelayMins(std: string, etd: string): number {
+    const isDelayed = etd !== 'On time' && etd !== std
+    if (!isDelayed) return 0
+
+    const hasRealEta = (etd as string).includes(':')
+
+    if (!hasRealEta) return 0
+
+    const sTime = std.split(':')
+    console.log(sTime)
+
+    const eTime = etd.split(':')
+    console.log(eTime)
+
+    const [h, m] = sTime.map(x => parseInt(x))
+    const [eH, eM] = eTime.map(x => parseInt(x))
+
+    console.log(`[Delay Mins] ${h}:${m} (${std}) -> ${eH}:${eM} (${etd}) = ${eH * 60 + eM - (h * 60 + m)}`)
+
+    let delayMins = Math.abs(eH * 60 + eM - (h * 60 + m))
+
+    if (delayMins < 0) {
+      // crosses over midnight
+      return calculateDelayMins(std, '23:59') + calculateDelayMins('00:00', etd)
+    }
+
+    return delayMins
+  }
+
   useEffect(() => {
     if (!hasEnabledFeature) return
 
     const checkAndPlay = async () => {
-      if (isPlaying) return
+      if (isPlaying) {
+        console.log('[Live Trains] Still playing an announcement; skipping this check')
+        return
+      }
+
+      console.log('[Live Trains] Checking for new services')
 
       const resp = await fetch(
         `https://national-rail-api.davwheat.dev/departures/${selectedCrs}?expand=true&numServices=3&timeOffset=0&timeWindow=10`,
       )
 
-      if (!resp.ok) return
+      if (!resp.ok) {
+        console.warn("[Live Trains] Couldn't fetch data from API")
+        return
+      }
 
       let services
 
@@ -3778,29 +3918,61 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
         const data = await resp.json()
         services = data.trainServices
       } catch {
+        console.warn("[Live Trains] Couldn't parse JSON from API")
         return
       }
 
-      if (!services) return
+      if (!services) {
+        console.log('[Live Trains] No services in API response')
+        return
+      }
 
-      const firstUnannounced = services.find(
-        s => !nextTrainAnnounced[s.rsid] && !s.isCancelled && s.etd !== 'Delayed' && s.platform !== null && !!s.length,
-      )
-      if (!firstUnannounced) return
+      console.log(`[Live Trains] ${services.length} services found`)
+
+      const firstUnannounced = services.find(s => {
+        if (nextTrainAnnounced[s.serviceIdGuid]) {
+          console.log(`[Live Trains] Skipping ${s.serviceIdGuid} (${s.std} to ${s.destination[0].locationName}) as it was announced recently`)
+          return false
+        }
+        if (s.isCancelled) {
+          console.log(`[Live Trains] Skipping ${s.serviceIdGuid} (${s.std} to ${s.destination[0].locationName}) as it is cancelled`)
+          return false
+        }
+        if (s.etd === 'Delayed') {
+          console.log(`[Live Trains] Skipping ${s.serviceIdGuid} (${s.std} to ${s.destination[0].locationName}) as it has no estimated time`)
+          return false
+        }
+        if (s.platform === null) {
+          console.log(`[Live Trains] Skipping ${s.serviceIdGuid} (${s.std} to ${s.destination[0].locationName}) as it has no confirmed platform`)
+          return false
+        }
+
+        return true
+      })
+
+      if (!firstUnannounced) {
+        console.log('[Live Trains] No suitable unannounced services found')
+        return
+      }
 
       console.log(firstUnannounced)
 
-      markTrainIdAnnounced(firstUnannounced.rsid)
+      markTrainIdAnnounced(firstUnannounced.serviceIdGuid)
 
       const h = firstUnannounced.std.split(':')[0]
       const m = firstUnannounced.std.split(':')[1]
+
+      const delayMins = calculateDelayMins(firstUnannounced.std, firstUnannounced.etd)
+
+      console.log(`[Live Trains] Is delayed by ${delayMins} mins`)
 
       const options: INextTrainAnnouncementOptions = {
         chime: 'four',
         hour: h === '00' ? '00 - midnight' : h,
         min: m === '00' ? '00 - hundred' : m,
+        isDelayed: delayMins > 5,
         toc: system.AVAILABLE_TOCS.find(t => t.toLowerCase() === firstUnannounced.operator.toLowerCase()) ?? '',
-        coaches: `${firstUnannounced.length} coaches`,
+        coaches: firstUnannounced.length ? `${firstUnannounced.length} coaches` : null,
         platform: system.platforms.includes(firstUnannounced.platform.toLowerCase()) ? firstUnannounced.platform.toLowerCase() : '1',
         terminatingStationCode: firstUnannounced.destination[0].crs,
         vias: [],
@@ -3825,24 +3997,36 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
 
       setIsPlaying(true)
       try {
-        console.log('PLAYING')
+        console.log(
+          `[Live Trains] Playing announcement for ${firstUnannounced.serviceIdGuid} (${firstUnannounced.std} to ${firstUnannounced.destination[0].locationName})`,
+        )
         await nextTrainHandler(options)
       } catch (e) {
-        console.log('FAILED')
+        console.warn(`[Live Trains] Error playing announcement for ${firstUnannounced.serviceIdGuid}; see below`)
         console.error(e)
         setIsPlaying(false)
       }
-      console.log('COMPLETE')
+      console.log(`[Live Trains] Announcement for ${firstUnannounced.serviceIdGuid} complete`)
       setIsPlaying(false)
     }
 
-    const refreshInterval = setInterval(checkAndPlay, 30_000)
+    const refreshInterval = setInterval(checkAndPlay, 10_000)
     checkAndPlay()
 
     return () => {
       clearInterval(refreshInterval)
     }
-  }, [hasEnabledFeature, nextTrainAnnounced, markTrainIdAnnounced, system, nextTrainHandler, selectedCrs, isPlaying, setIsPlaying])
+  }, [
+    hasEnabledFeature,
+    nextTrainAnnounced,
+    markTrainIdAnnounced,
+    system,
+    nextTrainHandler,
+    selectedCrs,
+    isPlaying,
+    setIsPlaying,
+    calculateDelayMins,
+  ])
 
   return (
     <div>
@@ -3865,15 +4049,12 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
         This page will auto-announce all departures in the next 10 minutes from the selected station. Departures outside this timeframe will
         appear on the board below, but won't be announced until closer to the time.
       </p>
-      <p style={{ margin: '16px 0' }}>
-        At the moment, we also won't announce services which:
-        <ul className="list">
-          <li>have no platform allocated in data feeds (common at larger stations, even at the time of departure)</li>
-          <li>have no train formation info (num of coaches)</li>
-          <li>are marked as cancelled or have an estimated time of "delayed"</li>
-          <li>have already been announced by the system in the last hour (only affects services which suddenly get delayed)</li>
-        </ul>
-      </p>
+      <p style={{ margin: '16px 0' }}>At the moment, we also won't announce services which:</p>
+      <ul className="list" style={{ margin: '16px 16px' }}>
+        <li>have no platform allocated in data feeds (common at larger stations, even at the time of departure)</li>
+        <li>are marked as cancelled or have an estimated time of "delayed"</li>
+        <li>have already been announced by the system in the last hour (only affects services which suddenly get delayed)</li>
+      </ul>
       <p>
         We also can't handle splits (we'll only announce the main portion), request stops, short platforms, delays (e.g., "for the delayed") and
         many more features. As I said, it's a beta!

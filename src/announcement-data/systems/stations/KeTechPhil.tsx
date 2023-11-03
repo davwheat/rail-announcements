@@ -3934,22 +3934,27 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
 
       console.log('[Live Trains] Checking for new services')
 
-      const resp = await fetch(
-        `https://national-rail-api.davwheat.dev/departures/${selectedCrs}?expand=true&numServices=3&timeOffset=0&timeWindow=${MIN_TIME_TO_ANNOUNCE}`,
-      )
-
-      if (!resp.ok) {
-        console.warn("[Live Trains] Couldn't fetch data from API")
-        return
-      }
-
-      let services
-
       try {
-        const data = await resp.json()
-        services = data.trainServices
-      } catch {
-        console.warn("[Live Trains] Couldn't parse JSON from API")
+        const resp = await fetch(
+          `https://national-rail-api.davwheat.dev/departures/${selectedCrs}?expand=true&numServices=3&timeOffset=0&timeWindow=${MIN_TIME_TO_ANNOUNCE}`,
+        )
+
+        if (!resp.ok) {
+          console.warn("[Live Trains] Couldn't fetch data from API")
+          return
+        }
+
+        let services
+
+        try {
+          const data = await resp.json()
+          services = data.trainServices
+        } catch {
+          console.warn("[Live Trains] Couldn't parse JSON from API")
+          return
+        }
+      } catch (e) {
+        console.warn('[Live Trains] Failed to fetch')
         return
       }
 
@@ -4083,8 +4088,8 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
         This is a beta feature, and isn't complete or fully functional. Please report any issues you face on GitHub.
       </p>
       <p style={{ margin: '16px 0' }}>
-        This page will auto-announce all departures in the next {MIN_TIME_TO_ANNOUNCE} minutes from the selected station. Departures outside this timeframe will
-        appear on the board below, but won't be announced until closer to the time.
+        This page will auto-announce all departures in the next {MIN_TIME_TO_ANNOUNCE} minutes from the selected station. Departures outside this
+        timeframe will appear on the board below, but won't be announced until closer to the time.
       </p>
       <p style={{ margin: '16px 0' }}>At the moment, we also won't announce services which:</p>
       <ul className="list" style={{ margin: '16px 16px' }}>

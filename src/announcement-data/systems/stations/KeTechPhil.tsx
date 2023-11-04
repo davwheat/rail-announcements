@@ -4158,8 +4158,8 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
         <li>have already been announced by the system in the last hour (only affects services which suddenly get delayed)</li>
       </ul>
       <p>
-        We also can't handle splits (we'll only announce the main portion), request stops, short platforms, delays (e.g., "for the delayed") and
-        many more features. As I said, it's a beta!
+        We also can't handle splits (we'll only announce the main portion), request stops, short platforms and several more features. As I said,
+        it's a beta!
       </p>
 
       {!hasEnabledFeature ? (

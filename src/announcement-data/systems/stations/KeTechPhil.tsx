@@ -3996,7 +3996,7 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
 
       try {
         const resp = await fetch(
-          `https://national-rail-api.davwheat.dev/departures/${selectedCrs}?expand=true&numServices=3&timeOffset=0&timeWindow=${MIN_TIME_TO_ANNOUNCE}`,
+          `https://national-rail-api.davwheat.dev/departures/${selectedCrs}?expand=true&numServices=15&timeOffset=0&timeWindow=${MIN_TIME_TO_ANNOUNCE}`,
         )
 
         if (!resp.ok) {

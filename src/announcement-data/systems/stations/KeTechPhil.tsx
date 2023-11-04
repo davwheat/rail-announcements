@@ -432,6 +432,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
       'First Transpennine',
       'intercity charter train',
       'international',
+      'London North Western Railway',
       'mainline',
       'North London Railways',
       'North Western Trains',
@@ -442,6 +443,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
       'Transpennine',
       'Transpennine Express',
       'Virgin Trains the Sussex Scot',
+      'West Midlands Railway',
       'West Yorkshire metro train',
     ],
   }
@@ -3963,6 +3965,22 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
     return delayMins
   }
 
+  function processToc(toc: string, originCrs: string, destinationCrs: string): string {
+    switch (toc.toLowerCase()) {
+      default:
+        return system.ALL_AVAILABLE_TOCS.find(t => t?.toLowerCase() === toc?.toLowerCase()) ?? ''
+
+      case 'west midlands trains':
+        // https://www.westmidlandsrailway.co.uk/media/3657/download?inline
+        const lnwr = ['EUS', 'CRE', 'BDM', 'SAA', 'MKC', 'TRI', 'LIV', 'NMP']
+        if (lnwr.includes(originCrs) || lnwr.includes(destinationCrs)) {
+          return 'london north western railway'
+        } else {
+          return 'west midlands railway'
+        }
+    }
+  }
+
   useEffect(() => {
     if (!hasEnabledFeature) return
 
@@ -4048,12 +4066,14 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
 
       console.log(`[Live Trains] Is delayed by ${delayMins} mins`)
 
+      const toc = processToc(firstUnannounced.operator, firstUnannounced.origin[0].crs, firstUnannounced.destination[0].crs)
+
       const options: INextTrainAnnouncementOptions = {
         chime: 'four',
         hour: h === '00' ? '00 - midnight' : h,
         min: m === '00' ? '00 - hundred' : m,
         isDelayed: delayMins > 5,
-        toc: system.ALL_AVAILABLE_TOCS.find(t => t.toLowerCase() === firstUnannounced.operator.toLowerCase()) ?? '',
+        toc,
         coaches: firstUnannounced.length ? `${firstUnannounced.length} coaches` : null,
         platform: system.platforms.includes(firstUnannounced.platform.toLowerCase()) ? firstUnannounced.platform.toLowerCase() : '1',
         terminatingStationCode: firstUnannounced.destination[0].crs,

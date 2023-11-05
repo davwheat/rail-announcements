@@ -39,6 +39,9 @@ export default class KeTechPhil extends StationAnnouncementSystem {
   readonly FILE_PREFIX = 'station/ketech/phil'
   readonly SYSTEM_TYPE = 'station'
 
+  private readonly CALLING_POINT_DELAY = 200
+  private readonly CALLING_POINT_AND_DELAY = 100
+
   private get announcementPresets(): Readonly<Record<string, ICustomAnnouncementPreset[]>> {
     return {
       nextTrain: [
@@ -490,18 +493,14 @@ export default class KeTechPhil extends StationAnnouncementSystem {
       const allDestinations = [terminatingStation, dividesAt.splitCallingPoints!![dividesAt.splitCallingPoints!!.length - 1].crsCode]
 
       files.push(
-        ...this.pluraliseAudio(
-          allDestinations.map((stn, i) => ({
-            id: stn,
-            opts: { delayStart: i === 0 ? 100 : 50 },
-          })),
-          100,
-          {
-            prefix: 'station.m.',
-            finalPrefix: 'station.e.',
-            andId: 'm.and',
-          },
-        ),
+        ...this.pluraliseAudio(allDestinations, {
+          prefix: 'station.m.',
+          finalPrefix: 'station.e.',
+          andId: 'm.and',
+          firstItemDelay: 100,
+          beforeAndDelay: 100,
+          beforeItemDelay: 50,
+        }),
       )
     } else {
       if (vias.length !== 0) {
@@ -509,12 +508,10 @@ export default class KeTechPhil extends StationAnnouncementSystem {
           `station.m.${terminatingStation}`,
           'm.via',
           ...this.pluraliseAudio(
-            vias.map((stn, i) => ({
-              id: `station.${i === vias.length - 1 ? 'e' : 'm'}.${stn}`,
-            })),
-            100,
+            vias.map((stn, i) => `station.${i === vias.length - 1 ? 'e' : 'm'}.${stn}`),
             {
               andId: 'm.and',
+              beforeAndDelay: 100,
             },
           ),
         )
@@ -594,15 +591,14 @@ export default class KeTechPhil extends StationAnnouncementSystem {
         } else {
           files.push(
             's.due to short platforms customers for',
-            ...this.pluraliseAudio(
-              plats.map(crs => ({ id: crs, opts: { delayStart: 100 } })),
-              100,
-              {
-                prefix: 'station.m.',
-                finalPrefix: 'station.m.',
-                andId: 'm.and',
-              },
-            ),
+            ...this.pluraliseAudio(plats, {
+              prefix: 'station.m.',
+              finalPrefix: 'station.m.',
+              andId: 'm.and',
+              beforeAndDelay: this.CALLING_POINT_AND_DELAY,
+              beforeItemDelay: this.CALLING_POINT_DELAY,
+              afterAndDelay: this.CALLING_POINT_AND_DELAY,
+            }),
             ...s.split(','),
           )
         }
@@ -612,15 +608,14 @@ export default class KeTechPhil extends StationAnnouncementSystem {
             id: 's.customers for',
             opts: { delayStart: 200 },
           },
-          ...this.pluraliseAudio(
-            plats.map(crs => ({ id: crs, opts: { delayStart: 100 } })),
-            100,
-            {
-              prefix: 'station.m.',
-              finalPrefix: 'station.m.',
-              andId: 'm.and',
-            },
-          ),
+          ...this.pluraliseAudio(plats, {
+            prefix: 'station.m.',
+            finalPrefix: 'station.m.',
+            andId: 'm.and',
+            beforeAndDelay: this.CALLING_POINT_AND_DELAY,
+            beforeItemDelay: this.CALLING_POINT_DELAY,
+            afterAndDelay: this.CALLING_POINT_AND_DELAY,
+          }),
           ...s.split(','),
         )
       }
@@ -645,11 +640,15 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     if (reqStops.size === 0) return []
 
     files.push(
-      ...this.pluraliseAudio(
-        Array.from(reqStops).map((s, i) => ({ id: s, opts: { delayStart: i === 0 ? 400 : 100 } })),
-        100,
-        { prefix: 'station.m.', finalPrefix: 'station.m.', andId: 'm.and' },
-      ),
+      ...this.pluraliseAudio(Array.from(reqStops), {
+        prefix: 'station.m.',
+        finalPrefix: 'station.m.',
+        andId: 'm.and',
+        firstItemDelay: 400,
+        beforeItemDelay: this.CALLING_POINT_DELAY,
+        beforeAndDelay: this.CALLING_POINT_AND_DELAY,
+        afterAndDelay: this.CALLING_POINT_AND_DELAY,
+      }),
       reqStops.size === 1 ? 'm.is a request stop and customers for this station' : 'm.are request stops and customers for these stations',
       'm.should ask the conductor on the train to arrange for the train to stop',
       'e.to allow them to alight',
@@ -799,9 +798,13 @@ export default class KeTechPhil extends StationAnnouncementSystem {
 
     files.push(
       ...this.pluraliseAudio(
-        splitData.stopsUpToSplit.map(s => ({ id: `station.m.${s.crsCode}`, opts: { delayStart: 100 } })),
-        100,
-        { andId: 'm.and' },
+        splitData.stopsUpToSplit.map(s => `station.m.${s.crsCode}`),
+        {
+          andId: 'm.and',
+          beforeItemDelay: this.CALLING_POINT_DELAY,
+          beforeAndDelay: this.CALLING_POINT_AND_DELAY,
+          afterAndDelay: this.CALLING_POINT_AND_DELAY,
+        },
       ),
     )
 
@@ -850,9 +853,13 @@ export default class KeTechPhil extends StationAnnouncementSystem {
       return [
         { id: 's.customers for', opts: { delayStart: 400 } },
         ...this.pluraliseAudio(
-          stops.map(s => ({ id: `station.m.${s}`, opts: { delayStart: 100 } })),
-          100,
-          { andId: 'm.and' },
+          stops.map(s => `station.m.${s}`),
+          {
+            andId: 'm.and',
+            beforeAndDelay: this.CALLING_POINT_AND_DELAY,
+            afterAndDelay: this.CALLING_POINT_AND_DELAY,
+            beforeItemDelay: this.CALLING_POINT_DELAY,
+          },
         ),
       ]
     }
@@ -922,19 +929,12 @@ export default class KeTechPhil extends StationAnnouncementSystem {
       files.push(`station.m.${terminatingStation}`, 'e.only')
     } else {
       files.push(
-        ...this.pluraliseAudio(
-          [
-            ...callingPoints.map(stn => ({
-              id: `station.m.${stn.crsCode}`,
-              opts: { delayStart: 100 },
-            })),
-            `station.e.${terminatingStation}`,
-          ],
-          100,
-          {
-            andId: 'm.and',
-          },
-        ),
+        ...this.pluraliseAudio([...callingPoints.map(stn => `station.m.${stn.crsCode}`), `station.e.${terminatingStation}`], {
+          andId: 'm.and',
+          beforeItemDelay: this.CALLING_POINT_DELAY,
+          beforeAndDelay: this.CALLING_POINT_AND_DELAY,
+          afterAndDelay: this.CALLING_POINT_AND_DELAY,
+        }),
       )
     }
 
@@ -4068,6 +4068,29 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
 
       const toc = processToc(firstUnannounced.operator, firstUnannounced.origin[0].crs, firstUnannounced.destination[0].crs)
 
+      const callingPoints = firstUnannounced.subsequentCallingPoints[0].callingPoint
+
+      const callingAt = (callingPoints as any[])
+        .map((p): any | null => {
+          if (p.isCancelled || p.et === 'Cancelled') return null
+          if (!system.stations.includes(p.crs)) return null
+
+          return p
+        })
+        .filter(x => !!x)
+        .map((p, i, arr): CallingAtPoint | null => {
+          console.log(`[${i} of ${arr.length - 1}]: ${p.crs}`)
+
+          if (i === arr.length - 1 && p.crs === firstUnannounced.destination[0].crs) return null
+
+          return {
+            crsCode: p.crs,
+            name: '',
+            randomId: '',
+          }
+        })
+        .filter(x => !!x) as CallingAtPoint[]
+
       const options: INextTrainAnnouncementOptions = {
         chime: 'four',
         hour: h === '00' ? '00 - midnight' : h,
@@ -4078,21 +4101,7 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
         platform: system.platforms.includes(firstUnannounced.platform.toLowerCase()) ? firstUnannounced.platform.toLowerCase() : '1',
         terminatingStationCode: firstUnannounced.destination[0].crs,
         vias: [],
-        callingAt: firstUnannounced.subsequentCallingPoints[0].callingPoint
-          .map((p, i): CallingAtPoint | null => {
-            if (p.isCancelled || p.et === 'Cancelled') return null
-            if (!system.stations.includes(p.crs)) return null
-
-            if (i === firstUnannounced.subsequentCallingPoints[0].callingPoint.length - 1 && p.crs === firstUnannounced.destination[0].crs)
-              return null
-
-            return {
-              crsCode: p.crs,
-              name: '',
-              randomId: '',
-            }
-          })
-          .filter(x => !!x),
+        callingAt,
       }
 
       console.log(options)

@@ -157,7 +157,7 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
       files.push(
         ...this.pluraliseAudio(
           options.changeFor.map(poi => `station connections.${poi}`),
-          50,
+          { beforeAndDelay: 50 },
         ),
       )
     }
@@ -211,21 +211,11 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
       if (!this.validateStationExists(terminatesAtCode, 'low')) return
 
       files.push(
-        ...this.pluraliseAudio(
-          [
-            ...callingAtCodes.map(
-              ({ crsCode }): AudioItemObject => ({
-                id: `stations.high.${crsCode}`,
-                opts: { delayStart: 350 },
-              }),
-            ),
-            {
-              id: `stations.low.${terminatesAtCode}`,
-              opts: { delayStart: 350 },
-            },
-          ],
-          350,
-        ),
+        ...this.pluraliseAudio([...callingAtCodes.map(({ crsCode }) => `stations.high.${crsCode}`), `stations.low.${terminatesAtCode}`], {
+          beforeAndDelay: 350,
+          afterAndDelay: 350,
+          beforeItemDelay: 350,
+        }),
       )
     }
 
@@ -255,21 +245,11 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
       if (!this.validateStationExists(terminatesAtCode, 'low')) return
 
       files.push(
-        ...this.pluraliseAudio(
-          [
-            ...callingAtCodes.map(
-              ({ crsCode }, i): AudioItemObject => ({
-                id: `stations.high.${crsCode}`,
-                opts: { delayStart: 350 },
-              }),
-            ),
-            {
-              id: `stations.low.${terminatesAtCode}`,
-              opts: { delayStart: 350 },
-            },
-          ],
-          350,
-        ),
+        ...this.pluraliseAudio([...callingAtCodes.map(({ crsCode }) => `stations.high.${crsCode}`), `stations.low.${terminatesAtCode}`], {
+          beforeAndDelay: 350,
+          afterAndDelay: 350,
+          beforeItemDelay: 350,
+        }),
       )
     }
 

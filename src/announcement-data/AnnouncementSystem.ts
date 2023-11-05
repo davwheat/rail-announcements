@@ -93,8 +93,16 @@ export type CustomAnnouncementButton = {
 
 export interface PluraliseOptions {
   andId: string
-  prefix?: string
-  finalPrefix?: string
+  prefix: string
+  finalPrefix: string
+  firstItemDelay: number
+  beforeItemDelay: number
+  beforeAndDelay: number
+  afterAndDelay: number
+}
+
+const DefaultPluraliseOptions = {
+  andId: 'and',
 }
 
 export default abstract class AnnouncementSystem {
@@ -238,8 +246,10 @@ export default abstract class AnnouncementSystem {
    * @param items Array of audio files
    * @returns Pluralised array of audio files
    */
-  protected pluraliseAudio(items: AudioItem[], delay: number = 0, options: PluraliseOptions = { andId: 'and' }): AudioItem[] {
-    items = items
+  protected pluraliseAudio(items: AudioItem[], options: Partial<PluraliseOptions> = DefaultPluraliseOptions): AudioItem[] {
+    const _options = { ...DefaultPluraliseOptions, ...options }
+
+    const _items = items
       .map(item => {
         if (typeof item === 'string') {
           return { id: item }
@@ -249,27 +259,43 @@ export default abstract class AnnouncementSystem {
       })
       .map((item, i) => {
         if (items.length - 1 === i) {
-          if (options.finalPrefix) {
-            item.id = `${options.finalPrefix}${item.id}`
+          if (_options.finalPrefix !== undefined) {
+            item.id = `${_options.finalPrefix}${item.id}`
 
             return item
           }
         } else {
-          if (options.prefix) {
-            item.id = `${options.prefix}${item.id}`
+          if (_options.prefix !== undefined) {
+            item.id = `${_options.prefix}${item.id}`
 
             return item
+          }
+        }
+
+        if (i === 0 && _options.firstItemDelay !== undefined) {
+          item.opts = {
+            ...item.opts,
+            delayStart: _options.firstItemDelay,
+          }
+        } else if (_options.beforeItemDelay !== undefined) {
+          item.opts = {
+            ...item.opts,
+            delayStart: _options.beforeItemDelay,
           }
         }
 
         return item
       })
 
-    if (items.length > 1) {
-      items.splice(items.length - 1, 0, { id: options.andId, opts: { delayStart: delay } })
-      return items
+    if (_items.length > 1) {
+      _items.splice(_items.length - 1, 0, { id: _options.andId, opts: { delayStart: _options.beforeAndDelay } })
+
+      if (_options.afterAndDelay !== undefined || _options.beforeItemDelay !== undefined) {
+        _items[items.length - 1].opts ??= {}
+        _items[items.length - 1].opts!!.delayStart = _options.afterAndDelay ?? _options.beforeItemDelay
+      }
     }
 
-    return items
+    return _items
   }
 }

@@ -1219,14 +1219,14 @@ export default class TfLElizabethLine extends AnnouncementSystem {
     if (nextStation.changeFor.length) {
       files.push(
         { id: 'conjoiners.change for', opts: { delayStart: 1000 } },
-        ...this.pluraliseAudio(nextStation.changeFor, 0, { andId: 'conjoiners.and', prefix: 'change for.m.', finalPrefix: 'change for.e.' }),
+        ...this.pluraliseAudio(nextStation.changeFor, { andId: 'conjoiners.and', prefix: 'change for.m.', finalPrefix: 'change for.e.' }),
       )
     }
 
     if (nextStation.exitFor.length) {
       files.push(
         { id: 'conjoiners.exit for', opts: { delayStart: 1000 } },
-        ...this.pluraliseAudio(nextStation.exitFor, 0, { andId: 'conjoiners.and', prefix: 'exit for.m.', finalPrefix: 'exit for.e.' }),
+        ...this.pluraliseAudio(nextStation.exitFor, { andId: 'conjoiners.and', prefix: 'exit for.m.', finalPrefix: 'exit for.e.' }),
       )
     }
 

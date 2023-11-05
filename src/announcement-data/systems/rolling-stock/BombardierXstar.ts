@@ -92,7 +92,7 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
     if (remainingStops.length > 1) {
       // We are not at the termination point.
       files.push('calling at')
-      files.push(...this.pluraliseAudio(remainingStops, 75))
+      files.push(...this.pluraliseAudio(remainingStops, { beforeAndDelay: 75 }))
       files.push('the next station is', remainingStops[0])
     }
 

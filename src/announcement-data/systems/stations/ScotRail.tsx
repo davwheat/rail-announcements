@@ -928,30 +928,6 @@ export default class ScotRail extends StationAnnouncementSystem {
     return files
   }
 
-  /**
-   * Takes an array of audio files, and adds an `and` audio file where needed.
-   *
-   * @example
-   * pluraliseAudioItems(['a', 'b', 'c']) // returns ['a', 'b', 'and', 'c']
-   *
-   * @example
-   * pluraliseAudioItems(['a']) // returns ['a']
-   *
-   * @example
-   * pluraliseAudioItems(['a', 'b']) // returns ['a', 'and', 'b']
-   *
-   * @param items Array of audio files
-   * @returns Pluralised array of audio files
-   */
-  protected pluraliseAudio(items: AudioItem[], delay: number = 0): AudioItem[] {
-    if (items.length > 1) {
-      items.splice(items.length - 1, 0, { id: 'conjoiner.and', opts: { delayStart: delay } })
-      return items
-    }
-
-    return items
-  }
-
   private async playNextTrainAnnouncement(options: INextTrainAnnouncementOptions, download: boolean = false): Promise<void> {
     const files: AudioItem[] = []
 
@@ -965,7 +941,9 @@ export default class ScotRail extends StationAnnouncementSystem {
     } else {
       const callingAtStops = options.callingAt.map(stn => stn.crsCode)
       files.push(
-        ...this.pluraliseAudio([...callingAtStops.map(stn => `stations.high._${stn}`), `stations.low._${options.terminatingStationCode}`]),
+        ...this.pluraliseAudio([...callingAtStops.map(stn => `stations.high._${stn}`), `stations.low._${options.terminatingStationCode}`], {
+          andId: 'conjoiner.and',
+        }),
       )
     }
 
@@ -1026,7 +1004,10 @@ export default class ScotRail extends StationAnnouncementSystem {
 
         files.push(
           { id: 'passengers for', opts: { delayStart: 400 } },
-          ...this.pluraliseAudio(alternativeService.passengersFor.map(stop => `stations.high.${stop.crsCode}`)),
+          ...this.pluraliseAudio(
+            alternativeService.passengersFor.map(stop => `stations.high.${stop.crsCode}`),
+            { andId: 'conjoiner.and' },
+          ),
           'your next fastest direct service is now expected to be the',
           `times.hour.${hour}`,
           `times.mins.${minute}`,

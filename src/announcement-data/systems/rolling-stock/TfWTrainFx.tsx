@@ -45,7 +45,6 @@ export default class TfWTrainFx extends TrainAnnouncementSystem {
     files.push(
       ...this.pluraliseAudio(
         callingAtCodes.map(stn => stn.crsCode),
-        0,
         { andId: 'conjoiners.and', prefix: 'stations.high.', finalPrefix: 'stations.low.' },
       ),
     )

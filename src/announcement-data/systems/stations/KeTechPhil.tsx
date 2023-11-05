@@ -3,7 +3,7 @@ import StationAnnouncementSystem from '@announcement-data/StationAnnouncementSys
 import CallingAtSelector, { CallingAtPoint } from '@components/CallingAtSelector'
 import CustomAnnouncementPane, { ICustomAnnouncementPaneProps, ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
 import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
-import { AllStationsTitleValueMap } from '@data/StationManipulators'
+import { getStationByCrs } from '@data/StationManipulators'
 import crsToStationItemMapper, { stationItemCompleter } from '@helpers/crsToStationItemMapper'
 import { AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
 import FullscreenIcon from 'mdi-react/FullscreenIcon'
@@ -3710,7 +3710,10 @@ export default class KeTechPhil extends StationAnnouncementSystem {
           terminatingStationCode: {
             name: 'Terminating station',
             default: this.stations[0],
-            options: AllStationsTitleValueMap.filter(s => this.stations.includes(s.value)),
+            options: this.stations.map(s => {
+              const stn = getStationByCrs(s)
+              return { title: stn ? `${stn.stationName} (${s})` : `Unknown name (${s})`, value: s }
+            }),
             type: 'select',
           },
           vias: {
@@ -3884,6 +3887,21 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
   const [isPlaying, setIsPlaying] = useState(false)
 
   const [nextTrainAnnounced, setNextTrainAnnounced] = useState<Record<string, number>>({})
+
+  const stationNameToCrsMap = useMemo(
+    () =>
+      Object.fromEntries(
+        supportedStations.map(s => {
+          if (!s.label) {
+            console.warn(`[Live Trains] Station ${s.value} has no label!`)
+            return [s.value, s.value]
+          }
+
+          return [s.label.toLowerCase(), s.value]
+        }),
+      ),
+    [supportedStations],
+  )
 
   function removeOldIds() {
     const now = Date.now()
@@ -4091,6 +4109,28 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
         })
         .filter(x => !!x) as CallingAtPoint[]
 
+      const vias: CallingAtPoint[] = []
+
+      if (firstUnannounced.destination[0].via) {
+        const v: string = firstUnannounced.destination[0].via.startsWith('via ')
+          ? firstUnannounced.destination[0].via.slice(4)
+          : firstUnannounced.destination[0].via
+
+        v.split(/(&|and)/).forEach(via => {
+          const guessViaCrs = stationNameToCrsMap[via.trim().toLowerCase()]
+
+          console.log(`[Live Trains] Guessed via ${guessViaCrs} for ${via}`)
+
+          if (guessViaCrs) {
+            vias.push({
+              crsCode: guessViaCrs,
+              name: '',
+              randomId: '',
+            })
+          }
+        })
+      }
+
       const options: INextTrainAnnouncementOptions = {
         chime: 'four',
         hour: h === '00' ? '00 - midnight' : h,
@@ -4100,7 +4140,7 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
         coaches: firstUnannounced.length ? `${firstUnannounced.length} coaches` : null,
         platform: system.platforms.includes(firstUnannounced.platform.toLowerCase()) ? firstUnannounced.platform.toLowerCase() : '1',
         terminatingStationCode: firstUnannounced.destination[0].crs,
-        vias: [],
+        vias,
         callingAt,
       }
 

@@ -4068,6 +4068,29 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
 
       const toc = processToc(firstUnannounced.operator, firstUnannounced.origin[0].crs, firstUnannounced.destination[0].crs)
 
+      const callingPoints = firstUnannounced.subsequentCallingPoints[0].callingPoint
+
+      const callingAt = (callingPoints as any[])
+        .map((p): any | null => {
+          if (p.isCancelled || p.et === 'Cancelled') return null
+          if (!system.stations.includes(p.crs)) return null
+
+          return p
+        })
+        .filter(x => !!x)
+        .map((p, i, arr): CallingAtPoint | null => {
+          console.log(`[${i} of ${arr.length - 1}]: ${p.crs}`)
+
+          if (i === arr.length - 1 && p.crs === firstUnannounced.destination[0].crs) return null
+
+          return {
+            crsCode: p.crs,
+            name: '',
+            randomId: '',
+          }
+        })
+        .filter(x => !!x) as CallingAtPoint[]
+
       const options: INextTrainAnnouncementOptions = {
         chime: 'four',
         hour: h === '00' ? '00 - midnight' : h,
@@ -4078,21 +4101,7 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
         platform: system.platforms.includes(firstUnannounced.platform.toLowerCase()) ? firstUnannounced.platform.toLowerCase() : '1',
         terminatingStationCode: firstUnannounced.destination[0].crs,
         vias: [],
-        callingAt: firstUnannounced.subsequentCallingPoints[0].callingPoint
-          .map((p, i): CallingAtPoint | null => {
-            if (p.isCancelled || p.et === 'Cancelled') return null
-            if (!system.stations.includes(p.crs)) return null
-
-            if (i === firstUnannounced.subsequentCallingPoints[0].callingPoint.length - 1 && p.crs === firstUnannounced.destination[0].crs)
-              return null
-
-            return {
-              crsCode: p.crs,
-              name: '',
-              randomId: '',
-            }
-          })
-          .filter(x => !!x),
+        callingAt,
       }
 
       console.log(options)

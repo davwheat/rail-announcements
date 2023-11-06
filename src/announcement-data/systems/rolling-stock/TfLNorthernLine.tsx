@@ -8,6 +8,367 @@ interface IDestination {
   viaCharingCross?: boolean
 }
 
+const ThisStationData: ThisStationItem[] = [
+  {
+    station: 'Angel',
+    branch: null,
+  },
+  {
+    station: 'Archway',
+    branch: null,
+  },
+  {
+    station: 'Balham',
+    branch: null,
+    extraInfo: ['conjoiner.change here for', 'connections.national rail services'],
+  },
+  {
+    station: 'Bank',
+    branch: null,
+    fullAudio: ['northern line extension.this station.bank change here'],
+  },
+  {
+    station: 'Battersea Power Station',
+    branch: null,
+    fullAudio: ['northern line extension.this station.battersea power station exit here'],
+  },
+  {
+    station: 'Belsize Park',
+    branch: null,
+  },
+  {
+    station: 'Borough',
+    branch: null,
+  },
+  {
+    station: 'Brent Cross',
+    branch: null,
+  },
+  {
+    station: 'Burnt Oak',
+    branch: null,
+  },
+  {
+    station: 'Camden Town',
+    branch: 'bank',
+    extraInfo: [
+      'conjoiner.change here for',
+      'connections.southbound northern line',
+      'conjoiner.service',
+      'routeing.high.via charing cross',
+      'conjoiner.and',
+      'connections.northbound',
+      'conjoiner.services',
+      'conjoiner.to',
+      'station.low.edgware',
+    ],
+  },
+  {
+    station: 'Camden Town',
+    branch: 'charing cross',
+    extraInfo: [
+      'conjoiner.change here for',
+      'connections.southbound northern line',
+      'conjoiner.service',
+      'routeing.high.via bank',
+      'conjoiner.and',
+      'connections.northbound',
+      'conjoiner.service',
+      'conjoiner.to',
+      'station.high.high barnet',
+      'conjoiner.and',
+      'station.low.mill hill east',
+      'connections.from platform 3',
+    ],
+  },
+  {
+    station: 'Camden Town',
+    branch: 'edgware',
+    extraInfo: [
+      'conjoiner.change here for',
+      'conjoiner.all stations to',
+      'station.high.high barnet',
+      'conjoiner.and',
+      'station.high.mill hill east',
+      'connections.from platform 3',
+    ],
+  },
+  {
+    station: 'Camden Town',
+    branch: 'high barnet',
+    extraInfo: ['conjoiner.change here for', 'conjoiner.all stations to', 'station.high.edgware', 'connections.from platform 1'],
+  },
+  {
+    station: 'Chalk Farm',
+    branch: null,
+  },
+  {
+    station: 'Charing Cross',
+    branch: null,
+    extraInfo: ['conjoiner.change here for', 'connections.bakerloo line', 'connections.and national rail services'],
+  },
+  {
+    station: 'Clapham Common',
+    branch: null,
+  },
+  {
+    station: 'Clapham North',
+    branch: null,
+  },
+  {
+    station: 'Clapham South',
+    branch: null,
+  },
+  {
+    station: 'Colindale',
+    branch: null,
+  },
+  {
+    station: 'Colliers Wood',
+    branch: null,
+  },
+  {
+    station: 'East Finchley',
+    branch: null,
+  },
+  {
+    station: 'Edgware',
+    branch: null,
+  },
+  {
+    station: 'Elephant & Castle',
+    branch: null,
+    extraInfo: ['conjoiner.change here for', 'connections.bakerloo line', 'connections.and national rail services'],
+  },
+  {
+    station: 'Embankment',
+    branch: null,
+    extraInfo: ['conjoiner.change here for', 'connections.bakerloo', 'connections.circle', 'conjoiner.and', 'connections.district line'],
+  },
+  {
+    station: 'Euston',
+    branch: 'bank',
+    extraInfo: [
+      'conjoiner.change here for',
+      'connections.southbound northern line',
+      'conjoiner.service',
+      'routeing.high.via charing cross',
+      'connections.from platform 2',
+      'connections.high.victoria line',
+      'connections.and national rail services',
+    ],
+  },
+  {
+    station: 'Euston',
+    branch: 'charing cross',
+    extraInfo: [
+      'conjoiner.change here for',
+      'connections.southbound northern line',
+      'conjoiner.service',
+      'routeing.high.via bank',
+      'connections.from platform 6',
+      'connections.high.victoria line',
+      'connections.and national rail services',
+    ],
+  },
+  {
+    station: 'Finchley Central',
+    branch: null,
+    extraInfo: ['conjoiner.change here for', 'station.low.mill hill east'],
+  },
+  // {
+  //   label: 'Finchley Central (change for Mill Hill East)',
+  //   branch: null,
+  // },
+  {
+    station: 'Golders Green',
+    branch: null,
+  },
+  {
+    station: 'Goodge Street',
+    branch: null,
+  },
+  {
+    station: 'Hampstead',
+    branch: null,
+  },
+  {
+    station: 'Hendon Central',
+    branch: null,
+  },
+  {
+    station: 'High Barnet',
+    branch: null,
+  },
+  {
+    station: 'Highgate',
+    branch: null,
+  },
+  {
+    station: 'Kennington',
+    suffix: '(southbound, terminating)',
+    branch: 'bank',
+    // Change platform for morden bank branch as on charing cross branch
+    fullAudio: ['northern line extension.this station.kennington change here southbound morden plat 2'],
+  },
+  {
+    station: 'Kennington',
+    suffix: '(southbound, to Morden)',
+    branch: 'bank',
+    // Change platform for BPS as on charing cross branch
+    fullAudio: ['northern line extension.this station.kennington change here southbound bps plat 2'],
+  },
+  {
+    station: 'Kennington',
+    suffix: '(northbound, from Morden)',
+    branch: 'bank',
+    fullAudio: ['northern line extension.this station.kennington change here northbound via xc plat 1 southbound bps plat 2'],
+  },
+  {
+    station: 'Kennington',
+    suffix: '(southbound, to Battersea Power Station)',
+    branch: 'charing cross',
+    // Same platform for Morden when on charing cross branch
+    fullAudio: ['northern line extension.this station.kennington change here southbound morden'],
+  },
+  {
+    station: 'Kennington',
+    suffix: '(northbound, from Battersea Power Station)',
+    branch: 'charing cross',
+    fullAudio: ['northern line extension.this station.kennington change here northbound via bank plat 3 southbound morden plat 2'],
+  },
+  {
+    station: 'Kennington',
+    suffix: '(northbound, from Morden)',
+    branch: 'charing cross',
+    fullAudio: ['northern line extension.this station.kennington change here northbound via bank plat 3 southbound bps plat 2'],
+  },
+  {
+    station: 'Kennington',
+    suffix: '(generic)',
+    branch: null,
+    fullAudio: ['northern line extension.this station.kennington change here northern other dest'],
+  },
+  {
+    station: 'Kentish Town',
+    branch: null,
+  },
+  {
+    station: 'Kings Cross St Pancras',
+    branch: null,
+    extraInfo: [
+      'conjoiner.change here for',
+      'connections.circle',
+      'connections.hammersmith and city',
+      'connections.metropolitan',
+      'connections.piccadilly',
+      'conjoiner.and',
+      'connections.victoria lines',
+      'conjoiner.and',
+      'connections.national and international rail services',
+    ],
+  },
+  {
+    station: 'Leicester Square',
+    branch: null,
+    extraInfo: ['conjoiner.change here for', 'connections.piccadilly line'],
+  },
+  {
+    station: 'London Bridge',
+    branch: null,
+    extraInfo: ['conjoiner.change here for', 'connections.jubilee line', 'connections.and national rail services'],
+  },
+  {
+    station: 'Mill Hill East',
+    branch: null,
+  },
+  {
+    station: 'Moorgate',
+    branch: null,
+    fullAudio: ['northern line extension.this station.moorgate change here'],
+  },
+  {
+    station: 'Morden',
+    branch: null,
+  },
+  {
+    station: 'Mornington Crescent',
+    branch: null,
+  },
+  {
+    station: 'Nine Elms',
+    branch: null,
+    fullAudio: ['northern line extension.this station.nine elms'],
+  },
+  {
+    station: 'Old Street',
+    branch: null,
+    extraInfo: ['conjoiner.change here for', 'poi.moorfields eye hospital', 'connections.and national rail services'],
+  },
+  {
+    station: 'Oval',
+    branch: null,
+  },
+  {
+    station: 'South Wimbledon',
+    branch: null,
+  },
+  {
+    station: 'Stockwell',
+    branch: null,
+    extraInfo: ['conjoiner.change here for', 'connections.victoria line'],
+  },
+  {
+    station: 'Tooting Bec',
+    branch: null,
+  },
+  {
+    station: 'Tooting Broadway',
+    branch: null,
+  },
+  {
+    station: 'Tottenham Court Road',
+    branch: null,
+    fullAudio: ['northern line extension.this station.tottenham court road change here'],
+  },
+  {
+    station: 'Totteridge & Whetstone',
+    branch: null,
+  },
+  {
+    station: 'Tufnell Park',
+    branch: null,
+  },
+  {
+    station: 'Warren Street',
+    branch: null,
+    extraInfo: ['conjoiner.change here for', 'connections.victoria line'],
+  },
+  {
+    station: 'Waterloo',
+    branch: null,
+    extraInfo: [
+      'conjoiner.change here for',
+      'connections.bakerloo',
+      'connections.jubilee',
+      'conjoiner.and',
+      'connections.waterloo and city lines',
+      'connections.and national rail services',
+      { id: 'connections.exit for riverboat services from', opts: { delayStart: 200 } },
+      'poi.waterloo pier',
+    ],
+  },
+  {
+    station: 'West Finchley',
+    branch: null,
+    extraInfo: ['please mind the gap between the train and the platform'],
+  },
+  {
+    station: 'Woodside Park',
+    branch: null,
+  },
+]
+
 const AvailableDestinations: IDestination[] = [
   {
     station: 'Archway',
@@ -161,6 +522,7 @@ const NextStationData: NextStationItem[] = [
     audio: [
       'conjoiner.the next station is',
       'station.low.charing cross',
+      ...(ThisStationData.find(s => s.station === 'Charing Cross')?.extraInfo || []),
       { id: 'sdo.upon arrival', opts: { delayStart: 250 } },
       'sdo.the first',
       'sdo.set of doors will not open',
@@ -175,6 +537,7 @@ const NextStationData: NextStationItem[] = [
     label: 'Clapham Common',
     audio: [
       'next station.clapham common',
+      ...(ThisStationData.find(s => s.station === 'Clapham Common')?.extraInfo || []),
       { id: 'sdo.upon arrival', opts: { delayStart: 250 } },
       'sdo.the last',
       'sdo.set of doors will not open',
@@ -198,19 +561,26 @@ const NextStationData: NextStationItem[] = [
   },
   {
     label: 'Edgware (terminating)',
-    // audio: ['conjoiner.the next station is', 'station.low.edgware'],
     onlyTerminates: true,
     terminatingAudio: ['next station.terminating.edgware'],
   },
   { label: 'Elephant & Castle' },
   {
     label: 'Embankment',
-    audio: ['conjoiner.the next station is', 'station.low.embankment', 'please mind the gap between the train and the platform'],
+    audio: [
+      'conjoiner.the next station is',
+      'station.low.embankment',
+      ...(ThisStationData.find(s => s.station === 'Embankment')?.extraInfo || []),
+      'please mind the gap between the train and the platform',
+    ],
   },
   {
-    label: 'Euston (Bank branch)',
+    label: 'Euston (Bank branch s/b)',
     audio: [
-      'next station.euston - bank',
+      'conjoiner.the next station is',
+      'station.high.euston',
+      'routeing.bank branch',
+      ...(ThisStationData.find(s => s.station === 'Euston' && s.branch === 'bank')?.extraInfo || []),
       { id: 'sdo.upon arrival', opts: { delayStart: 250 } },
       'sdo.the last',
       'sdo.set of doors will not open',
@@ -222,8 +592,22 @@ const NextStationData: NextStationItem[] = [
     ],
   },
   {
+    label: 'Euston (Bank branch n/b)',
+    audio: [
+      'conjoiner.the next station is',
+      'station.high.euston',
+      'routeing.bank branch',
+      ...(ThisStationData.find(s => s.station === 'Euston' && s.branch === 'bank')?.extraInfo || []),
+    ],
+  },
+  {
     label: 'Euston (Charing Cross branch)',
-    audio: ['conjoiner.the next station is', 'station.high.euston', 'routeing.charing cross branch'],
+    audio: [
+      'conjoiner.the next station is',
+      'station.high.euston',
+      'routeing.charing cross branch',
+      ...(ThisStationData.find(s => s.station === 'Euston' && s.branch === 'charing cross')?.extraInfo || []),
+    ],
   },
   {
     label: 'Finchley Central',
@@ -236,7 +620,11 @@ const NextStationData: NextStationItem[] = [
   },
   {
     label: 'Golders Green',
-    audio: ['next station.golders green', 'please mind the gap between the train and the platform'],
+    audio: [
+      'next station.golders green',
+      ...(ThisStationData.find(s => s.station === 'Golders Green')?.extraInfo || []),
+      'please mind the gap between the train and the platform',
+    ],
     terminatingAudio: ['next station.terminating.golders green'],
   },
   {
@@ -247,6 +635,7 @@ const NextStationData: NextStationItem[] = [
     label: 'Hampstead',
     audio: [
       'next station.hampstead',
+      ...(ThisStationData.find(s => s.station === 'Hampstead')?.extraInfo || []),
       { id: 'sdo.upon arrival', opts: { delayStart: 250 } },
       'sdo.the last',
       'sdo.set of doors will not open',
@@ -298,7 +687,11 @@ const NextStationData: NextStationItem[] = [
   { label: 'Kings Cross St Pancras' },
   {
     label: 'Leicester Square',
-    audio: ['conjoiner.the next station is', 'station.low.leicester square', 'conjoiner.change here for', 'connections.piccadilly line'],
+    audio: [
+      'conjoiner.the next station is',
+      'station.low.leicester square',
+      ...(ThisStationData.find(s => s.station === 'Leicester Square')?.extraInfo || []),
+    ],
   },
   { label: 'London Bridge' },
   {
@@ -357,11 +750,15 @@ const NextStationData: NextStationItem[] = [
   { label: 'Tufnell Park' },
   {
     label: 'Warren Street',
-    audio: ['conjoiner.the next station is', 'station.low.warren street'],
+    audio: [
+      'conjoiner.the next station is',
+      'station.low.warren street',
+      ...(ThisStationData.find(s => s.station === 'Warren Street')?.extraInfo || []),
+    ],
   },
   {
     label: 'Waterloo',
-    audio: ['conjoiner.the next station is', 'station.low.waterloo'],
+    audio: ['conjoiner.the next station is', 'station.low.waterloo', ...(ThisStationData.find(s => s.station === 'Waterloo')?.extraInfo || [])],
   },
   { label: 'West Finchley' },
   { label: 'Woodside Park' },
@@ -374,365 +771,6 @@ interface ThisStationItem {
   extraInfo?: AudioItem[]
   fullAudio?: AudioItem[]
 }
-
-const ThisStationData: ThisStationItem[] = [
-  {
-    station: 'Angel',
-    branch: null,
-  },
-  {
-    station: 'Archway',
-    branch: null,
-  },
-  {
-    station: 'Balham',
-    branch: null,
-    extraInfo: ['conjoiner.change here for', 'connections.national rail services'],
-  },
-  {
-    station: 'Bank',
-    branch: null,
-    fullAudio: ['northern line extension.this station.bank change here'],
-  },
-  {
-    station: 'Battersea Power Station',
-    branch: null,
-    fullAudio: ['northern line extension.this station.battersea power station exit here'],
-  },
-  {
-    station: 'Belsize Park',
-    branch: null,
-  },
-  {
-    station: 'Borough',
-    branch: null,
-  },
-  {
-    station: 'Brent Cross',
-    branch: null,
-  },
-  {
-    station: 'Burnt Oak',
-    branch: null,
-  },
-  {
-    station: 'Camden Town',
-    branch: 'bank',
-    extraInfo: [
-      'conjoiner.change here for',
-      'connections.southbound northern line',
-      'conjoiner.service',
-      'routeing.high.via charing cross',
-      'conjoiner.and',
-      'connections.northbound',
-      'conjoiner.services',
-      'conjoiner.to',
-      'station.low.edgware',
-    ],
-  },
-  {
-    station: 'Camden Town',
-    branch: 'charing cross',
-    extraInfo: [
-      'conjoiner.change here for',
-      'connections.southbound northern line',
-      'conjoiner.service',
-      'routeing.high.via bank',
-      'conjoiner.and',
-      'connections.northbound',
-      'conjoiner.services',
-      'conjoiner.to',
-      'station.high.high barnet',
-      'conjoiner.and',
-      'station.low.mill hill east',
-    ],
-  },
-  {
-    station: 'Camden Town',
-    branch: 'edgware',
-    extraInfo: [
-      'conjoiner.change here for',
-      'conjoiner.all stations to',
-      'station.high.high barnet',
-      'conjoiner.and',
-      'station.high.mill hill east',
-      'connections.from platform 3',
-    ],
-  },
-  {
-    station: 'Camden Town',
-    branch: 'high barnet',
-    extraInfo: ['conjoiner.change here for', 'conjoiner.all stations to', 'station.high.edgware', 'connections.from platform 1'],
-  },
-  {
-    station: 'Chalk Farm',
-    branch: null,
-  },
-  {
-    station: 'Charing Cross',
-    branch: null,
-    extraInfo: ['conjoiner.change here for', 'connections.bakerloo line', 'connections.and national rail services'],
-  },
-  {
-    station: 'Clapham Common',
-    branch: null,
-  },
-  {
-    station: 'Clapham North',
-    branch: null,
-  },
-  {
-    station: 'Clapham South',
-    branch: null,
-  },
-  {
-    station: 'Colindale',
-    branch: null,
-  },
-  {
-    station: 'Colliers Wood',
-    branch: null,
-  },
-  {
-    station: 'East Finchley',
-    branch: null,
-  },
-  {
-    station: 'Edgware',
-    branch: null,
-  },
-  {
-    station: 'Elephant & Castle',
-    branch: null,
-    extraInfo: ['conjoiner.change here for', 'connections.bakerloo line', 'connections.and national rail services'],
-  },
-  {
-    station: 'Embankment',
-    branch: null,
-    extraInfo: ['conjoiner.change here for', 'connections.bakerloo', 'connections.circle', 'conjoiner.and', 'connections.district line'],
-  },
-  {
-    station: 'Euston',
-    branch: 'bank',
-    extraInfo: [
-      'conjoiner.change here for',
-      'connections.southbound northern line',
-      'conjoiner.services',
-      'routeing.high.via charing cross',
-      'connections.from platform 2',
-      'connections.high.victoria line',
-      'connections.and national rail services',
-    ],
-  },
-  {
-    station: 'Euston',
-    branch: 'charing cross',
-    extraInfo: [
-      'conjoiner.change here for',
-      'connections.southbound northern line',
-      'conjoiner.services',
-      'routeing.high.via bank',
-      'connections.from platform 6',
-      'connections.high.victoria line',
-      'connections.and national rail services',
-    ],
-  },
-  {
-    station: 'Finchley Central',
-    branch: null,
-    extraInfo: ['conjoiner.change here for', 'station.low.mill hill east'],
-  },
-  // {
-  //   label: 'Finchley Central (change for Mill Hill East)',
-  //   branch: null,
-  // },
-  {
-    station: 'Golders Green',
-    branch: null,
-  },
-  {
-    station: 'Goodge Street',
-    branch: null,
-  },
-  {
-    station: 'Hampstead',
-    branch: null,
-  },
-  {
-    station: 'Hendon Central',
-    branch: null,
-  },
-  {
-    station: 'High Barnet',
-    branch: null,
-  },
-  {
-    station: 'Highgate',
-    branch: null,
-  },
-  {
-    station: 'Kennington',
-    suffix: '(southbound, terminating)',
-    branch: 'bank',
-    // Change platform for morden bank branch as on charing cross branch
-    fullAudio: ['northern line extension.this station.kennington change here southbound morden plat 2'],
-  },
-  {
-    station: 'Kennington',
-    suffix: '(southbound, to Morden)',
-    branch: 'bank',
-    // Change platform for BPS as on charing cross branch
-    fullAudio: ['northern line extension.this station.kennington change here southbound bps plat 2'],
-  },
-  {
-    station: 'Kennington',
-    suffix: '(northbound, from Morden)',
-    branch: 'bank',
-    fullAudio: ['northern line extension.this station.kennington change here northbound via xc plat 1 southbound bps plat 2'],
-  },
-  {
-    station: 'Kennington',
-    suffix: '(southbound, to Battersea Power Station)',
-    branch: 'charing cross',
-    // Same platform for Morden when on charing cross branch
-    fullAudio: ['northern line extension.this station.kennington change here southbound morden'],
-  },
-  {
-    station: 'Kennington',
-    suffix: '(northbound, from Battersea Power Station)',
-    branch: 'charing cross',
-    fullAudio: ['northern line extension.this station.kennington change here northbound via bank plat 3 southbound morden plat 2'],
-  },
-  {
-    station: 'Kennington',
-    suffix: '(northbound, from Morden)',
-    branch: 'charing cross',
-    fullAudio: ['northern line extension.this station.kennington change here northbound via bank plat 3 southbound bps plat 2'],
-  },
-  {
-    station: 'Kennington',
-    suffix: '(generic)',
-    branch: null,
-    fullAudio: ['northern line extension.this station.kennington change here northern other dest'],
-  },
-  {
-    station: 'Kentish Town',
-    branch: null,
-  },
-  {
-    station: 'Kings Cross St Pancras',
-    branch: null,
-    extraInfo: [
-      'conjoiner.change here for',
-      'connections.circle and hammersmith',
-      'connections.metropolitan',
-      'connections.piccadilly',
-      'conjoiner.and',
-      'connections.victoria lines',
-      'conjoiner.and',
-      'connections.national and international rail services',
-    ],
-  },
-  {
-    station: 'Leicester Square',
-    branch: null,
-    extraInfo: ['conjoiner.change here for', 'connections.piccadilly line'],
-  },
-  {
-    station: 'London Bridge',
-    branch: null,
-    extraInfo: ['conjoiner.change here for', 'connections.jubilee line', 'connections.and national rail services'],
-  },
-  {
-    station: 'Mill Hill East',
-    branch: null,
-  },
-  {
-    station: 'Moorgate',
-    branch: null,
-    fullAudio: ['northern line extension.this station.moorgate change here'],
-  },
-  {
-    station: 'Morden',
-    branch: null,
-  },
-  {
-    station: 'Mornington Crescent',
-    branch: null,
-  },
-  {
-    station: 'Nine Elms',
-    branch: null,
-    fullAudio: ['northern line extension.this station.nine elms'],
-  },
-  {
-    station: 'Old Street',
-    branch: null,
-    extraInfo: ['conjoiner.change here for', 'poi.moorfields eye hospital', 'connections.and national rail services'],
-  },
-  {
-    station: 'Oval',
-    branch: null,
-  },
-  {
-    station: 'South Wimbledon',
-    branch: null,
-  },
-  {
-    station: 'Stockwell',
-    branch: null,
-    extraInfo: ['conjoiner.change here for', 'connections.victoria line'],
-  },
-  {
-    station: 'Tooting Bec',
-    branch: null,
-  },
-  {
-    station: 'Tooting Broadway',
-    branch: null,
-  },
-  {
-    station: 'Tottenham Court Road',
-    branch: null,
-    fullAudio: ['northern line extension.this station.tottenham court road change here'],
-  },
-  {
-    station: 'Totteridge & Whetstone',
-    branch: null,
-  },
-  {
-    station: 'Tufnell Park',
-    branch: null,
-  },
-  {
-    station: 'Warren Street',
-    branch: null,
-    extraInfo: ['conjoiner.change here for', 'connections.victoria line'],
-  },
-  {
-    station: 'Waterloo',
-    branch: null,
-    extraInfo: [
-      'conjoiner.change here for',
-      'connections.waterloo and city',
-      'connections.bakerloo',
-      'conjoiner.and',
-      'connections.jubilee lines',
-      'conjoiner.and',
-      'connections.district line',
-      'connections.and national rail services',
-    ],
-  },
-  {
-    station: 'West Finchley',
-    branch: null,
-    extraInfo: ['please mind the gap between the train and the platform'],
-  },
-  {
-    station: 'Woodside Park',
-    branch: null,
-  },
-]
 
 interface INextStationAnnouncementOptions {
   stationLabel: string

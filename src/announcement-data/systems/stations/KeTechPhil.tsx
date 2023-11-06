@@ -950,7 +950,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
 
     const platFiles: AudioItem[] = []
 
-    if (plat <= 12) {
+    if (plat <= 12 || ['a', 'b'].includes(options.platform.toLowerCase())) {
       platFiles.push({ id: `s.platform ${options.platform} for the`, opts: { delayStart: 250 } })
       if (options.isDelayed) platFiles.push('m.delayed')
     } else {

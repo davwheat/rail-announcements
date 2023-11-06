@@ -2947,6 +2947,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     'RYR',
     'RYS',
     'SAA',
+    'SAC',
     'SAD',
     'SAE',
     'SAF',

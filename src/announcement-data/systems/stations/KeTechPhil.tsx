@@ -8,7 +8,7 @@ import crsToStationItemMapper, { stationItemCompleter } from '@helpers/crsToStat
 import { AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
 import FullscreenIcon from 'mdi-react/FullscreenIcon'
 
-type ChimeType = /*'3' |*/ 'four' | 'none'
+type ChimeType = 'three' | 'four' | 'none'
 
 interface INextTrainAnnouncementOptions {
   chime: ChimeType
@@ -3649,7 +3649,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
             type: 'select',
             default: 'four',
             options: [
-              // { title: '3 chimes', value: 'three' },
+              { title: '3 chimes', value: 'three' },
               { title: '4 chimes', value: 'four' },
               { title: 'No chime', value: 'none' },
             ],
@@ -3779,6 +3779,11 @@ export default class KeTechPhil extends StationAnnouncementSystem {
       props: {
         buttonSections: {
           General: [
+            {
+              label: '3 chimes',
+              play: this.playAudioFiles.bind(this, ['sfx - three chimes']),
+              download: this.playAudioFiles.bind(this, ['sfx - three chimes'], true),
+            },
             {
               label: '4 chimes',
               play: this.playAudioFiles.bind(this, ['sfx - four chimes']),

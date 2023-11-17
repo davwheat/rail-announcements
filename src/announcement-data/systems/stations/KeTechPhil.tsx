@@ -3334,6 +3334,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     'UPT',
     'UPW',
     'URM',
+    'UTT',
     'UTY',
     'UWL',
     'VAL',

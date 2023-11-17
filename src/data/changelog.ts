@@ -257,6 +257,10 @@ const changelog: IChangelogVersion[] = [
     date: '2023-10-20',
     fixes: ['[TfW - TrainFX] Add start of journey announcement'],
   },
+  {
+    date: '2023-11-17',
+    additions: ['[KeTech Phil] Add disruption announcements', '[KeTech Phil] Add (beta) live train announcements'],
+  },
 ]
 
 export default changelog

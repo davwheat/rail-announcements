@@ -23,6 +23,19 @@ interface INextTrainAnnouncementOptions {
   coaches: string | null
 }
 
+interface IDisruptedTrainAnnouncementOptions {
+  chime: ChimeType
+  platform: string
+  hour: string
+  min: string
+  toc: string
+  terminatingStationCode: string
+  vias: CallingAtPoint[]
+  disruptionType: 'delay' | 'delayedBy' | 'cancel'
+  disruptionReason: string
+  delayTime: string
+}
+
 interface SplitInfoStop {
   crsCode: string
   shortPlatform: string
@@ -451,6 +464,252 @@ export default class KeTechPhil extends StationAnnouncementSystem {
       'West Yorkshire metro train',
     ],
   }
+  private readonly DISRUPTION_REASONS: string[] = [
+    'a broken down freight train',
+    'a broken down preceding train',
+    'a broken down train',
+    'a broken rail',
+    'a cable fire',
+    'a chemical spillage',
+    'a currently unidentified which is under investigation',
+    'a customer having been taken ill on a preceding train',
+    'a customer having been taken ill on this train',
+    'a dangerous gas leak',
+    'a derailment',
+    'a driver shortage',
+    'a failed train',
+    'a failure of level crossing apparatus',
+    'a failure of signalling equipment',
+    'a fallen tree on the line',
+    'a fatality',
+    'a fault on a level crossing',
+    'a fault on a preceding that has now been rectified',
+    'a fault on a preceding train',
+    'a fault on the train that has now been rectified',
+    'a fault on the train',
+    'a fault on this train which cannot be rectified',
+    'a fault on this train which is being attended to',
+    'a fault on trackside equipment',
+    'a fault that has ocurred whilst attaching coaches to this train',
+    'a fault that has ocurred whilst detaching coaches from this train',
+    'a fault with the door mechanism on board a preceding train',
+    'a fault with the door mechanism on board this train',
+    'a fire',
+    'a gas leak in the area',
+    'a lack of suitable carriages',
+    'a landslide',
+    'a landslip',
+    'a late-running preceding service',
+    'a lightning strike affecting the signalling equipment',
+    'a lightning strike',
+    'a line blockage',
+    'a lineside fire',
+    'a major electrical power fault',
+    'a mechanical fault on a level crossing',
+    'a member of staff providing assistance to a passenger',
+    'a passenger incident',
+    'a passenger requiring urgent attention',
+    'a points failure',
+    'a power failure',
+    'a problem on property adjacent to the railway',
+    'a report of an injury to a person on the track',
+    'a road vehicle damaging a level crossing',
+    'a road vehicle on the line',
+    'a road vehicle striking a railway bridge',
+    'a shortage of available coaches',
+    'a shortage of serviceable trains',
+    'a shortage of train dispatch staff',
+    'a signal failure',
+    'a signalling apparatus failure',
+    'a slow-running preceding freight train running behind schedule',
+    'a slow-running preceding train with a technical fault',
+    'a staff shortage',
+    'a suspected fatality',
+    'a technical fault on the service',
+    'a technical fault to lineside equipment',
+    'a technical problem',
+    'a temporary fault with the signalling equipment',
+    'a temporary shortage of drivers',
+    'a temporary shortage of train crews',
+    'a temporary speed restriction because of signalling equipment repairs',
+    'a temporary speed restriction because of track repairs',
+    // 'a temporary speed restriction',
+    'a ticket irregularity on board a preceding train',
+    'a ticket irregularity on board this train',
+    'a track circuit failure',
+    'a train failure',
+    'a train speed restriction caused by a technical fault on this train',
+    'additional cleaning duties',
+    'additional coaches being attached to the train',
+    'additional maintenance requirements at the depot',
+    'additional safety duties being carried out on board this train',
+    'additional train movements to remove a broken down train',
+    'adverse weather conditions',
+    // 'after having been held awaiting late running connection (old cut)',
+    // 'after having been held for a late running connection',
+    'ambulance attending an incident on the train',
+    'ambulance attending an incident on this train',
+    'an accident on a level crossing',
+    'an accident to a member of the public',
+    'an act of vandalism on this train',
+    'an earlier act of vandalism on this train',
+    'an earlier blockage of the line',
+    'an earlier broken down train causing congestion',
+    'an earlier broken down train',
+    'an earlier electrical power supply problem',
+    'an earlier fallen tree on the line',
+    'an earlier fallen tree',
+    'an earlier fatality',
+    'an earlier fault on a level crossing',
+    'an earlier fault that ocurred whilst attaching coaches to this train',
+    'an earlier fault that ocurred whilst detaching coaches from this train',
+    'an earlier fault with the door mechanism on board a preceding train',
+    'an earlier fault with the door mechanism on board this train',
+    'an earlier fault with the signalling equipment',
+    'an earlier landslide',
+    'an earlier lineside fire',
+    'an earlier road vehicle striking a railway bridge',
+    'an earlier security alert',
+    'an earlier trespassing incident causing congestion',
+    'an earlier trespassing incident',
+    'an electrical power supply problem',
+    'an external cause beyond our control',
+    'an incident on the line',
+    'an injury to a person on the track',
+    'an obstruction on the line',
+    'animals on the railway line',
+    'animals on the track',
+    'awaiting a connecting service',
+    'awaiting a member of the train crew',
+    // 'awaiting a member of train crew',
+    'awaiting a portion of the train',
+    'awaiting a replacement driver',
+    'awaiting an available platform because of service congestion',
+    'awaiting replacement coaches',
+    'awaiting signal clearance',
+    'bad weather conditions',
+    'being held awaiting a late running connection',
+    'being held awaiting a replacement bus connection',
+    'cancellation of the incoming service',
+    'caused by servicing problems in the depot',
+    'children playing near the line',
+    'christmas holidays',
+    'coaches being detached from this train',
+    'conductor rail problems',
+    'confusion caused by a fault with the station information board',
+    'congestion caused by a failed train',
+    'congestion',
+    'crewing difficulties',
+    'damaged track',
+    'debris blown on the line',
+    'debris on the line',
+    'delay to a preceding train',
+    'earlier emergency track repairs',
+    'earlier engineering works',
+    'earlier overrunning engineering work',
+    'earlier reports of a disturbance on board this train',
+    'earlier reports of animals on the line',
+    'earlier reports of debris on the line',
+    'earlier reports of trespassers on the line',
+    'earlier vandalism',
+    'electric conductor rail problems',
+    'electrical problems with the train',
+    'emergency engineering work',
+    'emergency track repairs',
+    'engineering works',
+    'extreme weather conditions',
+    'failure of a preceding train',
+    'flooding on the line',
+    'flooding',
+    'fog',
+    'following signal staff instructions',
+    'heavy rain',
+    'high winds',
+    'industrial action',
+    // 'large numbers of passengers alighting from the trains at',
+    // 'large numbers of passengers joining the trains at',
+    'late running of a previous train',
+    'mechanical problems with the train',
+    'mechanical problems',
+    'no driver available',
+    'objects being thrown onto the line',
+    'objects on the line',
+    'on a preceding train',
+    'overcrowding caused by the short formation of this service today',
+    'overcrowding caused by the',
+    'overcrowding on the train',
+    'overcrowding',
+    'overhead electric line problems',
+    'overhead line damage',
+    'overhead line problems',
+    'overrunning engineering work',
+    'passenger illness',
+    'police activity on the line',
+    'police attending a disturbance on a preceding train',
+    'police attending a disturbance on this train',
+    'police attending an incident on the train',
+    'police attending an incident on this train',
+    'police persuing suspects on the line',
+    'poor rail conditions caused by frost',
+    'poor rail conditions caused by leaf fall',
+    'poor rail conditions',
+    'power car problems',
+    'refueling',
+    'replacing emergency equipment on this train',
+    'reports of a blockage on the line',
+    'reports of a disturbance on board this train',
+    'reports of animals on the line',
+    'reports of debris on the line',
+    'reports of trespass on the line',
+    'revenue protection officers attending this train',
+    'severe weather conditions',
+    'short formation of this train',
+    'signal testing',
+    'signalling difficulties',
+    'signalling equipment repairs',
+    'sliding train door problems',
+    'slipper rail conditions',
+    'slippery rail conditions',
+    'snow',
+    'staff shortages',
+    'staff sickness',
+    'suspected damage to a railway bridge by a road vehicle',
+    'suspected damage to a railway bridge',
+    'suspected terrorist threat',
+    'the advice of the emergency services',
+    'the emergency communication cord being activated on this train',
+    'the emergency communication cord being activated',
+    'the emergency communication cord being pulled on the service',
+    'the emergency communication cord being pulled on the train',
+    'the emergency cord being pulled on the service',
+    'the emergency cord being pulled on the train',
+    'the extreme heat',
+    'the fire brigade attending an incident on the train',
+    'the fire brigade attending an incident on this train',
+    'the late arrival of an incoming train',
+    // 'the late arrival of the coaches and train crew to form this service',
+    'the late running of a preceding train',
+    'the london fire brigade attending an incident on the train',
+    'the london fire brigade attending an incident on this train',
+    'the previous service being delayed',
+    'the short formation of this train',
+    'the train being diverted from its scheduled route',
+    'the train running on reduced engine power',
+    'the unfortunate action of vandals',
+    'third rail problems',
+    'this train making additional stops on its journey',
+    // ['a temporary speed restriction', 'to run at a reduced speed while inspecting the line'],
+    'track repairs',
+    'train being held awaiting an available platform',
+    'train door problems',
+    'trespass on the line',
+    'vandalism on a preceding train',
+    'vandalism on the service',
+    'vandalism',
+    // 'who has been delayed by the earlier disruption',
+    // 'who in turn has been delayed by the current disruption',
+    // 'who is delayed on a late-running service',
+  ]
 
   readonly ALL_AVAILABLE_TOCS = [...this.AVAILABLE_TOCS.standaloneOnly, ...this.AVAILABLE_TOCS.withServiceToFrom].sort((a, b) =>
     a.localeCompare(b),
@@ -463,6 +722,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     vias: string[],
     terminatingStation: string,
     callingPoints: CallingAtPoint[],
+    stationsAlwaysMiddle: boolean = false,
   ): Promise<AudioItem[]> {
     const files: AudioItem[] = [`hour.s.${hour}`, `mins.m.${min}`]
 
@@ -496,7 +756,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
       files.push(
         ...this.pluraliseAudio(allDestinations, {
           prefix: 'station.m.',
-          finalPrefix: 'station.e.',
+          finalPrefix: stationsAlwaysMiddle ? 'station.m.' : 'station.e.',
           andId: 'm.and',
           firstItemDelay: 100,
           beforeAndDelay: 100,
@@ -509,7 +769,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
           `station.m.${terminatingStation}`,
           'm.via',
           ...this.pluraliseAudio(
-            vias.map((stn, i) => `station.${i === vias.length - 1 ? 'e' : 'm'}.${stn}`),
+            vias.map((stn, i) => `station.${!stationsAlwaysMiddle && i === vias.length - 1 ? 'e' : 'm'}.${stn}`),
             {
               andId: 'm.and',
               beforeAndDelay: 100,
@@ -517,7 +777,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
           ),
         )
       } else {
-        files.push(`station.e.${terminatingStation}`)
+        files.push(`station.${stationsAlwaysMiddle ? 'm' : 'e'}.${terminatingStation}`)
       }
     }
 
@@ -1027,6 +1287,57 @@ export default class KeTechPhil extends StationAnnouncementSystem {
         options.callingAt,
       )),
     )
+
+    await this.playAudioFiles(files, download)
+  }
+
+  private async playDisruptedTrainAnnouncement(options: IDisruptedTrainAnnouncementOptions, download: boolean = false): Promise<void> {
+    const files: AudioItem[] = []
+
+    if (options.chime !== 'none') files.push(`sfx - ${options.chime} chimes`)
+
+    files.push('s.were sorry to announce that the')
+    files.push(
+      ...(await this.getFilesForBasicTrainInfo(
+        options.hour,
+        options.min,
+        options.toc,
+        options.vias.map(s => s.crsCode),
+        options.terminatingStationCode,
+        [],
+        true,
+      )),
+    )
+
+    const endInflection = options.disruptionReason ? 'm' : 'e'
+
+    switch (options.disruptionType) {
+      case 'delayedBy':
+        files.push('m.is delayed by approximately')
+
+        const num = parseInt(options.delayTime)
+
+        if (num < 10) {
+          files.push(`platform.m.${num}`)
+        } else {
+          files.push(`mins.m.${num}`)
+        }
+
+        files.push(`${endInflection}.${num !== 1 ? 'minutes' : 'minute'}`)
+        break
+      case 'delay':
+        files.push(`${endInflection}.is being delayed`)
+        break
+      case 'cancel':
+        files.push(`${endInflection}.has been cancelled`)
+        break
+    }
+
+    if (options.disruptionReason) {
+      files.push('m.due to', `disruption-reason.e.${options.disruptionReason}`)
+    }
+
+    files.push({ id: 'w.were sorry for the delay this will cause to your journey', opts: { delayStart: 250 } })
 
     await this.playAudioFiles(files, download)
   }
@@ -3761,6 +4072,117 @@ export default class KeTechPhil extends StationAnnouncementSystem {
               '12 coaches',
             ].map(c => ({ title: c, value: c })),
             type: 'select',
+          },
+        },
+      },
+    },
+    disruptedTrain: {
+      name: 'Disrupted train',
+      component: CustomAnnouncementPane,
+      props: {
+        // presets: this.announcementPresets.nextTrain,
+        playHandler: this.playDisruptedTrainAnnouncement.bind(this),
+        options: {
+          chime: {
+            name: 'Chime',
+            type: 'select',
+            default: 'four',
+            options: [
+              { title: '3 chimes', value: 'three' },
+              { title: '4 chimes', value: 'four' },
+              { title: 'No chime', value: 'none' },
+            ],
+          },
+          hour: {
+            name: 'Hour',
+            default: '07',
+            options: [
+              '00 - midnight',
+              '01',
+              '02',
+              '03',
+              '04',
+              '05',
+              '06',
+              '07',
+              '08',
+              '09',
+              '10',
+              '11',
+              '12',
+              '13',
+              '14',
+              '15',
+              '16',
+              '17',
+              '18',
+              '19',
+              '20',
+              '21',
+              '22',
+              '23',
+            ].map(h => ({ title: h, value: h })),
+            type: 'select',
+          },
+          min: {
+            name: 'Minute',
+            default: '33',
+            options: ['00 - hundred', '00 - hundred-hours']
+              .concat(new Array(58).fill(0).map((_, i) => (i + 2).toString()))
+              .map(m => ({ title: m.toString().padStart(2, '0'), value: m.toString().padStart(2, '0') })),
+            type: 'select',
+          },
+          toc: {
+            name: 'TOC',
+            default: '',
+            options: [{ title: 'None', value: '' }].concat(this.ALL_AVAILABLE_TOCS.map(m => ({ title: m, value: m.toLowerCase() }))),
+            type: 'select',
+          },
+          terminatingStationCode: {
+            name: 'Terminating station',
+            default: this.stations[0],
+            options: this.stations.map(s => {
+              const stn = getStationByCrs(s)
+              return { title: stn ? `${stn.stationName} (${s})` : `Unknown name (${s})`, value: s }
+            }),
+            type: 'select',
+          },
+          vias: {
+            name: '',
+            type: 'custom',
+            component: CallingAtSelector,
+            props: {
+              availableStations: this.stations,
+              selectLabel: 'Via points (non-splitting services only)',
+              placeholder: 'Add a via point...',
+              heading: 'Via... (optional)',
+            },
+            default: [],
+          },
+          disruptionType: {
+            name: 'Disruption type',
+            type: 'select',
+            options: [
+              { value: 'delayedBy', title: 'Delayed by...' },
+              { value: 'delay', title: 'Delayed' },
+              { value: 'cancel', title: 'Cancelled' },
+            ],
+            default: 'delayedBy',
+          },
+          delayTime: {
+            name: 'Delay length',
+            type: 'select',
+            options: new Array(60).fill(0).map((_, i) => ({ value: (i + 1).toString(), title: `${i + 1} minute${i === 0 ? '' : 's'}` })),
+            default: '10',
+            onlyShowWhen(activeState) {
+              return activeState.disruptionType === 'delayedBy'
+            },
+          },
+          disruptionReason: {
+            name: 'Disruption reason',
+            type: 'select',
+            options: [{ value: '', title: 'None' }, ...this.DISRUPTION_REASONS.map(r => ({ value: r, title: r }))],
+            default: '',
           },
         },
       },

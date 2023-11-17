@@ -4052,7 +4052,7 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
       console.log(`[Live Trains] ${services.length} services found`)
 
       const firstUnannounced = services.find(s => {
-        if (nextTrainAnnounced[s.serviceIdGuid]) {
+        if (nextTrainAnnounced.current[s.serviceIdGuid]) {
           console.log(`[Live Trains] Skipping ${s.serviceIdGuid} (${s.std} to ${s.destination[0].locationName}) as it was announced recently`)
           return false
         }

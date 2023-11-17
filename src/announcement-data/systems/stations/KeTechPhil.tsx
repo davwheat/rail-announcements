@@ -442,6 +442,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
       'Regional Railways charter train',
       'ScotRail Express',
       'South London Metro',
+      'South Western Railway',
       'Sussex Scot',
       'Transpennine',
       'Transpennine Express',

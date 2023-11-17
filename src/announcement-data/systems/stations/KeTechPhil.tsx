@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import StationAnnouncementSystem from '@announcement-data/StationAnnouncementSystem'
 import CallingAtSelector, { CallingAtPoint } from '@components/CallingAtSelector'
 import CustomAnnouncementPane, { ICustomAnnouncementPaneProps, ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
@@ -3887,7 +3887,7 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
   const [hasEnabledFeature, setHasEnabledFeature] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
 
-  const [nextTrainAnnounced, setNextTrainAnnounced] = useState<Record<string, number>>({})
+  const nextTrainAnnounced = useRef<Record<string, number>>({})
 
   const stationNameToCrsMap = useMemo(
     () =>
@@ -3904,22 +3904,21 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
     [supportedStations],
   )
 
-  function removeOldIds() {
-    const now = Date.now()
+  const removeOldIds = useCallback(
+    function removeOldIds() {
+      const now = Date.now()
+      const newIds = Object.fromEntries(Object.entries(nextTrainAnnounced.current).filter(([_, v]) => now - v < 1000 * 60 * 60))
+      nextTrainAnnounced.current = newIds
+    },
+    [nextTrainAnnounced.current],
+  )
 
-    setNextTrainAnnounced(prev => {
-      const newIds = Object.fromEntries(Object.entries(prev).filter(([_, v]) => now - v < 1000 * 60 * 60))
-
-      return newIds
-    })
-  }
-
-  function markTrainIdAnnounced(id: string) {
-    setNextTrainAnnounced(prev => ({
-      ...prev,
-      [id]: Date.now(),
-    }))
-  }
+  const markTrainIdAnnounced = useCallback(
+    function markTrainIdAnnounced(id: string) {
+      nextTrainAnnounced.current[id] = Date.now()
+    },
+    [nextTrainAnnounced.current],
+  )
 
   useEffect(() => {
     const key = setInterval(removeOldIds, 1000 * 60 * 5)
@@ -3929,62 +3928,68 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
     }
   }, [removeOldIds])
 
-  function calculateDelayMins(std: string, etd: string): number {
-    const isDelayed = etd !== 'On time' && etd !== std
-    if (!isDelayed) return 0
+  const calculateDelayMins = useCallback(
+    function calculateDelayMins(std: string, etd: string): number {
+      const isDelayed = etd !== 'On time' && etd !== std
+      if (!isDelayed) return 0
 
-    const hasRealEta = (etd as string).includes(':')
+      const hasRealEta = (etd as string).includes(':')
 
-    if (!hasRealEta) return 0
+      if (!hasRealEta) return 0
 
-    const sTime = std.split(':')
-    const eTime = etd.split(':')
+      const sTime = std.split(':')
+      const eTime = etd.split(':')
 
-    const [h, m] = sTime.map(x => parseInt(x))
-    const [eH, eM] = eTime.map(x => parseInt(x))
+      const [h, m] = sTime.map(x => parseInt(x))
+      const [eH, eM] = eTime.map(x => parseInt(x))
 
-    console.log(`[Delay Mins] ${h}:${m} (${std}) -> ${eH}:${eM} (${etd}) = ${eH * 60 + eM - (h * 60 + m)}`)
+      console.log(`[Delay Mins] ${h}:${m} (${std}) -> ${eH}:${eM} (${etd}) = ${eH * 60 + eM - (h * 60 + m)}`)
 
-    let delayMins = Math.abs(eH * 60 + eM - (h * 60 + m))
+      let delayMins = Math.abs(eH * 60 + eM - (h * 60 + m))
 
-    if (delayMins < 0) {
-      // crosses over midnight
-      return calculateDelayMins(std, '23:59') + calculateDelayMins('00:00', etd)
-    }
+      if (delayMins < 0) {
+        // crosses over midnight
+        return calculateDelayMins(std, '23:59') + calculateDelayMins('00:00', etd)
+      }
 
-    return delayMins
-  }
+      return delayMins
+    },
+    [console.log],
+  )
 
-  function calculateArrivalInMins(etd: string): number {
-    // HH:mm in UK
-    const std = new Date().toLocaleTimeString('en-GB', { hour12: false, timeZone: 'Europe/London' }).slice(0, 5)
+  const calculateArrivalInMins = useCallback(
+    function calculateArrivalInMins(etd: string): number {
+      // HH:mm in UK
+      const std = new Date().toLocaleTimeString('en-GB', { hour12: false, timeZone: 'Europe/London' }).slice(0, 5)
 
-    const isDelayed = etd !== 'On time' && etd !== std
-    if (!isDelayed) return 0
+      const isDelayed = etd !== 'On time' && etd !== std
+      if (!isDelayed) return 0
 
-    const hasRealEta = (etd as string).includes(':')
+      const hasRealEta = (etd as string).includes(':')
 
-    if (!hasRealEta) return 0
+      if (!hasRealEta) return 0
 
-    const sTime = std.split(':')
-    const eTime = etd.split(':')
+      const sTime = std.split(':')
+      const eTime = etd.split(':')
 
-    const [h, m] = sTime.map(x => parseInt(x))
-    const [eH, eM] = eTime.map(x => parseInt(x))
+      const [h, m] = sTime.map(x => parseInt(x))
+      const [eH, eM] = eTime.map(x => parseInt(x))
 
-    console.log(`[ETA mins] ${h}:${m} (${std}) -> ${eH}:${eM} (${etd}) = ${eH * 60 + eM - (h * 60 + m)}`)
+      console.log(`[ETA mins] ${h}:${m} (${std}) -> ${eH}:${eM} (${etd}) = ${eH * 60 + eM - (h * 60 + m)}`)
 
-    let delayMins = Math.abs(eH * 60 + eM - (h * 60 + m))
+      let delayMins = Math.abs(eH * 60 + eM - (h * 60 + m))
 
-    if (delayMins < 0) {
-      // crosses over midnight
-      return calculateDelayMins(std, '23:59') + calculateDelayMins('00:00', etd)
-    }
+      if (delayMins < 0) {
+        // crosses over midnight
+        return calculateDelayMins(std, '23:59') + calculateDelayMins('00:00', etd)
+      }
 
-    return delayMins
-  }
+      return delayMins
+    },
+    [calculateDelayMins, console.log],
+  )
 
-  function processToc(toc: string, originCrs: string, destinationCrs: string): string {
+  const processToc = useCallback(function processToc(toc: string, originCrs: string, destinationCrs: string): string {
     switch (toc.toLowerCase()) {
       default:
         return system.ALL_AVAILABLE_TOCS.find(t => t?.toLowerCase() === toc?.toLowerCase()) ?? ''
@@ -3998,10 +4003,12 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
           return 'west midlands railway'
         }
     }
-  }
+  }, [])
 
   useEffect(() => {
     if (!hasEnabledFeature) return
+
+    const abortController = new AbortController()
 
     const checkAndPlay = async () => {
       if (isPlaying) {
@@ -4146,9 +4153,13 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
       }
 
       console.log(options)
-
-      setIsPlaying(true)
       try {
+        if (abortController.signal.aborted) {
+          console.warn('[Live Trains] Aborted; skipping announcement')
+          return
+        }
+
+        setIsPlaying(true)
         console.log(
           `[Live Trains] Playing announcement for ${firstUnannounced.serviceIdGuid} (${firstUnannounced.std} to ${firstUnannounced.destination[0].locationName})`,
         )
@@ -4156,17 +4167,18 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
       } catch (e) {
         console.warn(`[Live Trains] Error playing announcement for ${firstUnannounced.serviceIdGuid}; see below`)
         console.error(e)
-        setIsPlaying(false)
       }
-      console.log(`[Live Trains] Announcement for ${firstUnannounced.serviceIdGuid} complete`)
-      setIsPlaying(false)
+      console.log(`[Live Trains] Announcement for ${firstUnannounced.serviceIdGuid} complete: waiting 5s until next`)
+      setTimeout(() => setIsPlaying(false), 5000)
     }
 
     const refreshInterval = setInterval(checkAndPlay, 10_000)
     checkAndPlay()
 
     return () => {
+      console.log('Clearing interval', refreshInterval)
       clearInterval(refreshInterval)
+      abortController.abort()
     }
   }, [
     hasEnabledFeature,

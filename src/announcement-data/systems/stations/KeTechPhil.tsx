@@ -850,10 +850,15 @@ export default class KeTechPhil extends StationAnnouncementSystem {
 
       if (!firstAdded) {
         if (order.length === 1 && plats.length === 1) {
-          files.push('m.due to a short platform at', `station.m.${plats[0]}`, 'm.customers for this station', ...s.split(','))
+          files.push(
+            { id: 'm.due to a short platform at', opts: { delayStart: 400 } },
+            `station.m.${plats[0]}`,
+            'm.customers for this station',
+            ...s.split(','),
+          )
         } else {
           files.push(
-            's.due to short platforms customers for',
+            { id: 's.due to short platforms customers for', opts: { delayStart: 400 } },
             ...this.pluraliseAudio(plats, {
               prefix: 'station.m.',
               finalPrefix: 'station.m.',
@@ -1165,7 +1170,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     switch (splitData.divideType) {
       case 'splitTerminates':
       case 'splits':
-        files.push('s.this train will divide at', `station.e.${splitPoint.crsCode}`)
+        files.push({ id: 's.this train will divide at', opts: { delayStart: 200 } }, `station.e.${splitPoint.crsCode}`)
         break
     }
 

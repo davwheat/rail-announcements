@@ -907,19 +907,34 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     const reqStops = new Set(allStops.filter(s => s.requestStop).map(s => s.crsCode))
     if (reqStops.size === 0) return []
 
+    //? KeTech style:
+    //
+    // files.push(
+    //   ...this.pluraliseAudio(Array.from(reqStops), {
+    //     prefix: 'station.m.',
+    //     finalPrefix: 'station.m.',
+    //     andId: 'm.and',
+    //     firstItemDelay: 400,
+    //     beforeItemDelay: this.CALLING_POINT_DELAY,
+    //     beforeAndDelay: this.CALLING_POINT_AND_DELAY,
+    //     afterAndDelay: this.CALLING_POINT_AND_DELAY,
+    //   }),
+    //   reqStops.size === 1 ? 'm.is a request stop and customers for this station' : 'm.are request stops and customers for these stations',
+    //   'm.should ask the conductor on the train to arrange for the train to stop',
+    //   'e.to allow them to alight',
+    // )
+
     files.push(
+      { id: 's.customers may request to stop at', opts: { delayStart: 400 } },
       ...this.pluraliseAudio(Array.from(reqStops), {
         prefix: 'station.m.',
         finalPrefix: 'station.m.',
-        andId: 'm.and',
-        firstItemDelay: 400,
+        andId: 'm.or-2',
         beforeItemDelay: this.CALLING_POINT_DELAY,
         beforeAndDelay: this.CALLING_POINT_AND_DELAY,
         afterAndDelay: this.CALLING_POINT_AND_DELAY,
       }),
-      reqStops.size === 1 ? 'm.is a request stop and customers for this station' : 'm.are request stops and customers for these stations',
-      'm.should ask the conductor on the train to arrange for the train to stop',
-      'e.to allow them to alight',
+      'e.by contacting the conductor on board the train',
     )
 
     return files

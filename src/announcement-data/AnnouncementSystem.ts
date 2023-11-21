@@ -261,14 +261,10 @@ export default abstract class AnnouncementSystem {
         if (items.length - 1 === i) {
           if (_options.finalPrefix !== undefined) {
             item.id = `${_options.finalPrefix}${item.id}`
-
-            return item
           }
         } else {
           if (_options.prefix !== undefined) {
             item.id = `${_options.prefix}${item.id}`
-
-            return item
           }
         }
 
@@ -295,6 +291,9 @@ export default abstract class AnnouncementSystem {
         _items[items.length - 1].opts!!.delayStart = _options.afterAndDelay ?? _options.beforeItemDelay
       }
     }
+
+    console.log(options)
+    console.log(_items)
 
     return _items
   }

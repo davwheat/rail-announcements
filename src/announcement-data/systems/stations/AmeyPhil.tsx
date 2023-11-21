@@ -46,9 +46,9 @@ interface SplitInfoStop {
   }
 }
 
-export default class KeTechPhil extends StationAnnouncementSystem {
-  readonly NAME = 'KeTech - Phil Sayer'
-  readonly ID = 'KETECH_PHIL_V1'
+export default class AmeyPhil extends StationAnnouncementSystem {
+  readonly NAME = 'Amey/Ditra - Phil Sayer'
+  readonly ID = 'AMEY_PHIL_V1'
   readonly FILE_PREFIX = 'station/ketech/phil'
   readonly SYSTEM_TYPE = 'station'
 
@@ -517,6 +517,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     'a road vehicle damaging a level crossing',
     'a road vehicle on the line',
     'a road vehicle striking a railway bridge',
+    'a security alert',
     'a shortage of available coaches',
     'a shortage of serviceable trains',
     'a shortage of train dispatch staff',
@@ -618,6 +619,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     'emergency engineering work',
     'emergency track repairs',
     'engineering works',
+    'engineering work',
     'extreme weather conditions',
     'failure of a preceding train',
     'flooding on the line',
@@ -848,10 +850,15 @@ export default class KeTechPhil extends StationAnnouncementSystem {
 
       if (!firstAdded) {
         if (order.length === 1 && plats.length === 1) {
-          files.push('m.due to a short platform at', `station.m.${plats[0]}`, 'm.customers for this station', ...s.split(','))
+          files.push(
+            { id: 'm.due to a short platform at', opts: { delayStart: 400 } },
+            `station.m.${plats[0]}`,
+            'm.customers for this station',
+            ...s.split(','),
+          )
         } else {
           files.push(
-            's.due to short platforms customers for',
+            { id: 's.due to short platforms customers for', opts: { delayStart: 400 } },
             ...this.pluraliseAudio(plats, {
               prefix: 'station.m.',
               finalPrefix: 'station.m.',
@@ -900,19 +907,34 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     const reqStops = new Set(allStops.filter(s => s.requestStop).map(s => s.crsCode))
     if (reqStops.size === 0) return []
 
+    //? KeTech style:
+    //
+    // files.push(
+    //   ...this.pluraliseAudio(Array.from(reqStops), {
+    //     prefix: 'station.m.',
+    //     finalPrefix: 'station.m.',
+    //     andId: 'm.and',
+    //     firstItemDelay: 400,
+    //     beforeItemDelay: this.CALLING_POINT_DELAY,
+    //     beforeAndDelay: this.CALLING_POINT_AND_DELAY,
+    //     afterAndDelay: this.CALLING_POINT_AND_DELAY,
+    //   }),
+    //   reqStops.size === 1 ? 'm.is a request stop and customers for this station' : 'm.are request stops and customers for these stations',
+    //   'm.should ask the conductor on the train to arrange for the train to stop',
+    //   'e.to allow them to alight',
+    // )
+
     files.push(
+      { id: 's.customers may request to stop at', opts: { delayStart: 400 } },
       ...this.pluraliseAudio(Array.from(reqStops), {
         prefix: 'station.m.',
         finalPrefix: 'station.m.',
-        andId: 'm.and',
-        firstItemDelay: 400,
+        andId: 'm.or-2',
         beforeItemDelay: this.CALLING_POINT_DELAY,
         beforeAndDelay: this.CALLING_POINT_AND_DELAY,
         afterAndDelay: this.CALLING_POINT_AND_DELAY,
       }),
-      reqStops.size === 1 ? 'm.is a request stop and customers for this station' : 'm.are request stops and customers for these stations',
-      'm.should ask the conductor on the train to arrange for the train to stop',
-      'e.to allow them to alight',
+      'e.by contacting the conductor on board the train',
     )
 
     return files
@@ -1163,7 +1185,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     switch (splitData.divideType) {
       case 'splitTerminates':
       case 'splits':
-        files.push('s.this train will divide at', `station.e.${splitPoint.crsCode}`)
+        files.push({ id: 's.this train will divide at', opts: { delayStart: 200 } }, `station.e.${splitPoint.crsCode}`)
         break
     }
 
@@ -1449,6 +1471,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     'AUD',
     'AUG',
     'AUI',
+    'AUK',
     'AUR',
     'AUW',
     'AVF',
@@ -1711,6 +1734,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     'BUE',
     'BUG',
     'BUH',
+    'BUI',
     'BUJ',
     'BUK',
     'BUL',
@@ -3676,6 +3700,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
     'WAS',
     'WAT',
     'WBC',
+    'WBD',
     'WBL',
     'WBO',
     'WBP',
@@ -4280,7 +4305,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
 }
 
 interface LiveTrainAnnouncementsProps extends ICustomAnnouncementPaneProps {
-  system: KeTechPhil
+  system: AmeyPhil
   nextTrainHandler: (options: INextTrainAnnouncementOptions) => Promise<void>
 }
 

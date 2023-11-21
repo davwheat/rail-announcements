@@ -46,9 +46,9 @@ interface SplitInfoStop {
   }
 }
 
-export default class KeTechPhil extends StationAnnouncementSystem {
-  readonly NAME = 'KeTech - Phil Sayer'
-  readonly ID = 'KETECH_PHIL_V1'
+export default class AmeyPhil extends StationAnnouncementSystem {
+  readonly NAME = 'Amey/Ditra - Phil Sayer'
+  readonly ID = 'AMEY_PHIL_V1'
   readonly FILE_PREFIX = 'station/ketech/phil'
   readonly SYSTEM_TYPE = 'station'
 
@@ -4290,7 +4290,7 @@ export default class KeTechPhil extends StationAnnouncementSystem {
 }
 
 interface LiveTrainAnnouncementsProps extends ICustomAnnouncementPaneProps {
-  system: KeTechPhil
+  system: AmeyPhil
   nextTrainHandler: (options: INextTrainAnnouncementOptions) => Promise<void>
 }
 

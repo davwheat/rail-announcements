@@ -261,6 +261,11 @@ const changelog: IChangelogVersion[] = [
     date: '2023-11-17',
     additions: ['[KeTech Phil] Add disruption announcements', '[KeTech Phil] Add (beta) live train announcements'],
   },
+  {
+    date: '2023-11-22',
+    additions: ['[Amey Celia] Replace KeTech Celia with Amey Celia using raw audio files'],
+    otherChanges: ['[Amey Phil] Renamed KeTech Phil to Amey Phil to reflect his wording and scripts'],
+  },
 ]
 
 export default changelog

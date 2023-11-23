@@ -8,7 +8,7 @@ import crsToStationItemMapper, { stationItemCompleter } from '@helpers/crsToStat
 import { AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
 import FullscreenIcon from 'mdi-react/FullscreenIcon'
 
-type ChimeType = 'three' | 'four' | 'none'
+export type ChimeType = 'three' | 'four' | 'none'
 
 interface INextTrainAnnouncementOptions {
   chime: ChimeType
@@ -47,13 +47,17 @@ interface SplitInfoStop {
 }
 
 export default class AmeyPhil extends StationAnnouncementSystem {
-  readonly NAME = 'Amey/Ditra - Phil Sayer'
-  readonly ID = 'AMEY_PHIL_V1'
-  readonly FILE_PREFIX = 'station/ketech/phil'
+  readonly NAME: string = 'Amey/Ditra - Phil Sayer'
+  readonly ID: string = 'AMEY_PHIL_V1'
+  readonly FILE_PREFIX: string = 'station/ketech/phil'
   readonly SYSTEM_TYPE = 'station'
 
-  private readonly CALLING_POINT_DELAY = 200
-  private readonly CALLING_POINT_AND_DELAY = 100
+  protected readonly CALLING_POINT_DELAY: number = 200
+  protected readonly CALLING_POINT_AND_DELAY: number = 100
+
+  protected get DEFAULT_CHIME(): ChimeType {
+    return 'four'
+  }
 
   private get announcementPresets(): Readonly<Record<string, ICustomAnnouncementPreset[]>> {
     return {
@@ -61,7 +65,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         {
           name: '12:28 | SN Littlehampton to Brighton',
           state: {
-            chime: 'four',
+            chime: this.DEFAULT_CHIME,
             platform: '2',
             hour: '12',
             min: '28',
@@ -75,7 +79,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         {
           name: '16:05 | SN Victoria to Portsmouth & Bognor',
           state: {
-            chime: 'four',
+            chime: this.DEFAULT_CHIME,
             platform: '12',
             hour: '16',
             min: '05',
@@ -109,7 +113,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         {
           name: '17:15 | GX Brighton to London Victoria',
           state: {
-            chime: 'four',
+            chime: this.DEFAULT_CHIME,
             platform: '5',
             hour: '17',
             min: '15',
@@ -123,7 +127,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         {
           name: '11:18 | VT Euston to Edinburgh',
           state: {
-            chime: 'four',
+            chime: this.DEFAULT_CHIME,
             platform: '6',
             hour: '11',
             min: '18',
@@ -152,9 +156,23 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           },
         },
         {
+          name: '13:15 | VT Manchester to Euston',
+          state: {
+            chime: this.DEFAULT_CHIME,
+            platform: '6',
+            hour: '13',
+            min: '15',
+            toc: 'virgin pendolino',
+            terminatingStationCode: 'EUS',
+            vias: [],
+            callingAt: ['SPT', 'MAC', 'SOT', 'RUG', 'MKC'].map(stationItemCompleter),
+            coaches: '9 coaches',
+          },
+        },
+        {
           name: '08:20 | XC Aberdeen to Penzance',
           state: {
-            chime: 'four',
+            chime: this.DEFAULT_CHIME,
             platform: '3',
             hour: '08',
             min: '20',
@@ -209,7 +227,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           // http://www.1s76.com/1S76%202008.htm
           name: '08:20 | 1O23 XC Manchester to Brighton (2008)',
           state: {
-            chime: 'four',
+            chime: this.DEFAULT_CHIME,
             platform: '3',
             hour: '08',
             min: '20',
@@ -225,7 +243,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         {
           name: '18:07 | Chiltern MYB - Stourbridge',
           state: {
-            chime: 'four',
+            chime: this.DEFAULT_CHIME,
             platform: '2',
             hour: '18',
             min: '07',
@@ -239,7 +257,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         {
           name: '12:50 | SN Eastbourne - Ashford',
           state: {
-            chime: 'four',
+            chime: this.DEFAULT_CHIME,
             platform: '2',
             hour: '12',
             min: '50',
@@ -268,7 +286,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     }
   }
 
-  readonly AVAILABLE_TOCS = {
+  protected readonly AVAILABLE_TOCS = {
     withServiceToFrom: [
       'a replacement bus',
       'additional',
@@ -465,7 +483,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       'West Yorkshire metro train',
     ],
   }
-  private readonly DISRUPTION_REASONS: string[] = [
+
+  protected readonly DISRUPTION_REASONS: string[] = [
     'a broken down freight train',
     'a broken down preceding train',
     'a broken down train',
@@ -713,661 +732,11 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     // 'who is delayed on a late-running service',
   ]
 
-  readonly ALL_AVAILABLE_TOCS = [...this.AVAILABLE_TOCS.standaloneOnly, ...this.AVAILABLE_TOCS.withServiceToFrom].sort((a, b) =>
-    a.localeCompare(b),
-  )
-
-  private async getFilesForBasicTrainInfo(
-    hour: string,
-    min: string,
-    toc: string,
-    vias: string[],
-    terminatingStation: string,
-    callingPoints: CallingAtPoint[],
-    stationsAlwaysMiddle: boolean = false,
-  ): Promise<AudioItem[]> {
-    const files: AudioItem[] = [`hour.s.${hour}`, `mins.m.${min}`]
-
-    if (toc === '') {
-      files.push({
-        id: `m.service to`,
-        opts: { delayStart: 50 },
-      })
-    } else {
-      if (this.AVAILABLE_TOCS.standaloneOnly.some(x => x.toLowerCase() === toc.toLowerCase())) {
-        files.push(
-          {
-            id: `toc.m.${toc.toLowerCase()}`,
-            opts: { delayStart: 150 },
-          },
-          'm.service to',
-        )
-      } else {
-        files.push({
-          id: `toc.m.${toc.toLowerCase()} service to`,
-          opts: { delayStart: 150 },
-        })
-      }
-    }
-
-    const dividesAt = callingPoints.find(s => s.splitType === 'splitTerminates' || s.splitType === 'splits')
-
-    if (dividesAt && (dividesAt.splitCallingPoints?.length ?? 0) > 0) {
-      const allDestinations = [terminatingStation, dividesAt.splitCallingPoints!![dividesAt.splitCallingPoints!!.length - 1].crsCode]
-
-      files.push(
-        ...this.pluraliseAudio(allDestinations, {
-          prefix: 'station.m.',
-          finalPrefix: stationsAlwaysMiddle ? 'station.m.' : 'station.e.',
-          andId: 'm.and',
-          firstItemDelay: 100,
-          beforeAndDelay: 100,
-          beforeItemDelay: 50,
-        }),
-      )
-    } else {
-      if (vias.length !== 0) {
-        files.push(
-          `station.m.${terminatingStation}`,
-          'm.via',
-          ...this.pluraliseAudio(
-            vias.map((stn, i) => `station.${!stationsAlwaysMiddle && i === vias.length - 1 ? 'e' : 'm'}.${stn}`),
-            {
-              andId: 'm.and',
-              beforeAndDelay: 100,
-            },
-          ),
-        )
-      } else {
-        files.push(`station.${stationsAlwaysMiddle ? 'm' : 'e'}.${terminatingStation}`)
-      }
-    }
-
-    return files
-  }
-
-  private async getShortPlatforms(
-    callingPoints: CallingAtPoint[],
-    terminatingStation: string,
-    overallLength: number | null,
-  ): Promise<AudioItem[]> {
-    const files: AudioItem[] = []
-
-    const splitData = this.getSplitInfo(callingPoints, terminatingStation, overallLength)
-    const allStops = splitData.stopsUpToSplit.concat(splitData.splitA?.stops ?? []).concat(splitData.splitB?.stops ?? [])
-
-    function shortDataToAudio(shortData: string, stopData: SplitInfoStop['portion']): AudioItem[] {
-      const files: AudioItem[] = []
-
-      const [pos, len] = shortData.split('.').map((x, i) => (i === 1 ? parseInt(x) : x)) as [string, number]
-
-      if (stopData.position === 'any' || stopData.position === pos) {
-        if (len === 1) {
-          files.push(`e.should travel in the ${pos} coach of the train`)
-        } else {
-          files.push(`m.should travel in the ${pos}`, `platform.s.${len}`, 'e.coaches of the train')
-        }
-      } else {
-        if (len === 1) {
-          files.push(`m.should travel in the ${pos}`, 'm.coach')
-        } else {
-          files.push(`m.should travel in the ${pos}`, `platform.s.${len}`, 'm.coaches')
-        }
-
-        if (stopData.length === 1) {
-          files.push('m.of', 'm.the', `m.${stopData.position}`, 'e.coach of this train')
-        } else {
-          files.push('m.of', 'm.the', `m.${stopData.position}`, `platform.s.${stopData.length}`, 'e.coaches of the train')
-        }
-      }
-
-      return files
-    }
-
-    const shortPlatforms = allStops.reduce(
-      (acc, curr) => {
-        if (!curr.shortPlatform) return acc
-
-        const data = shortDataToAudio(curr.shortPlatform, curr.portion).join(',')
-
-        if (acc[data]) {
-          acc[data].push(curr.crsCode)
-        } else {
-          acc[data] = [curr.crsCode]
-        }
-
-        return acc
-      },
-      {} as Record<string, string[]>,
-    )
-
-    const order = Object.keys(shortPlatforms).sort((a, b) => a.localeCompare(b))
-
-    let firstAdded = false
-
-    order.forEach(s => {
-      const plats = shortPlatforms[s]
-
-      if (!firstAdded) {
-        if (order.length === 1 && plats.length === 1) {
-          files.push(
-            { id: 'm.due to a short platform at', opts: { delayStart: 400 } },
-            `station.m.${plats[0]}`,
-            'm.customers for this station',
-            ...s.split(','),
-          )
-        } else {
-          files.push(
-            { id: 's.due to short platforms customers for', opts: { delayStart: 400 } },
-            ...this.pluraliseAudio(plats, {
-              prefix: 'station.m.',
-              finalPrefix: 'station.m.',
-              andId: 'm.and',
-              beforeAndDelay: this.CALLING_POINT_AND_DELAY,
-              beforeItemDelay: this.CALLING_POINT_DELAY,
-              afterAndDelay: this.CALLING_POINT_AND_DELAY,
-            }),
-            ...s.split(','),
-          )
-        }
-      } else {
-        files.push(
-          {
-            id: 's.customers for',
-            opts: { delayStart: 200 },
-          },
-          ...this.pluraliseAudio(plats, {
-            prefix: 'station.m.',
-            finalPrefix: 'station.m.',
-            andId: 'm.and',
-            beforeAndDelay: this.CALLING_POINT_AND_DELAY,
-            beforeItemDelay: this.CALLING_POINT_DELAY,
-            afterAndDelay: this.CALLING_POINT_AND_DELAY,
-          }),
-          ...s.split(','),
-        )
-      }
-
-      firstAdded = true
-    })
-
-    return files
-  }
-
-  private async getRequestStops(
-    callingPoints: CallingAtPoint[],
-    terminatingStation: string,
-    overallLength: number | null,
-  ): Promise<AudioItem[]> {
-    const files: AudioItem[] = []
-
-    const splitData = this.getSplitInfo(callingPoints, terminatingStation, overallLength)
-    const allStops = splitData.stopsUpToSplit.concat(splitData.splitA?.stops ?? []).concat(splitData.splitB?.stops ?? [])
-
-    const reqStops = new Set(allStops.filter(s => s.requestStop).map(s => s.crsCode))
-    if (reqStops.size === 0) return []
-
-    //? KeTech style:
-    //
-    // files.push(
-    //   ...this.pluraliseAudio(Array.from(reqStops), {
-    //     prefix: 'station.m.',
-    //     finalPrefix: 'station.m.',
-    //     andId: 'm.and',
-    //     firstItemDelay: 400,
-    //     beforeItemDelay: this.CALLING_POINT_DELAY,
-    //     beforeAndDelay: this.CALLING_POINT_AND_DELAY,
-    //     afterAndDelay: this.CALLING_POINT_AND_DELAY,
-    //   }),
-    //   reqStops.size === 1 ? 'm.is a request stop and customers for this station' : 'm.are request stops and customers for these stations',
-    //   'm.should ask the conductor on the train to arrange for the train to stop',
-    //   'e.to allow them to alight',
-    // )
-
-    files.push(
-      { id: 's.customers may request to stop at', opts: { delayStart: 400 } },
-      ...this.pluraliseAudio(Array.from(reqStops), {
-        prefix: 'station.m.',
-        finalPrefix: 'station.m.',
-        andId: 'm.or-2',
-        beforeItemDelay: this.CALLING_POINT_DELAY,
-        beforeAndDelay: this.CALLING_POINT_AND_DELAY,
-        afterAndDelay: this.CALLING_POINT_AND_DELAY,
-      }),
-      'e.by contacting the conductor on board the train',
-    )
-
-    return files
-  }
-
-  private getSplitInfo(
-    callingPoints: CallingAtPoint[],
-    terminatingStation: string,
-    overallLength: number | null,
-  ): {
-    divideType: CallingAtPoint['splitType']
-    stopsUpToSplit: SplitInfoStop[]
-    splitA: {
-      stops: SplitInfoStop[]
-      position: 'front' | 'middle' | 'rear' | 'unknown'
-      length: number | null
-    } | null
-    splitB: {
-      stops: SplitInfoStop[]
-      position: 'front' | 'middle' | 'rear' | 'unknown'
-      length: number | null
-    } | null
-  } {
-    // If there are no splits, return an empty array
-    if (callingPoints.every(p => p.splitType === 'none' || p.splitType === undefined)) {
-      return {
-        divideType: 'none',
-        stopsUpToSplit: callingPoints.map(p => ({
-          crsCode: p.crsCode,
-          shortPlatform: p.shortPlatform ?? '',
-          requestStop: p.requestStop ?? false,
-          portion: { position: 'any', length: overallLength },
-        })),
-        splitA: null,
-        splitB: null,
-      }
-    }
-
-    const stopsUntilFormationChange: CallingAtPoint[] = []
-    let dividePoint: CallingAtPoint | undefined = undefined
-    const stopsAfterFormationChange: CallingAtPoint[] = []
-
-    {
-      let preSplit = true
-      callingPoints.forEach((p, i) => {
-        if (preSplit) {
-          stopsUntilFormationChange.push(p)
-        } else {
-          dividePoint ||= callingPoints[i - 1]
-          stopsAfterFormationChange.push(p)
-        }
-
-        preSplit &&= p.splitType === 'none' || p.splitType === undefined
-      })
-    }
-
-    stopsAfterFormationChange.push(
-      stationItemCompleter({
-        crsCode: terminatingStation,
-      }),
-    )
-
-    if (overallLength === null) {
-      return {
-        divideType: dividePoint!!.splitType,
-        stopsUpToSplit: stopsUntilFormationChange.map(p => ({
-          crsCode: p.crsCode,
-          shortPlatform: p.shortPlatform ?? '',
-          requestStop: p.requestStop ?? false,
-          portion: { position: 'any', length: null },
-        })),
-        splitB: {
-          stops: (dividePoint!!.splitCallingPoints ?? []).map(p => ({
-            crsCode: p.crsCode,
-            shortPlatform: p.shortPlatform ?? '',
-            requestStop: p.requestStop ?? false,
-            portion: { position: 'unknown', length: null },
-          })),
-          position: 'unknown',
-          length: null,
-        },
-        splitA: {
-          stops: stopsAfterFormationChange.map(p => ({
-            crsCode: p.crsCode,
-            shortPlatform: p.shortPlatform ?? '',
-            requestStop: p.requestStop ?? false,
-            portion: { position: aPos, length: aCount },
-          })),
-          position: 'unknown',
-          length: null,
-        },
-      }
-    }
-
-    const [bPos, bCount] = (dividePoint!!.splitForm ?? 'front.1').split('.').map((x, i) => (i === 1 ? parseInt(x) : x)) as [string, number]
-    const aPos = bPos === 'front' ? 'rear' : 'front'
-    const aCount = Math.min(Math.max(1, overallLength - bCount), 12)
-
-    return {
-      divideType: dividePoint!!.splitType,
-      stopsUpToSplit: stopsUntilFormationChange.map(p => ({
-        crsCode: p.crsCode,
-        shortPlatform: p.shortPlatform ?? '',
-        requestStop: p.requestStop ?? false,
-        portion: { position: 'any', length: overallLength },
-      })),
-      splitB: {
-        stops: (dividePoint!!.splitCallingPoints ?? []).map(p => ({
-          crsCode: p.crsCode,
-          shortPlatform: p.shortPlatform ?? '',
-          requestStop: p.requestStop ?? false,
-          portion: { position: bPos as 'front' | 'middle' | 'rear', length: bCount },
-        })),
-        position: bPos as 'front' | 'middle' | 'rear',
-        length: bCount,
-      },
-      splitA: {
-        stops: stopsAfterFormationChange.map(p => ({
-          crsCode: p.crsCode,
-          shortPlatform: p.shortPlatform ?? '',
-          requestStop: p.requestStop ?? false,
-          portion: { position: aPos, length: aCount },
-        })),
-        position: aPos,
-        length: aCount,
-      },
-    }
-  }
-
-  private async getCallingPointsWithSplits(
-    callingPoints: CallingAtPoint[],
-    terminatingStation: string,
-    overallLength: number | null,
-  ): Promise<AudioItem[]> {
-    const files: AudioItem[] = []
-
-    const splitData = this.getSplitInfo(callingPoints, terminatingStation, overallLength)
-
-    if (splitData.divideType === 'none') {
-      return []
-    }
-
-    const splitPoint = splitData.stopsUpToSplit[splitData.stopsUpToSplit.length - 1]
-
-    files.push(
-      ...this.pluraliseAudio(
-        splitData.stopsUpToSplit.map(s => `station.m.${s.crsCode}`),
-        {
-          andId: 'm.and',
-          beforeItemDelay: this.CALLING_POINT_DELAY,
-          beforeAndDelay: this.CALLING_POINT_AND_DELAY,
-          afterAndDelay: this.CALLING_POINT_AND_DELAY,
-        },
-      ),
-    )
-
-    switch (splitData.divideType) {
-      case 'splitTerminates':
-        files.push('e.where the train will divide', {
-          id: 'w.please make sure you travel in the correct part of this train',
-          opts: { delayStart: 400 },
-        })
-
-        if (splitData.splitB!!.position === 'unknown') {
-          files.push({ id: `s.please note that`, opts: { delayStart: 400 } }, `m.coaches`, `m.will be detached and will terminate at`)
-        } else {
-          files.push(
-            { id: `s.please note that the ${splitData.splitB!!.position}`, opts: { delayStart: 400 } },
-            `m.${splitData.splitB!!.length === 1 ? 'coach' : `${splitData.splitB!!.length} coaches`} will detach at`,
-          )
-        }
-
-        files.push(`station.e.${splitPoint.crsCode}`)
-        break
-
-      case 'splits':
-        files.push('e.where the train will divide', {
-          id: 'w.please make sure you travel in the correct part of this train',
-          opts: { delayStart: 400 },
-        })
-
-        if (!splitData.splitB!!.stops.length) throw new Error("Splitting train doesn't have any calling points")
-        break
-    }
-
-    const aPortionStops = new Set([...splitData.splitA!!.stops.map(s => s.crsCode)])
-    const bPortionStops = new Set([...splitData.splitB!!.stops.map(s => s.crsCode)])
-    const anyPortionStops = new Set([
-      ...splitData.stopsUpToSplit.map(s => s.crsCode),
-      ...Array.from(aPortionStops).filter(x => bPortionStops.has(x)),
-    ])
-
-    Array.from(anyPortionStops).forEach(s => {
-      if (aPortionStops.has(s)) aPortionStops.delete(s)
-      if (bPortionStops.has(s)) bPortionStops.delete(s)
-    })
-
-    const listStops = (stops: string[]): AudioItem[] => {
-      return [
-        { id: 's.customers for', opts: { delayStart: 400 } },
-        ...this.pluraliseAudio(
-          stops.map(s => `station.m.${s}`),
-          {
-            andId: 'm.and',
-            beforeAndDelay: this.CALLING_POINT_AND_DELAY,
-            afterAndDelay: this.CALLING_POINT_AND_DELAY,
-            beforeItemDelay: this.CALLING_POINT_DELAY,
-          },
-        ),
-      ]
-    }
-
-    if (anyPortionStops.size !== 0) files.push(...listStops(Array.from(anyPortionStops)), 'e.may travel in any part of the train')
-
-    const aFiles =
-      aPortionStops.size === 0
-        ? []
-        : [
-            ...listStops(Array.from(aPortionStops)),
-            ...(splitData.splitA!!.position === 'unknown'
-              ? ['w.please listen for announcements on board the train']
-              : [
-                  `m.should travel in the ${splitData.splitA!!.position}`,
-                  ...(splitData.splitA!!.length === null ? [] : [`platform.s.${splitData.splitA!!.length}`]),
-                  'e.coaches of the train',
-                ]),
-          ]
-    const bFiles =
-      bPortionStops.size === 0
-        ? []
-        : [
-            ...listStops(Array.from(bPortionStops)),
-            ...(splitData.splitB!!.position === 'unknown'
-              ? ['w.please listen for announcements on board the train']
-              : [
-                  `m.should travel in the ${splitData.splitB!!.position}`,
-                  ...(splitData.splitB!!.length === null ? [] : [`platform.s.${splitData.splitB!!.length}`]),
-                  'e.coaches of the train',
-                ]),
-          ]
-
-    if (splitData.splitA!!.position === 'front') {
-      files.push(...aFiles, ...bFiles)
-    } else {
-      files.push(...bFiles, ...aFiles)
-    }
-
-    switch (splitData.divideType) {
-      case 'splitTerminates':
-      case 'splits':
-        files.push({ id: 's.this train will divide at', opts: { delayStart: 200 } }, `station.e.${splitPoint.crsCode}`)
-        break
-    }
-
-    return files
-  }
-
-  private async getCallingPoints(
-    callingPoints: CallingAtPoint[],
-    terminatingStation: string,
-    overallLength: number | null,
-  ): Promise<AudioItem[]> {
-    const files: AudioItem[] = []
-
-    const callingPointsWithSplits = await this.getCallingPointsWithSplits(callingPoints, terminatingStation, overallLength)
-
-    if (callingPointsWithSplits.length !== 0) {
-      files.push({ id: 'm.calling at', opts: { delayStart: 750 } }, ...callingPointsWithSplits)
-      return files
-    }
-
-    files.push({ id: 'm.calling at', opts: { delayStart: 750 } })
-
-    if (callingPoints.length === 0) {
-      files.push(`station.m.${terminatingStation}`, 'e.only')
-    } else {
-      files.push(
-        ...this.pluraliseAudio([...callingPoints.map(stn => `station.m.${stn.crsCode}`), `station.e.${terminatingStation}`], {
-          andId: 'm.and',
-          beforeItemDelay: this.CALLING_POINT_DELAY,
-          beforeAndDelay: this.CALLING_POINT_AND_DELAY,
-          afterAndDelay: this.CALLING_POINT_AND_DELAY,
-        }),
-      )
-    }
-
-    return files
-  }
-
-  private async playNextTrainAnnouncement(options: INextTrainAnnouncementOptions, download: boolean = false): Promise<void> {
-    const files: AudioItem[] = []
-
-    if (options.chime !== 'none') files.push(`sfx - ${options.chime} chimes`)
-
-    const plat = parseInt(options.platform)
-
-    const platFiles: AudioItem[] = []
-
-    if (plat <= 12 || ['a', 'b'].includes(options.platform.toLowerCase())) {
-      platFiles.push({ id: `s.platform ${options.platform} for the`, opts: { delayStart: 250 } })
-      if (options.isDelayed) platFiles.push('m.delayed')
-    } else {
-      platFiles.push(
-        { id: `s.platform`, opts: { delayStart: 250 } },
-        `platform.s.${options.platform}`,
-        options.isDelayed ? `m.for the delayed` : `m.for the`,
-      )
-    }
-
-    files.push(
-      ...platFiles,
-      ...(await this.getFilesForBasicTrainInfo(
-        options.hour,
-        options.min,
-        options.toc,
-        options.vias.map(s => s.crsCode),
-        options.terminatingStationCode,
-        options.callingAt,
-      )),
-    )
-
-    try {
-      files.push(
-        ...(await this.getCallingPoints(
-          options.callingAt,
-          options.terminatingStationCode,
-          options.coaches ? parseInt(options.coaches.split(' ')[0]) : null,
-        )),
-      )
-    } catch (e) {
-      if (e instanceof Error) {
-        alert(e.message)
-        console.error(e)
-        return
-      }
-    }
-
-    files.push(
-      ...(await this.getShortPlatforms(
-        options.callingAt,
-        options.terminatingStationCode,
-        options.coaches ? parseInt(options.coaches.split(' ')[0]) : null,
-      )),
-    )
-    files.push(
-      ...(await this.getRequestStops(
-        options.callingAt,
-        options.terminatingStationCode,
-        options.coaches ? parseInt(options.coaches.split(' ')[0]) : null,
-      )),
-    )
-
-    if (options.coaches) {
-      const coaches = options.coaches.split(' ')[0]
-
-      // Platforms share the same audio as coach numbers
-      files.push(
-        { id: 's.this train is formed of', opts: { delayStart: 250 } },
-        `platform.s.${coaches}`,
-        `e.${coaches == '1' ? 'coach' : 'coaches'}`,
-      )
-    }
-
-    files.push(
-      ...platFiles,
-      ...(await this.getFilesForBasicTrainInfo(
-        options.hour,
-        options.min,
-        options.toc,
-        options.vias.map(s => s.crsCode),
-        options.terminatingStationCode,
-        options.callingAt,
-      )),
-    )
-
-    await this.playAudioFiles(files, download)
-  }
-
-  private async playDisruptedTrainAnnouncement(options: IDisruptedTrainAnnouncementOptions, download: boolean = false): Promise<void> {
-    const files: AudioItem[] = []
-
-    if (options.chime !== 'none') files.push(`sfx - ${options.chime} chimes`)
-
-    files.push('s.were sorry to announce that the')
-    files.push(
-      ...(await this.getFilesForBasicTrainInfo(
-        options.hour,
-        options.min,
-        options.toc,
-        options.vias.map(s => s.crsCode),
-        options.terminatingStationCode,
-        [],
-        true,
-      )),
-    )
-
-    const endInflection = options.disruptionReason ? 'm' : 'e'
-
-    switch (options.disruptionType) {
-      case 'delayedBy':
-        files.push('m.is delayed by approximately')
-
-        const num = parseInt(options.delayTime)
-
-        if (num < 10) {
-          files.push(`platform.m.${num}`)
-        } else {
-          files.push(`mins.m.${num}`)
-        }
-
-        files.push(`${endInflection}.${num !== 1 ? 'minutes' : 'minute'}`)
-        break
-      case 'delay':
-        files.push(`${endInflection}.is being delayed`)
-        break
-      case 'cancel':
-        files.push(`${endInflection}.has been cancelled`)
-        break
-    }
-
-    if (options.disruptionReason) {
-      files.push('m.due to', `disruption-reason.e.${options.disruptionReason}`)
-    }
-
-    files.push({ id: 'w.were sorry for the delay this will cause to your journey', opts: { delayStart: 250 } })
-
-    await this.playAudioFiles(files, download)
-  }
-
-  readonly platforms = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+  readonly PLATFORMS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
     .flatMap(x => [`${x}`, `${x}a`, `${x}b`, `${x}c`, `${x}d`])
     .concat(['13', '14', '15', '16', '17', '18', '19', '20', 'a', 'b'])
-  readonly stations = [
+
+  readonly STATIONS = [
     'AAP',
     'AAT',
     'ABA',
@@ -2182,7 +1551,6 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     'EXR',
     'EXT',
     'EYN',
-    'Eye',
     'FAL',
     'FAV',
     'FAZ',
@@ -3908,7 +3276,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     'ZFD',
     'ZLW',
   ]
-  private shortPlatforms = [
+
+  protected readonly SHORT_PLATFORMS = [
     { value: 'front.1', title: 'Front coach' },
     { value: 'front.2', title: 'Front 2 coaches' },
     { value: 'front.3', title: 'Front 3 coaches' },
@@ -3946,7 +3315,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     { value: 'rear.11', title: 'Rear 11 coaches' },
     { value: 'rear.12', title: 'Rear 12 coaches' },
   ]
-  private splits = [
+
+  protected readonly SPLITS = [
     { value: 'front.1', title: 'Front coach' },
     { value: 'front.2', title: 'Front 2 coaches' },
     { value: 'front.3', title: 'Front 3 coaches' },
@@ -3985,6 +3355,693 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     { value: 'rear.12', title: 'Rear 12 coaches' },
   ]
 
+  readonly ALL_AVAILABLE_TOCS = [...this.AVAILABLE_TOCS.standaloneOnly, ...this.AVAILABLE_TOCS.withServiceToFrom].sort((a, b) =>
+    a.localeCompare(b),
+  )
+
+  processTocForLiveTrains(toc: string, originCrs: string, destinationCrs: string): string {
+    switch (toc.toLowerCase()) {
+      default:
+        return this.ALL_AVAILABLE_TOCS.find(t => t?.toLowerCase() === toc?.toLowerCase()) ?? ''
+
+      case 'west midlands trains':
+        // https://www.westmidlandsrailway.co.uk/media/3657/download?inline
+        const lnwr = ['EUS', 'CRE', 'BDM', 'SAA', 'MKC', 'TRI', 'LIV', 'NMP']
+        if (lnwr.includes(originCrs) || lnwr.includes(destinationCrs)) {
+          return 'london north western railway'
+        } else {
+          return 'west midlands railway'
+        }
+    }
+  }
+
+  private getChime(chime: ChimeType): AudioItem | null {
+    switch (chime) {
+      case 'none':
+        return null
+
+      default:
+        return { id: `sfx - ${chime} chimes`, opts: { customPrefix: 'station/ketech' } }
+    }
+  }
+
+  private async getFilesForBasicTrainInfo(
+    hour: string,
+    min: string,
+    toc: string,
+    vias: string[],
+    terminatingStation: string,
+    callingPoints: CallingAtPoint[],
+    stationsAlwaysMiddle: boolean = false,
+  ): Promise<AudioItem[]> {
+    const files: AudioItem[] = [`hour.s.${hour}`, `mins.m.${min}`]
+
+    if (toc === '') {
+      files.push({
+        id: `m.service to`,
+        opts: { delayStart: 50 },
+      })
+    } else {
+      if (this.AVAILABLE_TOCS.standaloneOnly.some(x => x.toLowerCase() === toc.toLowerCase())) {
+        files.push(
+          {
+            id: `toc.m.${toc.toLowerCase()}`,
+            opts: { delayStart: 150 },
+          },
+          'm.service to',
+        )
+      } else {
+        files.push({
+          id: `toc.m.${toc.toLowerCase()} service to`,
+          opts: { delayStart: 150 },
+        })
+      }
+    }
+
+    const dividesAt = callingPoints.find(s => s.splitType === 'splitTerminates' || s.splitType === 'splits')
+
+    if (dividesAt && (dividesAt.splitCallingPoints?.length ?? 0) > 0) {
+      const allDestinations = [terminatingStation, dividesAt.splitCallingPoints!![dividesAt.splitCallingPoints!!.length - 1].crsCode]
+
+      files.push(
+        ...this.pluraliseAudio(allDestinations, {
+          prefix: 'station.m.',
+          finalPrefix: stationsAlwaysMiddle ? 'station.m.' : 'station.e.',
+          andId: 'm.and',
+          firstItemDelay: 100,
+          beforeAndDelay: 100,
+          beforeItemDelay: 50,
+        }),
+      )
+    } else {
+      if (vias.length !== 0) {
+        files.push(
+          `station.m.${terminatingStation}`,
+          'm.via',
+          ...this.pluraliseAudio(
+            vias.map((stn, i) => `station.${!stationsAlwaysMiddle && i === vias.length - 1 ? 'e' : 'm'}.${stn}`),
+            {
+              andId: 'm.and',
+              beforeAndDelay: 100,
+            },
+          ),
+        )
+      } else {
+        files.push(`station.${stationsAlwaysMiddle ? 'm' : 'e'}.${terminatingStation}`)
+      }
+    }
+
+    return files
+  }
+
+  private async getShortPlatforms(
+    callingPoints: CallingAtPoint[],
+    terminatingStation: string,
+    overallLength: number | null,
+  ): Promise<AudioItem[]> {
+    const files: AudioItem[] = []
+
+    const splitData = this.getSplitInfo(callingPoints, terminatingStation, overallLength)
+    const allStops = splitData.stopsUpToSplit.concat(splitData.splitA?.stops ?? []).concat(splitData.splitB?.stops ?? [])
+
+    function shortDataToAudio(shortData: string, stopData: SplitInfoStop['portion']): AudioItem[] {
+      const files: AudioItem[] = []
+
+      const [pos, len] = shortData.split('.').map((x, i) => (i === 1 ? parseInt(x) : x)) as [string, number]
+
+      if (stopData.position === 'any' || stopData.position === pos) {
+        if (len === 1) {
+          files.push(`e.should travel in the ${pos} coach of the train`)
+        } else {
+          files.push(`m.should travel in the ${pos}`, `platform.s.${len}`, 'e.coaches of the train')
+        }
+      } else {
+        if (len === 1) {
+          files.push(`m.should travel in the ${pos}`, 'm.coach')
+        } else {
+          files.push(`m.should travel in the ${pos}`, `platform.s.${len}`, 'm.coaches')
+        }
+
+        if (stopData.length === 1) {
+          files.push('m.of', 'm.the', `m.${stopData.position}`, 'e.coach of this train')
+        } else {
+          files.push('m.of', 'm.the', `m.${stopData.position}`, `platform.s.${stopData.length}`, 'e.coaches of the train')
+        }
+      }
+
+      return files
+    }
+
+    const shortPlatforms = allStops.reduce(
+      (acc, curr) => {
+        if (!curr.shortPlatform) return acc
+
+        const data = shortDataToAudio(curr.shortPlatform, curr.portion).join(',')
+
+        if (acc[data]) {
+          acc[data].push(curr.crsCode)
+        } else {
+          acc[data] = [curr.crsCode]
+        }
+
+        return acc
+      },
+      {} as Record<string, string[]>,
+    )
+
+    const order = Object.keys(shortPlatforms).sort((a, b) => a.localeCompare(b))
+
+    let firstAdded = false
+
+    order.forEach(s => {
+      const plats = shortPlatforms[s]
+
+      if (!firstAdded) {
+        if (order.length === 1 && plats.length === 1) {
+          files.push(
+            { id: 'm.due to a short platform at', opts: { delayStart: 400 } },
+            `station.m.${plats[0]}`,
+            'm.customers for this station',
+            ...s.split(','),
+          )
+        } else {
+          files.push(
+            { id: 's.due to short platforms customers for', opts: { delayStart: 400 } },
+            ...this.pluraliseAudio(plats, {
+              prefix: 'station.m.',
+              finalPrefix: 'station.m.',
+              andId: 'm.and',
+              beforeAndDelay: this.CALLING_POINT_AND_DELAY,
+              beforeItemDelay: this.CALLING_POINT_DELAY,
+              afterAndDelay: this.CALLING_POINT_AND_DELAY,
+            }),
+            ...s.split(','),
+          )
+        }
+      } else {
+        files.push(
+          {
+            id: 's.customers for',
+            opts: { delayStart: 200 },
+          },
+          ...this.pluraliseAudio(plats, {
+            prefix: 'station.m.',
+            finalPrefix: 'station.m.',
+            andId: 'm.and',
+            beforeAndDelay: this.CALLING_POINT_AND_DELAY,
+            beforeItemDelay: this.CALLING_POINT_DELAY,
+            afterAndDelay: this.CALLING_POINT_AND_DELAY,
+          }),
+          ...s.split(','),
+        )
+      }
+
+      firstAdded = true
+    })
+
+    return files
+  }
+
+  protected readonly requestStopOptions = {
+    andId: 'm.or-2',
+  }
+
+  private async getRequestStops(
+    callingPoints: CallingAtPoint[],
+    terminatingStation: string,
+    overallLength: number | null,
+  ): Promise<AudioItem[]> {
+    const files: AudioItem[] = []
+
+    const splitData = this.getSplitInfo(callingPoints, terminatingStation, overallLength)
+    const allStops = splitData.stopsUpToSplit.concat(splitData.splitA?.stops ?? []).concat(splitData.splitB?.stops ?? [])
+
+    const reqStops = new Set(allStops.filter(s => s.requestStop).map(s => s.crsCode))
+    if (reqStops.size === 0) return []
+
+    //? KeTech style:
+    //
+    // files.push(
+    //   ...this.pluraliseAudio(Array.from(reqStops), {
+    //     prefix: 'station.m.',
+    //     finalPrefix: 'station.m.',
+    //     andId: 'm.and',
+    //     firstItemDelay: 400,
+    //     beforeItemDelay: this.CALLING_POINT_DELAY,
+    //     beforeAndDelay: this.CALLING_POINT_AND_DELAY,
+    //     afterAndDelay: this.CALLING_POINT_AND_DELAY,
+    //   }),
+    //   reqStops.size === 1 ? 'm.is a request stop and customers for this station' : 'm.are request stops and customers for these stations',
+    //   'm.should ask the conductor on the train to arrange for the train to stop',
+    //   'e.to allow them to alight',
+    // )
+
+    files.push(
+      { id: 's.customers may request to stop at', opts: { delayStart: 400 } },
+      ...this.pluraliseAudio(Array.from(reqStops), {
+        prefix: 'station.m.',
+        finalPrefix: 'station.m.',
+        andId: this.requestStopOptions.andId,
+        beforeItemDelay: this.CALLING_POINT_DELAY,
+        beforeAndDelay: this.CALLING_POINT_AND_DELAY,
+        afterAndDelay: this.CALLING_POINT_AND_DELAY,
+      }),
+      'e.by contacting the conductor on board the train',
+    )
+
+    return files
+  }
+
+  private getSplitInfo(
+    callingPoints: CallingAtPoint[],
+    terminatingStation: string,
+    overallLength: number | null,
+  ): {
+    divideType: CallingAtPoint['splitType']
+    stopsUpToSplit: SplitInfoStop[]
+    splitA: {
+      stops: SplitInfoStop[]
+      position: 'front' | 'middle' | 'rear' | 'unknown'
+      length: number | null
+    } | null
+    splitB: {
+      stops: SplitInfoStop[]
+      position: 'front' | 'middle' | 'rear' | 'unknown'
+      length: number | null
+    } | null
+  } {
+    // If there are no splits, return an empty array
+    if (callingPoints.every(p => p.splitType === 'none' || p.splitType === undefined)) {
+      return {
+        divideType: 'none',
+        stopsUpToSplit: callingPoints.map(p => ({
+          crsCode: p.crsCode,
+          shortPlatform: p.shortPlatform ?? '',
+          requestStop: p.requestStop ?? false,
+          portion: { position: 'any', length: overallLength },
+        })),
+        splitA: null,
+        splitB: null,
+      }
+    }
+
+    const stopsUntilFormationChange: CallingAtPoint[] = []
+    let dividePoint: CallingAtPoint | undefined = undefined
+    const stopsAfterFormationChange: CallingAtPoint[] = []
+
+    {
+      let preSplit = true
+      callingPoints.forEach((p, i) => {
+        if (preSplit) {
+          stopsUntilFormationChange.push(p)
+        } else {
+          dividePoint ||= callingPoints[i - 1]
+          stopsAfterFormationChange.push(p)
+        }
+
+        preSplit &&= p.splitType === 'none' || p.splitType === undefined
+      })
+    }
+
+    stopsAfterFormationChange.push(
+      stationItemCompleter({
+        crsCode: terminatingStation,
+      }),
+    )
+
+    if (overallLength === null) {
+      return {
+        divideType: dividePoint!!.splitType,
+        stopsUpToSplit: stopsUntilFormationChange.map(p => ({
+          crsCode: p.crsCode,
+          shortPlatform: p.shortPlatform ?? '',
+          requestStop: p.requestStop ?? false,
+          portion: { position: 'any', length: null },
+        })),
+        splitB: {
+          stops: (dividePoint!!.splitCallingPoints ?? []).map(p => ({
+            crsCode: p.crsCode,
+            shortPlatform: p.shortPlatform ?? '',
+            requestStop: p.requestStop ?? false,
+            portion: { position: 'unknown', length: null },
+          })),
+          position: 'unknown',
+          length: null,
+        },
+        splitA: {
+          stops: stopsAfterFormationChange.map(p => ({
+            crsCode: p.crsCode,
+            shortPlatform: p.shortPlatform ?? '',
+            requestStop: p.requestStop ?? false,
+            portion: { position: aPos, length: aCount },
+          })),
+          position: 'unknown',
+          length: null,
+        },
+      }
+    }
+
+    const [bPos, bCount] = (dividePoint!!.splitForm ?? 'front.1').split('.').map((x, i) => (i === 1 ? parseInt(x) : x)) as [string, number]
+    const aPos = bPos === 'front' ? 'rear' : 'front'
+    const aCount = Math.min(Math.max(1, overallLength - bCount), 12)
+
+    return {
+      divideType: dividePoint!!.splitType,
+      stopsUpToSplit: stopsUntilFormationChange.map(p => ({
+        crsCode: p.crsCode,
+        shortPlatform: p.shortPlatform ?? '',
+        requestStop: p.requestStop ?? false,
+        portion: { position: 'any', length: overallLength },
+      })),
+      splitB: {
+        stops: (dividePoint!!.splitCallingPoints ?? []).map(p => ({
+          crsCode: p.crsCode,
+          shortPlatform: p.shortPlatform ?? '',
+          requestStop: p.requestStop ?? false,
+          portion: { position: bPos as 'front' | 'middle' | 'rear', length: bCount },
+        })),
+        position: bPos as 'front' | 'middle' | 'rear',
+        length: bCount,
+      },
+      splitA: {
+        stops: stopsAfterFormationChange.map(p => ({
+          crsCode: p.crsCode,
+          shortPlatform: p.shortPlatform ?? '',
+          requestStop: p.requestStop ?? false,
+          portion: { position: aPos, length: aCount },
+        })),
+        position: aPos,
+        length: aCount,
+      },
+    }
+  }
+
+  protected readonly splitOptions = {
+    travelInCorrectPartId: 'w.please make sure you travel in the correct part of this train-2',
+  }
+
+  private async getCallingPointsWithSplits(
+    callingPoints: CallingAtPoint[],
+    terminatingStation: string,
+    overallLength: number | null,
+  ): Promise<AudioItem[]> {
+    const files: AudioItem[] = []
+
+    const splitData = this.getSplitInfo(callingPoints, terminatingStation, overallLength)
+
+    if (splitData.divideType === 'none') {
+      return []
+    }
+
+    const splitPoint = splitData.stopsUpToSplit[splitData.stopsUpToSplit.length - 1]
+
+    files.push(
+      ...this.pluraliseAudio(
+        splitData.stopsUpToSplit.map(s => `station.m.${s.crsCode}`),
+        {
+          andId: 'm.and',
+          beforeItemDelay: this.CALLING_POINT_DELAY,
+          beforeAndDelay: this.CALLING_POINT_AND_DELAY,
+          afterAndDelay: this.CALLING_POINT_AND_DELAY,
+        },
+      ),
+    )
+
+    switch (splitData.divideType) {
+      case 'splitTerminates':
+        files.push('e.where the train will divide', {
+          id: this.splitOptions.travelInCorrectPartId,
+          opts: { delayStart: 400 },
+        })
+
+        if (splitData.splitB!!.position === 'unknown') {
+          files.push({ id: `s.please note that`, opts: { delayStart: 400 } }, `m.coaches`, `m.will be detached and will terminate at`)
+        } else {
+          files.push(
+            { id: `s.please note that the ${splitData.splitB!!.position}`, opts: { delayStart: 400 } },
+            `m.${splitData.splitB!!.length === 1 ? 'coach' : `${splitData.splitB!!.length} coaches`} will detach at`,
+          )
+        }
+
+        files.push(`station.e.${splitPoint.crsCode}`)
+        break
+
+      case 'splits':
+        files.push('e.where the train will divide', {
+          id: 'w.please make sure you travel in the correct part of this train',
+          opts: { delayStart: 400 },
+        })
+
+        if (!splitData.splitB!!.stops.length) throw new Error("Splitting train doesn't have any calling points")
+        break
+    }
+
+    const aPortionStops = new Set([...splitData.splitA!!.stops.map(s => s.crsCode)])
+    const bPortionStops = new Set([...splitData.splitB!!.stops.map(s => s.crsCode)])
+    const anyPortionStops = new Set([
+      ...splitData.stopsUpToSplit.map(s => s.crsCode),
+      ...Array.from(aPortionStops).filter(x => bPortionStops.has(x)),
+    ])
+
+    Array.from(anyPortionStops).forEach(s => {
+      if (aPortionStops.has(s)) aPortionStops.delete(s)
+      if (bPortionStops.has(s)) bPortionStops.delete(s)
+    })
+
+    const listStops = (stops: string[]): AudioItem[] => {
+      return [
+        { id: 's.customers for', opts: { delayStart: 400 } },
+        ...this.pluraliseAudio(
+          stops.map(s => `station.m.${s}`),
+          {
+            andId: 'm.and',
+            beforeAndDelay: this.CALLING_POINT_AND_DELAY,
+            afterAndDelay: this.CALLING_POINT_AND_DELAY,
+            beforeItemDelay: this.CALLING_POINT_DELAY,
+          },
+        ),
+      ]
+    }
+
+    if (anyPortionStops.size !== 0) files.push(...listStops(Array.from(anyPortionStops)), 'e.may travel in any part of the train')
+
+    const aFiles =
+      aPortionStops.size === 0
+        ? []
+        : [
+            ...listStops(Array.from(aPortionStops)),
+            ...(splitData.splitA!!.position === 'unknown'
+              ? ['w.please listen for announcements on board the train']
+              : [
+                  `m.should travel in the ${splitData.splitA!!.position}`,
+                  ...(splitData.splitA!!.length === null ? [] : [`platform.s.${splitData.splitA!!.length}`]),
+                  'e.coaches of the train',
+                ]),
+          ]
+    const bFiles =
+      bPortionStops.size === 0
+        ? []
+        : [
+            ...listStops(Array.from(bPortionStops)),
+            ...(splitData.splitB!!.position === 'unknown'
+              ? ['w.please listen for announcements on board the train']
+              : [
+                  `m.should travel in the ${splitData.splitB!!.position}`,
+                  ...(splitData.splitB!!.length === null ? [] : [`platform.s.${splitData.splitB!!.length}`]),
+                  'e.coaches of the train',
+                ]),
+          ]
+
+    if (splitData.splitA!!.position === 'front') {
+      files.push(...aFiles, ...bFiles)
+    } else {
+      files.push(...bFiles, ...aFiles)
+    }
+
+    switch (splitData.divideType) {
+      case 'splitTerminates':
+      case 'splits':
+        files.push({ id: 's.this train will divide at', opts: { delayStart: 200 } }, `station.e.${splitPoint.crsCode}`)
+        break
+    }
+
+    return files
+  }
+
+  private async getCallingPoints(
+    callingPoints: CallingAtPoint[],
+    terminatingStation: string,
+    overallLength: number | null,
+  ): Promise<AudioItem[]> {
+    const files: AudioItem[] = []
+
+    const callingPointsWithSplits = await this.getCallingPointsWithSplits(callingPoints, terminatingStation, overallLength)
+
+    if (callingPointsWithSplits.length !== 0) {
+      files.push({ id: 'm.calling at', opts: { delayStart: 750 } }, ...callingPointsWithSplits)
+      return files
+    }
+
+    files.push({ id: 'm.calling at', opts: { delayStart: 750 } })
+
+    if (callingPoints.length === 0) {
+      files.push(`station.m.${terminatingStation}`, 'e.only')
+    } else {
+      files.push(
+        ...this.pluraliseAudio([...callingPoints.map(stn => `station.m.${stn.crsCode}`), `station.e.${terminatingStation}`], {
+          andId: 'm.and',
+          beforeItemDelay: this.CALLING_POINT_DELAY,
+          beforeAndDelay: this.CALLING_POINT_AND_DELAY,
+          afterAndDelay: this.CALLING_POINT_AND_DELAY,
+        }),
+      )
+    }
+
+    return files
+  }
+
+  private async playNextTrainAnnouncement(options: INextTrainAnnouncementOptions, download: boolean = false): Promise<void> {
+    const files: AudioItem[] = []
+
+    const chime = this.getChime(options.chime)
+    if (chime) files.push(chime)
+
+    const plat = parseInt(options.platform)
+
+    const platFiles: AudioItem[] = []
+
+    if (plat <= 12 || ['a', 'b'].includes(options.platform.toLowerCase())) {
+      platFiles.push({ id: `s.platform ${options.platform} for the`, opts: { delayStart: 250 } })
+      if (options.isDelayed) platFiles.push('m.delayed')
+    } else {
+      platFiles.push(
+        { id: `s.platform`, opts: { delayStart: 250 } },
+        `platform.s.${options.platform}`,
+        options.isDelayed ? `m.for the delayed` : `m.for the`,
+      )
+    }
+
+    files.push(
+      ...platFiles,
+      ...(await this.getFilesForBasicTrainInfo(
+        options.hour,
+        options.min,
+        options.toc,
+        options.vias.map(s => s.crsCode),
+        options.terminatingStationCode,
+        options.callingAt,
+      )),
+    )
+
+    try {
+      files.push(
+        ...(await this.getCallingPoints(
+          options.callingAt,
+          options.terminatingStationCode,
+          options.coaches ? parseInt(options.coaches.split(' ')[0]) : null,
+        )),
+      )
+    } catch (e) {
+      if (e instanceof Error) {
+        alert(e.message)
+        console.error(e)
+        return
+      }
+    }
+
+    files.push(
+      ...(await this.getShortPlatforms(
+        options.callingAt,
+        options.terminatingStationCode,
+        options.coaches ? parseInt(options.coaches.split(' ')[0]) : null,
+      )),
+    )
+    files.push(
+      ...(await this.getRequestStops(
+        options.callingAt,
+        options.terminatingStationCode,
+        options.coaches ? parseInt(options.coaches.split(' ')[0]) : null,
+      )),
+    )
+
+    if (options.coaches) {
+      const coaches = options.coaches.split(' ')[0]
+
+      // Platforms share the same audio as coach numbers
+      files.push(
+        { id: 's.this train is formed of', opts: { delayStart: 250 } },
+        `platform.s.${coaches}`,
+        `e.${coaches == '1' ? 'coach' : 'coaches'}`,
+      )
+    }
+
+    files.push(
+      ...platFiles,
+      ...(await this.getFilesForBasicTrainInfo(
+        options.hour,
+        options.min,
+        options.toc,
+        options.vias.map(s => s.crsCode),
+        options.terminatingStationCode,
+        options.callingAt,
+      )),
+    )
+
+    await this.playAudioFiles(files, download)
+  }
+
+  private async playDisruptedTrainAnnouncement(options: IDisruptedTrainAnnouncementOptions, download: boolean = false): Promise<void> {
+    const files: AudioItem[] = []
+
+    const chime = this.getChime(options.chime)
+    if (chime) files.push(chime)
+
+    files.push('s.were sorry to announce that the')
+    files.push(
+      ...(await this.getFilesForBasicTrainInfo(
+        options.hour,
+        options.min,
+        options.toc,
+        options.vias.map(s => s.crsCode),
+        options.terminatingStationCode,
+        [],
+        true,
+      )),
+    )
+
+    const endInflection = options.disruptionReason ? 'm' : 'e'
+
+    switch (options.disruptionType) {
+      case 'delayedBy':
+        files.push('m.is delayed by approximately')
+
+        const num = parseInt(options.delayTime)
+
+        if (num < 10) {
+          files.push(`platform.m.${num}`)
+        } else {
+          files.push(`mins.m.${num}`)
+        }
+
+        files.push(`${endInflection}.${num !== 1 ? 'minutes' : 'minute'}`)
+        break
+      case 'delay':
+        files.push(`${endInflection}.is being delayed`)
+        break
+      case 'cancel':
+        files.push(`${endInflection}.has been cancelled`)
+        break
+    }
+
+    if (options.disruptionReason) {
+      files.push('m.due to', `disruption-reason.e.${options.disruptionReason}`)
+    }
+
+    files.push({ id: 'w.were sorry for the delay this will cause to your journey', opts: { delayStart: 250 } })
+
+    await this.playAudioFiles(files, download)
+  }
+
   readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab> = {
     nextTrain: {
       name: 'Next train',
@@ -3996,7 +4053,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           chime: {
             name: 'Chime',
             type: 'select',
-            default: 'four',
+            default: this.DEFAULT_CHIME,
             options: [
               { title: '3 chimes', value: 'three' },
               { title: '4 chimes', value: 'four' },
@@ -4005,8 +4062,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           },
           platform: {
             name: 'Platform',
-            default: this.platforms[0],
-            options: this.platforms.map(p => ({ title: `Platform ${p.toUpperCase()}`, value: p })),
+            default: this.PLATFORMS[0],
+            options: this.PLATFORMS.map(p => ({ title: `Platform ${p.toUpperCase()}`, value: p })),
             type: 'select',
           },
           hour: {
@@ -4061,8 +4118,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           },
           terminatingStationCode: {
             name: 'Terminating station',
-            default: this.stations[0],
-            options: this.stations.map(s => {
+            default: this.STATIONS[0],
+            options: this.STATIONS.map(s => {
               const stn = getStationByCrs(s)
               return { title: stn ? `${stn.stationName} (${s})` : `Unknown name (${s})`, value: s }
             }),
@@ -4073,7 +4130,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             type: 'custom',
             component: CallingAtSelector,
             props: {
-              availableStations: this.stations,
+              availableStations: this.STATIONS,
               selectLabel: 'Via points (non-splitting services only)',
               placeholder: 'Add a via point...',
               heading: 'Via... (optional)',
@@ -4085,10 +4142,10 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             type: 'custom',
             component: CallingAtSelector,
             props: {
-              availableStations: this.stations,
-              enableShortPlatforms: this.shortPlatforms,
+              availableStations: this.STATIONS,
+              enableShortPlatforms: this.SHORT_PLATFORMS,
               enableRequestStops: true,
-              enableSplits: this.splits,
+              enableSplits: this.SPLITS,
             },
             default: [],
           },
@@ -4178,8 +4235,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           },
           terminatingStationCode: {
             name: 'Terminating station',
-            default: this.stations[0],
-            options: this.stations.map(s => {
+            default: this.STATIONS[0],
+            options: this.STATIONS.map(s => {
               const stn = getStationByCrs(s)
               return { title: stn ? `${stn.stationName} (${s})` : `Unknown name (${s})`, value: s }
             }),
@@ -4190,7 +4247,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             type: 'custom',
             component: CallingAtSelector,
             props: {
-              availableStations: this.stations,
+              availableStations: this.STATIONS,
               selectLabel: 'Via points (non-splitting services only)',
               placeholder: 'Add a via point...',
               heading: 'Via... (optional)',
@@ -4241,13 +4298,13 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           General: [
             {
               label: '3 chimes',
-              play: this.playAudioFiles.bind(this, ['sfx - three chimes']),
-              download: this.playAudioFiles.bind(this, ['sfx - three chimes'], true),
+              play: this.playAudioFiles.bind(this, [this.getChime('three')!!]),
+              download: this.playAudioFiles.bind(this, [this.getChime('three')!!], true),
             },
             {
               label: '4 chimes',
-              play: this.playAudioFiles.bind(this, ['sfx - four chimes']),
-              download: this.playAudioFiles.bind(this, ['sfx - four chimes'], true),
+              play: this.playAudioFiles.bind(this, [this.getChime('four')!!]),
+              download: this.playAudioFiles.bind(this, [this.getChime('four')!!], true),
             },
           ],
           Emergency: [
@@ -4338,7 +4395,7 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
 
   const supportedStations: Option[] = useMemo(
     () =>
-      system.stations.map(s => {
+      system.STATIONS.map(s => {
         const r = crsToStationItemMapper(s)
 
         return {
@@ -4346,7 +4403,7 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
           label: r.name,
         }
       }),
-    [system.stations],
+    [system.STATIONS],
   )
 
   const [isFullscreen, setFullscreen] = useState(false)
@@ -4456,22 +4513,6 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
     [calculateDelayMins, console.log],
   )
 
-  const processToc = useCallback(function processToc(toc: string, originCrs: string, destinationCrs: string): string {
-    switch (toc.toLowerCase()) {
-      default:
-        return system.ALL_AVAILABLE_TOCS.find(t => t?.toLowerCase() === toc?.toLowerCase()) ?? ''
-
-      case 'west midlands trains':
-        // https://www.westmidlandsrailway.co.uk/media/3657/download?inline
-        const lnwr = ['EUS', 'CRE', 'BDM', 'SAA', 'MKC', 'TRI', 'LIV', 'NMP']
-        if (lnwr.includes(originCrs) || lnwr.includes(destinationCrs)) {
-          return 'london north western railway'
-        } else {
-          return 'west midlands railway'
-        }
-    }
-  }, [])
-
   useEffect(() => {
     if (!hasEnabledFeature) return
 
@@ -4559,14 +4600,14 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
 
       console.log(`[Live Trains] Is delayed by ${delayMins} mins`)
 
-      const toc = processToc(firstUnannounced.operator, firstUnannounced.origin[0].crs, firstUnannounced.destination[0].crs)
+      const toc = system.processTocForLiveTrains(firstUnannounced.operator, firstUnannounced.origin[0].crs, firstUnannounced.destination[0].crs)
 
       const callingPoints = firstUnannounced.subsequentCallingPoints[0].callingPoint
 
       const callingAt = (callingPoints as any[])
         .map((p): any | null => {
           if (p.isCancelled || p.et === 'Cancelled') return null
-          if (!system.stations.includes(p.crs)) return null
+          if (!system.STATIONS.includes(p.crs)) return null
 
           return p
         })
@@ -4613,7 +4654,7 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
         isDelayed: delayMins > 5,
         toc,
         coaches: firstUnannounced.length ? `${firstUnannounced.length} coaches` : null,
-        platform: system.platforms.includes(firstUnannounced.platform.toLowerCase()) ? firstUnannounced.platform.toLowerCase() : '1',
+        platform: system.PLATFORMS.includes(firstUnannounced.platform.toLowerCase()) ? firstUnannounced.platform.toLowerCase() : '1',
         terminatingStationCode: firstUnannounced.destination[0].crs,
         vias,
         callingAt,

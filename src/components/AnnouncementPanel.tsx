@@ -25,6 +25,8 @@ function AnnouncementPanel(): JSX.Element {
   const classes = useStyles()
   const AnnouncementSystem = getActiveSystem()
 
+  window.__system = AnnouncementSystem
+
   const AnnouncementSystemInstance = AnnouncementSystem ? new AnnouncementSystem() : null
   const customTabs = AnnouncementSystemInstance?.customAnnouncementTabs
 

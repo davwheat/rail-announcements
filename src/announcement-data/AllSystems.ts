@@ -3,7 +3,7 @@ import BombardierXstar from './systems/rolling-stock/BombardierXstar'
 import TfWTrainFx from './systems/rolling-stock/TfWTrainFx'
 
 import AmeyPhil from './systems/stations/AmeyPhil'
-import KeTechCelia from './systems/stations/KeTechCelia'
+import AmeyCelia from './systems/stations/AmeyCelia'
 // import AtosMatt from './systems/stations/AtosMatt'
 // import AtosAnne from './systems/stations/AtosAnne'
 import ScotRail from './systems/stations/ScotRail'
@@ -22,7 +22,7 @@ export const AllStationAnnouncementSystems: { new (): StationAnnouncementSystem 
   // AtosMatt,
   // AtosAnne,
   AmeyPhil,
-  KeTechCelia,
+  AmeyCelia,
   ScotRail,
 ]
 

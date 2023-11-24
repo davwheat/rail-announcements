@@ -55,7 +55,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
   protected readonly CALLING_POINT_DELAY: number = 200
   protected readonly CALLING_POINT_AND_DELAY: number = 100
 
-  protected get DEFAULT_CHIME(): ChimeType {
+  get DEFAULT_CHIME(): ChimeType {
     return 'four'
   }
 
@@ -4193,7 +4193,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           chime: {
             name: 'Chime',
             type: 'select',
-            default: 'four',
+            default: this.DEFAULT_CHIME,
             options: [
               { title: '3 chimes', value: 'three' },
               { title: '4 chimes', value: 'four' },
@@ -4660,7 +4660,7 @@ function LiveTrainAnnouncements({ nextTrainHandler, system }: LiveTrainAnnouncem
       }
 
       const options: INextTrainAnnouncementOptions = {
-        chime: 'four',
+        chime: system.DEFAULT_CHIME,
         hour: h === '00' ? '00 - midnight' : h,
         min: m === '00' ? '00 - hundred' : m,
         isDelayed: delayMins > 5,

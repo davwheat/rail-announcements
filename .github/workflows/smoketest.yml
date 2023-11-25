@@ -64,9 +64,9 @@ jobs:
         id: gatsbyCache
         with:
           path: ./.cache
-          key: ${{ runner.os }}-gatsby-cache-${{ secrets.CACHE_VERSION }}-${{ hashFiles('public') }}
+          key: ${{ runner.os }}-gatsby-cache-${{ hashFiles('public') }}
           restore-keys: |
-            ${{ runner.os }}-gatsby-cache-${{ secrets.CACHE_VERSION }}-
+            ${{ runner.os }}-gatsby-cache-
 
       - name: Build site
         run: yarn build:ci

@@ -3035,6 +3035,10 @@ export default class AmeyCelia extends AmeyPhil {
     travelInCorrectPartId: 'w.please make sure you travel in the correct part of this train',
   }
 
+  protected readonly disruptionOptions = {
+    thisStationAudio: 'e.this station',
+  }
+
   processTocForLiveTrains(toc: string, originCrs: string, destinationCrs: string): string {
     switch (toc.toLowerCase()) {
       default:

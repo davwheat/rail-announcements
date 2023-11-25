@@ -4036,20 +4036,31 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         }
 
         files.push(`${endInflection}.${num !== 1 ? 'minutes' : 'minute'}`)
+
+        if (options.disruptionReason) {
+          files.push('m.due to', `disruption-reason.e.${options.disruptionReason}`)
+        }
         break
       case 'delay':
-        files.push(`${endInflection}.is being delayed`)
+        if (options.disruptionReason) {
+          files.push('m.is being delayed due to', `disruption-reason.e.${options.disruptionReason}`)
+        } else {
+          files.push('e.is being delayed')
+        }
         break
       case 'cancel':
-        files.push(`${endInflection}.has been cancelled`)
+        if (options.disruptionReason) {
+          files.push('m.has been cancelled due to', `disruption-reason.e.${options.disruptionReason}`)
+        } else {
+          files.push('e.has been cancelled')
+        }
         break
     }
 
-    if (options.disruptionReason) {
-      files.push('m.due to', `disruption-reason.e.${options.disruptionReason}`)
-    }
-
-    files.push({ id: 'w.were sorry for the delay this will cause to your journey', opts: { delayStart: 250 } })
+    files.push(
+      { id: 'w.please listen for further announcements', opts: { delayStart: 250 } },
+      { id: 'w.were sorry for the delay this will cause to your journey', opts: { delayStart: 250 } },
+    )
 
     await this.playAudioFiles(files, download)
   }

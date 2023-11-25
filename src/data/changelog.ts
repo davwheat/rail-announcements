@@ -266,6 +266,17 @@ const changelog: IChangelogVersion[] = [
     additions: ['[Amey Celia] Replace KeTech Celia with Amey Celia using raw audio files'],
     otherChanges: ['[Amey Phil] Renamed KeTech Phil to Amey Phil to reflect his wording and scripts'],
   },
+  {
+    date: '2023-11-25',
+    fixes: [
+      '[Amey Celia] Increase spacing between calling points',
+      '[Amey Celia] Cut down spacing before TOC',
+      '[Amey Celia] Always default to 3-note chime',
+      "[Amey Celia & Phil] Add missing 'from this station' for cancellations",
+      '[Amey Celia & Phil] Swap out some files for more accurate snippets',
+    ],
+    additions: ['[Amey Celia] Add custom Northern TOC snippets'],
+  },
 ]
 
 export default changelog

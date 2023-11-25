@@ -75,7 +75,6 @@ jobs:
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
-        if: github.ref == 'refs/heads/deploy' && github.event_name == 'push'
         with:
           path: ./public
 

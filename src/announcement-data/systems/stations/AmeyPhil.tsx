@@ -54,6 +54,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
 
   protected readonly CALLING_POINT_DELAY: number = 200
   protected readonly CALLING_POINT_AND_DELAY: number = 100
+  protected readonly BEFORE_TOC_DELAY: number = 150
 
   get DEFAULT_CHIME(): ChimeType {
     return 'four'
@@ -3422,28 +3423,38 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     terminatingStation: string,
     callingPoints: CallingAtPoint[],
     stationsAlwaysMiddle: boolean = false,
+    fromAudio: AudioItem[] = [],
   ): Promise<AudioItem[]> {
     const files: AudioItem[] = [`hour.s.${hour}`, `mins.m.${min}`]
 
+    const _fromAudio = fromAudio.length ? [...fromAudio, 'm.to'] : []
+
     if (toc === '') {
-      files.push({
-        id: `m.service to`,
-        opts: { delayStart: 50 },
-      })
+      files.push(
+        {
+          id: _fromAudio.length ? `m.service from` : `m.service to`,
+          opts: { delayStart: 50 },
+        },
+        ..._fromAudio,
+      )
     } else {
       if (this.AVAILABLE_TOCS.standaloneOnly.some(x => x.toLowerCase() === toc.toLowerCase())) {
         files.push(
           {
             id: `toc.m.${toc.toLowerCase()}`,
-            opts: { delayStart: 150 },
+            opts: { delayStart: this.BEFORE_TOC_DELAY },
           },
-          'm.service to',
+          _fromAudio.length ? `m.service from` : `m.service to`,
+          ..._fromAudio,
         )
       } else {
-        files.push({
-          id: `toc.m.${toc.toLowerCase()} service to`,
-          opts: { delayStart: 150 },
-        })
+        files.push(
+          {
+            id: `toc.m.${toc.toLowerCase()} ${_fromAudio.length ? 'service from' : 'service to'}`,
+            opts: { delayStart: this.BEFORE_TOC_DELAY },
+          },
+          ..._fromAudio,
+        )
       }
     }
 
@@ -4019,6 +4030,10 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     await this.playAudioFiles(files, download)
   }
 
+  protected readonly disruptionOptions = {
+    thisStationAudio: 'm.this station-2',
+  }
+
   private async playDisruptedTrainAnnouncement(options: IDisruptedTrainAnnouncementOptions, download: boolean = false): Promise<void> {
     const files: AudioItem[] = []
 
@@ -4035,6 +4050,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         options.terminatingStationCode,
         [],
         true,
+        options.disruptionType === 'cancel' ? [this.disruptionOptions.thisStationAudio] : [],
       )),
     )
 

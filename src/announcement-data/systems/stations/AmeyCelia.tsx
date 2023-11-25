@@ -8,8 +8,9 @@ export default class AmeyCelia extends AmeyPhil {
 
   protected readonly CALLING_POINT_DELAY = 160
   protected readonly CALLING_POINT_AND_DELAY = 80
+  protected readonly BEFORE_TOC_DELAY: number = 75
 
-  protected get DEFAULT_CHIME(): ChimeType {
+  get DEFAULT_CHIME(): ChimeType {
     return 'three'
   }
 
@@ -3032,6 +3033,10 @@ export default class AmeyCelia extends AmeyPhil {
 
   protected readonly splitOptions = {
     travelInCorrectPartId: 'w.please make sure you travel in the correct part of this train',
+  }
+
+  protected readonly disruptionOptions = {
+    thisStationAudio: 'e.this station',
   }
 
   processTocForLiveTrains(toc: string, originCrs: string, destinationCrs: string): string {

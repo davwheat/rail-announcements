@@ -283,6 +283,23 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           },
         },
       ],
+      disruptedTrain: [
+        {
+          name: '21:39 +44 | SN Havant to SOU',
+          // Modelled on https://www.realtimetrains.co.uk/service/gb-nr:Y50425/2023-11-24/detailed
+          state: {
+            chime: this.DEFAULT_CHIME,
+            hour: '21',
+            min: '39',
+            toc: 'southern',
+            terminatingStationCode: 'SOU',
+            vias: ['FRM'].map(crsToStationItemMapper),
+            disruptionType: 'delayedBy',
+            delayTime: '44',
+            disruptionReason: 'awaiting a member of the train crew',
+          },
+        },
+      ],
     }
   }
 
@@ -4198,7 +4215,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       name: 'Disrupted train',
       component: CustomAnnouncementPane,
       props: {
-        // presets: this.announcementPresets.nextTrain,
+        presets: this.announcementPresets.disruptedTrain,
         playHandler: this.playDisruptedTrainAnnouncement.bind(this),
         options: {
           chime: {

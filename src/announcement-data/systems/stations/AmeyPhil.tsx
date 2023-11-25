@@ -54,6 +54,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
 
   protected readonly CALLING_POINT_DELAY: number = 200
   protected readonly CALLING_POINT_AND_DELAY: number = 100
+  protected readonly BEFORE_TOC_DELAY: number = 150
 
   get DEFAULT_CHIME(): ChimeType {
     return 'four'
@@ -3435,14 +3436,14 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         files.push(
           {
             id: `toc.m.${toc.toLowerCase()}`,
-            opts: { delayStart: 150 },
+            opts: { delayStart: this.BEFORE_TOC_DELAY },
           },
           'm.service to',
         )
       } else {
         files.push({
           id: `toc.m.${toc.toLowerCase()} service to`,
-          opts: { delayStart: 150 },
+          opts: { delayStart: this.BEFORE_TOC_DELAY },
         })
       }
     }

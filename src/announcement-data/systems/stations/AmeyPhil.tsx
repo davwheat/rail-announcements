@@ -4702,6 +4702,7 @@ function LiveTrainAnnouncements({ nextTrainHandler, disruptedTrainHandler, syste
   const announceNextTrain = useCallback(
     async function announceNextTrain(train: TrainService, abortController: AbortController) {
       console.log(train)
+      addLog(`Announcing next train: ${train.rid} (${train.std} to ${train.destination[0].locationName})`)
 
       markNextTrainAnnounced(train.rid)
 
@@ -4710,8 +4711,8 @@ function LiveTrainAnnouncements({ nextTrainHandler, disruptedTrainHandler, syste
 
       const delayMins = calculateDelayMins(new Date(train.std), new Date(train.etd))
 
-      addLog(`[Live Trains] Is delayed by ${delayMins} mins`)
-      console.log(`[Live Trains] Is delayed by ${delayMins} mins`)
+      addLog(`Train is delayed by ${delayMins} mins`)
+      console.log(`[Live Trains] Train is delayed by ${delayMins} mins`)
 
       const toc = system.processTocForLiveTrains(train.operator, train.origin[0].crs, train.destination[0].crs)
 
@@ -4746,7 +4747,7 @@ function LiveTrainAnnouncements({ nextTrainHandler, disruptedTrainHandler, syste
         v.split(/(&|and)/).forEach(via => {
           const guessViaCrs = stationNameToCrsMap[via.trim().toLowerCase()]
 
-          addLog(`[Live Trains] Guessed via ${guessViaCrs} for ${via}`)
+          addLog(`Guessed via ${guessViaCrs} for ${via}`)
           console.log(`[Live Trains] Guessed via ${guessViaCrs} for ${via}`)
 
           if (guessViaCrs) {
@@ -4913,6 +4914,9 @@ function LiveTrainAnnouncements({ nextTrainHandler, disruptedTrainHandler, syste
       addLog(`${services.length} of which are passenger services`)
       console.log(`[Live Trains] ${services.length} of which are passenger services`)
 
+      addLog("Finding suitable train for 'next train'")
+      console.log("[Live Trains] Finding suitable train for 'next train'")
+
       const unannouncedNextTrain = services.find(s => {
         const std = new Date(s.std).toLocaleString('en-GB', { hour12: false })
 
@@ -4926,6 +4930,11 @@ function LiveTrainAnnouncements({ nextTrainHandler, disruptedTrainHandler, syste
           console.log(`[Live Trains] Skipping ${s.rid} (${std} to ${s.destination[0].locationName}) as it is cancelled`)
           return false
         }
+        if (s.atdSpecified) {
+          addLog(`Skipping ${s.rid} (${std} to ${s.destination[0].locationName}) as it has already departed`)
+          console.log(`[Live Trains] Skipping ${s.rid} (${std} to ${s.destination[0].locationName}) as it has already departed`)
+          return false
+        }
         if (!s.etdSpecified) {
           addLog(`Skipping ${s.rid} (${std} to ${s.destination[0].locationName}) as it has no estimated time`)
           console.log(`[Live Trains] Skipping ${s.rid} (${std} to ${s.destination[0].locationName}) as it has no estimated time`)
@@ -4937,9 +4946,7 @@ function LiveTrainAnnouncements({ nextTrainHandler, disruptedTrainHandler, syste
           return false
         }
         if (calculateArrivalInMins(new Date(s.etd)) > MIN_TIME_TO_ANNOUNCE) {
-          addLog(
-            `[Live Trains] Skipping ${s.rid} (${std} to ${s.destination[0].locationName}) as it is more than ${MIN_TIME_TO_ANNOUNCE} mins away`,
-          )
+          addLog(`Skipping ${s.rid} (${std} to ${s.destination[0].locationName}) as it is more than ${MIN_TIME_TO_ANNOUNCE} mins away`)
           console.log(
             `[Live Trains] Skipping ${s.rid} (${std} to ${s.destination[0].locationName}) as it is more than ${MIN_TIME_TO_ANNOUNCE} mins away`,
           )
@@ -4953,6 +4960,9 @@ function LiveTrainAnnouncements({ nextTrainHandler, disruptedTrainHandler, syste
         announceNextTrain(unannouncedNextTrain, abortController)
         return
       }
+
+      addLog("Finding suitable train for 'disrupted train'")
+      console.log("[Live Trains] Finding suitable train for 'disrupted train'")
 
       const unannouncedDisruptedTrain = services.find(s => {
         if (disruptedTrainAnnounced.current[s.rid]) {

@@ -4921,32 +4921,34 @@ function LiveTrainAnnouncements({ nextTrainHandler, disruptedTrainHandler, syste
         const std = new Date(s.std).toLocaleString('en-GB', { hour12: false })
 
         if (nextTrainAnnounced.current[s.rid]) {
-          addLog(`Skipping ${s.rid} (${std} to ${s.destination[0].locationName}) as it was announced recently`)
+          addLog(`Skipping ${s.trainid} ${s.rid} (${std} to ${s.destination[0].locationName}) as it was announced recently`)
           console.log(`[Live Trains] Skipping ${s.rid} (${std} to ${s.destination[0].locationName}) as it was announced recently`)
           return false
         }
         if (s.isCancelled) {
-          addLog(`Skipping ${s.rid} (${std} to ${s.destination[0].locationName}) as it is cancelled`)
+          addLog(`Skipping ${s.trainid} ${s.rid} (${std} to ${s.destination[0].locationName}) as it is cancelled`)
           console.log(`[Live Trains] Skipping ${s.rid} (${std} to ${s.destination[0].locationName}) as it is cancelled`)
           return false
         }
         if (s.atdSpecified) {
-          addLog(`Skipping ${s.rid} (${std} to ${s.destination[0].locationName}) as it has already departed`)
+          addLog(`Skipping ${s.trainid} ${s.rid} (${std} to ${s.destination[0].locationName}) as it has already departed`)
           console.log(`[Live Trains] Skipping ${s.rid} (${std} to ${s.destination[0].locationName}) as it has already departed`)
           return false
         }
         if (!s.etdSpecified) {
-          addLog(`Skipping ${s.rid} (${std} to ${s.destination[0].locationName}) as it has no estimated time`)
+          addLog(`Skipping ${s.trainid} ${s.rid} (${std} to ${s.destination[0].locationName}) as it has no estimated time`)
           console.log(`[Live Trains] Skipping ${s.rid} (${std} to ${s.destination[0].locationName}) as it has no estimated time`)
           return false
         }
         if (s.platform === null) {
-          addLog(`Skipping ${s.rid} (${std} to ${s.destination[0].locationName}) as it has no confirmed platform`)
+          addLog(`Skipping ${s.trainid} ${s.rid} (${std} to ${s.destination[0].locationName}) as it has no confirmed platform`)
           console.log(`[Live Trains] Skipping ${s.rid} (${std} to ${s.destination[0].locationName}) as it has no confirmed platform`)
           return false
         }
         if (calculateArrivalInMins(new Date(s.etd)) > MIN_TIME_TO_ANNOUNCE) {
-          addLog(`Skipping ${s.rid} (${std} to ${s.destination[0].locationName}) as it is more than ${MIN_TIME_TO_ANNOUNCE} mins away`)
+          addLog(
+            `Skipping ${s.trainid} ${s.rid} (${std} to ${s.destination[0].locationName}) as it is more than ${MIN_TIME_TO_ANNOUNCE} mins away`,
+          )
           console.log(
             `[Live Trains] Skipping ${s.rid} (${std} to ${s.destination[0].locationName}) as it is more than ${MIN_TIME_TO_ANNOUNCE} mins away`,
           )
@@ -4966,13 +4968,13 @@ function LiveTrainAnnouncements({ nextTrainHandler, disruptedTrainHandler, syste
 
       const unannouncedDisruptedTrain = services.find(s => {
         if (disruptedTrainAnnounced.current[s.rid]) {
-          addLog(`Skipping disrupted ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it was announced recently`)
-          console.log(`[Live Trains] Skipping disrupted ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it was announced recently`)
+          addLog(`Skipping ${s.trainid} ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it was announced recently`)
+          console.log(`[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it was announced recently`)
           return false
         }
         if (!s.isCancelled && calculateDelayMins(new Date(s.std), new Date(s.etd)) < 5 && s.etdSpecified && s.stdSpecified) {
-          addLog(`Skipping disrupted ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it is not delayed`)
-          console.log(`[Live Trains] Skipping disrupted ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it is not delayed`)
+          addLog(`Skipping ${s.trainid} ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it is not delayed`)
+          console.log(`[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it is not delayed`)
           return false
         }
 

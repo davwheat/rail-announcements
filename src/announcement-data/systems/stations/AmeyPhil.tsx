@@ -3690,11 +3690,15 @@ export default class AmeyPhil extends StationAnnouncementSystem {
 
     {
       let preSplit = true
-      callingPoints.forEach((p, i) => {
+
+      callingPoints.forEach(p => {
         if (preSplit) {
           stopsUntilFormationChange.push(p)
+
+          if (p.splitType !== 'none' && p.splitType !== undefined) {
+            dividePoint = p
+          }
         } else {
-          dividePoint ||= callingPoints[i - 1]
           stopsAfterFormationChange.push(p)
         }
 

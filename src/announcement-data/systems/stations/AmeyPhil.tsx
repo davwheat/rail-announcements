@@ -4062,7 +4062,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         const num = parseInt(options.delayTime)
 
         if (num < 10) {
-          files.push(`platform.m.${num}`)
+          files.push(`platform.s.${num}`)
         } else {
           files.push(`mins.m.${num}`)
         }
@@ -4089,10 +4089,28 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         break
     }
 
-    files.push(
-      { id: 'w.please listen for further announcements', opts: { delayStart: 250 } },
-      { id: 'w.were sorry for the delay this will cause to your journey', opts: { delayStart: 250 } },
-    )
+    files.push({ id: 'w.please listen for further announcements', opts: { delayStart: 250 } })
+
+    switch (options.disruptionType) {
+      case 'delayedBy':
+        const num = parseInt(options.delayTime)
+        if (num < 30) {
+          files.push({ id: 'w.were sorry for the delay to this service', opts: { delayStart: 250 } })
+        } else if (num < 45) {
+          files.push({ id: 'w.were very sorry for the delay to this service', opts: { delayStart: 250 } })
+        } else {
+          files.push({ id: 'w.were extremely sorry for the severe delay to this service', opts: { delayStart: 250 } })
+        }
+        break
+
+      case 'delay':
+        files.push({ id: 'w.were sorry for the delay to this service', opts: { delayStart: 250 } })
+        break
+
+      case 'cancel':
+        files.push({ id: 'w.were sorry for the delay this will cause to your journey', opts: { delayStart: 250 } })
+        break
+    }
 
     await this.playAudioFiles(files, download)
   }
@@ -4683,6 +4701,22 @@ function LiveTrainAnnouncements({ nextTrainHandler, disruptedTrainHandler, syste
     [disruptedTrainAnnounced.current],
   )
 
+  const getPlatform = useCallback(
+    function getPlatform(dataPlatform: string) {
+      dataPlatform = dataPlatform.toLowerCase()
+
+      if (system.PLATFORMS.includes(dataPlatform)) return dataPlatform
+
+      // Fix for stations with letter-suffixed platforms
+      dataPlatform = dataPlatform.replace(/[a-z]/g, '')
+
+      if (system.PLATFORMS.includes(dataPlatform)) return dataPlatform
+
+      return '1'
+    },
+    [system.PLATFORMS],
+  )
+
   useEffect(() => {
     const key = setInterval(removeOldIds, 1000 * 60)
 
@@ -4767,7 +4801,7 @@ function LiveTrainAnnouncements({ nextTrainHandler, disruptedTrainHandler, syste
         isDelayed: delayMins > 5,
         toc,
         coaches: train.length ? `${train.length} coaches` : null,
-        platform: system.PLATFORMS.includes(train.platform.toLowerCase()) ? train.platform.toLowerCase() : '1',
+        platform: getPlatform(train.platform),
         terminatingStationCode: train.destination[0].crs,
         vias,
         callingAt,

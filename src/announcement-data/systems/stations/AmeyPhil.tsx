@@ -4883,7 +4883,7 @@ function LiveTrainAnnouncements({ nextTrainHandler, disruptedTrainHandler, syste
       const options: IDisruptedTrainAnnouncementOptions = {
         chime: system.DEFAULT_CHIME,
         hour: h === '00' ? '00 - midnight' : h,
-        min: m === '00' ? '00 - hundred' : m,
+        min: m === '00' ? '00 - hundred-hours' : m,
         toc,
         terminatingStationCode: train.destination[0].crs,
         vias,

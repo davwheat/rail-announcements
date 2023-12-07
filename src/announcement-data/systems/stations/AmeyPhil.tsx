@@ -52,6 +52,17 @@ export default class AmeyPhil extends StationAnnouncementSystem {
   readonly SYSTEM_TYPE = 'station'
 
   protected readonly BEFORE_TOC_DELAY: number = 150
+  protected readonly BEFORE_SECTION_DELAY: number = 870
+
+  protected readonly callingPointsOptions = {
+    beforeCallingAtDelay: this.BEFORE_SECTION_DELAY,
+    betweenStopsDelay: 320,
+    aroundAndDelay: 100,
+  }
+
+  protected readonly requestStopOptions = {
+    andId: 'm.or-2',
+  }
 
   get DEFAULT_CHIME(): ChimeType {
     return 'four'
@@ -3599,16 +3610,6 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     return files
   }
 
-  protected readonly callingPointsOptions = {
-    beforeCallingAtDelay: 870,
-    betweenStopsDelay: 340,
-    aroundAndDelay: 100,
-  }
-
-  protected readonly requestStopOptions = {
-    andId: 'm.or-2',
-  }
-
   private async getRequestStops(
     callingPoints: CallingAtPoint[],
     terminatingStation: string,
@@ -5024,8 +5025,8 @@ function LiveTrainAnnouncements({ nextTrainHandler, disruptedTrainHandler, syste
           return false
         }
         if (s.atdSpecified) {
-          addLog(`Skipping ${s.trainid} ${s.rid} (${std} to ${s.destination[0].locationName}) as it has already departed`)
-          console.log(`[Live Trains] Skipping ${s.rid} (${std} to ${s.destination[0].locationName}) as it has already departed`)
+          addLog(`Skipping ${s.trainid} ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has already departed`)
+          console.log(`[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has already departed`)
           return false
         }
         if (!s.isCancelled && calculateDelayMins(new Date(s.std), new Date(s.etd)) < 5 && s.etdSpecified && s.stdSpecified) {

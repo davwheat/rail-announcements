@@ -4762,6 +4762,15 @@ function LiveTrainAnnouncements({ nextTrainHandler, disruptedTrainHandler, syste
         return true
       })
 
+      if (train.destination[0].tiploc !== callingPoints[callingPoints.length - 1].tiploc) {
+        // False destination -- need to trim calling points
+        const lastRealCallingPoint = callingPoints.findIndex(s => s.tiploc == train.destination[0].tiploc)
+
+        console.log(`Fake destination detected. Last real calling point index is ${lastRealCallingPoint}`)
+
+        for (let i = lastRealCallingPoint; i < callingPoints.length; i++) delete callingPoints[i]
+      }
+
       const callingAt = callingPoints
         .map((p, i, arr): CallingAtPoint | null => {
           console.log(`[${i} of ${arr.length - 1}]: ${p.crs}`)

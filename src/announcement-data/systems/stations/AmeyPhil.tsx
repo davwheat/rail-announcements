@@ -4810,7 +4810,7 @@ function LiveTrainAnnouncements({ nextTrainHandler, disruptedTrainHandler, syste
       const options: INextTrainAnnouncementOptions = {
         chime: system.DEFAULT_CHIME,
         hour: h === '00' ? '00 - midnight' : h,
-        min: m === '00' ? '00 - hundred' : m,
+        min: m === '00' ? '00 - hundred-hours' : m,
         isDelayed: delayMins > 5,
         toc,
         coaches: train.length ? `${train.length} coaches` : null,

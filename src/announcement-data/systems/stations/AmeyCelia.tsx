@@ -6,9 +6,13 @@ export default class AmeyCelia extends AmeyPhil {
   readonly FILE_PREFIX = 'station/ketech/celia'
   readonly SYSTEM_TYPE = 'station'
 
-  protected readonly CALLING_POINT_DELAY = 160
-  protected readonly CALLING_POINT_AND_DELAY = 80
-  protected readonly BEFORE_TOC_DELAY: number = 75
+  protected readonly BEFORE_TOC_DELAY: number = 30
+
+  protected readonly callingPointsOptions = {
+    beforeCallingAtDelay: 520,
+    betweenStopsDelay: 220,
+    aroundAndDelay: 0,
+  }
 
   get DEFAULT_CHIME(): ChimeType {
     return 'three'

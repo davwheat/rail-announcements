@@ -287,8 +287,8 @@ export default abstract class AnnouncementSystem {
       _items.splice(_items.length - 1, 0, { id: _options.andId, opts: { delayStart: _options.beforeAndDelay } })
 
       if (_options.afterAndDelay !== undefined || _options.beforeItemDelay !== undefined) {
-        _items[items.length - 1].opts ??= {}
-        _items[items.length - 1].opts!!.delayStart = _options.afterAndDelay ?? _options.beforeItemDelay
+        _items[_items.length - 1].opts ??= {}
+        _items[_items.length - 1].opts!!.delayStart = _options.afterAndDelay ?? _options.beforeItemDelay
       }
     }
 

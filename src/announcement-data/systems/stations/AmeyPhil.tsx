@@ -51,9 +51,18 @@ export default class AmeyPhil extends StationAnnouncementSystem {
   readonly FILE_PREFIX: string = 'station/ketech/phil'
   readonly SYSTEM_TYPE = 'station'
 
-  protected readonly CALLING_POINT_DELAY: number = 200
-  protected readonly CALLING_POINT_AND_DELAY: number = 100
   protected readonly BEFORE_TOC_DELAY: number = 150
+  protected readonly BEFORE_SECTION_DELAY: number = 870
+
+  protected readonly callingPointsOptions = {
+    beforeCallingAtDelay: this.BEFORE_SECTION_DELAY,
+    betweenStopsDelay: 320,
+    aroundAndDelay: 100,
+  }
+
+  protected readonly requestStopOptions = {
+    andId: 'm.or-2',
+  }
 
   get DEFAULT_CHIME(): ChimeType {
     return 'four'
@@ -3571,7 +3580,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
               finalPrefix: 'station.m.',
               andId: 'm.and',
               beforeAndDelay: this.CALLING_POINT_AND_DELAY,
-              beforeItemDelay: this.CALLING_POINT_DELAY,
+              beforeItemDelay: this.BETWEEN_CALLING_POINT_DELAY,
               afterAndDelay: this.CALLING_POINT_AND_DELAY,
             }),
             ...s.split(','),
@@ -3588,7 +3597,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             finalPrefix: 'station.m.',
             andId: 'm.and',
             beforeAndDelay: this.CALLING_POINT_AND_DELAY,
-            beforeItemDelay: this.CALLING_POINT_DELAY,
+            beforeItemDelay: this.BETWEEN_CALLING_POINT_DELAY,
             afterAndDelay: this.CALLING_POINT_AND_DELAY,
           }),
           ...s.split(','),
@@ -3599,10 +3608,6 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     })
 
     return files
-  }
-
-  protected readonly requestStopOptions = {
-    andId: 'm.or-2',
   }
 
   private async getRequestStops(
@@ -3641,7 +3646,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         prefix: 'station.m.',
         finalPrefix: 'station.m.',
         andId: this.requestStopOptions.andId,
-        beforeItemDelay: this.CALLING_POINT_DELAY,
+        beforeItemDelay: this.BETWEEN_CALLING_POINT_DELAY,
         beforeAndDelay: this.CALLING_POINT_AND_DELAY,
         afterAndDelay: this.CALLING_POINT_AND_DELAY,
       }),
@@ -3803,9 +3808,9 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         splitData.stopsUpToSplit.map(s => `station.m.${s.crsCode}`),
         {
           andId: 'm.and',
-          beforeItemDelay: this.CALLING_POINT_DELAY,
-          beforeAndDelay: this.CALLING_POINT_AND_DELAY,
-          afterAndDelay: this.CALLING_POINT_AND_DELAY,
+          beforeItemDelay: this.callingPointsOptions.betweenStopsDelay,
+          beforeAndDelay: this.callingPointsOptions.aroundAndDelay,
+          afterAndDelay: this.callingPointsOptions.aroundAndDelay,
         },
       ),
     )
@@ -3858,9 +3863,9 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           stops.map(s => `station.m.${s}`),
           {
             andId: 'm.and',
-            beforeAndDelay: this.CALLING_POINT_AND_DELAY,
-            afterAndDelay: this.CALLING_POINT_AND_DELAY,
-            beforeItemDelay: this.CALLING_POINT_DELAY,
+            beforeItemDelay: this.callingPointsOptions.betweenStopsDelay,
+            beforeAndDelay: this.callingPointsOptions.aroundAndDelay,
+            afterAndDelay: this.callingPointsOptions.aroundAndDelay,
           },
         ),
       ]
@@ -3921,11 +3926,11 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     const callingPointsWithSplits = await this.getCallingPointsWithSplits(callingPoints, terminatingStation, overallLength)
 
     if (callingPointsWithSplits.length !== 0) {
-      files.push({ id: 'm.calling at', opts: { delayStart: 750 } }, ...callingPointsWithSplits)
+      files.push({ id: 'm.calling at', opts: { delayStart: this.callingPointsOptions.beforeCallingAtDelay } }, ...callingPointsWithSplits)
       return files
     }
 
-    files.push({ id: 'm.calling at', opts: { delayStart: 750 } })
+    files.push({ id: 'm.calling at', opts: { delayStart: this.callingPointsOptions.beforeCallingAtDelay } })
 
     if (callingPoints.length === 0) {
       files.push(`station.m.${terminatingStation}`, 'e.only')
@@ -3933,9 +3938,9 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       files.push(
         ...this.pluraliseAudio([...callingPoints.map(stn => `station.m.${stn.crsCode}`), `station.e.${terminatingStation}`], {
           andId: 'm.and',
-          beforeItemDelay: this.CALLING_POINT_DELAY,
-          beforeAndDelay: this.CALLING_POINT_AND_DELAY,
-          afterAndDelay: this.CALLING_POINT_AND_DELAY,
+          beforeItemDelay: this.callingPointsOptions.betweenStopsDelay,
+          beforeAndDelay: this.callingPointsOptions.aroundAndDelay,
+          afterAndDelay: this.callingPointsOptions.aroundAndDelay,
         }),
       )
     }
@@ -4762,6 +4767,15 @@ function LiveTrainAnnouncements({ nextTrainHandler, disruptedTrainHandler, syste
         return true
       })
 
+      if (train.destination[0].tiploc !== callingPoints[callingPoints.length - 1].tiploc) {
+        // False destination -- need to trim calling points
+        const lastRealCallingPoint = callingPoints.findIndex(s => s.tiploc == train.destination[0].tiploc)
+
+        console.log(`Fake destination detected. Last real calling point index is ${lastRealCallingPoint}`)
+
+        for (let i = lastRealCallingPoint; i < callingPoints.length; i++) delete callingPoints[i]
+      }
+
       const callingAt = callingPoints
         .map((p, i, arr): CallingAtPoint | null => {
           console.log(`[${i} of ${arr.length - 1}]: ${p.crs}`)
@@ -4801,7 +4815,7 @@ function LiveTrainAnnouncements({ nextTrainHandler, disruptedTrainHandler, syste
       const options: INextTrainAnnouncementOptions = {
         chime: system.DEFAULT_CHIME,
         hour: h === '00' ? '00 - midnight' : h,
-        min: m === '00' ? '00 - hundred' : m,
+        min: m === '00' ? '00 - hundred-hours' : m,
         isDelayed: delayMins > 5,
         toc,
         coaches: train.length ? `${train.length} coaches` : null,
@@ -5011,8 +5025,8 @@ function LiveTrainAnnouncements({ nextTrainHandler, disruptedTrainHandler, syste
           return false
         }
         if (s.atdSpecified) {
-          addLog(`Skipping ${s.trainid} ${s.rid} (${std} to ${s.destination[0].locationName}) as it has already departed`)
-          console.log(`[Live Trains] Skipping ${s.rid} (${std} to ${s.destination[0].locationName}) as it has already departed`)
+          addLog(`Skipping ${s.trainid} ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has already departed`)
+          console.log(`[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has already departed`)
           return false
         }
         if (!s.isCancelled && calculateDelayMins(new Date(s.std), new Date(s.etd)) < 5 && s.etdSpecified && s.stdSpecified) {

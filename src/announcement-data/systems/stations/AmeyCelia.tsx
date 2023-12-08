@@ -11,6 +11,7 @@ export default class AmeyCelia extends AmeyPhil {
 
   protected readonly callingPointsOptions = {
     beforeCallingAtDelay: this.BEFORE_SECTION_DELAY,
+    afterCallingAtDelay: 0,
     betweenStopsDelay: 220,
     aroundAndDelay: 0,
   }

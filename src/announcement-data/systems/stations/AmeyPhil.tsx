@@ -36,6 +36,12 @@ interface IDisruptedTrainAnnouncementOptions {
   delayTime: string
 }
 
+interface IFastTrainAnnouncementOptions {
+  chime: ChimeType
+  platform: string
+  fastTrainApproaching: boolean
+}
+
 interface SplitInfoStop {
   crsCode: string
   shortPlatform: string
@@ -4164,6 +4170,24 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     await this.playAudioFiles(files, download)
   }
 
+  private async playFastTrainAnnouncement(options: IFastTrainAnnouncementOptions, download: boolean = false): Promise<void> {
+    const files: AudioItem[] = []
+
+    const chime = this.getChime(options.chime)
+    if (chime) files.push(chime)
+
+    files.push('s.stand well away from the edge of platform', `platform.e.${options.platform}`, {
+      id: 'w.the approaching train is not scheduled to stop at this station',
+      opts: { delayStart: this.BEFORE_SECTION_DELAY },
+    })
+
+    if (options.fastTrainApproaching) {
+      files.push({ id: 'w.fast train approaching', opts: { delayStart: this.BEFORE_SECTION_DELAY } })
+    }
+
+    await this.playAudioFiles(files, download)
+  }
+
   readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab> = {
     nextTrain: {
       name: 'Next train',
@@ -4404,6 +4428,36 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         },
       },
     },
+    fastTrain: {
+      name: 'Fast train',
+      component: CustomAnnouncementPane,
+      props: {
+        playHandler: this.playFastTrainAnnouncement.bind(this),
+        options: {
+          chime: {
+            name: 'Chime',
+            type: 'select',
+            default: this.DEFAULT_CHIME,
+            options: [
+              { title: '3 chimes', value: 'three' },
+              { title: '4 chimes', value: 'four' },
+              { title: 'No chime', value: 'none' },
+            ],
+          },
+          platform: {
+            name: 'Platform',
+            default: this.PLATFORMS[0],
+            options: this.PLATFORMS.map(p => ({ title: `Platform ${p.toUpperCase()}`, value: p })),
+            type: 'select',
+          },
+          fastTrainApproaching: {
+            name: '"Fast train approaching"',
+            type: 'boolean',
+            default: false,
+          },
+        },
+      },
+    },
     liveTrains: {
       name: 'Live trains (beta)',
       component: LiveTrainAnnouncements,
@@ -4411,7 +4465,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         nextTrainHandler: this.playNextTrainAnnouncement.bind(this),
         disruptedTrainHandler: this.playDisruptedTrainAnnouncement.bind(this),
         system: this,
-      },
+      } as any,
     },
     announcementButtons: {
       name: 'Announcement buttons',

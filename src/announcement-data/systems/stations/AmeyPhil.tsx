@@ -5173,8 +5173,8 @@ function LiveTrainAnnouncements({ nextTrainHandler, disruptedTrainHandler, syste
       <p style={{ margin: '16px 0' }}>At the moment, we also won't announce services which:</p>
       <ul className="list" style={{ margin: '16px 16px' }}>
         <li>have no platform allocated in data feeds (common at larger stations, even at the time of departure)</li>
-        <li>are marked as cancelled or have an estimated time of "delayed"</li>
         <li>have already been announced by the system in the last hour (only affects services which suddenly get delayed)</li>
+        <li>are terminating at the selected station</li>
       </ul>
       <p>
         We also can't handle splits (we'll only announce the main portion), request stops, short platforms and several more features. As I said,

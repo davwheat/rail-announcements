@@ -1,7 +1,5 @@
-import { CustomAnnouncementTab } from '@announcement-data/AnnouncementSystem'
 import AmeyPhil, { ChimeType } from './AmeyPhil'
 import DelayCodeMapping from './DarwinDelayCodes_Female1.json'
-import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
 
 export default class AmeyCelia extends AmeyPhil {
   readonly NAME = 'Amey/Ditra - Celia Drummond'
@@ -3063,34 +3061,6 @@ export default class AmeyCelia extends AmeyPhil {
       //   } else {
       //     return 'west midlands railway'
       //   }
-    }
-  }
-
-  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab> = this._customAnnouncementTabs
-
-  get _customAnnouncementTabs(): Record<string, CustomAnnouncementTab> {
-    return {
-      ...super._customAnnouncementTabs,
-      announcementButtons: {
-        name: 'Announcement buttons',
-        component: CustomButtonPane,
-        props: {
-          buttonSections: {
-            General: [
-              {
-                label: '3 chimes',
-                play: this.playAudioFiles.bind(this, [this.getChime('three')!!]),
-                download: this.playAudioFiles.bind(this, [this.getChime('three')!!], true),
-              },
-              {
-                label: '4 chimes',
-                play: this.playAudioFiles.bind(this, [this.getChime('four')!!]),
-                download: this.playAudioFiles.bind(this, [this.getChime('four')!!], true),
-              },
-            ],
-          },
-        },
-      },
     }
   }
 }

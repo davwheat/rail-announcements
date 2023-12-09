@@ -30,6 +30,9 @@ const useStyles = makeStyles({
     },
   },
   tab: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
     padding: 12,
     color: '#000',
     textAlign: 'center',

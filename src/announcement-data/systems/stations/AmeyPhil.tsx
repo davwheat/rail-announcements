@@ -3435,7 +3435,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     return null
   }
 
-  private getChime(chime: ChimeType): AudioItem | null {
+  protected getChime(chime: ChimeType): AudioItem | null {
     switch (chime) {
       case 'none':
         return null
@@ -4188,353 +4188,357 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     await this.playAudioFiles(files, download)
   }
 
-  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab> = {
-    nextTrain: {
-      name: 'Next train',
-      component: CustomAnnouncementPane,
-      props: {
-        presets: this.announcementPresets.nextTrain,
-        playHandler: this.playNextTrainAnnouncement.bind(this),
-        options: {
-          chime: {
-            name: 'Chime',
-            type: 'select',
-            default: this.DEFAULT_CHIME,
-            options: [
-              { title: '3 chimes', value: 'three' },
-              { title: '4 chimes', value: 'four' },
-              { title: 'No chime', value: 'none' },
-            ],
-          },
-          platform: {
-            name: 'Platform',
-            default: this.PLATFORMS[0],
-            options: this.PLATFORMS.map(p => ({ title: `Platform ${p.toUpperCase()}`, value: p })),
-            type: 'select',
-          },
-          hour: {
-            name: 'Hour',
-            default: '07',
-            options: [
-              '00 - midnight',
-              '01',
-              '02',
-              '03',
-              '04',
-              '05',
-              '06',
-              '07',
-              '08',
-              '09',
-              '10',
-              '11',
-              '12',
-              '13',
-              '14',
-              '15',
-              '16',
-              '17',
-              '18',
-              '19',
-              '20',
-              '21',
-              '22',
-              '23',
-            ].map(h => ({ title: h, value: h })),
-            type: 'select',
-          },
-          min: {
-            name: 'Minute',
-            default: '33',
-            options: ['00 - hundred', '00 - hundred-hours']
-              .concat(new Array(58).fill(0).map((_, i) => (i + 2).toString()))
-              .map(m => ({ title: m.toString().padStart(2, '0'), value: m.toString().padStart(2, '0') })),
-            type: 'select',
-          },
-          isDelayed: {
-            name: 'Delayed?',
-            default: false,
-            type: 'boolean',
-          },
-          toc: {
-            name: 'TOC',
-            default: '',
-            options: [{ title: 'None', value: '' }].concat(this.ALL_AVAILABLE_TOCS.map(m => ({ title: m, value: m.toLowerCase() }))),
-            type: 'select',
-          },
-          terminatingStationCode: {
-            name: 'Terminating station',
-            default: this.STATIONS[0],
-            options: this.STATIONS.map(s => {
-              const stn = getStationByCrs(s)
-              return { title: stn ? `${stn.stationName} (${s})` : `Unknown name (${s})`, value: s }
-            }),
-            type: 'select',
-          },
-          vias: {
-            name: '',
-            type: 'custom',
-            component: CallingAtSelector,
-            props: {
-              availableStations: this.STATIONS,
-              selectLabel: 'Via points (non-splitting services only)',
-              placeholder: 'Add a via point...',
-              heading: 'Via... (optional)',
+  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab> = this._customAnnouncementTabs
+
+  get _customAnnouncementTabs(): Record<string, CustomAnnouncementTab> {
+    return {
+      nextTrain: {
+        name: 'Next train',
+        component: CustomAnnouncementPane,
+        props: {
+          presets: this.announcementPresets.nextTrain,
+          playHandler: this.playNextTrainAnnouncement.bind(this),
+          options: {
+            chime: {
+              name: 'Chime',
+              type: 'select',
+              default: this.DEFAULT_CHIME,
+              options: [
+                { title: '3 chimes', value: 'three' },
+                { title: '4 chimes', value: 'four' },
+                { title: 'No chime', value: 'none' },
+              ],
             },
-            default: [],
-          },
-          callingAt: {
-            name: '',
-            type: 'custom',
-            component: CallingAtSelector,
-            props: {
-              availableStations: this.STATIONS,
-              enableShortPlatforms: this.SHORT_PLATFORMS,
-              enableRequestStops: true,
-              enableSplits: this.SPLITS,
+            platform: {
+              name: 'Platform',
+              default: this.PLATFORMS[0],
+              options: this.PLATFORMS.map(p => ({ title: `Platform ${p.toUpperCase()}`, value: p })),
+              type: 'select',
             },
-            default: [],
-          },
-          coaches: {
-            name: 'Coach count',
-            default: '8 coaches',
-            options: [
-              '1 coach',
-              '2 coaches',
-              '3 coaches',
-              '4 coaches',
-              '5 coaches',
-              '6 coaches',
-              '7 coaches',
-              '8 coaches',
-              '9 coaches',
-              '10 coaches',
-              '11 coaches',
-              '12 coaches',
-            ].map(c => ({ title: c, value: c })),
-            type: 'select',
+            hour: {
+              name: 'Hour',
+              default: '07',
+              options: [
+                '00 - midnight',
+                '01',
+                '02',
+                '03',
+                '04',
+                '05',
+                '06',
+                '07',
+                '08',
+                '09',
+                '10',
+                '11',
+                '12',
+                '13',
+                '14',
+                '15',
+                '16',
+                '17',
+                '18',
+                '19',
+                '20',
+                '21',
+                '22',
+                '23',
+              ].map(h => ({ title: h, value: h })),
+              type: 'select',
+            },
+            min: {
+              name: 'Minute',
+              default: '33',
+              options: ['00 - hundred', '00 - hundred-hours']
+                .concat(new Array(58).fill(0).map((_, i) => (i + 2).toString()))
+                .map(m => ({ title: m.toString().padStart(2, '0'), value: m.toString().padStart(2, '0') })),
+              type: 'select',
+            },
+            isDelayed: {
+              name: 'Delayed?',
+              default: false,
+              type: 'boolean',
+            },
+            toc: {
+              name: 'TOC',
+              default: '',
+              options: [{ title: 'None', value: '' }].concat(this.ALL_AVAILABLE_TOCS.map(m => ({ title: m, value: m.toLowerCase() }))),
+              type: 'select',
+            },
+            terminatingStationCode: {
+              name: 'Terminating station',
+              default: this.STATIONS[0],
+              options: this.STATIONS.map(s => {
+                const stn = getStationByCrs(s)
+                return { title: stn ? `${stn.stationName} (${s})` : `Unknown name (${s})`, value: s }
+              }),
+              type: 'select',
+            },
+            vias: {
+              name: '',
+              type: 'custom',
+              component: CallingAtSelector,
+              props: {
+                availableStations: this.STATIONS,
+                selectLabel: 'Via points (non-splitting services only)',
+                placeholder: 'Add a via point...',
+                heading: 'Via... (optional)',
+              },
+              default: [],
+            },
+            callingAt: {
+              name: '',
+              type: 'custom',
+              component: CallingAtSelector,
+              props: {
+                availableStations: this.STATIONS,
+                enableShortPlatforms: this.SHORT_PLATFORMS,
+                enableRequestStops: true,
+                enableSplits: this.SPLITS,
+              },
+              default: [],
+            },
+            coaches: {
+              name: 'Coach count',
+              default: '8 coaches',
+              options: [
+                '1 coach',
+                '2 coaches',
+                '3 coaches',
+                '4 coaches',
+                '5 coaches',
+                '6 coaches',
+                '7 coaches',
+                '8 coaches',
+                '9 coaches',
+                '10 coaches',
+                '11 coaches',
+                '12 coaches',
+              ].map(c => ({ title: c, value: c })),
+              type: 'select',
+            },
           },
         },
       },
-    },
-    disruptedTrain: {
-      name: 'Disrupted train',
-      component: CustomAnnouncementPane,
-      props: {
-        presets: this.announcementPresets.disruptedTrain,
-        playHandler: this.playDisruptedTrainAnnouncement.bind(this),
-        options: {
-          chime: {
-            name: 'Chime',
-            type: 'select',
-            default: this.DEFAULT_CHIME,
-            options: [
-              { title: '3 chimes', value: 'three' },
-              { title: '4 chimes', value: 'four' },
-              { title: 'No chime', value: 'none' },
-            ],
-          },
-          hour: {
-            name: 'Hour',
-            default: '07',
-            options: [
-              '00 - midnight',
-              '01',
-              '02',
-              '03',
-              '04',
-              '05',
-              '06',
-              '07',
-              '08',
-              '09',
-              '10',
-              '11',
-              '12',
-              '13',
-              '14',
-              '15',
-              '16',
-              '17',
-              '18',
-              '19',
-              '20',
-              '21',
-              '22',
-              '23',
-            ].map(h => ({ title: h, value: h })),
-            type: 'select',
-          },
-          min: {
-            name: 'Minute',
-            default: '33',
-            options: ['00 - hundred', '00 - hundred-hours']
-              .concat(new Array(58).fill(0).map((_, i) => (i + 2).toString()))
-              .map(m => ({ title: m.toString().padStart(2, '0'), value: m.toString().padStart(2, '0') })),
-            type: 'select',
-          },
-          toc: {
-            name: 'TOC',
-            default: '',
-            options: [{ title: 'None', value: '' }].concat(this.ALL_AVAILABLE_TOCS.map(m => ({ title: m, value: m.toLowerCase() }))),
-            type: 'select',
-          },
-          terminatingStationCode: {
-            name: 'Terminating station',
-            default: this.STATIONS[0],
-            options: this.STATIONS.map(s => {
-              const stn = getStationByCrs(s)
-              return { title: stn ? `${stn.stationName} (${s})` : `Unknown name (${s})`, value: s }
-            }),
-            type: 'select',
-          },
-          vias: {
-            name: '',
-            type: 'custom',
-            component: CallingAtSelector,
-            props: {
-              availableStations: this.STATIONS,
-              selectLabel: 'Via points (non-splitting services only)',
-              placeholder: 'Add a via point...',
-              heading: 'Via... (optional)',
+      disruptedTrain: {
+        name: 'Disrupted train',
+        component: CustomAnnouncementPane,
+        props: {
+          presets: this.announcementPresets.disruptedTrain,
+          playHandler: this.playDisruptedTrainAnnouncement.bind(this),
+          options: {
+            chime: {
+              name: 'Chime',
+              type: 'select',
+              default: this.DEFAULT_CHIME,
+              options: [
+                { title: '3 chimes', value: 'three' },
+                { title: '4 chimes', value: 'four' },
+                { title: 'No chime', value: 'none' },
+              ],
             },
-            default: [],
-          },
-          disruptionType: {
-            name: 'Disruption type',
-            type: 'select',
-            options: [
-              { value: 'delayedBy', title: 'Delayed by...' },
-              { value: 'delay', title: 'Delayed' },
-              { value: 'cancel', title: 'Cancelled' },
-            ],
-            default: 'delayedBy',
-          },
-          delayTime: {
-            name: 'Delay length',
-            type: 'select',
-            options: new Array(60).fill(0).map((_, i) => ({ value: (i + 1).toString(), title: `${i + 1} minute${i === 0 ? '' : 's'}` })),
-            default: '10',
-            onlyShowWhen(activeState) {
-              return activeState.disruptionType === 'delayedBy'
+            hour: {
+              name: 'Hour',
+              default: '07',
+              options: [
+                '00 - midnight',
+                '01',
+                '02',
+                '03',
+                '04',
+                '05',
+                '06',
+                '07',
+                '08',
+                '09',
+                '10',
+                '11',
+                '12',
+                '13',
+                '14',
+                '15',
+                '16',
+                '17',
+                '18',
+                '19',
+                '20',
+                '21',
+                '22',
+                '23',
+              ].map(h => ({ title: h, value: h })),
+              type: 'select',
             },
-          },
-          disruptionReason: {
-            name: 'Disruption reason',
-            type: 'select',
-            options: [{ value: '', title: 'None' }, ...this.DISRUPTION_REASONS.map(r => ({ value: r, title: r }))],
-            default: '',
+            min: {
+              name: 'Minute',
+              default: '33',
+              options: ['00 - hundred', '00 - hundred-hours']
+                .concat(new Array(58).fill(0).map((_, i) => (i + 2).toString()))
+                .map(m => ({ title: m.toString().padStart(2, '0'), value: m.toString().padStart(2, '0') })),
+              type: 'select',
+            },
+            toc: {
+              name: 'TOC',
+              default: '',
+              options: [{ title: 'None', value: '' }].concat(this.ALL_AVAILABLE_TOCS.map(m => ({ title: m, value: m.toLowerCase() }))),
+              type: 'select',
+            },
+            terminatingStationCode: {
+              name: 'Terminating station',
+              default: this.STATIONS[0],
+              options: this.STATIONS.map(s => {
+                const stn = getStationByCrs(s)
+                return { title: stn ? `${stn.stationName} (${s})` : `Unknown name (${s})`, value: s }
+              }),
+              type: 'select',
+            },
+            vias: {
+              name: '',
+              type: 'custom',
+              component: CallingAtSelector,
+              props: {
+                availableStations: this.STATIONS,
+                selectLabel: 'Via points (non-splitting services only)',
+                placeholder: 'Add a via point...',
+                heading: 'Via... (optional)',
+              },
+              default: [],
+            },
+            disruptionType: {
+              name: 'Disruption type',
+              type: 'select',
+              options: [
+                { value: 'delayedBy', title: 'Delayed by...' },
+                { value: 'delay', title: 'Delayed' },
+                { value: 'cancel', title: 'Cancelled' },
+              ],
+              default: 'delayedBy',
+            },
+            delayTime: {
+              name: 'Delay length',
+              type: 'select',
+              options: new Array(60).fill(0).map((_, i) => ({ value: (i + 1).toString(), title: `${i + 1} minute${i === 0 ? '' : 's'}` })),
+              default: '10',
+              onlyShowWhen(activeState) {
+                return activeState.disruptionType === 'delayedBy'
+              },
+            },
+            disruptionReason: {
+              name: 'Disruption reason',
+              type: 'select',
+              options: [{ value: '', title: 'None' }, ...this.DISRUPTION_REASONS.map(r => ({ value: r, title: r }))],
+              default: '',
+            },
           },
         },
       },
-    },
-    fastTrain: {
-      name: 'Fast train',
-      component: CustomAnnouncementPane,
-      props: {
-        playHandler: this.playFastTrainAnnouncement.bind(this),
-        options: {
-          chime: {
-            name: 'Chime',
-            type: 'select',
-            default: this.DEFAULT_CHIME,
-            options: [
-              { title: '3 chimes', value: 'three' },
-              { title: '4 chimes', value: 'four' },
-              { title: 'No chime', value: 'none' },
-            ],
-          },
-          platform: {
-            name: 'Platform',
-            default: this.PLATFORMS[0],
-            options: this.PLATFORMS.map(p => ({ title: `Platform ${p.toUpperCase()}`, value: p })),
-            type: 'select',
-          },
-          fastTrainApproaching: {
-            name: '"Fast train approaching"',
-            type: 'boolean',
-            default: false,
+      fastTrain: {
+        name: 'Fast train',
+        component: CustomAnnouncementPane,
+        props: {
+          playHandler: this.playFastTrainAnnouncement.bind(this),
+          options: {
+            chime: {
+              name: 'Chime',
+              type: 'select',
+              default: this.DEFAULT_CHIME,
+              options: [
+                { title: '3 chimes', value: 'three' },
+                { title: '4 chimes', value: 'four' },
+                { title: 'No chime', value: 'none' },
+              ],
+            },
+            platform: {
+              name: 'Platform',
+              default: this.PLATFORMS[0],
+              options: this.PLATFORMS.map(p => ({ title: `Platform ${p.toUpperCase()}`, value: p })),
+              type: 'select',
+            },
+            fastTrainApproaching: {
+              name: '"Fast train approaching"',
+              type: 'boolean',
+              default: false,
+            },
           },
         },
       },
-    },
-    liveTrains: {
-      name: 'Live trains (beta)',
-      component: LiveTrainAnnouncements,
-      props: {
-        nextTrainHandler: this.playNextTrainAnnouncement.bind(this),
-        disruptedTrainHandler: this.playDisruptedTrainAnnouncement.bind(this),
-        system: this,
-      } as any,
-    },
-    announcementButtons: {
-      name: 'Announcement buttons',
-      component: CustomButtonPane,
-      props: {
-        buttonSections: {
-          General: [
-            {
-              label: '3 chimes',
-              play: this.playAudioFiles.bind(this, [this.getChime('three')!!]),
-              download: this.playAudioFiles.bind(this, [this.getChime('three')!!], true),
-            },
-            {
-              label: '4 chimes',
-              play: this.playAudioFiles.bind(this, [this.getChime('four')!!]),
-              download: this.playAudioFiles.bind(this, [this.getChime('four')!!], true),
-            },
-          ],
-          Emergency: [
-            {
-              label: 'Newton Aycliffe chemical emergency',
-              play: this.playAudioFiles.bind(this, [
-                's.this is an emergency announcement',
-                'e.for customers at newton aycliffe station',
-                { id: 's.there is an emergency at a nearby chemical works', opts: { delayStart: 300 } },
-                { id: 'm.please leave the station by the ramp from platform 1', opts: { delayStart: 300 } },
-                'e.and turning left make your way to a position of safety',
-                { id: 'e.listen for announcement by the emergency services', opts: { delayStart: 300 } },
-              ]),
-              download: this.playAudioFiles.bind(
-                this,
-                [
+      liveTrains: {
+        name: 'Live trains (beta)',
+        component: LiveTrainAnnouncements,
+        props: {
+          nextTrainHandler: this.playNextTrainAnnouncement.bind(this),
+          disruptedTrainHandler: this.playDisruptedTrainAnnouncement.bind(this),
+          system: this,
+        } as any,
+      },
+      announcementButtons: {
+        name: 'Announcement buttons',
+        component: CustomButtonPane,
+        props: {
+          buttonSections: {
+            General: [
+              {
+                label: '3 chimes',
+                play: this.playAudioFiles.bind(this, [this.getChime('three')!!]),
+                download: this.playAudioFiles.bind(this, [this.getChime('three')!!], true),
+              },
+              {
+                label: '4 chimes',
+                play: this.playAudioFiles.bind(this, [this.getChime('four')!!]),
+                download: this.playAudioFiles.bind(this, [this.getChime('four')!!], true),
+              },
+            ],
+            Emergency: [
+              {
+                label: 'Newton Aycliffe chemical emergency',
+                play: this.playAudioFiles.bind(this, [
                   's.this is an emergency announcement',
                   'e.for customers at newton aycliffe station',
                   { id: 's.there is an emergency at a nearby chemical works', opts: { delayStart: 300 } },
                   { id: 'm.please leave the station by the ramp from platform 1', opts: { delayStart: 300 } },
                   'e.and turning left make your way to a position of safety',
                   { id: 'e.listen for announcement by the emergency services', opts: { delayStart: 300 } },
-                ],
-                true,
-              ),
-            },
-            {
-              label: 'Castleford chemical emergency',
-              play: this.playAudioFiles.bind(this, [
-                's.this is an emergency announcement',
-                'e.for customers at castleford station',
-                { id: 's.there is an emergency at a nearby chemical works', opts: { delayStart: 300 } },
-                { id: 'm.please leave the station by the main exit', opts: { delayStart: 300 } },
-                'e.and proceed to the town centre',
-                { id: 'e.listen for announcement by the emergency services', opts: { delayStart: 300 } },
-              ]),
-              download: this.playAudioFiles.bind(
-                this,
-                [
+                ]),
+                download: this.playAudioFiles.bind(
+                  this,
+                  [
+                    's.this is an emergency announcement',
+                    'e.for customers at newton aycliffe station',
+                    { id: 's.there is an emergency at a nearby chemical works', opts: { delayStart: 300 } },
+                    { id: 'm.please leave the station by the ramp from platform 1', opts: { delayStart: 300 } },
+                    'e.and turning left make your way to a position of safety',
+                    { id: 'e.listen for announcement by the emergency services', opts: { delayStart: 300 } },
+                  ],
+                  true,
+                ),
+              },
+              {
+                label: 'Castleford chemical emergency',
+                play: this.playAudioFiles.bind(this, [
                   's.this is an emergency announcement',
                   'e.for customers at castleford station',
                   { id: 's.there is an emergency at a nearby chemical works', opts: { delayStart: 300 } },
                   { id: 'm.please leave the station by the main exit', opts: { delayStart: 300 } },
                   'e.and proceed to the town centre',
                   { id: 'e.listen for announcement by the emergency services', opts: { delayStart: 300 } },
-                ],
-                true,
-              ),
-            },
-          ],
+                ]),
+                download: this.playAudioFiles.bind(
+                  this,
+                  [
+                    's.this is an emergency announcement',
+                    'e.for customers at castleford station',
+                    { id: 's.there is an emergency at a nearby chemical works', opts: { delayStart: 300 } },
+                    { id: 'm.please leave the station by the main exit', opts: { delayStart: 300 } },
+                    'e.and proceed to the town centre',
+                    { id: 'e.listen for announcement by the emergency services', opts: { delayStart: 300 } },
+                  ],
+                  true,
+                ),
+              },
+            ],
+          },
         },
       },
-    },
+    }
   }
 }
 

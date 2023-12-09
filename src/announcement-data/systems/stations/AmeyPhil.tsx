@@ -7,6 +7,7 @@ import { getStationByCrs } from '@data/StationManipulators'
 import crsToStationItemMapper, { stationItemCompleter } from '@helpers/crsToStationItemMapper'
 import { AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
 import FullscreenIcon from 'mdi-react/FullscreenIcon'
+import DelayCodeMapping from './DarwinDelayCodes_Male1.json'
 
 export type ChimeType = 'three' | 'four' | 'none'
 
@@ -31,7 +32,7 @@ interface IDisruptedTrainAnnouncementOptions {
   terminatingStationCode: string
   vias: CallingAtPoint[]
   disruptionType: 'delay' | 'delayedBy' | 'cancel'
-  disruptionReason: string
+  disruptionReason: string | string[]
   delayTime: string
 }
 
@@ -53,6 +54,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
 
   protected readonly BEFORE_TOC_DELAY: number = 150
   protected readonly BEFORE_SECTION_DELAY: number = 870
+
+  readonly DelayCodeMapping = DelayCodeMapping
 
   protected readonly callingPointsOptions = {
     beforeCallingAtDelay: this.BEFORE_SECTION_DELAY,
@@ -4101,20 +4104,34 @@ export default class AmeyPhil extends StationAnnouncementSystem {
 
         files.push(`${endInflection}.${num !== 1 ? 'minutes' : 'minute'}`)
 
-        if (options.disruptionReason) {
+        if (Array.isArray(options.disruptionReason)) {
+          files.push('m.due to', ...options.disruptionReason)
+        } else if (options.disruptionReason) {
           files.push('m.due to', `disruption-reason.e.${options.disruptionReason}`)
         }
         break
       case 'delay':
         if (options.disruptionReason) {
-          files.push('m.is being delayed due to', `disruption-reason.e.${options.disruptionReason}`)
+          files.push('m.is being delayed due to')
+
+          if (Array.isArray(options.disruptionReason)) {
+            files.push(...options.disruptionReason)
+          } else {
+            files.push(`disruption-reason.e.${options.disruptionReason}`)
+          }
         } else {
           files.push('e.is being delayed')
         }
         break
       case 'cancel':
         if (options.disruptionReason) {
-          files.push('m.has been cancelled due to', `disruption-reason.e.${options.disruptionReason}`)
+          files.push('m.has been cancelled due to')
+
+          if (Array.isArray(options.disruptionReason)) {
+            files.push(...options.disruptionReason)
+          } else {
+            files.push(`disruption-reason.e.${options.disruptionReason}`)
+          }
         } else {
           files.push('e.has been cancelled')
         }
@@ -4912,6 +4929,18 @@ function LiveTrainAnnouncements({ nextTrainHandler, disruptedTrainHandler, syste
         })
       }
 
+      let delayReason: string[] | null = null
+
+      const reasonData = cancelled ? train.cancelReason : train.delayReason
+
+      if (reasonData?.value) {
+        const audioOptions = system.DelayCodeMapping[reasonData.value.toString()]?.e
+
+        if (audioOptions) {
+          delayReason = audioOptions.split(',')
+        }
+      }
+
       const options: IDisruptedTrainAnnouncementOptions = {
         chime: system.DEFAULT_CHIME,
         hour: h === '00' ? '00 - midnight' : h,
@@ -4921,7 +4950,7 @@ function LiveTrainAnnouncements({ nextTrainHandler, disruptedTrainHandler, syste
         vias,
         delayTime: delayMins.toString(),
         disruptionType: cancelled ? 'cancel' : unknownDelay || delayMins > 59 || delayMins < 0 ? 'delay' : 'delayedBy',
-        disruptionReason: '',
+        disruptionReason: delayReason ?? '',
       }
 
       console.log(options)
@@ -4936,6 +4965,22 @@ function LiveTrainAnnouncements({ nextTrainHandler, disruptedTrainHandler, syste
         await disruptedTrainHandler(options)
       } catch (e) {
         console.warn(`[Live Trains] Error playing announcement for ${train.rid}; see below`)
+
+        if (delayReason) {
+          // Try without
+          const options2 = { ...options, disruptionReason: '' }
+
+          try {
+            console.log(
+              `[Live Trains] Playing disrupted announcement (attempt 2) for ${train.rid} (${train.std} to ${train.destination[0].locationName})`,
+            )
+            await disruptedTrainHandler(options2)
+          } catch (e) {
+            console.warn(`[Live Trains] Error playing announcement for ${train.rid}; see below`)
+            console.error(e)
+          }
+        }
+
         console.error(e)
       }
       console.log(`[Live Trains] Announcement for ${train.rid} complete: waiting 5s until next`)

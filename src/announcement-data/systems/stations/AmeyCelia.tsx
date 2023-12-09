@@ -1,4 +1,5 @@
 import AmeyPhil, { ChimeType } from './AmeyPhil'
+import DelayCodeMapping from './DarwinDelayCodes_Female1.json'
 
 export default class AmeyCelia extends AmeyPhil {
   readonly NAME = 'Amey/Ditra - Celia Drummond'
@@ -8,6 +9,8 @@ export default class AmeyCelia extends AmeyPhil {
 
   protected readonly BEFORE_TOC_DELAY: number = 30
   protected readonly BEFORE_SECTION_DELAY: number = 520
+
+  readonly DelayCodeMapping = DelayCodeMapping
 
   protected readonly callingPointsOptions = {
     beforeCallingAtDelay: this.BEFORE_SECTION_DELAY,

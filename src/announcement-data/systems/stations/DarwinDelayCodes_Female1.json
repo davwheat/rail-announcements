@@ -1,0 +1,1998 @@
+{
+    "100": {
+        "e": "disruption-reason.e.a broken down train",
+        "m": "disruption-reason.m.a broken down train"
+    },
+    "101": {
+        "e": "disruption-reason.e.late running of the previous train",
+        "m": "disruption-reason.m.late running of the previous train"
+    },
+    "102": {
+        "e": "disruption-reason.e.a derailment",
+        "m": "disruption-reason.m.a derailment"
+    },
+    "104": {
+        "e": "disruption-reason.e.a fire",
+        "m": "disruption-reason.m.a fire"
+    },
+    "105": {
+        "e": "disruption-reason.e.a fire",
+        "m": "disruption-reason.m.a fire"
+    },
+    "106": {
+        "e": "disruption-reason.e.a landslide",
+        "m": "disruption-reason.m.a landslide"
+    },
+    "107": {
+        "e": "disruption-reason.e.a lineside fire",
+        "m": "disruption-reason.m.a lineside fire"
+    },
+    "108": {
+        "e": "disruption-reason.e.a temporary shortage of train crews",
+        "m": "disruption-reason.m.a temporary shortage of train crews"
+    },
+    "109": {
+        "e": "disruption-reason.e.a customer having been taken ill on this train",
+        "m": "disruption-reason.m.a customer having been taken ill on this train"
+    },
+    "110": {
+        "e": "disruption-reason.e.a customer having been taken ill on a preceding train",
+        "m": "disruption-reason.m.a customer having been taken ill on a preceding train"
+    },
+    "111": {
+        "e": "disruption-reason.e.a suspected fatality",
+        "m": "disruption-reason.m.a suspected fatality"
+    },
+    "112": {
+        "e": "disruption-reason.e.an earlier fatality",
+        "m": "disruption-reason.m.an earlier fatality"
+    },
+    "113": {
+        "e": "disruption-reason.e.a fault on a level crossing",
+        "m": "disruption-reason.m.a fault on a level crossing"
+    },
+    "114": {
+        "e": "disruption-reason.e.a currently unidentified reason which is under investigation",
+        "m": "disruption-reason.m.a currently unidentified reason which is under investigation"
+    },
+    "115": {
+        "e": "disruption-reason.e.a problem on property adjacent to the railway",
+        "m": "disruption-reason.m.a problem on property adjacent to the railway"
+    },
+    "116": {
+        "e": "disruption-reason.e.suspected damage to a railway bridge",
+        "m": "disruption-reason.m.suspected damage to a railway bridge"
+    },
+    "117": {
+        "e": "disruption-reason.e.a fault on trackside equipment",
+        "m": "disruption-reason.m.a fault on trackside equipment"
+    },
+    "118": {
+        "e": "disruption-reason.e.a security alert",
+        "m": "disruption-reason.m.a security alert"
+    },
+    "119": {
+        "e": "disruption-reason.e.a derailment",
+        "m": "disruption-reason.m.a derailment"
+    },
+    "120": {
+        "e": "disruption-reason.e.a fault on the train",
+        "m": "disruption-reason.m.a fault on the train"
+    },
+    "121": {
+        "e": "disruption-reason.e.the late arrival of the coaches and train crew to form this service",
+        "m": "disruption-reason.m.the late arrival of the coaches and train crew to form this service"
+    },
+    "122": {
+        "e": "disruption-reason.e.the late arrival of the coaches and train crew to form this service",
+        "m": "disruption-reason.m.the late arrival of the coaches and train crew to form this service"
+    },
+    "123": {
+        "e": "disruption-reason.e.trespassers on the line",
+        "m": "disruption-reason.m.trespassers on the line"
+    },
+    "124": {
+        "e": "disruption-reason.e.a road vehicle striking a railway bridge",
+        "m": "disruption-reason.m.a road vehicle striking a railway bridge"
+    },
+    "125": {
+        "e": "disruption-reason.e.an earlier road vehicle striking a railway bridge",
+        "m": "disruption-reason.m.an earlier road vehicle striking a railway bridge"
+    },
+    "126": {
+        "e": "disruption-reason.e.an earlier broken down train",
+        "m": "disruption-reason.m.an earlier broken down train"
+    },
+    "128": {
+        "e": "disruption-reason.e.an earlier landslide",
+        "m": "disruption-reason.m.an earlier landslide"
+    },
+    "129": {
+        "e": "disruption-reason.e.an earlier lineside fire",
+        "m": "disruption-reason.m.an earlier lineside fire"
+    },
+    "130": {
+        "e": "disruption-reason.e.operational problems",
+        "m": "disruption-reason.m.operational problems"
+    },
+    "131": {
+        "e": "disruption-reason.e.an earlier fault on a level crossing",
+        "m": "disruption-reason.m.an earlier fault on a level crossing"
+    },
+    "132": {
+        "e": "disruption-reason.e.a problem on property adjacent to the railway",
+        "m": "disruption-reason.m.a problem on property adjacent to the railway"
+    },
+    "133": {
+        "e": "disruption-reason.e.suspected damage to a railway bridge",
+        "m": "disruption-reason.m.suspected damage to a railway bridge"
+    },
+    "134": {
+        "e": "disruption-reason.e.a fault on trackside equipment",
+        "m": "disruption-reason.m.a fault on trackside equipment"
+    },
+    "135": {
+        "e": "disruption-reason.e.an earlier security alert",
+        "m": "disruption-reason.m.an earlier security alert"
+    },
+    "136": {
+        "e": "disruption-reason.e.a fault on a preceding train",
+        "m": "disruption-reason.m.a fault on a preceding train"
+    },
+    "137": {
+        "e": "disruption-reason.e.an earlier trespassing incident",
+        "m": "disruption-reason.m.an earlier trespassing incident"
+    },
+    "138": {
+        "e": "disruption-reason.e.an obstruction on the line",
+        "m": "disruption-reason.m.an obstruction on the line"
+    },
+    "139": {
+        "e": "disruption-reason.e.an obstruction on the line",
+        "m": "disruption-reason.m.an obstruction on the line"
+    },
+    "140": {
+        "e": "disruption-reason.e.operational problems",
+        "m": "disruption-reason.m.operational problems"
+    },
+    "141": {
+        "e": "disruption-reason.e.large numbers of passengers joining the trains",
+        "m": "disruption-reason.m.large numbers of passengers joining the trains"
+    },
+    "142": {
+        "e": "disruption-reason.e.large numbers of passengers joining the trains",
+        "m": "disruption-reason.m.large numbers of passengers joining the trains"
+    },
+    "143": {
+        "e": "disruption-reason.e.animals on the railway line",
+        "m": "disruption-reason.m.animals on the railway line"
+    },
+    "144": {
+        "e": "disruption-reason.e.earlier reports of animals on the line",
+        "m": "disruption-reason.m.earlier reports of animals on the line"
+    },
+    "145": {
+        "e": "disruption-reason.e.congestion",
+        "m": "disruption-reason.m.congestion"
+    },
+    "146": {
+        "e": "disruption-reason.e.police attending a disturbance on this train",
+        "m": "disruption-reason.m.police attending a disturbance on this train"
+    },
+    "147": {
+        "e": "disruption-reason.e.police attending a disturbance on a preceding train",
+        "m": "disruption-reason.m.police attending a disturbance on a preceding train"
+    },
+    "148": {
+        "e": "disruption-reason.e.an earlier electrical power supply problem",
+        "m": "disruption-reason.m.an earlier electrical power supply problem"
+    },
+    "149": {
+        "e": "disruption-reason.e.emergency engineering work",
+        "m": "disruption-reason.m.emergency engineering work"
+    },
+    "150": {
+        "e": "disruption-reason.e.industrial action",
+        "m": "disruption-reason.m.industrial action"
+    },
+    "151": {
+        "e": "disruption-reason.e.overhead electric line problems",
+        "m": "disruption-reason.m.overhead electric line problems"
+    },
+    "152": {
+        "e": "disruption-reason.e.overrunning engineering work",
+        "m": "disruption-reason.m.overrunning engineering work"
+    },
+    "153": {
+        "e": "disruption-reason.e.an earlier fault with the signalling equipment",
+        "m": "disruption-reason.m.an earlier fault with the signalling equipment"
+    },
+    "154": {
+        "e": "disruption-reason.e.earlier vandalism",
+        "m": "disruption-reason.m.earlier vandalism"
+    },
+    "155": {
+        "e": "disruption-reason.e.an electrical power supply problem",
+        "m": "disruption-reason.m.an electrical power supply problem"
+    },
+    "156": {
+        "e": "disruption-reason.e.emergency engineering work",
+        "m": "disruption-reason.m.emergency engineering work"
+    },
+    "157": {
+        "e": "disruption-reason.m.emergency services attending an incident adjacent,disruption-reason.e.to the railway line",
+        "m": ""
+    },
+    "158": {
+        "e": "disruption-reason.m.emergency services attending an incident adjacent,disruption-reason.e.to the railway line",
+        "m": ""
+    },
+    "161": {
+        "e": "disruption-reason.e.flooding on the line",
+        "m": "disruption-reason.m.flooding on the line"
+    },
+    "162": {
+        "e": "disruption-reason.e.flooding on the line",
+        "m": "disruption-reason.m.flooding on the line"
+    },
+    "163": {
+        "e": "disruption-reason.e.adverse weather conditions",
+        "m": "disruption-reason.m.adverse weather conditions"
+    },
+    "164": {
+        "e": "disruption-reason.e.adverse weather conditions",
+        "m": "disruption-reason.m.adverse weather conditions"
+    },
+    "165": {
+        "e": "disruption-reason.e.high winds",
+        "m": "disruption-reason.m.high winds"
+    },
+    "166": {
+        "e": "disruption-reason.e.high winds",
+        "m": "disruption-reason.m.high winds"
+    },
+    "167": {
+        "e": "disruption-reason.e.industrial action",
+        "m": "disruption-reason.m.industrial action"
+    },
+    "168": {
+        "e": "disruption-reason.e.a lightning strike affecting the signalling equipment",
+        "m": "disruption-reason.m.a lightning strike affecting the signalling equipment"
+    },
+    "169": {
+        "e": "disruption-reason.e.overhead electric line problems",
+        "m": "disruption-reason.m.overhead electric line problems"
+    },
+    "170": {
+        "e": "disruption-reason.e.overrunning engineering work",
+        "m": "disruption-reason.m.overrunning engineering work"
+    },
+    "171": {
+        "e": "disruption-reason.e.being held awaiting a late running connection",
+        "m": "disruption-reason.m.being held awaiting a late running connection"
+    },
+    "172": {
+        "e": "disruption-reason.e.being held awaiting a late running connection",
+        "m": "disruption-reason.m.being held awaiting a late running connection"
+    },
+    "173": {
+        "e": "disruption-reason.e.poor rail conditions",
+        "m": "disruption-reason.m.poor rail conditions"
+    },
+    "174": {
+        "e": "disruption-reason.e.poor rail conditions",
+        "m": "disruption-reason.m.poor rail conditions"
+    },
+    "175": {
+        "e": "disruption-reason.e.severe weather conditions",
+        "m": "disruption-reason.m.severe weather conditions"
+    },
+    "176": {
+        "e": "disruption-reason.e.severe weather conditions",
+        "m": "disruption-reason.m.severe weather conditions"
+    },
+    "177": {
+        "e": "disruption-reason.e.additional safety duties being carried out on board this train",
+        "m": "disruption-reason.m.additional safety duties being carried out on board this train"
+    },
+    "178": {
+        "e": "disruption-reason.e.additional safety duties being carried out on board this train",
+        "m": "disruption-reason.m.additional safety duties being carried out on board this train"
+    },
+    "179": {
+        "e": "disruption-reason.e.a temporary fault with the signalling equipment",
+        "m": "disruption-reason.m.a temporary fault with the signalling equipment"
+    },
+    "180": {
+        "e": "disruption-reason.e.snow",
+        "m": "disruption-reason.m.snow"
+    },
+    "181": {
+        "e": "disruption-reason.e.snow",
+        "m": "disruption-reason.m.snow"
+    },
+    "182": {
+        "e": "disruption-reason.e.a temporary speed restriction",
+        "m": "disruption-reason.m.a temporary speed restriction"
+    },
+    "183": {
+        "e": "disruption-reason.e.a temporary shortage of train crews",
+        "m": "disruption-reason.m.a temporary shortage of train crews"
+    },
+    "184": {
+        "e": "disruption-reason.e.vandalism",
+        "m": "disruption-reason.m.vandalism"
+    },
+    "185": {
+        "e": "disruption-reason.e.awaiting a member of the train crew",
+        "m": "disruption-reason.m.awaiting a member of the train crew"
+    },
+    "186": {
+        "e": "disruption-reason.e.awaiting a member of the train crew",
+        "m": "disruption-reason.m.awaiting a member of the train crew"
+    },
+    "187": {
+        "e": "disruption-reason.e.engineering work",
+        "m": "disruption-reason.m.engineering work"
+    },
+    "501": {
+        "e": "disruption-reason.e.a broken down train",
+        "m": "disruption-reason.m.a broken down train"
+    },
+    "502": {
+        "e": "disruption-reason.e.additional maintenance requirements at the depot",
+        "m": "disruption-reason.m.additional maintenance requirements at the depot"
+    },
+    "503": {
+        "e": "disruption-reason.e.a shortage of serviceable trains",
+        "m": "disruption-reason.m.a shortage of serviceable trains"
+    },
+    "504": {
+        "e": "disruption-reason.e.a shortage of serviceable trains",
+        "m": "disruption-reason.m.a shortage of serviceable trains"
+    },
+    "505": {
+        "e": "disruption-reason.e.a shortage of serviceable trains",
+        "m": "disruption-reason.m.a shortage of serviceable trains"
+    },
+    "506": {
+        "e": "disruption-reason.e.a shortage of serviceable trains",
+        "m": "disruption-reason.m.a shortage of serviceable trains"
+    },
+    "507": {
+        "e": "disruption-reason.e.a shortage of serviceable trains",
+        "m": "disruption-reason.m.a shortage of serviceable trains"
+    },
+    "508": {
+        "e": "disruption-reason.e.a fault on the train",
+        "m": "disruption-reason.m.a fault on the train"
+    },
+    "509": {
+        "e": "disruption-reason.e.a fault on the train",
+        "m": "disruption-reason.m.a fault on the train"
+    },
+    "510": {
+        "e": "disruption-reason.e.an incident on the line",
+        "m": "disruption-reason.m.an incident on the line"
+    },
+    "511": {
+        "e": "disruption-reason.e.an incident on the line",
+        "m": "disruption-reason.m.an incident on the line"
+    },
+    "512": {
+        "e": "disruption-reason.e.a derailment",
+        "m": "disruption-reason.m.a derailment"
+    },
+    "513": {
+        "e": "disruption-reason.e.a derailment",
+        "m": "disruption-reason.m.a derailment"
+    },
+    "514": {
+        "e": "disruption-reason.e.a derailment",
+        "m": "disruption-reason.m.a derailment"
+    },
+    "515": {
+        "e": "disruption-reason.e.an incident on the line",
+        "m": "disruption-reason.m.an incident on the line"
+    },
+    "516": {
+        "e": "disruption-reason.e.an incident on the line",
+        "m": "disruption-reason.m.an incident on the line"
+    },
+    "517": {
+        "e": "disruption-reason.e.a fire",
+        "m": "disruption-reason.m.a fire"
+    },
+    "518": {
+        "e": "disruption-reason.e.a fire",
+        "m": "disruption-reason.m.a fire"
+    },
+    "519": {
+        "e": "disruption-reason.e.a landslide",
+        "m": "disruption-reason.m.a landslide"
+    },
+    "520": {
+        "e": "disruption-reason.e.a lineside fire",
+        "m": "disruption-reason.m.a lineside fire"
+    },
+    "521": {
+        "e": "disruption-reason.e.a fire",
+        "m": "disruption-reason.m.a fire"
+    },
+    "522": {
+        "e": "disruption-reason.e.staff sickness",
+        "m": "disruption-reason.m.staff sickness"
+    },
+    "523": {
+        "e": "disruption-reason.e.a staff shortage",
+        "m": "disruption-reason.m.a staff shortage"
+    },
+    "524": {
+        "e": "disruption-reason.e.a staff shortage",
+        "m": "disruption-reason.m.a staff shortage"
+    },
+    "525": {
+        "e": "disruption-reason.e.a staff shortage",
+        "m": "disruption-reason.m.a staff shortage"
+    },
+    "526": {
+        "e": "disruption-reason.e.a staff shortage",
+        "m": "disruption-reason.m.a staff shortage"
+    },
+    "527": {
+        "e": "disruption-reason.e.a staff shortage",
+        "m": "disruption-reason.m.a staff shortage"
+    },
+    "528": {
+        "e": "disruption-reason.e.a staff shortage",
+        "m": "disruption-reason.m.a staff shortage"
+    },
+    "529": {
+        "e": "disruption-reason.m.awaiting a member of train crew,disruption-reason.e.who in turn has been delayed by the current disruption",
+        "m": ""
+    },
+    "530": {
+        "e": "disruption-reason.e.staff sickness",
+        "m": "disruption-reason.m.staff sickness"
+    },
+    "531": {
+        "e": "disruption-reason.e.staff sickness",
+        "m": "disruption-reason.m.staff sickness"
+    },
+    "532": {
+        "e": "disruption-reason.e.staff sickness",
+        "m": "disruption-reason.m.staff sickness"
+    },
+    "533": {
+        "e": "disruption-reason.e.staff sickness",
+        "m": "disruption-reason.m.staff sickness"
+    },
+    "534": {
+        "e": "disruption-reason.e.passenger illness",
+        "m": "disruption-reason.m.passenger illness"
+    },
+    "535": {
+        "e": "disruption-reason.e.a passenger having been taken ill on a preceding train",
+        "m": "disruption-reason.m.a passenger having been taken ill on a preceding train"
+    },
+    "536": {
+        "e": "disruption-reason.e.a passenger having been taken ill on this train",
+        "m": "disruption-reason.m.a passenger having been taken ill on this train"
+    },
+    "537": {
+        "e": "disruption-reason.e.passenger illness",
+        "m": "disruption-reason.m.passenger illness"
+    },
+    "538": {
+        "e": "disruption-reason.e.a passenger having been taken ill on a preceding train",
+        "m": "disruption-reason.m.a passenger having been taken ill on a preceding train"
+    },
+    "539": {
+        "e": "disruption-reason.e.a passenger having been taken ill on this train",
+        "m": "disruption-reason.m.a passenger having been taken ill on this train"
+    },
+    "540": {
+        "e": "disruption-reason.e.a suspected fatality",
+        "m": "disruption-reason.m.a suspected fatality"
+    },
+    "541": {
+        "e": "disruption-reason.e.an earlier fatality",
+        "m": "disruption-reason.m.an earlier fatality"
+    },
+    "542": {
+        "e": "disruption-reason.e.an accident on a level crossing",
+        "m": "disruption-reason.m.an accident on a level crossing"
+    },
+    "543": {
+        "e": "disruption-reason.e.a failure of level crossing apparatus-2",
+        "m": "disruption-reason.m.a failure of level crossing apparatus-2"
+    },
+    "544": {
+        "e": "disruption-reason.e.an accident on a level crossing",
+        "m": "disruption-reason.m.an accident on a level crossing"
+    },
+    "545": {
+        "e": "disruption-reason.e.a road vehicle damaging a level crossing",
+        "m": "disruption-reason.m.a road vehicle damaging a level crossing"
+    },
+    "546": {
+        "e": "disruption-reason.e.a road vehicle damaging a level crossing",
+        "m": "disruption-reason.m.a road vehicle damaging a level crossing"
+    },
+    "547": {
+        "e": "disruption-reason.e.a currently unidentified reason which is under investigation",
+        "m": "disruption-reason.m.a currently unidentified reason which is under investigation"
+    },
+    "548": {
+        "e": "disruption-reason.e.a problem on property adjacent to the railway",
+        "m": "disruption-reason.m.a problem on property adjacent to the railway"
+    },
+    "549": {
+        "e": "disruption-reason.e.a chemical spillage",
+        "m": "disruption-reason.m.a chemical spillage"
+    },
+    "550": {
+        "e": "disruption-reason.e.a fire",
+        "m": "disruption-reason.m.a fire"
+    },
+    "551": {
+        "e": "disruption-reason.e.a fire",
+        "m": "disruption-reason.m.a fire"
+    },
+    "552": {
+        "e": "disruption-reason.e.a fire",
+        "m": "disruption-reason.m.a fire"
+    },
+    "553": {
+        "e": "disruption-reason.e.a gas leak in the area",
+        "m": "disruption-reason.m.a gas leak in the area"
+    },
+    "554": {
+        "e": "disruption-reason.e.a problem on property adjacent to the railway",
+        "m": "disruption-reason.m.a problem on property adjacent to the railway"
+    },
+    "555": {
+        "e": "disruption-reason.e.police activity on the line",
+        "m": "disruption-reason.m.police activity on the line"
+    },
+    "556": {
+        "e": "disruption-reason.e.the advice of the emergency services",
+        "m": "disruption-reason.m.the advice of the emergency services"
+    },
+    "557": {
+        "e": "disruption-reason.e.the advice of the emergency services",
+        "m": "disruption-reason.m.the advice of the emergency services"
+    },
+    "558": {
+        "e": "disruption-reason.e.the advice of the emergency services",
+        "m": "disruption-reason.m.the advice of the emergency services"
+    },
+    "559": {
+        "e": "disruption-reason.e.the advice of the emergency services",
+        "m": "disruption-reason.m.the advice of the emergency services"
+    },
+    "560": {
+        "e": "disruption-reason.e.suspected damage to a railway bridge",
+        "m": "disruption-reason.m.suspected damage to a railway bridge"
+    },
+    "561": {
+        "e": "disruption-reason.e.a fault on trackside equipment",
+        "m": "disruption-reason.m.a fault on trackside equipment"
+    },
+    "562": {
+        "e": "disruption-reason.e.a fault on trackside equipment",
+        "m": "disruption-reason.m.a fault on trackside equipment"
+    },
+    "563": {
+        "e": "disruption-reason.e.a fault on trackside equipment",
+        "m": "disruption-reason.m.a fault on trackside equipment"
+    },
+    "564": {
+        "e": "disruption-reason.e.a security alert",
+        "m": "disruption-reason.m.a security alert"
+    },
+    "565": {
+        "e": "disruption-reason.e.a security alert",
+        "m": "disruption-reason.m.a security alert"
+    },
+    "566": {
+        "e": "disruption-reason.e.a security alert",
+        "m": "disruption-reason.m.a security alert"
+    },
+    "567": {
+        "e": "disruption-reason.e.a derailment",
+        "m": "disruption-reason.m.a derailment"
+    },
+    "568": {
+        "e": "disruption-reason.e.a derailment",
+        "m": "disruption-reason.m.a derailment"
+    },
+    "569": {
+        "e": "disruption-reason.e.a fault that has occurred whilst attaching coaches to this train",
+        "m": "disruption-reason.m.a fault that has occurred whilst attaching coaches to this train"
+    },
+    "570": {
+        "e": "disruption-reason.e.an earlier fault that occurred whilst attaching coaches to this train",
+        "m": "disruption-reason.m.an earlier fault that occurred whilst attaching coaches to this train"
+    },
+    "571": {
+        "e": "disruption-reason.e.a fault that has occurred whilst detaching coaches from this train",
+        "m": "disruption-reason.m.a fault that has occurred whilst detaching coaches from this train"
+    },
+    "572": {
+        "e": "disruption-reason.e.an earlier fault that occurred whilst detaching coaches from this train",
+        "m": "disruption-reason.m.an earlier fault that occurred whilst detaching coaches from this train"
+    },
+    "573": {
+        "e": "disruption-reason.e.a fault on a preceding train",
+        "m": "disruption-reason.m.a fault on a preceding train"
+    },
+    "574": {
+        "e": "disruption-reason.e.a fault on the train",
+        "m": "disruption-reason.m.a fault on the train"
+    },
+    "575": {
+        "e": "disruption-reason.e.the late arrival of the coaches and train crew to form this service",
+        "m": "disruption-reason.m.the late arrival of the coaches and train crew to form this service"
+    },
+    "576": {
+        "e": "disruption-reason.e.trespassers on the line",
+        "m": "disruption-reason.m.trespassers on the line"
+    },
+    "577": {
+        "e": "disruption-reason.e.a road vehicle striking a railway bridge",
+        "m": "disruption-reason.m.a road vehicle striking a railway bridge"
+    },
+    "578": {
+        "e": "disruption-reason.e.a road vehicle striking a railway bridge",
+        "m": "disruption-reason.m.a road vehicle striking a railway bridge"
+    },
+    "579": {
+        "e": "disruption-reason.e.a road vehicle striking a railway bridge",
+        "m": "disruption-reason.m.a road vehicle striking a railway bridge"
+    },
+    "580": {
+        "e": "disruption-reason.e.an earlier road vehicle striking a railway bridge",
+        "m": "disruption-reason.m.an earlier road vehicle striking a railway bridge"
+    },
+    "581": {
+        "e": "disruption-reason.e.a road vehicle striking a railway bridge",
+        "m": "disruption-reason.m.a road vehicle striking a railway bridge"
+    },
+    "582": {
+        "e": "disruption-reason.e.an earlier road vehicle striking a railway bridge",
+        "m": "disruption-reason.m.an earlier road vehicle striking a railway bridge"
+    },
+    "583": {
+        "e": "disruption-reason.e.a road vehicle striking a railway bridge",
+        "m": "disruption-reason.m.a road vehicle striking a railway bridge"
+    },
+    "584": {
+        "e": "disruption-reason.e.an earlier road vehicle striking a railway bridge",
+        "m": "disruption-reason.m.an earlier road vehicle striking a railway bridge"
+    },
+    "585": {
+        "e": "disruption-reason.e.a road vehicle striking a railway bridge",
+        "m": "disruption-reason.m.a road vehicle striking a railway bridge"
+    },
+    "586": {
+        "e": "disruption-reason.e.an earlier broken down train",
+        "m": "disruption-reason.m.an earlier broken down train"
+    },
+    "587": {
+        "e": "disruption-reason.e.an earlier landslide",
+        "m": "disruption-reason.m.an earlier landslide"
+    },
+    "588": {
+        "e": "disruption-reason.e.an earlier lineside fire",
+        "m": "disruption-reason.m.an earlier lineside fire"
+    },
+    "589": {
+        "e": "disruption-reason.e.a fire",
+        "m": "disruption-reason.m.a fire"
+    },
+    "590": {
+        "e": "disruption-reason.e.a fault on the train that has now been rectified",
+        "m": "disruption-reason.m.a fault on the train that has now been rectified"
+    },
+    "591": {
+        "e": "disruption-reason.e.a fault on the train that has now been rectified",
+        "m": "disruption-reason.m.a fault on the train that has now been rectified"
+    },
+    "592": {
+        "e": "disruption-reason.e.a fault on the train that has now been rectified",
+        "m": "disruption-reason.m.a fault on the train that has now been rectified"
+    },
+    "593": {
+        "e": "disruption-reason.e.a fault on the train that has now been rectified",
+        "m": "disruption-reason.m.a fault on the train that has now been rectified"
+    },
+    "594": {
+        "e": "disruption-reason.e.operational problems",
+        "m": "disruption-reason.m.operational problems"
+    },
+    "595": {
+        "e": "disruption-reason.e.operational problems",
+        "m": "disruption-reason.m.operational problems"
+    },
+    "596": {
+        "e": "disruption-reason.e.operational problems",
+        "m": "disruption-reason.m.operational problems"
+    },
+    "597": {
+        "e": "disruption-reason.e.operational problems",
+        "m": "disruption-reason.m.operational problems"
+    },
+    "598": {
+        "e": "disruption-reason.e.the emergency cord being pulled on the train",
+        "m": "disruption-reason.m.the emergency cord being pulled on the train"
+    },
+    "599": {
+        "e": "disruption-reason.e.the emergency cord being pulled on the train",
+        "m": "disruption-reason.m.the emergency cord being pulled on the train"
+    },
+    "600": {
+        "e": "disruption-reason.e.operational problems",
+        "m": "disruption-reason.m.operational problems"
+    },
+    "601": {
+        "e": "disruption-reason.e.operational problems",
+        "m": "disruption-reason.m.operational problems"
+    },
+    "602": {
+        "e": "disruption-reason.e.operational problems",
+        "m": "disruption-reason.m.operational problems"
+    },
+    "603": {
+        "e": "disruption-reason.e.operational problems",
+        "m": "disruption-reason.m.operational problems"
+    },
+    "604": {
+        "e": "disruption-reason.e.operational problems",
+        "m": "disruption-reason.m.operational problems"
+    },
+    "605": {
+        "e": "disruption-reason.e.operational problems",
+        "m": "disruption-reason.m.operational problems"
+    },
+    "606": {
+        "e": "disruption-reason.e.operational problems",
+        "m": "disruption-reason.m.operational problems"
+    },
+    "607": {
+        "e": "disruption-reason.e.operational problems",
+        "m": "disruption-reason.m.operational problems"
+    },
+    "608": {
+        "e": "disruption-reason.e.a road vehicle damaging a level crossing",
+        "m": "disruption-reason.m.a road vehicle damaging a level crossing"
+    },
+    "609": {
+        "e": "disruption-reason.e.a road vehicle damaging a level crossing",
+        "m": "disruption-reason.m.a road vehicle damaging a level crossing"
+    },
+    "610": {
+        "e": "disruption-reason.e.a failure of level crossing apparatus",
+        "m": "disruption-reason.m.a failure of level crossing apparatus"
+    },
+    "611": {
+        "e": "disruption-reason.e.a failure of level crossing apparatus",
+        "m": "disruption-reason.m.a failure of level crossing apparatus"
+    },
+    "612": {
+        "e": "disruption-reason.e.an accident on a level crossing",
+        "m": "disruption-reason.m.an accident on a level crossing"
+    },
+    "613": {
+        "e": "disruption-reason.e.an accident on a level crossing",
+        "m": "disruption-reason.m.an accident on a level crossing"
+    },
+    "614": {
+        "e": "disruption-reason.e.a road vehicle damaging a level crossing",
+        "m": "disruption-reason.m.a road vehicle damaging a level crossing"
+    },
+    "615": {
+        "e": "disruption-reason.e.a road vehicle damaging a level crossing",
+        "m": "disruption-reason.m.a road vehicle damaging a level crossing"
+    },
+    "616": {
+        "e": "disruption-reason.e.a road vehicle damaging a level crossing",
+        "m": "disruption-reason.m.a road vehicle damaging a level crossing"
+    },
+    "617": {
+        "e": "disruption-reason.e.a road vehicle damaging a level crossing",
+        "m": "disruption-reason.m.a road vehicle damaging a level crossing"
+    },
+    "618": {
+        "e": "disruption-reason.e.a problem on property adjacent to the railway",
+        "m": "disruption-reason.m.a problem on property adjacent to the railway"
+    },
+    "619": {
+        "e": "disruption-reason.e.a problem on property adjacent to the railway",
+        "m": "disruption-reason.m.a problem on property adjacent to the railway"
+    },
+    "620": {
+        "e": "disruption-reason.e.a chemical spillage",
+        "m": "disruption-reason.m.a chemical spillage"
+    },
+    "621": {
+        "e": "disruption-reason.e.a chemical spillage",
+        "m": "disruption-reason.m.a chemical spillage"
+    },
+    "622": {
+        "e": "disruption-reason.e.a fire",
+        "m": "disruption-reason.m.a fire"
+    },
+    "623": {
+        "e": "disruption-reason.e.a fire",
+        "m": "disruption-reason.m.a fire"
+    },
+    "624": {
+        "e": "disruption-reason.e.a fire",
+        "m": "disruption-reason.m.a fire"
+    },
+    "625": {
+        "e": "disruption-reason.e.a fire",
+        "m": "disruption-reason.m.a fire"
+    },
+    "626": {
+        "e": "disruption-reason.e.a problem on property adjacent to the railway",
+        "m": "disruption-reason.m.a problem on property adjacent to the railway"
+    },
+    "627": {
+        "e": "disruption-reason.e.a problem on property adjacent to the railway",
+        "m": "disruption-reason.m.a problem on property adjacent to the railway"
+    },
+    "628": {
+        "e": "disruption-reason.e.a gas leak in the area",
+        "m": "disruption-reason.m.a gas leak in the area"
+    },
+    "629": {
+        "e": "disruption-reason.e.a gas leak in the area",
+        "m": "disruption-reason.m.a gas leak in the area"
+    },
+    "630": {
+        "e": "disruption-reason.e.a problem on property adjacent to the railway",
+        "m": "disruption-reason.m.a problem on property adjacent to the railway"
+    },
+    "631": {
+        "e": "disruption-reason.e.a problem on property adjacent to the railway",
+        "m": "disruption-reason.m.a problem on property adjacent to the railway"
+    },
+    "632": {
+        "e": "disruption-reason.e.a problem on property adjacent to the railway",
+        "m": "disruption-reason.m.a problem on property adjacent to the railway"
+    },
+    "633": {
+        "e": "disruption-reason.e.a problem on property adjacent to the railway",
+        "m": "disruption-reason.m.a problem on property adjacent to the railway"
+    },
+    "634": {
+        "e": "disruption-reason.e.a problem on property adjacent to the railway",
+        "m": "disruption-reason.m.a problem on property adjacent to the railway"
+    },
+    "635": {
+        "e": "disruption-reason.e.the advice of the emergency services",
+        "m": "disruption-reason.m.the advice of the emergency services"
+    },
+    "636": {
+        "e": "disruption-reason.e.the advice of the emergency services",
+        "m": "disruption-reason.m.the advice of the emergency services"
+    },
+    "637": {
+        "e": "disruption-reason.e.the advice of the emergency services",
+        "m": "disruption-reason.m.the advice of the emergency services"
+    },
+    "638": {
+        "e": "disruption-reason.e.the advice of the emergency services",
+        "m": "disruption-reason.m.the advice of the emergency services"
+    },
+    "639": {
+        "e": "disruption-reason.e.the advice of the emergency services",
+        "m": "disruption-reason.m.the advice of the emergency services"
+    },
+    "640": {
+        "e": "disruption-reason.e.the advice of the emergency services",
+        "m": "disruption-reason.m.the advice of the emergency services"
+    },
+    "641": {
+        "e": "disruption-reason.e.police activity on the line",
+        "m": "disruption-reason.m.police activity on the line"
+    },
+    "642": {
+        "e": "disruption-reason.e.police activity on the line",
+        "m": "disruption-reason.m.police activity on the line"
+    },
+    "643": {
+        "e": "disruption-reason.e.suspected damage to a railway bridge",
+        "m": "disruption-reason.m.suspected damage to a railway bridge"
+    },
+    "644": {
+        "e": "disruption-reason.e.suspected damage to a railway bridge",
+        "m": "disruption-reason.m.suspected damage to a railway bridge"
+    },
+    "645": {
+        "e": "disruption-reason.e.suspected damage to a railway bridge",
+        "m": "disruption-reason.m.suspected damage to a railway bridge"
+    },
+    "646": {
+        "e": "disruption-reason.e.an earlier fault with the signalling equipment",
+        "m": "disruption-reason.m.an earlier fault with the signalling equipment"
+    },
+    "647": {
+        "e": "disruption-reason.e.an earlier security alert",
+        "m": "disruption-reason.m.an earlier security alert"
+    },
+    "648": {
+        "e": "disruption-reason.e.a fault on the train that has now been rectified",
+        "m": "disruption-reason.m.a fault on the train that has now been rectified"
+    },
+    "649": {
+        "e": "disruption-reason.e.an earlier trespassing incident",
+        "m": "disruption-reason.m.an earlier trespassing incident"
+    },
+    "650": {
+        "e": "disruption-reason.e.an earlier trespassing incident",
+        "m": "disruption-reason.m.an earlier trespassing incident"
+    },
+    "651": {
+        "e": "disruption-reason.e.debris on the line",
+        "m": "disruption-reason.m.debris on the line"
+    },
+    "652": {
+        "e": "disruption-reason.e.a road vehicle on the line",
+        "m": "disruption-reason.m.a road vehicle on the line"
+    },
+    "653": {
+        "e": "disruption-reason.e.objects being thrown onto the line",
+        "m": "disruption-reason.m.objects being thrown onto the line"
+    },
+    "654": {
+        "e": "disruption-reason.e.objects being thrown onto the line",
+        "m": "disruption-reason.m.objects being thrown onto the line"
+    },
+    "655": {
+        "e": "disruption-reason.e.a fallen tree on the line",
+        "m": "disruption-reason.m.a fallen tree on the line"
+    },
+    "656": {
+        "e": "disruption-reason.e.an obstruction on the line",
+        "m": "disruption-reason.m.an obstruction on the line"
+    },
+    "657": {
+        "e": "disruption-reason.e.reports of debris on the line",
+        "m": "disruption-reason.m.reports of debris on the line"
+    },
+    "658": {
+        "e": "disruption-reason.e.an obstruction on the line",
+        "m": "disruption-reason.m.an obstruction on the line"
+    },
+    "659": {
+        "e": "disruption-reason.e.an obstruction on the line",
+        "m": "disruption-reason.m.an obstruction on the line"
+    },
+    "660": {
+        "e": "disruption-reason.e.earlier reports of debris on the line",
+        "m": "disruption-reason.m.earlier reports of debris on the line"
+    },
+    "661": {
+        "e": "disruption-reason.e.a road vehicle on the line",
+        "m": "disruption-reason.m.a road vehicle on the line"
+    },
+    "662": {
+        "e": "disruption-reason.e.a road vehicle on the line",
+        "m": "disruption-reason.m.a road vehicle on the line"
+    },
+    "663": {
+        "e": "disruption-reason.e.objects being thrown onto the line",
+        "m": "disruption-reason.m.objects being thrown onto the line"
+    },
+    "664": {
+        "e": "disruption-reason.e.objects being thrown onto the line",
+        "m": "disruption-reason.m.objects being thrown onto the line"
+    },
+    "665": {
+        "e": "disruption-reason.e.an obstruction on the line",
+        "m": "disruption-reason.m.an obstruction on the line"
+    },
+    "666": {
+        "e": "disruption-reason.e.an obstruction on the line",
+        "m": "disruption-reason.m.an obstruction on the line"
+    },
+    "667": {
+        "e": "disruption-reason.e.an earlier fallen tree on the line",
+        "m": "disruption-reason.m.an earlier fallen tree on the line"
+    },
+    "668": {
+        "e": "disruption-reason.e.an earlier fallen tree on the line",
+        "m": "disruption-reason.m.an earlier fallen tree on the line"
+    },
+    "669": {
+        "e": "disruption-reason.e.earlier reports of debris on the line",
+        "m": "disruption-reason.m.earlier reports of debris on the line"
+    },
+    "670": {
+        "e": "disruption-reason.e.earlier reports of debris on the line",
+        "m": "disruption-reason.m.earlier reports of debris on the line"
+    },
+    "671": {
+        "e": "disruption-reason.e.earlier reports of debris on the line",
+        "m": "disruption-reason.m.earlier reports of debris on the line"
+    },
+    "672": {
+        "e": "disruption-reason.e.earlier reports of debris on the line",
+        "m": "disruption-reason.m.earlier reports of debris on the line"
+    },
+    "673": {
+        "e": "disruption-reason.e.earlier reports of debris on the line",
+        "m": "disruption-reason.m.earlier reports of debris on the line"
+    },
+    "674": {
+        "e": "disruption-reason.e.earlier reports of debris on the line",
+        "m": "disruption-reason.m.earlier reports of debris on the line"
+    },
+    "675": {
+        "e": "disruption-reason.e.earlier reports of debris on the line",
+        "m": "disruption-reason.m.earlier reports of debris on the line"
+    },
+    "676": {
+        "e": "disruption-reason.e.a fault on the train that has now been rectified",
+        "m": "disruption-reason.m.a fault on the train that has now been rectified"
+    },
+    "677": {
+        "e": "disruption-reason.e.a fault on the train that has now been rectified",
+        "m": "disruption-reason.m.a fault on the train that has now been rectified"
+    },
+    "678": {
+        "e": "disruption-reason.e.operational problems",
+        "m": "disruption-reason.m.operational problems"
+    },
+    "679": {
+        "e": "disruption-reason.e.operational problems",
+        "m": "disruption-reason.m.operational problems"
+    },
+    "680": {
+        "e": "disruption-reason.e.the emergency cord being pulled on the train",
+        "m": "disruption-reason.m.the emergency cord being pulled on the train"
+    },
+    "681": {
+        "e": "disruption-reason.e.operational problems",
+        "m": "disruption-reason.m.operational problems"
+    },
+    "682": {
+        "e": "disruption-reason.e.operational problems",
+        "m": "disruption-reason.m.operational problems"
+    },
+    "683": {
+        "e": "disruption-reason.e.operational problems",
+        "m": "disruption-reason.m.operational problems"
+    },
+    "684": {
+        "e": "disruption-reason.e.the emergency cord being pulled on the train",
+        "m": "disruption-reason.m.the emergency cord being pulled on the train"
+    },
+    "685": {
+        "e": "disruption-reason.e.overcrowding",
+        "m": "disruption-reason.m.overcrowding"
+    },
+    "686": {
+        "e": "disruption-reason.e.overcrowding caused by the short formation of this service today",
+        "m": "disruption-reason.m.overcrowding caused by the short formation of this service today"
+    },
+    "687": {
+        "e": "disruption-reason.e.overcrowding",
+        "m": "disruption-reason.m.overcrowding"
+    },
+    "688": {
+        "e": "disruption-reason.e.overcrowding",
+        "m": "disruption-reason.m.overcrowding"
+    },
+    "689": {
+        "e": "disruption-reason.e.overcrowding",
+        "m": "disruption-reason.m.overcrowding"
+    },
+    "690": {
+        "e": "disruption-reason.e.overcrowding",
+        "m": "disruption-reason.m.overcrowding"
+    },
+    "691": {
+        "e": "disruption-reason.e.overcrowding",
+        "m": "disruption-reason.m.overcrowding"
+    },
+    "692": {
+        "e": "disruption-reason.e.overcrowding",
+        "m": "disruption-reason.m.overcrowding"
+    },
+    "693": {
+        "e": "disruption-reason.e.overcrowding",
+        "m": "disruption-reason.m.overcrowding"
+    },
+    "694": {
+        "e": "disruption-reason.e.overcrowding",
+        "m": "disruption-reason.m.overcrowding"
+    },
+    "695": {
+        "e": "disruption-reason.e.overcrowding",
+        "m": "disruption-reason.m.overcrowding"
+    },
+    "696": {
+        "e": "disruption-reason.e.animals on the railway line",
+        "m": "disruption-reason.m.animals on the railway line"
+    },
+    "697": {
+        "e": "disruption-reason.e.animals on the railway line",
+        "m": "disruption-reason.m.animals on the railway line"
+    },
+    "698": {
+        "e": "disruption-reason.e.animals on the railway line",
+        "m": "disruption-reason.m.animals on the railway line"
+    },
+    "699": {
+        "e": "disruption-reason.e.animals on the railway line",
+        "m": "disruption-reason.m.animals on the railway line"
+    },
+    "700": {
+        "e": "disruption-reason.e.earlier reports of animals on the line",
+        "m": "disruption-reason.m.earlier reports of animals on the line"
+    },
+    "701": {
+        "e": "disruption-reason.e.earlier reports of animals on the line",
+        "m": "disruption-reason.m.earlier reports of animals on the line"
+    },
+    "702": {
+        "e": "disruption-reason.e.earlier reports of animals on the line",
+        "m": "disruption-reason.m.earlier reports of animals on the line"
+    },
+    "703": {
+        "e": "disruption-reason.e.earlier reports of animals on the line",
+        "m": "disruption-reason.m.earlier reports of animals on the line"
+    },
+    "704": {
+        "e": "disruption-reason.e.police attending a disturbance on a preceding train",
+        "m": "disruption-reason.m.police attending a disturbance on a preceding train"
+    },
+    "705": {
+        "e": "disruption-reason.e.reports of a disturbance on board this train",
+        "m": "disruption-reason.m.reports of a disturbance on board this train"
+    },
+    "706": {
+        "e": "disruption-reason.e.earlier reports of a disturbance on board this train",
+        "m": "disruption-reason.m.earlier reports of a disturbance on board this train"
+    },
+    "707": {
+        "e": "disruption-reason.e.police attending a disturbance on a preceding train",
+        "m": "disruption-reason.m.police attending a disturbance on a preceding train"
+    },
+    "708": {
+        "e": "disruption-reason.e.electric conductor rail problems",
+        "m": "disruption-reason.m.electric conductor rail problems"
+    },
+    "709": {
+        "e": "disruption-reason.e.electric conductor rail problems",
+        "m": "disruption-reason.m.electric conductor rail problems"
+    },
+    "710": {
+        "e": "disruption-reason.e.electric conductor rail problems",
+        "m": "disruption-reason.m.electric conductor rail problems"
+    },
+    "711": {
+        "e": "disruption-reason.e.electric conductor rail problems",
+        "m": "disruption-reason.m.electric conductor rail problems"
+    },
+    "712": {
+        "e": "disruption-reason.e.an earlier electrical power supply problem",
+        "m": "disruption-reason.m.an earlier electrical power supply problem"
+    },
+    "713": {
+        "e": "disruption-reason.e.an earlier electrical power supply problem",
+        "m": "disruption-reason.m.an earlier electrical power supply problem"
+    },
+    "714": {
+        "e": "disruption-reason.e.an earlier electrical power supply problem",
+        "m": "disruption-reason.m.an earlier electrical power supply problem"
+    },
+    "715": {
+        "e": "disruption-reason.e.an earlier electrical power supply problem",
+        "m": "disruption-reason.m.an earlier electrical power supply problem"
+    },
+    "716": {
+        "e": "disruption-reason.e.earlier emergency track repairs",
+        "m": "disruption-reason.m.earlier emergency track repairs"
+    },
+    "717": {
+        "e": "disruption-reason.e.earlier emergency track repairs",
+        "m": "disruption-reason.m.earlier emergency track repairs"
+    },
+    "718": {
+        "e": "disruption-reason.e.earlier emergency track repairs",
+        "m": "disruption-reason.m.earlier emergency track repairs"
+    },
+    "719": {
+        "e": "disruption-reason.e.earlier emergency track repairs",
+        "m": "disruption-reason.m.earlier emergency track repairs"
+    },
+    "720": {
+        "e": "disruption-reason.e.industrial action",
+        "m": "disruption-reason.m.industrial action"
+    },
+    "721": {
+        "e": "disruption-reason.e.industrial action",
+        "m": "disruption-reason.m.industrial action"
+    },
+    "722": {
+        "e": "disruption-reason.e.industrial action",
+        "m": "disruption-reason.m.industrial action"
+    },
+    "723": {
+        "e": "disruption-reason.e.industrial action",
+        "m": "disruption-reason.m.industrial action"
+    },
+    "724": {
+        "e": "disruption-reason.e.overhead line damage",
+        "m": "disruption-reason.m.overhead line damage"
+    },
+    "725": {
+        "e": "disruption-reason.e.overhead line damage",
+        "m": "disruption-reason.m.overhead line damage"
+    },
+    "726": {
+        "e": "disruption-reason.e.overhead line damage",
+        "m": "disruption-reason.m.overhead line damage"
+    },
+    "727": {
+        "e": "disruption-reason.e.overhead line damage",
+        "m": "disruption-reason.m.overhead line damage"
+    },
+    "728": {
+        "e": "disruption-reason.e.earlier overrunning engineering work",
+        "m": "disruption-reason.m.earlier overrunning engineering work"
+    },
+    "729": {
+        "e": "disruption-reason.e.a technical fault on the service",
+        "m": "disruption-reason.m.a technical fault on the service"
+    },
+    "730": {
+        "e": "disruption-reason.e.a technical fault on the service",
+        "m": "disruption-reason.m.a technical fault on the service"
+    },
+    "731": {
+        "e": "disruption-reason.e.a technical fault on the service",
+        "m": "disruption-reason.m.a technical fault on the service"
+    },
+    "732": {
+        "e": "disruption-reason.e.a technical fault on the service",
+        "m": "disruption-reason.m.a technical fault on the service"
+    },
+    "733": {
+        "e": "disruption-reason.e.an earlier fault with the signalling equipment",
+        "m": "disruption-reason.m.an earlier fault with the signalling equipment"
+    },
+    "734": {
+        "e": "disruption-reason.e.an earlier fault with the signalling equipment",
+        "m": "disruption-reason.m.an earlier fault with the signalling equipment"
+    },
+    "735": {
+        "e": "disruption-reason.e.staff sickness",
+        "m": "disruption-reason.m.staff sickness"
+    },
+    "736": {
+        "e": "disruption-reason.e.staff sickness",
+        "m": "disruption-reason.m.staff sickness"
+    },
+    "737": {
+        "e": "disruption-reason.e.signalling difficulties",
+        "m": "disruption-reason.m.signalling difficulties"
+    },
+    "738": {
+        "e": "disruption-reason.e.signalling difficulties",
+        "m": "disruption-reason.m.signalling difficulties"
+    },
+    "739": {
+        "e": "disruption-reason.e.signalling difficulties",
+        "m": "disruption-reason.m.signalling difficulties"
+    },
+    "740": {
+        "e": "disruption-reason.e.signalling difficulties",
+        "m": "disruption-reason.m.signalling difficulties"
+    },
+    "741": {
+        "e": "disruption-reason.e.overhead electric line problems",
+        "m": "disruption-reason.m.overhead electric line problems"
+    },
+    "742": {
+        "e": "disruption-reason.e.overhead electric line problems",
+        "m": "disruption-reason.m.overhead electric line problems"
+    },
+    "743": {
+        "e": "disruption-reason.e.police activity on the line",
+        "m": "disruption-reason.m.police activity on the line"
+    },
+    "744": {
+        "e": "disruption-reason.e.police activity on the line",
+        "m": "disruption-reason.m.police activity on the line"
+    },
+    "745": {
+        "e": "disruption-reason.e.police activity on the line",
+        "m": "disruption-reason.m.police activity on the line"
+    },
+    "746": {
+        "e": "disruption-reason.e.police activity on the line",
+        "m": "disruption-reason.m.police activity on the line"
+    },
+    "747": {
+        "e": "disruption-reason.e.police activity on the line",
+        "m": "disruption-reason.m.police activity on the line"
+    },
+    "748": {
+        "e": "disruption-reason.e.police activity on the line",
+        "m": "disruption-reason.m.police activity on the line"
+    },
+    "749": {
+        "e": "disruption-reason.e.police activity on the line",
+        "m": "disruption-reason.m.police activity on the line"
+    },
+    "750": {
+        "e": "disruption-reason.e.police activity on the line",
+        "m": "disruption-reason.m.police activity on the line"
+    },
+    "751": {
+        "e": "disruption-reason.e.police activity on the line",
+        "m": "disruption-reason.m.police activity on the line"
+    },
+    "752": {
+        "e": "disruption-reason.e.police activity on the line",
+        "m": "disruption-reason.m.police activity on the line"
+    },
+    "753": {
+        "e": "disruption-reason.e.police activity on the line",
+        "m": "disruption-reason.m.police activity on the line"
+    },
+    "754": {
+        "e": "disruption-reason.e.police activity on the line",
+        "m": "disruption-reason.m.police activity on the line"
+    },
+    "755": {
+        "e": "disruption-reason.e.police activity on the line",
+        "m": "disruption-reason.m.police activity on the line"
+    },
+    "756": {
+        "e": "disruption-reason.e.police activity on the line",
+        "m": "disruption-reason.m.police activity on the line"
+    },
+    "757": {
+        "e": "disruption-reason.e.earlier vandalism",
+        "m": "disruption-reason.m.earlier vandalism"
+    },
+    "758": {
+        "e": "disruption-reason.e.earlier vandalism",
+        "m": "disruption-reason.m.earlier vandalism"
+    },
+    "759": {
+        "e": "disruption-reason.e.earlier vandalism",
+        "m": "disruption-reason.m.earlier vandalism"
+    },
+    "760": {
+        "e": "disruption-reason.e.earlier vandalism",
+        "m": "disruption-reason.m.earlier vandalism"
+    },
+    "761": {
+        "e": "disruption-reason.e.earlier vandalism",
+        "m": "disruption-reason.m.earlier vandalism"
+    },
+    "762": {
+        "e": "disruption-reason.e.earlier vandalism",
+        "m": "disruption-reason.m.earlier vandalism"
+    },
+    "763": {
+        "e": "disruption-reason.e.earlier vandalism",
+        "m": "disruption-reason.m.earlier vandalism"
+    },
+    "764": {
+        "e": "disruption-reason.e.earlier vandalism",
+        "m": "disruption-reason.m.earlier vandalism"
+    },
+    "765": {
+        "e": "disruption-reason.e.electric conductor rail problems",
+        "m": "disruption-reason.m.electric conductor rail problems"
+    },
+    "766": {
+        "e": "disruption-reason.e.electric conductor rail problems",
+        "m": "disruption-reason.m.electric conductor rail problems"
+    },
+    "767": {
+        "e": "disruption-reason.e.a major electrical power fault",
+        "m": "disruption-reason.m.a major electrical power fault"
+    },
+    "768": {
+        "e": "disruption-reason.e.an electrical power supply problem",
+        "m": "disruption-reason.m.an electrical power supply problem"
+    },
+    "769": {
+        "e": "disruption-reason.e.emergency track repairs",
+        "m": "disruption-reason.m.emergency track repairs"
+    },
+    "770": {
+        "e": "disruption-reason.e.emergency track repairs",
+        "m": "disruption-reason.m.emergency track repairs"
+    },
+    "771": {
+        "e": "disruption-reason.e.emergency track repairs",
+        "m": "disruption-reason.m.emergency track repairs"
+    },
+    "772": {
+        "e": "disruption-reason.e.emergency track repairs",
+        "m": "disruption-reason.m.emergency track repairs"
+    },
+    "773": {
+        "e": "disruption-reason.e.the advice of the emergency services",
+        "m": "disruption-reason.m.the advice of the emergency services"
+    },
+    "774": {
+        "e": "disruption-reason.e.the advice of the emergency services",
+        "m": "disruption-reason.m.the advice of the emergency services"
+    },
+    "775": {
+        "e": "disruption-reason.e.the advice of the emergency services",
+        "m": "disruption-reason.m.the advice of the emergency services"
+    },
+    "776": {
+        "e": "disruption-reason.e.the advice of the emergency services",
+        "m": "disruption-reason.m.the advice of the emergency services"
+    },
+    "777": {
+        "e": "disruption-reason.e.the advice of the emergency services",
+        "m": "disruption-reason.m.the advice of the emergency services"
+    },
+    "780": {
+        "e": "disruption-reason.e.flooding on the line",
+        "m": "disruption-reason.m.flooding on the line"
+    },
+    "781": {
+        "e": "disruption-reason.e.flooding on the line",
+        "m": "disruption-reason.m.flooding on the line"
+    },
+    "782": {
+        "e": "disruption-reason.e.flooding on the line",
+        "m": "disruption-reason.m.flooding on the line"
+    },
+    "783": {
+        "e": "disruption-reason.e.flooding on the line",
+        "m": "disruption-reason.m.flooding on the line"
+    },
+    "784": {
+        "e": "disruption-reason.e.flooding on the line",
+        "m": "disruption-reason.m.flooding on the line"
+    },
+    "785": {
+        "e": "disruption-reason.e.flooding on the line",
+        "m": "disruption-reason.m.flooding on the line"
+    },
+    "786": {
+        "e": "disruption-reason.e.flooding on the line",
+        "m": "disruption-reason.m.flooding on the line"
+    },
+    "787": {
+        "e": "disruption-reason.e.flooding on the line",
+        "m": "disruption-reason.m.flooding on the line"
+    },
+    "788": {
+        "e": "disruption-reason.e.flooding on the line",
+        "m": "disruption-reason.m.flooding on the line"
+    },
+    "789": {
+        "e": "disruption-reason.e.flooding on the line",
+        "m": "disruption-reason.m.flooding on the line"
+    },
+    "790": {
+        "e": "disruption-reason.e.flooding on the line",
+        "m": "disruption-reason.m.flooding on the line"
+    },
+    "791": {
+        "e": "disruption-reason.e.flooding on the line",
+        "m": "disruption-reason.m.flooding on the line"
+    },
+    "792": {
+        "e": "disruption-reason.e.heavy rain",
+        "m": "disruption-reason.m.heavy rain"
+    },
+    "793": {
+        "e": "disruption-reason.e.flooding on the line",
+        "m": "disruption-reason.m.flooding on the line"
+    },
+    "794": {
+        "e": "disruption-reason.e.flooding on the line",
+        "m": "disruption-reason.m.flooding on the line"
+    },
+    "795": {
+        "e": "disruption-reason.e.adverse weather conditions",
+        "m": "disruption-reason.m.adverse weather conditions"
+    },
+    "796": {
+        "e": "disruption-reason.e.adverse weather conditions",
+        "m": "disruption-reason.m.adverse weather conditions"
+    },
+    "797": {
+        "e": "disruption-reason.e.adverse weather conditions",
+        "m": "disruption-reason.m.adverse weather conditions"
+    },
+    "798": {
+        "e": "disruption-reason.e.high winds",
+        "m": "disruption-reason.m.high winds"
+    },
+    "799": {
+        "e": "disruption-reason.e.high winds",
+        "m": "disruption-reason.m.high winds"
+    },
+    "800": {
+        "e": "disruption-reason.e.high winds",
+        "m": "disruption-reason.m.high winds"
+    },
+    "801": {
+        "e": "disruption-reason.e.high winds",
+        "m": "disruption-reason.m.high winds"
+    },
+    "802": {
+        "e": "disruption-reason.e.industrial action",
+        "m": "disruption-reason.m.industrial action"
+    },
+    "803": {
+        "e": "disruption-reason.e.industrial action",
+        "m": "disruption-reason.m.industrial action"
+    },
+    "804": {
+        "e": "disruption-reason.e.a lightning strike",
+        "m": "disruption-reason.m.a lightning strike"
+    },
+    "805": {
+        "e": "disruption-reason.e.a lightning strike",
+        "m": "disruption-reason.m.a lightning strike"
+    },
+    "806": {
+        "e": "disruption-reason.e.a lightning strike affecting the signalling equipment",
+        "m": "disruption-reason.m.a lightning strike affecting the signalling equipment"
+    },
+    "807": {
+        "e": "disruption-reason.e.a lightning strike",
+        "m": "disruption-reason.m.a lightning strike"
+    },
+    "808": {
+        "e": "disruption-reason.e.a lightning strike affecting the signalling equipment",
+        "m": "disruption-reason.m.a lightning strike affecting the signalling equipment"
+    },
+    "809": {
+        "e": "disruption-reason.e.a lightning strike",
+        "m": "disruption-reason.m.a lightning strike"
+    },
+    "810": {
+        "e": "disruption-reason.e.overhead electric line problems",
+        "m": "disruption-reason.m.overhead electric line problems"
+    },
+    "811": {
+        "e": "disruption-reason.e.overhead line damage",
+        "m": "disruption-reason.m.overhead line damage"
+    },
+    "812": {
+        "e": "disruption-reason.e.overrunning engineering work",
+        "m": "disruption-reason.m.overrunning engineering work"
+    },
+    "813": {
+        "e": "disruption-reason.e.slippery rail conditions",
+        "m": "disruption-reason.m.slippery rail conditions"
+    },
+    "814": {
+        "e": "disruption-reason.e.electric conductor rail problems",
+        "m": "disruption-reason.m.electric conductor rail problems"
+    },
+    "815": {
+        "e": "disruption-reason.e.electric conductor rail problems",
+        "m": "disruption-reason.m.electric conductor rail problems"
+    },
+    "816": {
+        "e": "disruption-reason.e.slippery rail conditions",
+        "m": "disruption-reason.m.slippery rail conditions"
+    },
+    "817": {
+        "e": "disruption-reason.e.slippery rail conditions",
+        "m": "disruption-reason.m.slippery rail conditions"
+    },
+    "818": {
+        "e": "disruption-reason.e.slippery rail conditions",
+        "m": "disruption-reason.m.slippery rail conditions"
+    },
+    "819": {
+        "e": "disruption-reason.e.severe weather conditions",
+        "m": "disruption-reason.m.severe weather conditions"
+    },
+    "820": {
+        "e": "disruption-reason.e.severe weather conditions",
+        "m": "disruption-reason.m.severe weather conditions"
+    },
+    "821": {
+        "e": "disruption-reason.e.severe weather conditions",
+        "m": "disruption-reason.m.severe weather conditions"
+    },
+    "822": {
+        "e": "disruption-reason.e.severe weather conditions",
+        "m": "disruption-reason.m.severe weather conditions"
+    },
+    "823": {
+        "e": "disruption-reason.e.severe weather conditions",
+        "m": "disruption-reason.m.severe weather conditions"
+    },
+    "824": {
+        "e": "disruption-reason.e.additional safety duties being carried out on board this train",
+        "m": "disruption-reason.m.additional safety duties being carried out on board this train"
+    },
+    "825": {
+        "e": "disruption-reason.e.additional safety duties being carried out on board this train",
+        "m": "disruption-reason.m.additional safety duties being carried out on board this train"
+    },
+    "826": {
+        "e": "disruption-reason.e.additional safety duties being carried out on board this train",
+        "m": "disruption-reason.m.additional safety duties being carried out on board this train"
+    },
+    "827": {
+        "e": "disruption-reason.e.additional safety duties being carried out on board this train",
+        "m": "disruption-reason.m.additional safety duties being carried out on board this train"
+    },
+    "828": {
+        "e": "disruption-reason.e.additional safety duties being carried out on board this train",
+        "m": "disruption-reason.m.additional safety duties being carried out on board this train"
+    },
+    "829": {
+        "e": "disruption-reason.e.additional safety duties being carried out on board this train",
+        "m": "disruption-reason.m.additional safety duties being carried out on board this train"
+    },
+    "830": {
+        "e": "disruption-reason.e.a technical fault on the service",
+        "m": "disruption-reason.m.a technical fault on the service"
+    },
+    "831": {
+        "e": "disruption-reason.e.a technical fault on the service",
+        "m": "disruption-reason.m.a technical fault on the service"
+    },
+    "832": {
+        "e": "disruption-reason.e.a technical fault on the service",
+        "m": "disruption-reason.m.a technical fault on the service"
+    },
+    "833": {
+        "e": "disruption-reason.e.staff sickness",
+        "m": "disruption-reason.m.staff sickness"
+    },
+    "834": {
+        "e": "disruption-reason.e.signalling difficulties",
+        "m": "disruption-reason.m.signalling difficulties"
+    },
+    "835": {
+        "e": "disruption-reason.e.signalling difficulties",
+        "m": "disruption-reason.m.signalling difficulties"
+    },
+    "836": {
+        "e": "disruption-reason.e.snow",
+        "m": "disruption-reason.m.snow"
+    },
+    "837": {
+        "e": "disruption-reason.e.snow",
+        "m": "disruption-reason.m.snow"
+    },
+    "838": {
+        "e": "disruption-reason.e.snow",
+        "m": "disruption-reason.m.snow"
+    },
+    "839": {
+        "e": "disruption-reason.e.snow",
+        "m": "disruption-reason.m.snow"
+    },
+    "840": {
+        "e": "disruption-reason.e.snow",
+        "m": "disruption-reason.m.snow"
+    },
+    "841": {
+        "e": "disruption-reason.e.a temporary speed restriction",
+        "m": "disruption-reason.m.a temporary speed restriction"
+    },
+    "842": {
+        "e": "disruption-reason.e.a temporary speed restriction",
+        "m": "disruption-reason.m.a temporary speed restriction"
+    },
+    "843": {
+        "e": "disruption-reason.e.a temporary speed restriction",
+        "m": "disruption-reason.m.a temporary speed restriction"
+    },
+    "844": {
+        "e": "disruption-reason.e.a temporary speed restriction",
+        "m": "disruption-reason.m.a temporary speed restriction"
+    },
+    "845": {
+        "e": "disruption-reason.e.a temporary speed restriction",
+        "m": "disruption-reason.m.a temporary speed restriction"
+    },
+    "846": {
+        "e": "disruption-reason.e.a temporary speed restriction",
+        "m": "disruption-reason.m.a temporary speed restriction"
+    },
+    "847": {
+        "e": "disruption-reason.e.a temporary speed restriction",
+        "m": "disruption-reason.m.a temporary speed restriction"
+    },
+    "848": {
+        "e": "disruption-reason.e.a temporary speed restriction",
+        "m": "disruption-reason.m.a temporary speed restriction"
+    },
+    "849": {
+        "e": "disruption-reason.e.a temporary speed restriction",
+        "m": "disruption-reason.m.a temporary speed restriction"
+    },
+    "850": {
+        "e": "disruption-reason.e.a temporary speed restriction",
+        "m": "disruption-reason.m.a temporary speed restriction"
+    },
+    "851": {
+        "e": "disruption-reason.e.a temporary speed restriction",
+        "m": "disruption-reason.m.a temporary speed restriction"
+    },
+    "852": {
+        "e": "disruption-reason.e.a temporary speed restriction",
+        "m": "disruption-reason.m.a temporary speed restriction"
+    },
+    "853": {
+        "e": "disruption-reason.e.a temporary speed restriction",
+        "m": "disruption-reason.m.a temporary speed restriction"
+    },
+    "854": {
+        "e": "disruption-reason.e.a temporary speed restriction",
+        "m": "disruption-reason.m.a temporary speed restriction"
+    },
+    "855": {
+        "e": "disruption-reason.e.a temporary speed restriction",
+        "m": "disruption-reason.m.a temporary speed restriction"
+    },
+    "856": {
+        "e": "disruption-reason.e.a temporary speed restriction",
+        "m": "disruption-reason.m.a temporary speed restriction"
+    },
+    "857": {
+        "e": "disruption-reason.e.a temporary speed restriction",
+        "m": "disruption-reason.m.a temporary speed restriction"
+    },
+    "858": {
+        "e": "disruption-reason.e.a temporary speed restriction",
+        "m": "disruption-reason.m.a temporary speed restriction"
+    },
+    "859": {
+        "e": "disruption-reason.e.a temporary speed restriction",
+        "m": "disruption-reason.m.a temporary speed restriction"
+    },
+    "860": {
+        "e": "disruption-reason.e.a temporary speed restriction",
+        "m": "disruption-reason.m.a temporary speed restriction"
+    },
+    "861": {
+        "e": "disruption-reason.e.a temporary speed restriction",
+        "m": "disruption-reason.m.a temporary speed restriction"
+    },
+    "862": {
+        "e": "disruption-reason.e.a temporary speed restriction",
+        "m": "disruption-reason.m.a temporary speed restriction"
+    },
+    "863": {
+        "e": "disruption-reason.e.a temporary speed restriction",
+        "m": "disruption-reason.m.a temporary speed restriction"
+    },
+    "864": {
+        "e": "disruption-reason.e.a temporary speed restriction",
+        "m": "disruption-reason.m.a temporary speed restriction"
+    },
+    "865": {
+        "e": "disruption-reason.e.a temporary speed restriction",
+        "m": "disruption-reason.m.a temporary speed restriction"
+    },
+    "866": {
+        "e": "disruption-reason.e.a temporary speed restriction",
+        "m": "disruption-reason.m.a temporary speed restriction"
+    },
+    "867": {
+        "e": "disruption-reason.e.a temporary speed restriction",
+        "m": "disruption-reason.m.a temporary speed restriction"
+    },
+    "868": {
+        "e": "disruption-reason.e.a temporary speed restriction",
+        "m": "disruption-reason.m.a temporary speed restriction"
+    },
+    "869": {
+        "e": "disruption-reason.e.a temporary speed restriction",
+        "m": "disruption-reason.m.a temporary speed restriction"
+    },
+    "870": {
+        "e": "disruption-reason.e.a temporary speed restriction",
+        "m": "disruption-reason.m.a temporary speed restriction"
+    },
+    "871": {
+        "e": "disruption-reason.e.a temporary speed restriction because of track repairs",
+        "m": "disruption-reason.m.a temporary speed restriction because of track repairs"
+    },
+    "872": {
+        "e": "disruption-reason.e.a temporary speed restriction because of track repairs",
+        "m": "disruption-reason.m.a temporary speed restriction because of track repairs"
+    },
+    "873": {
+        "e": "disruption-reason.e.a temporary speed restriction because of track repairs",
+        "m": "disruption-reason.m.a temporary speed restriction because of track repairs"
+    },
+    "874": {
+        "e": "disruption-reason.e.overhead electric line problems",
+        "m": "disruption-reason.m.overhead electric line problems"
+    },
+    "875": {
+        "e": "disruption-reason.e.police activity on the line",
+        "m": "disruption-reason.m.police activity on the line"
+    },
+    "876": {
+        "e": "disruption-reason.e.police activity on the line",
+        "m": "disruption-reason.m.police activity on the line"
+    },
+    "877": {
+        "e": "disruption-reason.e.police activity on the line",
+        "m": "disruption-reason.m.police activity on the line"
+    },
+    "878": {
+        "e": "disruption-reason.e.police activity on the line",
+        "m": "disruption-reason.m.police activity on the line"
+    },
+    "879": {
+        "e": "disruption-reason.e.police activity on the line",
+        "m": "disruption-reason.m.police activity on the line"
+    },
+    "880": {
+        "e": "disruption-reason.e.police activity on the line",
+        "m": "disruption-reason.m.police activity on the line"
+    },
+    "881": {
+        "e": "disruption-reason.e.police activity on the line",
+        "m": "disruption-reason.m.police activity on the line"
+    },
+    "882": {
+        "e": "disruption-reason.e.vandalism",
+        "m": "disruption-reason.m.vandalism"
+    },
+    "883": {
+        "e": "disruption-reason.e.vandalism",
+        "m": "disruption-reason.m.vandalism"
+    },
+    "884": {
+        "e": "disruption-reason.e.vandalism",
+        "m": "disruption-reason.m.vandalism"
+    },
+    "885": {
+        "e": "disruption-reason.e.an act of vandalism on this train",
+        "m": "disruption-reason.m.an act of vandalism on this train"
+    },
+    "886": {
+        "e": "disruption-reason.e.awaiting a member of train crew",
+        "m": "disruption-reason.m.awaiting a member of train crew"
+    },
+    "887": {
+        "e": "disruption-reason.m.awaiting a member of train crew,disruption-reason.e.who in turn has been delayed by the current disruption",
+        "m": ""
+    },
+    "888": {
+        "e": "disruption-reason.e.suspected damage to a railway bridge",
+        "m": "disruption-reason.m.suspected damage to a railway bridge"
+    },
+    "889": {
+        "e": "disruption-reason.e.suspected damage to a railway bridge",
+        "m": "disruption-reason.m.suspected damage to a railway bridge"
+    },
+    "890": {
+        "e": "disruption-reason.e.suspected damage to a railway bridge",
+        "m": "disruption-reason.m.suspected damage to a railway bridge"
+    },
+    "891": {
+        "e": "disruption-reason.e.suspected damage to a railway bridge",
+        "m": "disruption-reason.m.suspected damage to a railway bridge"
+    },
+    "892": {
+        "e": "disruption-reason.e.a broken rail",
+        "m": "disruption-reason.m.a broken rail"
+    },
+    "893": {
+        "e": "disruption-reason.e.additional cleaning duties",
+        "m": "disruption-reason.m.additional cleaning duties"
+    },
+    "894": {
+        "e": "disruption-reason.e.a slow-running preceding freight train running behind schedule",
+        "m": "disruption-reason.m.a slow-running preceding freight train running behind schedule"
+    },
+    "895": {
+        "e": "disruption-reason.e.a slow-running preceding freight train running behind schedule",
+        "m": "disruption-reason.m.a slow-running preceding freight train running behind schedule"
+    },
+    "896": {
+        "e": "disruption-reason.e.a points failure",
+        "m": "disruption-reason.m.a points failure"
+    },
+    "897": {
+        "e": "disruption-reason.e.an electrical power supply problem",
+        "m": "disruption-reason.m.an electrical power supply problem"
+    },
+    "898": {
+        "e": "disruption-reason.e.a temporary fault on the station lighting",
+        "m": "disruption-reason.m.a temporary fault on the station lighting"
+    },
+    "899": {
+        "e": "disruption-reason.e.the extreme heat",
+        "m": "disruption-reason.m.the extreme heat"
+    },
+    "900": {
+        "e": "disruption-reason.e.a landslip",
+        "m": "disruption-reason.m.a landslip"
+    },
+    "901": {
+        "e": "disruption-reason.e.a shortage of train dispatch staff",
+        "m": "disruption-reason.m.a shortage of train dispatch staff"
+    },
+    "902": {
+        "e": "disruption-reason.e.damaged track",
+        "m": "disruption-reason.m.damaged track"
+    },
+    "903": {
+        "e": "disruption-reason.e.a security alert",
+        "m": "disruption-reason.m.a security alert"
+    },
+    "904": {
+        "e": "disruption-reason.e.congestion",
+        "m": "disruption-reason.m.congestion"
+    },
+    "905": {
+        "e": "disruption-reason.e.the emergency communication cord being activated",
+        "m": "disruption-reason.m.the emergency communication cord being activated"
+    },
+    "906": {
+        "e": "disruption-reason.e.the emergency communication cord being activated on this train",
+        "m": "disruption-reason.m.the emergency communication cord being activated on this train"
+    },
+    "907": {
+        "e": "disruption-reason.e.being held awaiting a late running connection",
+        "m": "disruption-reason.m.being held awaiting a late running connection"
+    },
+    "908": {
+        "e": "disruption-reason.e.this train making additional stops on its journey",
+        "m": "disruption-reason.m.this train making additional stops on its journey"
+    },
+    "909": {
+        "e": "disruption-reason.e.this train making additional stops on its journey",
+        "m": "disruption-reason.m.this train making additional stops on its journey"
+    },
+    "910": {
+        "e": "disruption-reason.e.additional coaches being attached to this train",
+        "m": "disruption-reason.m.additional coaches being attached to this train"
+    },
+    "911": {
+        "e": "disruption-reason.e.a fault on a preceding train",
+        "m": "disruption-reason.m.a fault on a preceding train"
+    },
+    "912": {
+        "e": "disruption-reason.e.a temporary fault on the station lighting",
+        "m": "disruption-reason.m.a temporary fault on the station lighting"
+    },
+    "913": {
+        "e": "disruption-reason.e.a fault on a preceding train that has now been rectified",
+        "m": "disruption-reason.m.a fault on a preceding train that has now been rectified"
+    },
+    "914": {
+        "e": "disruption-reason.e.signalling difficulties",
+        "m": "disruption-reason.m.signalling difficulties"
+    },
+    "915": {
+        "e": "disruption-reason.m.the late arrival of the coaches and train crew to form this service,disruption-reason.e.caused by servicing problems in the depot",
+        "m": ""
+    },
+    "916": {
+        "e": "disruption-reason.e.signalling difficulties",
+        "m": "disruption-reason.m.signalling difficulties"
+    },
+    "917": {
+        "e": "disruption-reason.e.a staff shortage",
+        "m": "disruption-reason.m.a staff shortage"
+    }
+}

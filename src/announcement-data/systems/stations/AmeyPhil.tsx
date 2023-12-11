@@ -502,6 +502,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         'Chiltern Railway company',
         'Croydon Tramlink',
         'First Transpennine',
+        'Great Western Railway',
         'intercity charter train',
         'international',
         'London North Western Railway',

@@ -101,6 +101,7 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
 
   private readonly StationsWithForcedChangeHere = {
     ABW: 'other national rail services',
+    BFR: 'the circle and district lines',
     DMK: 'london overground and other national rail services',
     ECR: 'other national rail and tramlink services',
     EPH: 'the bakerloo and northern lines',

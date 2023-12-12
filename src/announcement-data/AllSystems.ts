@@ -11,12 +11,13 @@ import ScotRail from './systems/stations/ScotRail'
 import TfLJubileeLine from './systems/rolling-stock/TfLJubileeLine'
 import TfLNorthernLine from './systems/rolling-stock/TfLNorthernLine'
 import TfLElizabethLine from './systems/rolling-stock/TfLElizabeth'
+import LnerAzuma from './systems/rolling-stock/LNERAzuma'
 
 import TrainAnnouncementSystem from './TrainAnnouncementSystem'
 import StationAnnouncementSystem from './StationAnnouncementSystem'
 import AnnouncementSystem from './AnnouncementSystem'
 
-export const AllTrainAnnouncementSystems: { new (): TrainAnnouncementSystem }[] = [ThameslinkClass700, BombardierXstar, TfWTrainFx]
+export const AllTrainAnnouncementSystems: { new (): TrainAnnouncementSystem }[] = [ThameslinkClass700, BombardierXstar, TfWTrainFx, LnerAzuma]
 
 export const AllStationAnnouncementSystems: { new (): StationAnnouncementSystem }[] = [
   // AtosMatt,

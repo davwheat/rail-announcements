@@ -277,6 +277,41 @@ const changelog: IChangelogVersion[] = [
     ],
     additions: ['[Amey Celia] Add custom Northern TOC snippets'],
   },
+  {
+    date: '2023-11-26',
+    fixes: ["[Amey Live Trains] Don't announce delayed trains after departure"],
+    additions: ['[Amey Live Trains] Add disruption announcements'],
+  },
+  {
+    date: '2023-11-30',
+    fixes: [
+      '[Amey Celia & Phil] Allow announcing a split with no further calling points',
+      '[Amey Celia & Phil] Wrong delayed snippets for some messages',
+    ],
+  },
+  {
+    date: '2023-12-08',
+    fixes: [
+      "[Amey Celia & Phil] Use 'hundred-hour' instead of 'hundred'",
+      '[Amey Live Trains] Handle fake destinations correctly',
+      '[Amey Celia & Phil] Various sound snippet swaps',
+      '[Amey Celia & Phil] Tweak spacing based on real-world recordings',
+    ],
+  },
+  {
+    date: '2023-12-09',
+    fixes: ["[Amey Celia & Phil] Use 'hundred-hour' instead of 'hundred'"],
+    additions: ['[Amey Live Trains] Announce delay reasons', '[Amey Celia & Phil] Add fast train option'],
+  },
+  {
+    date: '2023-12-11',
+    fixes: ['[Class 700] Add missing Circle & District lines for Blackfriars'],
+    additions: ['[Amey Phil] Bodged GWR TOC snippet'],
+  },
+  {
+    date: '2023-12-11',
+    additions: ['[LNER Azuma] Add Azuma announcement system'],
+  },
 ]
 
 export default changelog

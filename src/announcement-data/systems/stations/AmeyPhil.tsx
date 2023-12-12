@@ -42,6 +42,19 @@ interface IFastTrainAnnouncementOptions {
   fastTrainApproaching: boolean
 }
 
+interface ITrainApproachingAnnouncementOptions {
+  chime: ChimeType
+  platform: string
+  hour: string
+  min: string
+  isDelayed: boolean
+  toc: string
+  terminatingStationCode: string
+  vias: CallingAtPoint[]
+  originStationCode: string
+  callingAt?: CallingAtPoint[]
+}
+
 interface SplitInfoStop {
   crsCode: string
   shortPlatform: string
@@ -4189,6 +4202,45 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     await this.playAudioFiles(files, download)
   }
 
+  private async playTrainApproachingAnnouncement(options: ITrainApproachingAnnouncementOptions, download: boolean = false): Promise<void> {
+    const files: AudioItem[] = []
+
+    const chime = this.getChime(options.chime)
+    if (chime) files.push(chime)
+
+    const plat = parseInt(options.platform)
+
+    if (plat <= 20 && options.platform.match(/^\d+$/)) {
+      files.push(`s.the train now approaching platform ${plat}`)
+    } else {
+      files.push(`s.the train now approaching platform`, `platform.m.${options.platform}`)
+    }
+
+    files.push('m.is the')
+
+    if (options.isDelayed) {
+      files.push('m.delayed')
+    }
+
+    files.push(
+      ...(await this.getFilesForBasicTrainInfo(
+        options.hour,
+        options.min,
+        options.toc,
+        options.vias.map(s => s.crsCode),
+        options.terminatingStationCode,
+        options.callingAt || [],
+      )),
+    )
+
+    files.push(
+      { id: 's.this train is the service from', opts: { delayStart: this.BEFORE_SECTION_DELAY } },
+      `station.e.${options.originStationCode}`,
+    )
+
+    await this.playAudioFiles(files, download)
+  }
+
   readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab> = {
     nextTrain: {
       name: 'Next train',
@@ -4313,6 +4365,112 @@ export default class AmeyPhil extends StationAnnouncementSystem {
               '11 coaches',
               '12 coaches',
             ].map(c => ({ title: c, value: c })),
+            type: 'select',
+          },
+        },
+      },
+    },
+    approachingTrain: {
+      name: 'Approaching train',
+      component: CustomAnnouncementPane,
+      props: {
+        presets: this.announcementPresets.approachingTrain,
+        playHandler: this.playTrainApproachingAnnouncement.bind(this),
+        options: {
+          chime: {
+            name: 'Chime',
+            type: 'select',
+            default: this.DEFAULT_CHIME,
+            options: [
+              { title: '3 chimes', value: 'three' },
+              { title: '4 chimes', value: 'four' },
+              { title: 'No chime', value: 'none' },
+            ],
+          },
+          platform: {
+            name: 'Platform',
+            default: this.PLATFORMS[0],
+            options: this.PLATFORMS.map(p => ({ title: `Platform ${p.toUpperCase()}`, value: p })),
+            type: 'select',
+          },
+          hour: {
+            name: 'Hour',
+            default: '07',
+            options: [
+              '00 - midnight',
+              '01',
+              '02',
+              '03',
+              '04',
+              '05',
+              '06',
+              '07',
+              '08',
+              '09',
+              '10',
+              '11',
+              '12',
+              '13',
+              '14',
+              '15',
+              '16',
+              '17',
+              '18',
+              '19',
+              '20',
+              '21',
+              '22',
+              '23',
+            ].map(h => ({ title: h, value: h })),
+            type: 'select',
+          },
+          min: {
+            name: 'Minute',
+            default: '33',
+            options: ['00 - hundred', '00 - hundred-hours']
+              .concat(new Array(58).fill(0).map((_, i) => (i + 2).toString()))
+              .map(m => ({ title: m.toString().padStart(2, '0'), value: m.toString().padStart(2, '0') })),
+            type: 'select',
+          },
+          isDelayed: {
+            name: 'Delayed?',
+            default: false,
+            type: 'boolean',
+          },
+          toc: {
+            name: 'TOC',
+            default: '',
+            options: [{ title: 'None', value: '' }].concat(this.ALL_AVAILABLE_TOCS.map(m => ({ title: m, value: m.toLowerCase() }))),
+            type: 'select',
+          },
+          terminatingStationCode: {
+            name: 'Terminating station',
+            default: this.STATIONS[0],
+            options: this.STATIONS.map(s => {
+              const stn = getStationByCrs(s)
+              return { title: stn ? `${stn.stationName} (${s})` : `Unknown name (${s})`, value: s }
+            }),
+            type: 'select',
+          },
+          vias: {
+            name: '',
+            type: 'custom',
+            component: CallingAtSelector,
+            props: {
+              availableStations: this.STATIONS,
+              selectLabel: 'Via points (non-splitting services only)',
+              placeholder: 'Add a via point...',
+              heading: 'Via... (optional)',
+            },
+            default: [],
+          },
+          originStationCode: {
+            name: 'Origin station',
+            default: this.STATIONS[0],
+            options: this.STATIONS.map(s => {
+              const stn = getStationByCrs(s)
+              return { title: stn ? `${stn.stationName} (${s})` : `Unknown name (${s})`, value: s }
+            }),
             type: 'select',
           },
         },

@@ -23,6 +23,12 @@ export default class AmeyCelia extends AmeyPhil {
     return 'three'
   }
 
+  get PLATFORMS() {
+    return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+      .flatMap(x => [`${x}`, `${x}a`, `${x}b`, `${x}c`, `${x}d`])
+      .concat(['13', '14', '15', '16', '17', '18', '19', '20'])
+  }
+
   protected get AVAILABLE_TOCS() {
     return {
       withServiceToFrom: [

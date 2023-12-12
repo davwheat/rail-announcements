@@ -13,6 +13,11 @@ interface IStoppedAtStationAnnouncementOptions {
   // mindTheGap: boolean
 }
 
+interface IApproachingStationAnnouncementOptions {
+  nextStationCode: string
+  terminates: boolean
+}
+
 const announcementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {
   stopped: [
     {
@@ -28,6 +33,14 @@ const announcementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>>
       state: {
         thisStationCode: 'BWK',
         terminatesAtCode: 'EDB',
+        callingAtCodes: [].map(crsToStationItemMapper),
+      },
+    },
+    {
+      name: 'Terminating KGX',
+      state: {
+        thisStationCode: 'KGX',
+        terminatesAtCode: 'KGX',
         callingAtCodes: [].map(crsToStationItemMapper),
       },
     },
@@ -254,15 +267,21 @@ export default class LnerAzuma extends TrainAnnouncementSystem {
 
     const files: AudioItem[] = []
 
-    files.push({ id: 'we are now at' }, { id: `station.${thisStationCode}`, opts: { delayStart: 150 } })
-
     if (thisStationCode === terminatesAtCode) {
       // End of journey
-      files.push('where we finish our journey today', {
-        id: 'on behalf of the onboard team thank you for travelling with lner',
-        opts: { delayStart: 2000 },
-      })
+      files.push(
+        'welcome to',
+        `station.${terminatesAtCode}`,
+        'where we finish our journey today',
+        {
+          id: 'on behalf of the onboard team thank you for travelling with lner',
+          opts: { delayStart: 2000 },
+        },
+        { id: 'male.if you enjoyed your journey please let us know', opts: { delayStart: 2000 } },
+      )
     } else {
+      files.push({ id: 'we are now at' }, { id: `station.${thisStationCode}`, opts: { delayStart: 150 } })
+
       files.push(
         { id: 'hello and welcome on board this lner azuma to', opts: { delayStart: 5000 } },
         { id: `station.${terminatesAtCode}`, opts: { delayStart: 150 } },
@@ -286,6 +305,23 @@ export default class LnerAzuma extends TrainAnnouncementSystem {
       files.push({ id: 'the next station will be', opts: { delayStart: 3000 } }, { id: `station.${nextStation}`, opts: { delayStart: 150 } })
       files.push({ id: 'male.cctv is in operation', opts: { delayStart: 3000 } }, { id: 'male.btp 61016', opts: { delayStart: 3000 } })
     }
+
+    await this.playAudioFiles(files, download)
+  }
+
+  private async playApproachingStationAnnouncement(options: IApproachingStationAnnouncementOptions, download: boolean = false): Promise<void> {
+    const { nextStationCode, terminates } = options
+
+    const files: AudioItem[] = []
+
+    files.push('we will shortly be arriving at', `station.${nextStationCode}`)
+
+    if (terminates) {
+      files.push('where we finish our journey today')
+    }
+
+    files.push({ id: 'if youre leaving us here please make sure to take all your personal belongings with you', opts: { delayStart: 1000 } })
+    files.push({ id: 'thank you for travelling with lner', opts: { delayStart: 1000 } })
 
     await this.playAudioFiles(files, download)
   }
@@ -318,6 +354,26 @@ export default class LnerAzuma extends TrainAnnouncementSystem {
               availableStations: this.ALL_STATIONS,
             },
             default: [],
+          },
+        },
+      },
+    },
+    aproachingStation: {
+      name: 'Approaching station',
+      component: CustomAnnouncementPane,
+      props: {
+        playHandler: this.playApproachingStationAnnouncement.bind(this),
+        options: {
+          nextStationCode: {
+            name: 'Next station',
+            default: this.ALL_STATIONS[0],
+            options: this.ALL_STATIONS.map(crsToStationItemMapper).map(({ crsCode, name }) => ({ value: crsCode, title: name })),
+            type: 'select',
+          },
+          terminates: {
+            name: 'Terminates here',
+            default: false,
+            type: 'boolean',
           },
         },
       },

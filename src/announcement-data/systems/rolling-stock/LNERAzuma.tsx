@@ -13,7 +13,26 @@ interface IStoppedAtStationAnnouncementOptions {
   // mindTheGap: boolean
 }
 
-const announcementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {}
+const announcementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {
+  stopped: [
+    {
+      name: 'YRK - ABD',
+      state: {
+        thisStationCode: 'YRK',
+        terminatesAtCode: 'ABD',
+        callingAtCodes: ['DAR', 'NCL', 'BWK', 'EDB', 'HYM', 'INK', 'KDY', 'LEU', 'DEE', 'ARB', 'MTS', 'STN'].map(crsToStationItemMapper),
+      },
+    },
+    {
+      name: 'BWK - EDB',
+      state: {
+        thisStationCode: 'BWK',
+        terminatesAtCode: 'EDB',
+        callingAtCodes: [].map(crsToStationItemMapper),
+      },
+    },
+  ],
+}
 
 export default class LnerAzuma extends TrainAnnouncementSystem {
   readonly NAME = 'LNER Azuma'

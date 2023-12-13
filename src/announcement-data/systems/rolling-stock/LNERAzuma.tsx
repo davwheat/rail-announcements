@@ -197,7 +197,6 @@ export default class LnerAzuma extends TrainAnnouncementSystem {
     'PBR',
     'PEG',
     'PFM',
-    'PIC',
     'PIT',
     'PLN',
     'PMT',
@@ -253,6 +252,7 @@ export default class LnerAzuma extends TrainAnnouncementSystem {
     'WMG',
     'WRK',
     'WTB',
+    'XPK',
     'YRK',
     'YRM',
   ]

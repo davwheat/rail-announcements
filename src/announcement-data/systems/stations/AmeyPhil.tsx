@@ -5004,6 +5004,18 @@ function LiveTrainAnnouncements({ nextTrainHandler, disruptedTrainHandler, syste
     [system],
   )
 
+  const guessViaPoint = useCallback(function guessViaPoint(via: string): string | null {
+    if (stationNameToCrsMap[via]) return stationNameToCrsMap[via]
+
+    // Manual entries
+    switch (via) {
+      case 'cobham':
+        return 'CSD'
+    }
+
+    return null
+  }, [])
+
   const announceNextTrain = useCallback(
     async function announceNextTrain(train: TrainService, abortController: AbortController) {
       console.log(train)
@@ -5059,7 +5071,7 @@ function LiveTrainAnnouncements({ nextTrainHandler, disruptedTrainHandler, syste
         const v: string = train.destination[0].via.startsWith('via ') ? train.destination[0].via.slice(4) : train.destination[0].via
 
         v.split(/(&|and)/).forEach(via => {
-          const guessViaCrs = stationNameToCrsMap[via.trim().toLowerCase()]
+          const guessViaCrs = guessViaPoint(via.trim().toLowerCase())
 
           addLog(`Guessed via ${guessViaCrs} for ${via}`)
           console.log(`[Live Trains] Guessed via ${guessViaCrs} for ${via}`)

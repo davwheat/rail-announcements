@@ -2780,6 +2780,7 @@ export default class AmeyCelia extends AmeyPhil {
       'WEA',
       'WED',
       'WEE',
+      'WEH',
       'WEL',
       'WEM',
       'WES',

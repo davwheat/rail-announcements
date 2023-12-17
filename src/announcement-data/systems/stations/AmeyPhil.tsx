@@ -5034,9 +5034,8 @@ function LiveTrainAnnouncements({ nextTrainHandler, disruptedTrainHandler, syste
       const toc = system.processTocForLiveTrains(train.operator, train.origin[0].crs, train.destination[0].crs)
 
       const callingPoints = train.subsequentLocations.filter(s => {
-        if (s.isCancelled) return false
-        if (s.isPass) return false
         if (!s.crs) return false
+        if (s.isCancelled || s.isOperational || s.isPass) return false
         if (!system.STATIONS.includes(s.crs)) return false
         return true
       })

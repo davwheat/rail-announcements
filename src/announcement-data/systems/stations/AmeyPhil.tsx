@@ -1884,6 +1884,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       'HMP',
       'HMS',
       'HMT',
+      'HMW',
       'HMY',
       'HNA',
       'HNB',
@@ -3155,6 +3156,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       'WEA',
       'WED',
       'WEE',
+      'WEH',
       'WEL',
       'WEM',
       'WET',
@@ -5002,6 +5004,18 @@ function LiveTrainAnnouncements({ nextTrainHandler, disruptedTrainHandler, syste
     [system],
   )
 
+  const guessViaPoint = useCallback(function guessViaPoint(via: string): string | null {
+    if (stationNameToCrsMap[via]) return stationNameToCrsMap[via]
+
+    // Manual entries
+    switch (via) {
+      case 'cobham':
+        return 'CSD'
+    }
+
+    return null
+  }, [])
+
   const announceNextTrain = useCallback(
     async function announceNextTrain(train: TrainService, abortController: AbortController) {
       console.log(train)
@@ -5020,9 +5034,8 @@ function LiveTrainAnnouncements({ nextTrainHandler, disruptedTrainHandler, syste
       const toc = system.processTocForLiveTrains(train.operator, train.origin[0].crs, train.destination[0].crs)
 
       const callingPoints = train.subsequentLocations.filter(s => {
-        if (s.isCancelled) return false
-        if (s.isPass) return false
         if (!s.crs) return false
+        if (s.isCancelled || s.isOperational || s.isPass) return false
         if (!system.STATIONS.includes(s.crs)) return false
         return true
       })
@@ -5057,7 +5070,7 @@ function LiveTrainAnnouncements({ nextTrainHandler, disruptedTrainHandler, syste
         const v: string = train.destination[0].via.startsWith('via ') ? train.destination[0].via.slice(4) : train.destination[0].via
 
         v.split(/(&|and)/).forEach(via => {
-          const guessViaCrs = stationNameToCrsMap[via.trim().toLowerCase()]
+          const guessViaCrs = guessViaPoint(via.trim().toLowerCase())
 
           addLog(`Guessed via ${guessViaCrs} for ${via}`)
           console.log(`[Live Trains] Guessed via ${guessViaCrs} for ${via}`)

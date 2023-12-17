@@ -309,8 +309,8 @@ const changelog: IChangelogVersion[] = [
     additions: ['[Amey Phil] Bodged GWR TOC snippet'],
   },
   {
-    date: '2023-12-11',
-    additions: ['[LNER Azuma] Add Azuma announcement system'],
+    date: '2023-12-12',
+    additions: ['[LNER Azuma] Add Azuma announcement system', '[Amey Celia & Phil] Add approaching train option'],
   },
 ]
 

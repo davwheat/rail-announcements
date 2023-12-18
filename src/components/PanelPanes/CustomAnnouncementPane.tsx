@@ -65,7 +65,7 @@ export interface ICustomAnnouncementPaneProps {
   presets?: ICustomAnnouncementPreset[]
 }
 
-function CustomAnnouncementPane({ options, playHandler, name, presets }: ICustomAnnouncementPaneProps): JSX.Element {
+function CustomAnnouncementPane({ options, playHandler, name, presets }: ICustomAnnouncementPaneProps) {
   const classes = useStyles()
 
   const AnnouncementSystem = getActiveSystem()
@@ -73,7 +73,7 @@ function CustomAnnouncementPane({ options, playHandler, name, presets }: ICustom
 
   const AnnouncementSystemInstance = new AnnouncementSystem()
 
-  const [playError, setPlayError] = React.useState<Error>(null)
+  const [playError, setPlayError] = React.useState<Error | null>(null)
 
   const [optionsState, setOptionsState] = React.useState<Record<string, unknown>>(
     Object.entries(options).reduce((acc, [key, opt]) => {

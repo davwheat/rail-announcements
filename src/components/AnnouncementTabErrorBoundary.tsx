@@ -7,7 +7,7 @@ interface IAnnouncementTabErrorBoundaryProps {
   children: React.ReactNode
 }
 
-export default function AnnouncementTabErrorBoundary(props: IAnnouncementTabErrorBoundaryProps) {
+export default function AnnouncementTabErrorBoundary(props: IAnnouncementTabErrorBoundaryProps): React.ReactElement {
   return (
     <Sentry.ErrorBoundary
       beforeCapture={scope => {

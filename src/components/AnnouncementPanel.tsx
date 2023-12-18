@@ -21,7 +21,7 @@ const useStyles = makeStyles({
   },
 })
 
-function AnnouncementPanel(): JSX.Element {
+function AnnouncementPanel() {
   const classes = useStyles()
   const AnnouncementSystem = getActiveSystem()
 
@@ -30,11 +30,11 @@ function AnnouncementPanel(): JSX.Element {
   }
 
   const AnnouncementSystemInstance = AnnouncementSystem ? new AnnouncementSystem() : null
-  const customTabs = AnnouncementSystemInstance?.customAnnouncementTabs
+  const customTabs = AnnouncementSystemInstance?.customAnnouncementTabs ?? {}
 
-  const TabPanels = React.useMemo(
+  const TabPanels: React.ReactElement[] | null = React.useMemo(
     () =>
-      !AnnouncementSystem
+      !AnnouncementSystem || !AnnouncementSystemInstance
         ? null
         : Object.values(customTabs).map(({ component: TabComponent, ...opts }) => (
             <AnnouncementTabErrorBoundary key={opts.name} systemId={AnnouncementSystemInstance.ID} systemName={AnnouncementSystemInstance.NAME}>
@@ -53,14 +53,14 @@ function AnnouncementPanel(): JSX.Element {
   })
 
   function getSelectedTab() {
-    return _selectedTab?.[AnnouncementSystemInstance.ID] || 0
+    return _selectedTab?.[AnnouncementSystemInstance?.ID ?? ''] || 0
   }
 
   const setSelectedTab = useCallback(
     (index: number) => {
       _setSelectedTab(s => ({
         ...s,
-        [AnnouncementSystemInstance.ID]: index,
+        [AnnouncementSystemInstance?.ID ?? '']: index,
       }))
     },
     [_setSelectedTab],
@@ -70,16 +70,16 @@ function AnnouncementPanel(): JSX.Element {
 
   return (
     <div className={classes.root}>
-      <h2 className={classes.heading}>{AnnouncementSystemInstance.NAME}</h2>
+      <h2 className={classes.heading}>{AnnouncementSystemInstance?.NAME}</h2>
 
-      <div className={classes.instanceHeader}>{AnnouncementSystemInstance.headerComponent()}</div>
+      <div className={classes.instanceHeader}>{AnnouncementSystemInstance?.headerComponent()}</div>
 
       <Tabs
         selectedTabIndex={getSelectedTab()}
         onTabChange={setSelectedTab}
         tabNames={Object.values(customTabs).map(tab => tab.name)}
-        tabItems={TabPanels}
-        customKeyPrefix={AnnouncementSystemInstance.ID}
+        tabItems={TabPanels ?? []}
+        customKeyPrefix={AnnouncementSystemInstance?.ID}
       />
     </div>
   )

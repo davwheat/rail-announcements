@@ -10,5 +10,5 @@ import TrainAnnouncementSystem from '@announcement-data/TrainAnnouncementSystem'
 export default function getActiveSystem(): (new () => TrainAnnouncementSystem | StationAnnouncementSystem | AnnouncementSystem) | null {
   const globalState = useRecoilValue(globalPersistentStateAtom)
 
-  return AllAnnouncementSystems.find(sys => new sys().ID === globalState.systemId?.value)
+  return AllAnnouncementSystems.find(sys => new sys().ID === globalState.systemId?.value) ?? null
 }

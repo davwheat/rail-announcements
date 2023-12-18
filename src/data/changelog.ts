@@ -312,6 +312,14 @@ const changelog: IChangelogVersion[] = [
     date: '2023-12-12',
     additions: ['[LNER Azuma] Add Azuma announcement system', '[Amey Celia & Phil] Add approaching train option'],
   },
+  {
+    date: '2023-12-18',
+    additions: ['[Amey Phil & Celia] Add missing Hampton Wick and West Ham stations'],
+    fixes: [
+      "[Amey Live Trains] Don't announce unadvertised stops (e.g. City Thameslink AC/DC switchover after it closes)",
+      "[Amey Live Trains] Manual override for some via points (e.g. 'via Cobham' will be announced correctly now)",
+    ],
+  },
 ]
 
 export default changelog

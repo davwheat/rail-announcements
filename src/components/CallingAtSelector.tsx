@@ -104,7 +104,7 @@ function CallingAtSelector({
   availableStations,
   additionalOptions,
   selectLabel = 'Intermediary stops',
-  placeholder = 'Add a calling point...',
+  placeholder = 'Add a calling point…',
   heading = 'Calling at... (excluding terminating station)',
   enableShortPlatforms = false,
   enableRequestStops = false,
@@ -270,7 +270,7 @@ function CallingAtSelector({
                                       props: {
                                         availableStations: availableStations,
                                         selectLabel: 'Split calling points',
-                                        placeholder: 'Add a split calling point...',
+                                        placeholder: 'Add a split calling point…',
                                         heading: 'Calling points (INCLUDING terminating station)',
                                         enableShortPlatforms: enableShortPlatforms,
                                         enableRequestStops: enableRequestStops,

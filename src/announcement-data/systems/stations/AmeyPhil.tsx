@@ -8,6 +8,7 @@ import crsToStationItemMapper, { stationItemCompleter } from '@helpers/crsToStat
 import { AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
 import FullscreenIcon from 'mdi-react/FullscreenIcon'
 import DelayCodeMapping from './DarwinDelayCodes_Male1.json'
+import NREPowered from '@assets/NRE_Powered_logo.png'
 
 export type ChimeType = 'three' | 'four' | 'none'
 
@@ -4333,7 +4334,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             props: {
               availableStations: this.STATIONS,
               selectLabel: 'Via points (non-splitting services only)',
-              placeholder: 'Add a via point...',
+              placeholder: 'Add a via point…',
               heading: 'Via... (optional)',
             },
             default: [],
@@ -4461,7 +4462,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             props: {
               availableStations: this.STATIONS,
               selectLabel: 'Via points (non-splitting services only)',
-              placeholder: 'Add a via point...',
+              placeholder: 'Add a via point…',
               heading: 'Via... (optional)',
             },
             default: [],
@@ -4556,7 +4557,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             props: {
               availableStations: this.STATIONS,
               selectLabel: 'Via points (non-splitting services only)',
-              placeholder: 'Add a via point...',
+              placeholder: 'Add a via point…',
               heading: 'Via... (optional)',
             },
             default: [],
@@ -4565,7 +4566,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             name: 'Disruption type',
             type: 'select',
             options: [
-              { value: 'delayedBy', title: 'Delayed by...' },
+              { value: 'delayedBy', title: 'Delayed by…' },
               { value: 'delay', title: 'Delayed' },
               { value: 'cancel', title: 'Cancelled' },
             ],
@@ -4878,6 +4879,10 @@ const useLiveTrainsStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
     marginBottom: 16,
+
+    '&:last-child': {
+      marginBottom: 0,
+    },
   },
   iframe: {
     border: 'none',
@@ -4887,6 +4892,14 @@ const useLiveTrainsStyles = makeStyles({
     ':fullscreen &': {
       height: '100%',
     },
+  },
+  poweredBy: {
+    maxWidth: '100%',
+    width: 300,
+    marginTop: 16,
+  },
+  logs: {
+    marginTop: 16,
   },
 })
 
@@ -5426,16 +5439,18 @@ function LiveTrainAnnouncements({ nextTrainHandler, disruptedTrainHandler, syste
             />
           </FullScreen>
 
-          <Logs logs={logs} />
+          <Logs className={classes.logs} logs={logs} />
+
+          <img src={NREPowered} alt="Powered by National Rail Enquiries" className={classes.poweredBy} />
         </>
       )}
     </div>
   )
 }
 
-function Logs({ logs }: { logs: string[] }) {
+function Logs({ logs, className }: { logs: string[]; className?: string }) {
   return (
-    <div>
+    <div className={className}>
       <h2>Logs</h2>
 
       <textarea value={logs.join('\n')} style={{ width: '100%', minHeight: 250, maxHeight: '90vh', resize: 'vertical', padding: 8 }} />

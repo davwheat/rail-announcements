@@ -31,7 +31,6 @@ const useStyles = makeStyles({
   timelineList: {
     display: 'flex',
     flexDirection: 'column',
-    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
     '--timeline-width': '4px',
     '--timeline-node-size': '1.5rem',
     '--timeline-color': 'var(--primary-blue)',

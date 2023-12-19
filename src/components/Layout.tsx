@@ -35,11 +35,14 @@ const Layout: React.FC<Props> = ({ children, description, location }) => {
 
         <footer className={classes.footer}>
           <p>
-            <span style={{ fontFamily: 'sans-serif' }}>&copy;</span> {new Date().getFullYear()} &mdash; Made with love by David Wheatley.
+            Made with love by{' '}
+            <a href="https://davwheat.dev/" target="_blank">
+              David Wheatley
+            </a>
           </p>
           <p>
-            <a href="https://github.com/davwheat/rail-announcements" rel="noopener noreferrer" target="_blank">
-              This site is open source, and available on GitHub.
+            <a href="https://github.com/davwheat/rail-announcements" target="_blank">
+              This site is open source, and its code is available on GitHub.
             </a>
           </p>
         </footer>

@@ -79,7 +79,10 @@ function IndexPage({ location }): JSX.Element {
 
       <aside className={classes.noticeBlock}>
         <h2>Health & safety</h2>
-        <p>This website is provided for educations and entertainment purposes only. It is not permitted to be used for .</p>
+        <p>
+          This website is provided for educations and entertainment purposes only. It may not be used as a replacement for a public customer
+          information system or be used as a source of accurate real-time data.
+        </p>
       </aside>
     </Layout>
   )

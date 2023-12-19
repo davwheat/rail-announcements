@@ -4,6 +4,12 @@ declare module '*.svg' {
   export default content
 }
 
+// Allow imports of .png files by URL
+declare module '*.png' {
+  const content: string
+  export default content
+}
+
 // Allow imports of .inline.svg files as React components
 declare module '*.inline.svg' {
   import React = require('react')

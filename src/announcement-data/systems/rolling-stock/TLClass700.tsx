@@ -868,7 +868,7 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
             },
           },
           changeFor: {
-            name: 'Change for...',
+            name: 'Change for…',
             type: 'multiselect',
             options: this.OtherServicesAvailable,
             default: [],

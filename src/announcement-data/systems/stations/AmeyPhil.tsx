@@ -4333,7 +4333,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             props: {
               availableStations: this.STATIONS,
               selectLabel: 'Via points (non-splitting services only)',
-              placeholder: 'Add a via point...',
+              placeholder: 'Add a via point…',
               heading: 'Via... (optional)',
             },
             default: [],
@@ -4461,7 +4461,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             props: {
               availableStations: this.STATIONS,
               selectLabel: 'Via points (non-splitting services only)',
-              placeholder: 'Add a via point...',
+              placeholder: 'Add a via point…',
               heading: 'Via... (optional)',
             },
             default: [],
@@ -4556,7 +4556,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             props: {
               availableStations: this.STATIONS,
               selectLabel: 'Via points (non-splitting services only)',
-              placeholder: 'Add a via point...',
+              placeholder: 'Add a via point…',
               heading: 'Via... (optional)',
             },
             default: [],
@@ -4565,7 +4565,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             name: 'Disruption type',
             type: 'select',
             options: [
-              { value: 'delayedBy', title: 'Delayed by...' },
+              { value: 'delayedBy', title: 'Delayed by…' },
               { value: 'delay', title: 'Delayed' },
               { value: 'cancel', title: 'Cancelled' },
             ],

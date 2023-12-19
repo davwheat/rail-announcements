@@ -6,9 +6,9 @@ const prodPlugins = !__IS_DEV__ ? [] : []
 module.exports = {
   siteMetadata: {
     siteUrl: 'https://rail-announcements.davwheat.dev',
-    title: 'Rail Announcements',
-    description: 'Announcements for the UK rail network',
-    author: '@davwheat',
+    title: 'UK Rail Announcement Generator',
+    description: 'Generate various station and on-train announcements for the UK rail network using raw audio recordings.',
+    author: 'David Wheatley',
   },
   plugins: [
     ...prodPlugins,
@@ -28,11 +28,19 @@ module.exports = {
         background_color: `#000`,
         theme_color: `#ffa500`,
         display: `minimal-ui`,
-        icon: `src/images/logo.png`, // This path is relative to the root of the site.
+        icon: `src/images/rs2.png`,
       },
     },
     {
       resolve: '@sentry/gatsby',
+    },
+    {
+      resolve: 'gatsby-plugin-react-svg',
+      options: {
+        rule: {
+          include: /\.inline\.svg$/,
+        },
+      },
     },
   ],
 }

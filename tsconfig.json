@@ -17,7 +17,8 @@
       "@atoms/*": ["./src/atoms/*"],
       "@helpers/*": ["./src/helpers/*"],
       "@announcement-data/*": ["./src/announcement-data/*"],
-      "@hooks/*": ["./src/hooks/*"]
+      "@hooks/*": ["./src/hooks/*"],
+      "@assets/*": ["./src/assets/*"]
     }
   },
   "exclude": ["node_modules", "build", "scripts", "acceptance-tests", "webpack", "jest", "src/setupTests.ts"]

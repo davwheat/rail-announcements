@@ -320,6 +320,10 @@ const changelog: IChangelogVersion[] = [
       "[Amey Live Trains] Manual override for some via points (e.g. 'via Cobham' will be announced correctly now)",
     ],
   },
+  {
+    date: '2023-12-19',
+    otherChanges: ['Website styling changes and reorganisation', 'Use RA2 font for website'],
+  },
 ]
 
 export default changelog

@@ -218,7 +218,7 @@ function AtosDisruptionAlternativeServicePanel({
         className={classes.passengersFor}
         value={{
           value: 'none',
-          label: 'Select station...',
+          label: 'Select station…',
         }}
         onChange={val => {
           const stn = getStationByCrs(val.value)
@@ -228,7 +228,7 @@ function AtosDisruptionAlternativeServicePanel({
         options={[
           {
             value: 'none',
-            label: 'Select station...',
+            label: 'Select station…',
           },
         ].concat(
           availableStations.high

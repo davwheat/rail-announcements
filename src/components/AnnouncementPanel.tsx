@@ -5,7 +5,8 @@ import Tabs from './Tabs'
 import getActiveSystem from '@helpers/getActiveSystem'
 import AnnouncementTabErrorBoundary from './AnnouncementTabErrorBoundary'
 
-import useStateWithLocalStorage from '@hooks/useStateWithLocalStorage'
+import { useRecoilState } from 'recoil'
+import { selectedTabIdsState } from '@atoms'
 
 const useStyles = makeStyles({
   root: {
@@ -32,38 +33,58 @@ function AnnouncementPanel() {
   const AnnouncementSystemInstance = AnnouncementSystem ? new AnnouncementSystem() : null
   const customTabs = AnnouncementSystemInstance?.customAnnouncementTabs ?? {}
 
-  const TabPanels: React.ReactElement[] | null = React.useMemo(
+  const TabPanelMap = React.useMemo(
     () =>
       !AnnouncementSystem || !AnnouncementSystemInstance
         ? null
-        : Object.values(customTabs).map(({ component: TabComponent, ...opts }) => (
-            <AnnouncementTabErrorBoundary key={opts.name} systemId={AnnouncementSystemInstance.ID} systemName={AnnouncementSystemInstance.NAME}>
-              <TabComponent {...opts.props} name={opts.name} />
-            </AnnouncementTabErrorBoundary>
-          )),
-    [customTabs, AnnouncementSystem],
+        : Object.entries(customTabs).reduce(
+            (acc, [id, { component: TabComponent, ...opts }], i) => {
+              acc[opts.name] = (
+                <AnnouncementTabErrorBoundary
+                  key={opts.name}
+                  systemId={AnnouncementSystemInstance.ID}
+                  systemName={AnnouncementSystemInstance.NAME}
+                >
+                  <TabComponent {...opts.props} name={opts.name} tabId={id} systemId={AnnouncementSystemInstance.ID} />
+                </AnnouncementTabErrorBoundary>
+              )
+
+              return acc
+            },
+            {} as Record<string, React.ReactElement>,
+          ),
+    [customTabs, AnnouncementSystem, AnnouncementSystemInstance],
   )
+  const TabPanels: React.ReactElement[] = Object.values(TabPanelMap ?? {})
 
-  const [_selectedTab, _setSelectedTab] = useStateWithLocalStorage<Record<string, number>>('selectedSystemTabs', {}, tabs => {
-    if (typeof tabs !== 'object' || tabs === null) return false
-
-    if (!Object.values(tabs).every(i => typeof i === 'number')) return false
-
-    return true
-  })
+  const [selectedTabIds, setSelectedTabIds] = useRecoilState(selectedTabIdsState)
 
   function getSelectedTab() {
-    return _selectedTab?.[AnnouncementSystemInstance?.ID ?? ''] || 0
+    const tabId = selectedTabIds?.[AnnouncementSystemInstance?.ID ?? '']
+
+    if (tabId) {
+      const index = Object.values(customTabs).findIndex(tab => tab.name === tabId)
+
+      if (index !== -1) {
+        return index
+      }
+    }
+
+    return 0
   }
 
   const setSelectedTab = useCallback(
     (index: number) => {
-      _setSelectedTab(s => ({
-        ...s,
-        [AnnouncementSystemInstance?.ID ?? '']: index,
+      console.log(index)
+
+      const tabName = Object.values(customTabs)[index].name
+
+      setSelectedTabIds(prevState => ({
+        ...(prevState || {}),
+        [AnnouncementSystemInstance?.ID ?? '']: tabName,
       }))
     },
-    [_setSelectedTab],
+    [setSelectedTabIds],
   )
 
   if (!AnnouncementSystem) return null

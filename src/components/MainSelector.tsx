@@ -1,8 +1,9 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 
-import { useRecoilState } from 'recoil'
-import { globalPersistentStateAtom } from '@atoms/globalStateAtom'
+import { useRecoilState, useSetRecoilState } from 'recoil'
+import { selectedSystemState, selectedTabIdsState, tabStatesState } from '@atoms'
 import { AllAnnouncementSystems } from '@announcement-data/AllSystems'
+
 import Select from 'react-select'
 
 const allSystems = AllAnnouncementSystems.reduce(
@@ -21,7 +22,10 @@ interface SystemOption {
 }
 
 function MainSelector(): JSX.Element {
-  const [globalState, setGlobalState] = useRecoilState(globalPersistentStateAtom)
+  const [selectedSystem, setSelectedSystem] = useRecoilState(selectedSystemState)
+  const setSelectedTabIds = useSetRecoilState(selectedTabIdsState)
+  const setTabState = useSetRecoilState(tabStatesState)
+
 
   return (
     <div>
@@ -29,9 +33,9 @@ function MainSelector(): JSX.Element {
         Choose a system
         <Select<SystemOption, false>
           id="system-select"
-          value={globalState.systemId || { label: 'None', value: 'none' }}
+          value={selectedSystem || { label: 'None', value: 'none' }}
           onChange={val => {
-            setGlobalState({ ...globalState, systemId: val })
+            setSelectedSystem(val)
           }}
           options={options}
         />

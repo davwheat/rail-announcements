@@ -1,5 +1,6 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 
+import LoadingSpinner from '@components/LoadingSpinner'
 import { makeStyles } from '@material-ui/styles'
 import getActiveSystem from '@helpers/getActiveSystem'
 import createOptionField from '@helpers/createOptionField'
@@ -13,6 +14,8 @@ import PresetIcon from 'mdi-react/FolderTextOutlineIcon'
 import DownloadIcon from 'mdi-react/DownloadIcon'
 
 import clsx from 'clsx'
+import { useRecoilState } from 'recoil'
+import { tabStatesState } from '@atoms/index'
 
 const useStyles = makeStyles({
   root: {
@@ -63,40 +66,132 @@ export interface ICustomAnnouncementPaneProps {
   playHandler: (options: { [key: string]: any }, download?: boolean) => Promise<void>
   name: string
   presets?: ICustomAnnouncementPreset[]
+  systemId: string
+  tabId: string
 }
 
-function CustomAnnouncementPane({ options, playHandler, name, presets }: ICustomAnnouncementPaneProps) {
+function CustomAnnouncementPane({ options, playHandler, name, presets, systemId, tabId }: ICustomAnnouncementPaneProps) {
   const classes = useStyles()
-
-  const AnnouncementSystem = getActiveSystem()
-  if (!AnnouncementSystem) return null
-
-  const AnnouncementSystemInstance = new AnnouncementSystem()
 
   const [playError, setPlayError] = React.useState<Error | null>(null)
 
-  const [optionsState, setOptionsState] = React.useState<Record<string, unknown>>(
-    Object.entries(options).reduce((acc, [key, opt]) => {
-      if (options[key].type === 'customNoState') return acc
+  const [allTabStates, setAllTabStates] = useRecoilState(tabStatesState)
+  const optionsState = allTabStates?.[tabId]
 
-      // @ts-expect-error
-      acc[key] = opt.default
-
-      return acc
-    }, {}),
-  )
   const [isDisabled, setIsDisabled] = useIsPlayingAnnouncement()
+
+  useEffect(() => {
+    // Set default options if currently null
+
+    if (!optionsState) {
+      setAllTabStates(prevState => ({
+        ...(prevState || {}),
+        [tabId]: Object.entries(options).reduce((acc, [key, opt]) => {
+          if (options[key].type === 'customNoState') return acc
+
+          // @ts-expect-error
+          acc[key] = opt.default
+
+          return acc
+        }, {}),
+      }))
+    }
+  }, [optionsState])
+
+  const AnnouncementSystem = getActiveSystem()
+
+  const AnnouncementSystemInstance = new AnnouncementSystem()
 
   function createFieldUpdater(field: string): (value) => void {
     return (value): void => {
       if (isDisabled) return
 
-      setOptionsState(prevState => ({ ...prevState, [field]: value }))
+      setAllTabStates(prevState => ({ ...(prevState || {}), [tabId]: { ...(prevState?.[tabId] || {}), [field]: value } }))
     }
   }
 
+  const playAnnouncement = React.useCallback(
+    async function playAnnouncement() {
+      if (isDisabled) return
+
+      setIsDisabled(true)
+
+      Sentry.addBreadcrumb({
+        category: 'announcement.play',
+        data: {
+          systemId: AnnouncementSystemInstance.ID,
+          type: 'constructed',
+          name,
+          options: JSON.stringify(optionsState, null, 2),
+        },
+      })
+
+      console.info('Playing announcement', name, optionsState)
+
+      try {
+        await playHandler(optionsState!!)
+      } catch (err) {
+        setPlayError(err)
+      }
+
+      setIsDisabled(false)
+    },
+    [isDisabled, playHandler, setIsDisabled, optionsState],
+  )
+
+  const downloadAnnouncement = React.useCallback(
+    async function downloadAnnouncement() {
+      if (isDisabled) return
+
+      setIsDisabled(true)
+
+      Sentry.addBreadcrumb({
+        category: 'announcement.download',
+        data: {
+          systemId: AnnouncementSystemInstance.ID,
+          type: 'constructed',
+          name,
+          options: JSON.stringify(optionsState, null, 2),
+        },
+      })
+
+      console.info('Playing announcement', name, optionsState)
+
+      try {
+        await playHandler(optionsState!!, true)
+      } catch (err) {
+        setPlayError(err)
+      }
+
+      setIsDisabled(false)
+    },
+    [isDisabled, playHandler, setIsDisabled, optionsState],
+  )
+
   if (playError) {
     throw playError
+  }
+
+  if (!AnnouncementSystem) return null
+
+  if (!optionsState) {
+    return (
+      <div className={classes.root}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'column',
+            gap: 24,
+            textAlign: 'center',
+          }}
+        >
+          <LoadingSpinner />
+          <p>Loading...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -111,7 +206,7 @@ function CustomAnnouncementPane({ options, playHandler, name, presets }: ICustom
                 key={preset.name}
                 disabled={isDisabled}
                 onClick={() => {
-                  setOptionsState(preset.state)
+                  setAllTabStates(prevState => ({ ...(prevState || {}), [tabId]: preset.state }))
                 }}
               >
                 <span className="buttonLabel">
@@ -147,69 +242,13 @@ function CustomAnnouncementPane({ options, playHandler, name, presets }: ICustom
       </fieldset>
 
       <div className="buttonGroup">
-        <button
-          disabled={isDisabled}
-          onClick={React.useCallback(async () => {
-            if (isDisabled) return
-
-            setIsDisabled(true)
-
-            Sentry.addBreadcrumb({
-              category: 'announcement.play',
-              data: {
-                systemId: AnnouncementSystemInstance.ID,
-                type: 'constructed',
-                name,
-                options: JSON.stringify(optionsState, null, 2),
-              },
-            })
-
-            console.info('Playing announcement', name, optionsState)
-
-            try {
-              await playHandler(optionsState)
-            } catch (err) {
-              setPlayError(err)
-            }
-
-            setIsDisabled(false)
-          }, [isDisabled, playHandler, setIsDisabled, optionsState])}
-        >
+        <button disabled={isDisabled} onClick={playAnnouncement}>
           <span className="buttonLabel">
             <PlayIcon />
             Play announcement
           </span>
         </button>
-        <button
-          disabled={isDisabled}
-          onClick={React.useCallback(async () => {
-            if (isDisabled) return
-
-            setIsDisabled(true)
-
-            Sentry.addBreadcrumb({
-              category: 'announcement.download',
-              data: {
-                systemId: AnnouncementSystemInstance.ID,
-                type: 'constructed',
-                name,
-                options: JSON.stringify(optionsState, null, 2),
-              },
-            })
-
-            console.info('Playing announcement', name, optionsState)
-
-            try {
-              await playHandler(optionsState, true)
-            } catch (err) {
-              setPlayError(err)
-            }
-
-            setIsDisabled(false)
-          }, [isDisabled, playHandler, setIsDisabled, optionsState])}
-          className="iconButton"
-          aria-label="Download announcement"
-        >
+        <button disabled={isDisabled} onClick={downloadAnnouncement} className="iconButton" aria-label="Download announcement">
           <DownloadIcon />
         </button>
       </div>
@@ -219,4 +258,4 @@ function CustomAnnouncementPane({ options, playHandler, name, presets }: ICustom
   )
 }
 
-export default CustomAnnouncementPane
+export default React.memo(CustomAnnouncementPane)

@@ -1,14 +1,14 @@
 import { useRecoilValue } from 'recoil'
 
 import { AllAnnouncementSystems } from '@announcement-data/AllSystems'
-import { globalPersistentStateAtom } from '@atoms/globalStateAtom'
+import { selectedSystemState } from '@atoms'
 
 import AnnouncementSystem from '@announcement-data/AnnouncementSystem'
 import StationAnnouncementSystem from '@announcement-data/StationAnnouncementSystem'
 import TrainAnnouncementSystem from '@announcement-data/TrainAnnouncementSystem'
 
 export default function getActiveSystem(): (new () => TrainAnnouncementSystem | StationAnnouncementSystem | AnnouncementSystem) | null {
-  const globalState = useRecoilValue(globalPersistentStateAtom)
+  const selectedSystem = useRecoilValue(selectedSystemState)
 
-  return AllAnnouncementSystems.find(sys => new sys().ID === globalState.systemId?.value) ?? null
+  return AllAnnouncementSystems.find(sys => new sys().ID === selectedSystem?.value) ?? null
 }

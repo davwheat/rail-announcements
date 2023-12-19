@@ -6,9 +6,9 @@ const prodPlugins = !__IS_DEV__ ? [] : []
 module.exports = {
   siteMetadata: {
     siteUrl: 'https://rail-announcements.davwheat.dev',
-    title: 'Rail Announcements',
-    description: 'Announcements for the UK rail network',
-    author: '@davwheat',
+    title: 'UK Rail Announcement Generator',
+    description: 'Generate various station and on-train announcements for the UK rail network using raw audio recordings.',
+    author: 'David Wheatley',
   },
   plugins: [
     ...prodPlugins,

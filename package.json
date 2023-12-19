@@ -24,9 +24,11 @@
   },
   "dependencies": {
     "@material-ui/styles": "^4.11.5",
-    "@sentry/gatsby": "^7.88.0",
-    "@sentry/tracing": "^7.88.0",
+    "@sentry/gatsby": "^7.89.0",
+    "@sentry/tracing": "^7.89.0",
+    "base65536": "^4.0.3",
     "clsx": "^2.0.0",
+    "copy-to-clipboard": "^3.3.3",
     "crunker": "^2.3.0",
     "dayjs": "^1.11.10",
     "gatsby": "^5.13.0",

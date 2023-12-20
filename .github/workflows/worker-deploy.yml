@@ -62,6 +62,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           workingDirectory: 'cf-workers'
           preCommands: |
+            echo "$(pwd)"
             echo "Running D1 database migrations"
             cd cf-workers
             wrangler d1 migrations apply rail-announcements

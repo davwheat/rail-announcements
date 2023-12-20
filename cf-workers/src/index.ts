@@ -1,5 +1,4 @@
-import { Router } from 'itty-router'
-import { error, missing } from 'itty-router-extras'
+import { Router, error } from 'itty-router'
 import { createCors } from 'itty-cors'
 
 import { saveAnnouncementHandler } from './save-announcement'
@@ -18,7 +17,7 @@ router.all('*', preflight)
 router.post('/save-announcement', saveAnnouncementHandler)
 router.get('/get-announcement', getAnnouncementHandler)
 
-router.all('*', missing)
+router.all('*', () => error(404))
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {

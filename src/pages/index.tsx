@@ -29,11 +29,15 @@ const useStyles = makeStyles({
   },
   noticeBlock: {
     marginTop: 24,
-    padding: 16,
+    padding: '24px 16px',
     background: '#eee',
 
     '& > :last-child': {
       marginBottom: 0,
+    },
+
+    '& > h2:not(:first-child)': {
+      marginTop: 16,
     },
   },
 })
@@ -75,10 +79,8 @@ function IndexPage({ location }): JSX.Element {
           an attempt to archive present-day and historical PIS/CIS systems. Abuse of the website and its contents could result in legal action
           against you by copyright holders, and/or cause this site to be taken down.
         </p>
-      </aside>
 
-      <aside className={classes.noticeBlock}>
-        <h2>Health & safety</h2>
+        <h2>Health and safety</h2>
         <p>
           This website is provided for educations and entertainment purposes only. It may not be used as a replacement for a public customer
           information system or be used as a source of accurate real-time data.

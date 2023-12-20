@@ -30,6 +30,7 @@ jobs:
           yarn install --immutable
 
       - name: Verify formatting
+        working-directory: ./cf-workers
         run: yarn format:check
 
   deploy:

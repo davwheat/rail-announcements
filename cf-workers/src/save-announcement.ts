@@ -6,9 +6,7 @@ import utc from 'dayjs/plugin/utc'
 dayjs.extend(utc)
 
 import { v4 as uuid } from 'uuid'
-import Ajv from 'ajv'
-
-const ajv = new Ajv()
+import { Validator } from '@cfworker/json-schema'
 
 interface ISystemTabStateJson {
   systemId: string
@@ -16,7 +14,7 @@ interface ISystemTabStateJson {
   state: Record<string, unknown>
 }
 
-const requestSchema = {
+const validator = new Validator({
   type: 'object',
   properties: {
     systemId: { type: 'string' },
@@ -25,16 +23,16 @@ const requestSchema = {
   },
   required: ['systemId', 'tabId', 'state'],
   additionalProperties: false,
-}
+})
 
 export async function saveAnnouncementHandler(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
   const body = await request.json()
 
-  const validateRequest = ajv.compile(requestSchema)
+  const validationResult = validator.validate(body)
 
   // Validate request body structure
-  if (!validateRequest(body)) {
-    return new Response(JSON.stringify({ error: true, message: 'Invalid body', detail: validateRequest.errors }), {
+  if (!validationResult.valid) {
+    return new Response(JSON.stringify({ error: true, message: 'Invalid body', detail: validationResult.errors }), {
       status: 400,
       headers: {
         'content-type': 'application/json;charset=UTF-8',

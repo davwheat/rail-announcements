@@ -1,5 +1,4 @@
-import React from 'react'
-import CallingAtSelector from '@components/CallingAtSelector'
+import CallingAtSelector, { CallingAtPoint } from '@components/CallingAtSelector'
 import CustomAnnouncementPane, { ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
 import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
 import { AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
@@ -9,8 +8,13 @@ import crsToStationItemMapper from '@helpers/crsToStationItemMapper'
 interface IStoppedAtStationAnnouncementOptions {
   thisStationCode: string
   terminatesAtCode: string
-  callingAtCodes: { crsCode: string; name: string; randomId: string }[]
+  callingAtCodes: CallingAtPoint[]
   // mindTheGap: boolean
+}
+
+interface IDepartingStationAnnouncementOptions {
+  terminatesAtCode: string
+  callingAtCodes: CallingAtPoint[]
 }
 
 interface IApproachingStationAnnouncementOptions {
@@ -40,6 +44,29 @@ const announcementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>>
       name: 'Terminating KGX',
       state: {
         thisStationCode: 'KGX',
+        terminatesAtCode: 'KGX',
+        callingAtCodes: [].map(crsToStationItemMapper),
+      },
+    },
+  ],
+  departingStation: [
+    {
+      name: 'Departing YRK for ABD',
+      state: {
+        terminatesAtCode: 'ABD',
+        callingAtCodes: ['DAR', 'NCL', 'BWK', 'EDB', 'HYM', 'INK', 'KDY', 'LEU', 'DEE', 'ARB', 'MTS', 'STN'].map(crsToStationItemMapper),
+      },
+    },
+    {
+      name: 'Terminating EDB',
+      state: {
+        terminatesAtCode: 'EDB',
+        callingAtCodes: [].map(crsToStationItemMapper),
+      },
+    },
+    {
+      name: 'Terminating KGX',
+      state: {
         terminatesAtCode: 'KGX',
         callingAtCodes: [].map(crsToStationItemMapper),
       },
@@ -282,29 +309,18 @@ export default class LnerAzuma extends TrainAnnouncementSystem {
     } else {
       files.push({ id: 'we are now at' }, { id: `station.${thisStationCode}`, opts: { delayStart: 150 } })
 
-      files.push(
-        { id: 'hello and welcome on board this lner azuma to', opts: { delayStart: 5000 } },
-        { id: `station.${terminatesAtCode}`, opts: { delayStart: 150 } },
-        { id: `we will call at`, opts: { delayStart: 5000 } },
-      )
-
-      if (callingAtCodes.length === 0) {
-        files.push(`station.${terminatesAtCode}`, 'only')
-      } else {
-        files.push(
-          ...this.pluraliseAudio([...callingAtCodes.map(({ crsCode }) => `station.${crsCode}`), `station.${terminatesAtCode}`], {
-            beforeAndDelay: 150,
-            afterAndDelay: 150,
-            beforeItemDelay: 100,
-          }),
-        )
-      }
-
-      const nextStation = callingAtCodes.at(0)?.crsCode ?? terminatesAtCode
-
-      files.push({ id: 'the next station will be', opts: { delayStart: 3000 } }, { id: `station.${nextStation}`, opts: { delayStart: 150 } })
-      files.push({ id: 'male.cctv is in operation', opts: { delayStart: 3000 } }, { id: 'male.btp 61016', opts: { delayStart: 3000 } })
+      files.push(...this.getWelcomeAudio(terminatesAtCode, callingAtCodes, 5000))
     }
+
+    await this.playAudioFiles(files, download)
+  }
+
+  private async playDepartingStationAnnouncement(options: IDepartingStationAnnouncementOptions, download: boolean = false): Promise<void> {
+    const { terminatesAtCode, callingAtCodes } = options
+
+    const files: AudioItem[] = []
+
+    files.push(...this.getWelcomeAudio(terminatesAtCode, callingAtCodes))
 
     await this.playAudioFiles(files, download)
   }
@@ -326,7 +342,36 @@ export default class LnerAzuma extends TrainAnnouncementSystem {
     await this.playAudioFiles(files, download)
   }
 
-  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab> = {
+  private getWelcomeAudio(terminatesAtCode: string, callingAtCodes: CallingAtPoint[], delay: number = 0): AudioItem[] {
+    const files: AudioItem[] = []
+
+    files.push(
+      { id: 'hello and welcome on board this lner azuma to', opts: { delayStart: delay } },
+      { id: `station.${terminatesAtCode}`, opts: { delayStart: 150 } },
+      { id: `we will call at`, opts: { delayStart: 5000 } },
+    )
+
+    if (callingAtCodes.length === 0) {
+      files.push(`station.${terminatesAtCode}`, 'only')
+    } else {
+      files.push(
+        ...this.pluraliseAudio([...callingAtCodes.map(({ crsCode }) => `station.${crsCode}`), `station.${terminatesAtCode}`], {
+          beforeAndDelay: 150,
+          afterAndDelay: 150,
+          beforeItemDelay: 100,
+        }),
+      )
+    }
+
+    const nextStation = callingAtCodes.at(0)?.crsCode ?? terminatesAtCode
+
+    files.push({ id: 'the next station will be', opts: { delayStart: 3000 } }, { id: `station.${nextStation}`, opts: { delayStart: 150 } })
+    files.push({ id: 'male.cctv is in operation', opts: { delayStart: 3000 } }, { id: 'male.btp 61016', opts: { delayStart: 3000 } })
+
+    return files
+  }
+
+  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab<string>> = {
     stoppedAtStation: {
       name: 'Stopped at station',
       component: CustomAnnouncementPane,
@@ -357,7 +402,32 @@ export default class LnerAzuma extends TrainAnnouncementSystem {
           },
         },
       },
-    },
+    } as CustomAnnouncementTab<keyof IStoppedAtStationAnnouncementOptions>,
+    departingStation: {
+      name: 'Route start & departing station',
+      component: CustomAnnouncementPane,
+      props: {
+        presets: announcementPresets.departingStation,
+        playHandler: this.playDepartingStationAnnouncement.bind(this),
+        options: {
+          terminatesAtCode: {
+            name: 'Terminates at',
+            default: this.ALL_STATIONS[0],
+            options: this.ALL_STATIONS.map(crsToStationItemMapper).map(({ crsCode, name }) => ({ value: crsCode, title: name })),
+            type: 'select',
+          },
+          callingAtCodes: {
+            name: '',
+            type: 'custom',
+            component: CallingAtSelector,
+            props: {
+              availableStations: this.ALL_STATIONS,
+            },
+            default: [],
+          },
+        },
+      },
+    } as CustomAnnouncementTab<keyof IDepartingStationAnnouncementOptions>,
     aproachingStation: {
       name: 'Approaching station',
       component: CustomAnnouncementPane,
@@ -377,7 +447,7 @@ export default class LnerAzuma extends TrainAnnouncementSystem {
           },
         },
       },
-    },
+    } as CustomAnnouncementTab<keyof IApproachingStationAnnouncementOptions>,
     announcementButtons: {
       name: 'Announcement buttons',
       component: CustomButtonPane,

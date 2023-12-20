@@ -4,9 +4,11 @@ import SEO from './SEO'
 
 import { makeStyles } from '@material-ui/styles'
 
-import type { LocationContext } from '@gatsbyjs/reach-router'
 import { ScrollContext } from 'gatsby-react-router-scroll'
 import { RecoilRoot } from 'recoil'
+import { SnackbarProvider } from 'notistack'
+
+import type { LocationContext } from '@gatsbyjs/reach-router'
 
 const useStyles = makeStyles({
   mainContent: {
@@ -29,23 +31,25 @@ const Layout: React.FC<Props> = ({ children, description, location }) => {
   return (
     <ScrollContext location={location}>
       <RecoilRoot>
-        <SEO description={description} />
+        <SnackbarProvider>
+          <SEO description={description} />
 
-        <main className={classes.mainContent}>{children}</main>
+          <main className={classes.mainContent}>{children}</main>
 
-        <footer className={classes.footer}>
-          <p>
-            Made with love by{' '}
-            <a href="https://davwheat.dev/" target="_blank">
-              David Wheatley
-            </a>
-          </p>
-          <p>
-            <a href="https://github.com/davwheat/rail-announcements" target="_blank">
-              This site is open source, and its code is available on GitHub.
-            </a>
-          </p>
-        </footer>
+          <footer className={classes.footer}>
+            <p>
+              Made with love by{' '}
+              <a href="https://davwheat.dev/" target="_blank">
+                David Wheatley
+              </a>
+            </p>
+            <p>
+              <a href="https://github.com/davwheat/rail-announcements" target="_blank">
+                This site is open source, and its code is available on GitHub.
+              </a>
+            </p>
+          </footer>
+        </SnackbarProvider>
       </RecoilRoot>
     </ScrollContext>
   )

@@ -1,13 +1,13 @@
-import { globalStateAtom } from '@atoms/globalStateAtom'
+import { isPlayingAnnouncementState } from '@atoms'
 import { useRecoilState } from 'recoil'
 
 export default function useIsPlayingAnnouncement(): [boolean, (newVal: boolean) => void] {
-  const [globalState, setGlobalState] = useRecoilState(globalStateAtom)
+  const [globalState, setGlobalState] = useRecoilState(isPlayingAnnouncementState)
 
   return [
-    globalState.isPlayingAnnouncement,
+    globalState,
     (newVal: boolean) => {
-      setGlobalState(state => ({ ...state, isPlayingAnnouncement: newVal }))
+      setGlobalState(newVal)
     },
   ]
 }

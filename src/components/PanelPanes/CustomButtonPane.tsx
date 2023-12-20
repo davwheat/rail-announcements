@@ -31,10 +31,10 @@ export interface ICustomButtonPaneProps {
   buttonSections?: Record<string, CustomAnnouncementButton[]>
 }
 
-function CustomButtonPane({ buttons, buttonSections }: ICustomButtonPaneProps): JSX.Element {
+function CustomButtonPane({ buttons, buttonSections }: ICustomButtonPaneProps) {
   const classes = useStyles()
 
-  const [playError, setPlayError] = useState<Error>(null)
+  const [playError, setPlayError] = useState<Error | null>(null)
 
   const AnnouncementSystem = getActiveSystem()
   if (!AnnouncementSystem) return null

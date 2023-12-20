@@ -57,14 +57,20 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
   readonly FILE_PREFIX = 'SN/377'
   readonly SYSTEM_TYPE = 'train'
 
+  private readonly stationsWithUnattendedBaggageAnnouncement = ['GTW']
+
   private async playApproachingStationAnnouncement(options: IApproachingStationAnnouncementOptions, download: boolean = false): Promise<void> {
     const files: AudioItem[] = []
 
     files.push('bing bong')
-    files.push('we are now approaching', `stations.${options.stationCode}`)
+    files.push('we will shortly be arriving at', `stations.${options.stationCode}`)
 
     if (options.mindTheGap) {
       files.push('please mind the gap between the train and the platform')
+    }
+
+    if (this.stationsWithUnattendedBaggageAnnouncement.includes(options.stationCode)) {
+      files.push('please do not leave unattended items of luggage in the train or on the station', '61016')
     }
 
     await this.playAudioFiles(files, download)
@@ -80,7 +86,7 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
 
     const files: AudioItem[] = []
     files.push('bing bong')
-    files.push('this is', `stations.${thisStationCode}`, 'this train is the southern service to', `stations.${terminatesAtCode}`)
+    files.push('this is', `stations.${thisStationCode}`)
 
     const remainingStops = [
       ...callingAtCodes.map((crsCode): AudioItemObject => ({ id: `stations.${crsCode}`, opts: { delayStart: 100 } })),
@@ -91,9 +97,13 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
 
     if (remainingStops.length > 1) {
       // We are not at the termination point.
+      files.push('this train is the southern service to', `stations.${terminatesAtCode}`)
       files.push('calling at')
       files.push(...this.pluraliseAudio(remainingStops, { beforeAndDelay: 75 }))
       files.push('the next station is', remainingStops[0])
+    } else {
+      // We are at the termination point.
+      files.push('this train terminates here all change please ensure')
     }
 
     await this.playAudioFiles(files, download)

@@ -63,7 +63,7 @@ function AnnouncementPanel() {
     const tabId = selectedTabIds?.[AnnouncementSystemInstance?.ID ?? '']
 
     if (tabId) {
-      const index = Object.values(customTabs).findIndex(tab => tab.name === tabId)
+      const index = Object.keys(customTabs).findIndex(tab => tab === tabId)
 
       if (index !== -1) {
         return index

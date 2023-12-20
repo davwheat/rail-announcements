@@ -10,12 +10,17 @@ import useIsPlayingAnnouncement from '@helpers/useIsPlayingAnnouncement'
 import * as Sentry from '@sentry/gatsby'
 
 import PlayIcon from 'mdi-react/PlayIcon'
+import ShareIcon from 'mdi-react/ShareVariantIcon'
 import PresetIcon from 'mdi-react/FolderTextOutlineIcon'
 import DownloadIcon from 'mdi-react/DownloadIcon'
 
-import clsx from 'clsx'
 import { useRecoilState } from 'recoil'
 import { tabStatesState } from '@atoms/index'
+import { SystemTabState } from '@data/SystemTabState'
+
+import clsx from 'clsx'
+import copy from 'copy-to-clipboard'
+import { useSnackbar } from 'notistack'
 
 const useStyles = makeStyles({
   root: {
@@ -34,7 +39,7 @@ const useStyles = makeStyles({
       alignItems: 'center',
       justifyContent: 'center',
       fontSize: '2em',
-      content: '"Playing announcement..."',
+      content: '"Please wait..."',
       position: 'absolute',
       top: 0,
       bottom: 0,
@@ -42,6 +47,16 @@ const useStyles = makeStyles({
       left: 0,
       background: 'rgba(0, 0, 0, 0.25)',
       zIndex: 1,
+    },
+  },
+  optionsDisabledPlaying: {
+    '&::after': {
+      content: '"Playing announcement..."',
+    },
+  },
+  optionsDisabledSharing: {
+    '&::after': {
+      content: '"Sharing announcement..."',
     },
   },
   presets: {
@@ -74,15 +89,19 @@ function CustomAnnouncementPane({ options, playHandler, name, presets, systemId,
   const classes = useStyles()
 
   const [playError, setPlayError] = React.useState<Error | null>(null)
+  const [isSharing, setIsSharing] = React.useState(false)
 
   const [allTabStates, setAllTabStates] = useRecoilState(tabStatesState)
   const optionsState = allTabStates?.[tabId]
 
-  const [isDisabled, setIsDisabled] = useIsPlayingAnnouncement()
+  const { enqueueSnackbar } = useSnackbar()
+
+  console.log('ats', allTabStates)
+
+  const [isPlayingAnnouncement, setIsPlayingAnnouncement] = useIsPlayingAnnouncement()
 
   useEffect(() => {
     // Set default options if currently null
-
     if (!optionsState) {
       setAllTabStates(prevState => ({
         ...(prevState || {}),
@@ -99,12 +118,11 @@ function CustomAnnouncementPane({ options, playHandler, name, presets, systemId,
   }, [optionsState])
 
   const AnnouncementSystem = getActiveSystem()
-
-  const AnnouncementSystemInstance = new AnnouncementSystem()
+  const AnnouncementSystemInstance = new AnnouncementSystem!!()
 
   function createFieldUpdater(field: string): (value) => void {
     return (value): void => {
-      if (isDisabled) return
+      if (isPlayingAnnouncement) return
 
       setAllTabStates(prevState => ({ ...(prevState || {}), [tabId]: { ...(prevState?.[tabId] || {}), [field]: value } }))
     }
@@ -112,9 +130,9 @@ function CustomAnnouncementPane({ options, playHandler, name, presets, systemId,
 
   const playAnnouncement = React.useCallback(
     async function playAnnouncement() {
-      if (isDisabled) return
+      if (isPlayingAnnouncement) return
 
-      setIsDisabled(true)
+      setIsPlayingAnnouncement(true)
 
       Sentry.addBreadcrumb({
         category: 'announcement.play',
@@ -134,16 +152,16 @@ function CustomAnnouncementPane({ options, playHandler, name, presets, systemId,
         setPlayError(err)
       }
 
-      setIsDisabled(false)
+      setIsPlayingAnnouncement(false)
     },
-    [isDisabled, playHandler, setIsDisabled, optionsState],
+    [isPlayingAnnouncement, playHandler, setIsPlayingAnnouncement, optionsState],
   )
 
   const downloadAnnouncement = React.useCallback(
     async function downloadAnnouncement() {
-      if (isDisabled) return
+      if (isPlayingAnnouncement) return
 
-      setIsDisabled(true)
+      setIsPlayingAnnouncement(true)
 
       Sentry.addBreadcrumb({
         category: 'announcement.download',
@@ -163,9 +181,39 @@ function CustomAnnouncementPane({ options, playHandler, name, presets, systemId,
         setPlayError(err)
       }
 
-      setIsDisabled(false)
+      setIsPlayingAnnouncement(false)
     },
-    [isDisabled, playHandler, setIsDisabled, optionsState],
+    [isPlayingAnnouncement, playHandler, setIsPlayingAnnouncement, optionsState],
+  )
+
+  const shareAnnouncement = React.useCallback(
+    function shareAnnouncement() {
+      setIsSharing(true)
+      ;(async function () {
+        const state = new SystemTabState(systemId, tabId, optionsState!!)
+
+        console.log('Sharing announcement', state.toString())
+
+        const id = await state.saveToApi()
+
+        const url = new URL(window.location.href)
+        url.searchParams.set('announcementId', id)
+
+        copy(url.toString(), {
+          format: 'text/plain',
+          message: 'Copy the URL to share this announcement',
+        })
+
+        enqueueSnackbar('Copied sharable announcement URL to clipboard', { variant: 'success' })
+      })()
+        .catch(e => {
+          Sentry.captureException(e)
+          enqueueSnackbar('An error occurred while trying to share this announcement', { variant: 'error' })
+          console.error(e)
+        })
+        .finally(() => setIsSharing(false))
+    },
+    [optionsState, systemId, tabId, setIsSharing, enqueueSnackbar],
   )
 
   if (playError) {
@@ -204,7 +252,7 @@ function CustomAnnouncementPane({ options, playHandler, name, presets, systemId,
             {presets.map(preset => (
               <button
                 key={preset.name}
-                disabled={isDisabled}
+                disabled={isPlayingAnnouncement}
                 onClick={() => {
                   setAllTabStates(prevState => ({ ...(prevState || {}), [tabId]: preset.state }))
                 }}
@@ -219,13 +267,19 @@ function CustomAnnouncementPane({ options, playHandler, name, presets, systemId,
         </section>
       )}
 
-      {isDisabled && (
+      {isPlayingAnnouncement && (
         <p className={classes.disabledMessage}>
           <strong>All options are disabled while an announcement is playing.</strong>
         </p>
       )}
 
-      <fieldset className={clsx(isDisabled && classes.optionsDisabled)}>
+      <fieldset
+        className={clsx({
+          [classes.optionsDisabled]: isPlayingAnnouncement || isSharing,
+          [classes.optionsDisabledPlaying]: isPlayingAnnouncement,
+          [classes.optionsDisabledSharing]: isSharing,
+        })}
+      >
         <h3>Options</h3>
 
         {Object.keys(options).length === 0 && <p>No options available</p>}
@@ -241,19 +295,27 @@ function CustomAnnouncementPane({ options, playHandler, name, presets, systemId,
         </>
       </fieldset>
 
-      <div className="buttonGroup">
-        <button disabled={isDisabled} onClick={playAnnouncement}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
+        <div className="buttonGroup">
+          <button disabled={isPlayingAnnouncement} onClick={playAnnouncement}>
+            <span className="buttonLabel">
+              <PlayIcon />
+              Play announcement
+            </span>
+          </button>
+          <button disabled={isPlayingAnnouncement} onClick={downloadAnnouncement} className="iconButton" aria-label="Download announcement">
+            <DownloadIcon />
+          </button>
+        </div>
+
+        <button className="outlined" onClick={shareAnnouncement} disabled={isSharing}>
           <span className="buttonLabel">
-            <PlayIcon />
-            Play announcement
+            <ShareIcon /> Share announcement
           </span>
-        </button>
-        <button disabled={isDisabled} onClick={downloadAnnouncement} className="iconButton" aria-label="Download announcement">
-          <DownloadIcon />
         </button>
       </div>
 
-      {isDisabled && <p style={{ marginTop: 8 }}>Assembling and playing announcement...</p>}
+      {isPlayingAnnouncement && <p style={{ marginTop: 8 }}>Assembling and playing announcement...</p>}
     </div>
   )
 }

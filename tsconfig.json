@@ -15,6 +15,7 @@
       "@components/*": ["./src/components/*"],
       "@data/*": ["./src/data/*"],
       "@atoms/*": ["./src/atoms/*"],
+      "@atoms": ["./src/atoms"],
       "@helpers/*": ["./src/helpers/*"],
       "@announcement-data/*": ["./src/announcement-data/*"],
       "@hooks/*": ["./src/hooks/*"],

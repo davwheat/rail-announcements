@@ -1,0 +1,63 @@
+name: Deploy Cloudflare Worker
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: 20.x
+
+jobs:
+  formatting:
+    name: verify formatting
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+
+      - name: Install dependencies
+        working-directory: ./cf-workers
+        run: |
+          yarn install --immutable
+
+      - name: Verify formatting
+        working-directory: ./cf-workers
+        run: yarn format:check
+
+  deploy:
+    name: deploy to cloudflare
+
+    needs: formatting
+    runs-on: ubuntu-latest
+
+    if: github.ref == 'refs/heads/deploy' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+
+      - name: Install dependencies
+        working-directory: ./cf-workers
+        run: |
+          yarn install --immutable
+
+      - name: Deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          workingDirectory: 'cf-workers'

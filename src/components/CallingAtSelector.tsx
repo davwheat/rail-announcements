@@ -160,7 +160,7 @@ function CallingAtSelector({
 
               const { source, destination } = result
 
-              const tempState = value
+              const tempState = [...value]
               const movedItem = tempState[source.index]
 
               tempState.splice(source.index, 1)

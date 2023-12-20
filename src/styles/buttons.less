@@ -32,6 +32,23 @@ button {
       margin-left: -4px;
     }
   }
+
+  &.outlined {
+    background: transparent;
+    border: 1px solid #0160a0;
+    color: #0160a0;
+
+    &:hover,
+    &:focus {
+      border-color: #00528a;
+      background-color: hsla(204, 100%, 40%, 0.07);
+    }
+
+    &:active {
+      border-color: #004574;
+      background-color: hsla(204, 100%, 35%, 0.12);
+    }
+  }
 }
 
 .buttonGroup {

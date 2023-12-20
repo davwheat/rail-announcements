@@ -56,13 +56,15 @@ jobs:
         run: |
           yarn install --immutable
 
+      - name: Run D1 migrations
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          workingDirectory: 'cf-workers'
+          command: d1 migrations apply rail-announcements
+
       - name: Deploy
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           workingDirectory: 'cf-workers'
-          preCommands: |
-            echo "$(pwd)"
-            echo "Running D1 database migrations"
-            wrangler d1 migrations apply rail-announcements
-            echo "Complete!"

@@ -82,7 +82,7 @@ function AnnouncementPanel() {
         [AnnouncementSystemInstance?.ID ?? '']: tabId,
       }))
     },
-    [setSelectedTabIds],
+    [setSelectedTabIds, AnnouncementSystemInstance, customTabs],
   )
 
   if (!AnnouncementSystem) return null

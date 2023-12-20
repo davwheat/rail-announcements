@@ -95,15 +95,19 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
 
     if (callingAtCodes.some(code => !this.validateStationExists(code))) return
 
-    if (remainingStops.length > 1) {
+    if (remainingStops.length === 0) {
+      // We are at the termination point.
+      files.push('this train terminates here all change please ensure')
+    } else if (remainingStops.length === 1) {
+      // Next station is the termination point.
+      files.push('this train is the southern service to', `stations.${terminatesAtCode}`)
+      files.push('the next station is', remainingStops[0])
+    } else {
       // We are not at the termination point.
       files.push('this train is the southern service to', `stations.${terminatesAtCode}`)
       files.push('calling at')
       files.push(...this.pluraliseAudio(remainingStops, { beforeAndDelay: 75 }))
       files.push('the next station is', remainingStops[0])
-    } else {
-      // We are at the termination point.
-      files.push('this train terminates here all change please ensure')
     }
 
     await this.playAudioFiles(files, download)
@@ -393,7 +397,7 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
     low: this.RealAvailableStationNames,
   }
 
-  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab> = {
+  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab<string>> = {
     approachingStation: {
       name: 'Approaching station',
       component: CustomAnnouncementPane,
@@ -413,7 +417,7 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
           },
         },
       },
-    },
+    } as CustomAnnouncementTab<keyof IApproachingStationAnnouncementOptions>,
     stoppedAtStation: {
       name: 'Stopped at station',
       component: CustomAnnouncementPane,
@@ -444,7 +448,7 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
           },
         },
       },
-    },
+    } as CustomAnnouncementTab<keyof IStoppedAtStationAnnouncementOptions>,
     departingStation: {
       name: 'Departing station',
       component: CustomAnnouncementPane,
@@ -465,7 +469,7 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
           },
         },
       },
-    },
+    } as CustomAnnouncementTab<keyof IDepartingStationAnnouncementOptions>,
     announcementButtons: {
       name: 'Announcement buttons',
       component: CustomButtonPane,

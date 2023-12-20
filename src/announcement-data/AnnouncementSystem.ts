@@ -1,6 +1,8 @@
+import Crunker from 'crunker'
+
 import type { ICustomAnnouncementPaneProps } from '@components/PanelPanes/CustomAnnouncementPane'
 import type { ICustomButtonPaneProps } from '@components/PanelPanes/CustomButtonPane'
-import Crunker from 'crunker'
+import type React from 'react'
 
 export interface IPlayOptions {
   delayStart: number
@@ -72,10 +74,10 @@ export interface AudioItemObject {
   opts?: Partial<IPlayOptions>
 }
 
-export interface CustomAnnouncementTab {
+export interface CustomAnnouncementTab<OptionIds extends string> {
   name: string
-  component: (props: ICustomAnnouncementPaneProps | ICustomButtonPaneProps) => JSX.Element
-  props: Omit<ICustomAnnouncementPaneProps, 'name'> | ICustomButtonPaneProps
+  component: React.ComponentType<ICustomAnnouncementPaneProps<OptionIds> | ICustomButtonPaneProps>
+  props: Omit<ICustomAnnouncementPaneProps<OptionIds>, 'name' | 'systemId' | 'tabId'> | ICustomButtonPaneProps
 }
 
 export type CustomAnnouncementButton = {

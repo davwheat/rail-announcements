@@ -76,8 +76,8 @@ export interface ICustomAnnouncementPreset {
   state: Record<string, unknown>
 }
 
-export interface ICustomAnnouncementPaneProps {
-  options: Record<string, OptionsExplanation>
+export interface ICustomAnnouncementPaneProps<OptionIds extends string> {
+  options: Record<OptionIds, OptionsExplanation>
   playHandler: (options: { [key: string]: any }, download?: boolean) => Promise<void>
   name: string
   presets?: ICustomAnnouncementPreset[]

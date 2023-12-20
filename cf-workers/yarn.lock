@@ -314,6 +314,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/itty-router-extras@npm:^0.4.3":
+  version: 0.4.3
+  resolution: "@types/itty-router-extras@npm:0.4.3"
+  dependencies:
+    itty-router: "npm:^2.3.10"
+  checksum: 3c41a8c4c5829b72f0978da824f5b1e89597a02e0b1f402a234f9948be37c366f89e02108abdf37c1af9683c47ad964b744f90438ccd17cd40a65678e995249f
+  languageName: node
+  linkType: hard
+
 "@types/node-forge@npm:^1.3.0":
   version: 1.3.10
   resolution: "@types/node-forge@npm:1.3.10"
@@ -523,10 +532,13 @@ __metadata:
   resolution: "cf-workers@workspace:."
   dependencies:
     "@cloudflare/workers-types": "npm:^4.20231218.0"
+    "@types/itty-router-extras": "npm:^0.4.3"
     "@types/uuid": "npm:^9.0.7"
     ajv: "npm:^8.12.0"
     dayjs: "npm:^1.11.10"
+    itty-cors: "npm:^0.3.6"
     itty-router: "npm:^4.0.23"
+    itty-router-extras: "npm:^0.4.5"
     prettier: "npm:^3.1.1"
     typescript: "npm:^5.3.3"
     uuid: "npm:^9.0.1"
@@ -1001,6 +1013,27 @@ __metadata:
   version: 3.1.1
   resolution: "isexe@npm:3.1.1"
   checksum: 7fe1931ee4e88eb5aa524cd3ceb8c882537bc3a81b02e438b240e47012eef49c86904d0f0e593ea7c3a9996d18d0f1f3be8d3eaa92333977b0c3a9d353d5563e
+  languageName: node
+  linkType: hard
+
+"itty-cors@npm:^0.3.6":
+  version: 0.3.6
+  resolution: "itty-cors@npm:0.3.6"
+  checksum: c8d08bd31c3dc243d8c76e5e065e1e38ae6900a04a6dbdec2df06de0a63587a230cf903ad72ed288c55b6bcc415b1cfc8d1e45e5cf234bd44c31ee9c79193a17
+  languageName: node
+  linkType: hard
+
+"itty-router-extras@npm:^0.4.5":
+  version: 0.4.5
+  resolution: "itty-router-extras@npm:0.4.5"
+  checksum: aea688eab6acac19cdf9406a3cf682cca06fc82d299167c61d20b62c12f43560ecec3b5df107ab1bdebc7563eb8fe5962be71c936cdbd1b323e303f71efd845f
+  languageName: node
+  linkType: hard
+
+"itty-router@npm:^2.3.10":
+  version: 2.6.6
+  resolution: "itty-router@npm:2.6.6"
+  checksum: 78f1391c27e78a21967b984ca872ed8a4cd925ecc99a1052776c45ec3b6ccc3f02b5687c718a670c02271d57a04b4c0dac79705041984514a3a3045da30e8f77
   languageName: node
   linkType: hard
 

@@ -1,0 +1,25 @@
+{
+  "name": "cf-workers",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "start": "wrangler dev",
+    "format": "prettier --write \"**/*.{js,ts,json,md}\"",
+    "format:check": "prettier --check \"**/*.{js,ts,json,md}\""
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20231218.0",
+    "@types/uuid": "^9.0.7",
+    "prettier": "^3.1.1",
+    "typescript": "^5.3.3",
+    "wrangler": "^3.22.0"
+  },
+  "dependencies": {
+    "ajv": "^8.12.0",
+    "dayjs": "^1.11.10",
+    "itty-router": "^4.0.23",
+    "uuid": "^9.0.1"
+  }
+}

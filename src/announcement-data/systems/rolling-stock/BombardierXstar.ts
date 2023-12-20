@@ -393,7 +393,7 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
     low: this.RealAvailableStationNames,
   }
 
-  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab> = {
+  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab<string>> = {
     approachingStation: {
       name: 'Approaching station',
       component: CustomAnnouncementPane,
@@ -413,7 +413,7 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
           },
         },
       },
-    },
+    } as CustomAnnouncementTab<keyof IApproachingStationAnnouncementOptions>,
     stoppedAtStation: {
       name: 'Stopped at station',
       component: CustomAnnouncementPane,
@@ -444,7 +444,7 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
           },
         },
       },
-    },
+    } as CustomAnnouncementTab<keyof IStoppedAtStationAnnouncementOptions>,
     departingStation: {
       name: 'Departing station',
       component: CustomAnnouncementPane,
@@ -465,7 +465,7 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
           },
         },
       },
-    },
+    } as CustomAnnouncementTab<keyof IDepartingStationAnnouncementOptions>,
     announcementButtons: {
       name: 'Announcement buttons',
       component: CustomButtonPane,

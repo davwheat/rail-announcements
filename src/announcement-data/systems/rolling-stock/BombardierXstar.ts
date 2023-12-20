@@ -95,15 +95,19 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
 
     if (callingAtCodes.some(code => !this.validateStationExists(code))) return
 
-    if (remainingStops.length > 1) {
+    if (remainingStops.length === 0) {
+      // We are at the termination point.
+      files.push('this train terminates here all change please ensure')
+    } else if (remainingStops.length === 1) {
+      // Next station is the termination point.
+      files.push('this train is the southern service to', `stations.${terminatesAtCode}`)
+      files.push('the next station is', remainingStops[0])
+    } else {
       // We are not at the termination point.
       files.push('this train is the southern service to', `stations.${terminatesAtCode}`)
       files.push('calling at')
       files.push(...this.pluraliseAudio(remainingStops, { beforeAndDelay: 75 }))
       files.push('the next station is', remainingStops[0])
-    } else {
-      // We are at the termination point.
-      files.push('this train terminates here all change please ensure')
     }
 
     await this.playAudioFiles(files, download)

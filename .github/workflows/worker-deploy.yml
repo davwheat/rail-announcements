@@ -63,5 +63,7 @@ jobs:
           workingDirectory: 'cf-workers'
           preCommands: |
             echo "Running D1 database migrations"
+            cd cf-workers
             wrangler d1 migrations apply rail-announcements
+            cd ..
             echo "Complete!"

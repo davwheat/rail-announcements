@@ -41,6 +41,7 @@ export async function getAnnouncementHandler(request: Request, env: Env, ctx: Ex
           tabId: result.results[0].tab_id,
           state: JSON.parse(result.results[0].state as string),
         },
+        savedAt: result.results[0].created_at,
       }),
       {
         status: 200,

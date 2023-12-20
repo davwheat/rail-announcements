@@ -93,6 +93,7 @@ function MainSelector(): JSX.Element {
           id="system-select"
           value={selectedSystem || { label: 'None', value: 'none' }}
           onChange={val => {
+            setTabState(null)
             setSelectedSystem(val)
           }}
           options={options}

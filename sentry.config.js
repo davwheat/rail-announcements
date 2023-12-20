@@ -7,12 +7,12 @@ Sentry.init({
   sampleRate: 1.0,
   release: process.env.RELEASE,
 
-  // This sets the sample rate to be 10%. You may want this to be 100% while
+  // This sets the sample rate to be 0.1%. You may want this to be 100% while
   // in development and sample at a lower rate in production
-  replaysSessionSampleRate: __IS_DEV__ ? 1.0 : 0.01,
+  replaysSessionSampleRate: __IS_DEV__ ? 1.0 : 0.001,
   // If the entire session is not sampled, use the below sample rate to sample
   // sessions when an error occurs.
-  replaysOnErrorSampleRate: 0.1,
+  replaysOnErrorSampleRate: 0.05,
 
   tracesSampleRate: __IS_DEV__ ? 1.0 : 0.3,
 

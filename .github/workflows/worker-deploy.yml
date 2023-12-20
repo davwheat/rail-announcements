@@ -61,3 +61,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           workingDirectory: 'cf-workers'
+          preCommands: |
+            echo "Running D1 database migrations"
+            wrangler d1 migrations apply rail-announcements
+            echo "Complete!"

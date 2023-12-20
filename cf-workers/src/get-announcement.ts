@@ -34,7 +34,7 @@ export async function getAnnouncementHandler(request: Request, env: Env, ctx: Ex
     })
   } else {
     // Increment load count
-    const result = await db.prepare('UPDATE saved_announcements SET load_count = load_count + 1 WHERE id = ?').bind(id).run()
+    const incrementResult = await db.prepare('UPDATE saved_announcements SET load_count = load_count + 1 WHERE id = ?').bind(id).run()
 
     return new Response(
       JSON.stringify({

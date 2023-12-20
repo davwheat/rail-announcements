@@ -324,6 +324,11 @@ const changelog: IChangelogVersion[] = [
     date: '2023-12-19',
     otherChanges: ['Website styling changes and reorganisation', 'Use RA2 font for website'],
   },
+  {
+    date: '2023-12-20',
+    additions: ['Sharable announcements: you can now share announcements with a link'],
+    fixes: ['[Amey Phil] Fix broken Warwick Parkway announcement', '[Bombardier XStar] Correct announcement when terminating at station'],
+  },
 ]
 
 export default changelog

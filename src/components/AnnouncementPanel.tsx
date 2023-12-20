@@ -75,8 +75,6 @@ function AnnouncementPanel() {
 
   const setSelectedTab = useCallback(
     (index: number) => {
-      console.log(index)
-
       const tabName = Object.values(customTabs)[index].name
 
       setSelectedTabIds(prevState => ({

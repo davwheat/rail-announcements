@@ -96,8 +96,6 @@ function CustomAnnouncementPane({ options, playHandler, name, presets, systemId,
 
   const { enqueueSnackbar } = useSnackbar()
 
-  console.log('ats', allTabStates)
-
   const [isPlayingAnnouncement, setIsPlayingAnnouncement] = useIsPlayingAnnouncement()
 
   useEffect(() => {

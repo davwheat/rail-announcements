@@ -326,7 +326,10 @@ const changelog: IChangelogVersion[] = [
   },
   {
     date: '2023-12-20',
-    additions: ['Sharable announcements: you can now share announcements with a link'],
+    additions: [
+      'Sharable announcements: you can now share announcements with a link',
+      '[Amey Phil & Celia] Add First Great Eastern, Greater Anglia, Great Western Railway and SWR to supported TOCs',
+    ],
     fixes: ['[Amey Phil] Fix broken Warwick Parkway announcement', '[Bombardier XStar] Correct announcement when terminating at station'],
   },
 ]

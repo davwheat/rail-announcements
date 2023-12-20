@@ -62,9 +62,9 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           workingDirectory: 'cf-workers'
 
-      - name: Run D1 migrations
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          workingDirectory: 'cf-workers'
-          command: d1 migrations apply rail-announcements
+      # - name: Run D1 migrations
+      #   uses: cloudflare/wrangler-action@v3
+      #   with:
+      #     apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      #     workingDirectory: 'cf-workers'
+      #     command: d1 migrations apply rail-announcements

@@ -1,6 +1,4 @@
-import * as base65536 from 'base65536'
-
-interface ISystemTabStateJson {
+export interface ISystemTabStateJson {
   systemId: string
   tabId: string
   state: Record<string, unknown>

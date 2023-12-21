@@ -11,8 +11,13 @@ import * as Sentry from '@sentry/gatsby'
 
 import PlayIcon from 'mdi-react/PlayIcon'
 import ShareIcon from 'mdi-react/ShareVariantIcon'
-import PresetIcon from 'mdi-react/FolderTextOutlineIcon'
+import SaveIcon from 'mdi-react/ContentSaveIcon'
+import PresetIcon from 'mdi-react/TextIcon'
+import PersonalPresetIcon from 'mdi-react/TextAccountIcon'
+import ReloadIcon from 'mdi-react/ReloadIcon'
 import DownloadIcon from 'mdi-react/DownloadIcon'
+import TickIcon from 'mdi-react/CheckIcon'
+import DeleteIcon from 'mdi-react/DeleteOutlineIcon'
 
 import { useRecoilState } from 'recoil'
 import { tabStatesState } from '@atoms/index'
@@ -21,6 +26,8 @@ import { SystemTabState } from '@data/SystemTabState'
 import clsx from 'clsx'
 import copy from 'copy-to-clipboard'
 import { useSnackbar } from 'notistack'
+import { IPersonalPresetObject } from '@data/db'
+import { v4 as uuid } from 'uuid'
 
 const useStyles = makeStyles({
   root: {
@@ -83,20 +90,36 @@ export interface ICustomAnnouncementPaneProps<OptionIds extends string> {
   presets?: ICustomAnnouncementPreset[]
   systemId: string
   tabId: string
+  isPersonalPresetsReady: boolean
+  savePersonalPreset: (preset: IPersonalPresetObject) => Promise<void>
+  getPersonalPresets: (systemId: string, tabId: string) => Promise<IPersonalPresetObject[]>
+  deletePersonalPreset: (systemId: string, tabId: string, presetId: string) => Promise<void>
 }
 
-function CustomAnnouncementPane({ options, playHandler, name, presets, systemId, tabId }: ICustomAnnouncementPaneProps) {
+function CustomAnnouncementPane({
+  options,
+  playHandler,
+  name,
+  presets,
+  systemId,
+  tabId,
+  isPersonalPresetsReady,
+  savePersonalPreset,
+  getPersonalPresets,
+  deletePersonalPreset,
+}: ICustomAnnouncementPaneProps<string>) {
   const classes = useStyles()
+  const { enqueueSnackbar } = useSnackbar()
 
   const [playError, setPlayError] = React.useState<Error | null>(null)
   const [isSharing, setIsSharing] = React.useState(false)
-
-  const [allTabStates, setAllTabStates] = useRecoilState(tabStatesState)
-  const optionsState = allTabStates?.[tabId]
-
-  const { enqueueSnackbar } = useSnackbar()
+  const [personalPresets, setPersonalPresets] = React.useState<IPersonalPresetObject[] | null>(null)
+  const [loadingPersonalPresets, setLoadingPersonalPresets] = React.useState(true)
 
   const [isPlayingAnnouncement, setIsPlayingAnnouncement] = useIsPlayingAnnouncement()
+  const [allTabStates, setAllTabStates] = useRecoilState(tabStatesState)
+
+  const optionsState = allTabStates?.[tabId]
 
   useEffect(() => {
     // Set default options if currently null
@@ -214,6 +237,63 @@ function CustomAnnouncementPane({ options, playHandler, name, presets, systemId,
     [optionsState, systemId, tabId, setIsSharing, enqueueSnackbar],
   )
 
+  const saveAnnouncementAsPersonalPreset = React.useCallback(
+    function saveAnnouncementAsPersonalPreset() {
+      const name = window.prompt('Enter a name for this preset')?.trim()
+
+      if (name === null) return
+
+      if (!name) {
+        enqueueSnackbar("No name entered; preset can't be saved.", { variant: 'error' })
+        return
+      }
+
+      ;(async function () {
+        try {
+          await savePersonalPreset({
+            name,
+            presetId: uuid(), // pray it won't collide
+            systemId,
+            tabId,
+            state: optionsState!!,
+          })
+
+          enqueueSnackbar('Saved as personal preset', { variant: 'success' })
+        } catch (e) {
+          console.error(e)
+          enqueueSnackbar('An error occurred while trying to save this preset', { variant: 'error' })
+          Sentry.captureException(e)
+        }
+      })()
+    },
+    [optionsState, systemId, tabId, enqueueSnackbar, savePersonalPreset],
+  )
+
+  const loadPersonalPresetsForTab = React.useCallback(
+    async function getPersonalPresetsForTab() {
+      setLoadingPersonalPresets(true)
+
+      try {
+        const presets = await getPersonalPresets(systemId, tabId)
+        console.log(presets)
+
+        setPersonalPresets(presets)
+      } catch (e) {
+        console.error(e)
+        Sentry.captureException(e)
+      } finally {
+        setLoadingPersonalPresets(false)
+      }
+    },
+    [systemId, tabId, getPersonalPresets, setLoadingPersonalPresets],
+  )
+
+  useEffect(() => {
+    if (isPersonalPresetsReady && personalPresets === null) {
+      loadPersonalPresetsForTab()
+    }
+  }, [isPersonalPresetsReady, personalPresets, loadPersonalPresetsForTab])
+
   if (playError) {
     throw playError
   }
@@ -247,6 +327,8 @@ function CustomAnnouncementPane({ options, playHandler, name, presets, systemId,
           <h3>Presets</h3>
 
           <div className={classes.presetButtonList}>
+            {presets.length === 0 && <p>Sorry, no presets are available for this announcement.</p>}
+
             {presets.map(preset => (
               <button
                 key={preset.name}
@@ -264,6 +346,50 @@ function CustomAnnouncementPane({ options, playHandler, name, presets, systemId,
           </div>
         </section>
       )}
+
+      <section className={classes.presets}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: '0.7rem' }}>
+          <h3 style={{ margin: 0 }}>Personal presets</h3>
+          <button className="outlined icon" onClick={loadPersonalPresetsForTab}>
+            <ReloadIcon size={24} style={{ verticalAlign: 'middle' }} />
+            <span className="sr-only">Reload</span>
+          </button>
+        </div>
+
+        {!isPersonalPresetsReady || loadingPersonalPresets || !personalPresets ? (
+          <div
+            style={{
+              alignSelf: 'center',
+              justifySelf: 'center',
+              textAlign: 'center',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexDirection: 'column',
+              gap: 16,
+            }}
+          >
+            <LoadingSpinner />
+            <p>Loading your personal presets&hellip;</p>
+          </div>
+        ) : (
+          <div className={classes.presetButtonList}>
+            {personalPresets.length === 0 && (
+              <p style={{ marginTop: 8, marginBottom: 0 }}>You have no personal presets for this announcement type.</p>
+            )}
+
+            {personalPresets.map(preset => (
+              <PersonalPresetButton
+                key={preset.presetId}
+                disabled={isPlayingAnnouncement}
+                presetData={preset}
+                onClick={() => setAllTabStates(prevState => ({ ...(prevState || {}), [tabId]: preset.state }))}
+                onDelete={() => deletePersonalPreset(systemId, tabId, preset.presetId).finally(loadPersonalPresetsForTab)}
+              />
+            ))}
+          </div>
+        )}
+      </section>
 
       {isPlayingAnnouncement && (
         <p className={classes.disabledMessage}>
@@ -301,14 +427,20 @@ function CustomAnnouncementPane({ options, playHandler, name, presets, systemId,
               Play announcement
             </span>
           </button>
-          <button disabled={isPlayingAnnouncement} onClick={downloadAnnouncement} className="iconButton" aria-label="Download announcement">
+          <button disabled={isPlayingAnnouncement} onClick={downloadAnnouncement} className="icon" aria-label="Download announcement">
             <DownloadIcon />
           </button>
         </div>
 
         <button className="outlined" onClick={shareAnnouncement} disabled={isSharing}>
           <span className="buttonLabel">
-            <ShareIcon /> Share announcement
+            <ShareIcon /> Copy sharable link to announcement
+          </span>
+        </button>
+
+        <button className="outlined" onClick={saveAnnouncementAsPersonalPreset} disabled={isSharing}>
+          <span className="buttonLabel">
+            <SaveIcon /> Save as personal preset
           </span>
         </button>
       </div>
@@ -319,3 +451,43 @@ function CustomAnnouncementPane({ options, playHandler, name, presets, systemId,
 }
 
 export default React.memo(CustomAnnouncementPane)
+
+interface IPersonalPresetButtonProps {
+  presetData: IPersonalPresetObject
+  onClick: () => void
+  onDelete: () => void
+  disabled: boolean
+}
+
+function PersonalPresetButton({ presetData, onClick, onDelete, disabled }: IPersonalPresetButtonProps) {
+  const timeoutRef = React.useRef<number | null>(null)
+
+  const [awaitingDeleteConfirmation, setAwaitingDeleteConfirmation] = React.useState(false)
+
+  return (
+    <div className="buttonGroup">
+      <button disabled={disabled} onClick={() => onClick()}>
+        <span className="buttonLabel">
+          <PersonalPresetIcon />
+          {presetData.name}
+        </span>
+      </button>
+      <button
+        className={clsx('icon danger', { outlined: !awaitingDeleteConfirmation })}
+        disabled={disabled}
+        onClick={() => {
+          if (!awaitingDeleteConfirmation) {
+            if (timeoutRef.current) window.clearTimeout(timeoutRef.current)
+            setAwaitingDeleteConfirmation(true)
+            timeoutRef.current = window.setTimeout(() => setAwaitingDeleteConfirmation(false), 5000)
+          } else {
+            // Confirming deletion
+            onDelete()
+          }
+        }}
+      >
+        {awaitingDeleteConfirmation ? <TickIcon /> : <DeleteIcon />}
+      </button>
+    </div>
+  )
+}

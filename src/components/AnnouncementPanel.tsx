@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import { makeStyles } from '@material-ui/styles'
 import Tabs from './Tabs'
@@ -7,6 +7,9 @@ import AnnouncementTabErrorBoundary from './AnnouncementTabErrorBoundary'
 
 import { useRecoilState } from 'recoil'
 import { selectedTabIdsState } from '@atoms'
+import { IPersonalPresetObject, deletePersonalPreset, getPersonalPresets, initPersonalPresetsDb, savePersonalPreset } from '@data/db'
+
+import * as Sentry from '@sentry/gatsby'
 
 const useStyles = makeStyles({
   root: {
@@ -25,6 +28,8 @@ const useStyles = makeStyles({
 function AnnouncementPanel() {
   const classes = useStyles()
   const AnnouncementSystem = getActiveSystem()
+
+  const [isPresetsDbReady, setIsPresetsDbReady] = useState<boolean>(false)
 
   if (typeof window !== 'undefined') {
     window.__system = AnnouncementSystem
@@ -45,7 +50,16 @@ function AnnouncementPanel() {
                   systemId={AnnouncementSystemInstance.ID}
                   systemName={AnnouncementSystemInstance.NAME}
                 >
-                  <TabComponent {...opts.props} name={opts.name} tabId={id} systemId={AnnouncementSystemInstance.ID} />
+                  <TabComponent
+                    {...opts.props}
+                    name={opts.name}
+                    tabId={id}
+                    systemId={AnnouncementSystemInstance.ID}
+                    isPersonalPresetsReady={isPresetsDbReady}
+                    savePersonalPreset={savePersonalPreset}
+                    getPersonalPresets={getPersonalPresets}
+                    deletePersonalPreset={deletePersonalPreset}
+                  />
                 </AnnouncementTabErrorBoundary>
               )
 
@@ -53,7 +67,7 @@ function AnnouncementPanel() {
             },
             {} as Record<string, React.ReactElement>,
           ),
-    [customTabs, AnnouncementSystem, AnnouncementSystemInstance],
+    [customTabs, AnnouncementSystem, AnnouncementSystemInstance, isPresetsDbReady, savePersonalPreset, getPersonalPresets],
   )
   const TabPanels: React.ReactElement[] = Object.values(TabPanelMap ?? {})
 
@@ -84,6 +98,25 @@ function AnnouncementPanel() {
     },
     [setSelectedTabIds, AnnouncementSystemInstance, customTabs],
   )
+
+  async function initialisePresetsDb() {
+    try {
+      const status = await initPersonalPresetsDb()
+
+      if (status) {
+        setIsPresetsDbReady(true)
+      }
+    } catch (e) {
+      console.log('Failed to initialise personal presets database', e)
+      Sentry.captureException(e)
+    }
+  }
+
+  useEffect(() => {
+    if (!isPresetsDbReady) {
+      initialisePresetsDb()
+    }
+  }, [isPresetsDbReady])
 
   if (!AnnouncementSystem) return null
 

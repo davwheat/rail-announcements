@@ -203,14 +203,14 @@ export default abstract class AnnouncementSystem {
     const audioBuffers_P = crunker.fetchAudio(...filesWithUris.map(file => file.uri))
 
     const audioBuffers = (await audioBuffers_P).reduce((acc, curr, i) => {
-      if (filesWithUris[i].opts?.delayStart > 0) {
-        acc.push(this.createSilence(filesWithUris[i].opts.delayStart))
+      if (filesWithUris[i].opts?.delayStart!! > 0) {
+        acc.push(this.createSilence(filesWithUris[i].opts!!.delayStart!!))
       }
 
       acc.push(curr)
 
       return acc
-    }, [])
+    }, [] as AudioBuffer[])
 
     return crunker.concatAudio(audioBuffers)
   }
@@ -231,7 +231,7 @@ export default abstract class AnnouncementSystem {
     return fileId
   }
 
-  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab> = {}
+  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab<string>> = {}
 
   /**
    * Takes an array of audio files, and adds an `and` audio file where needed.

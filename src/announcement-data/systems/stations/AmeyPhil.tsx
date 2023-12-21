@@ -4326,11 +4326,63 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           download: this.playAudioFiles.bind(this, ['w.would mr neptune please go to the town centre immediately'], true),
         },
         {
+          label: 'Unattended items',
+          play: this.playAudioFiles.bind(this, [
+            'm.please do not leave cases or parcels',
+            'm.unattended anywhere on the station',
+            'm.any unattended articles are likely to be removed',
+            'e.without warning',
+          ]),
+          download: this.playAudioFiles.bind(
+            this,
+            [
+              'm.please do not leave cases or parcels',
+              'm.unattended anywhere on the station',
+              'm.any unattended articles are likely to be removed',
+              'e.without warning',
+            ],
+            true,
+          ),
+        },
+        {
+          label: 'Station evacuation',
+          play: this.playAudioFiles.bind(this, [
+            'w.attention please',
+            { id: 'w.here is a special announcement', opts: { delayStart: 250 } },
+            { id: 's.for reasons of security', opts: { delayStart: 500 } },
+            'e.we are having to close the station',
+            { id: 's.would all passengers kindly leave the station', opts: { delayStart: 500 } },
+            'm.as quickly and as orderly as possible',
+            'e.by the nearest available exit',
+            { id: 's.please take your luggage with you', opts: { delayStart: 500 } },
+            'e.and ensure that you keep it with you',
+            { id: 's.there is no cause for panic', opts: { delayStart: 500 } },
+            { id: 'm.i repeat', opts: { delayStart: 500 } },
+            { id: 's.there is no cause for panic', opts: { delayStart: 200 } },
+          ]),
+          download: this.playAudioFiles.bind(
+            this,
+            [
+              'w.attention please',
+              { id: 'w.here is a special announcement', opts: { delayStart: 250 } },
+              { id: 's.for reasons of security', opts: { delayStart: 500 } },
+              'e.we are having to close the station',
+              { id: 's.would all passengers kindly leave the station', opts: { delayStart: 500 } },
+              'm.as quickly and as orderly as possible',
+              'e.by the nearest available exit',
+              { id: 's.please take your luggage with you', opts: { delayStart: 500 } },
+              'e.and ensure that you keep it with you',
+              { id: 's.there is no cause for panic', opts: { delayStart: 500 } },
+              { id: 'm.i repeat', opts: { delayStart: 500 } },
+              { id: 's.there is no cause for panic', opts: { delayStart: 200 } },
+            ],
+            true,
+          ),
+        },
+        {
           label: 'Unattended items (French)',
           play: this.playAudioFiles.bind(this, [
-            'w.attention attention',
-            'w.voici une annonce spéciale',
-            { id: 's.ne laissez pas trainer vos valises', opts: { delayStart: 500 } },
+            's.ne laissez pas trainer vos valises',
             'm.ou vos paquets abandonnés nulle part dans la gare',
             'm.tout articles non accompagné',
             'e.sera enlavé sans aucun avertissement',
@@ -4338,9 +4390,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           download: this.playAudioFiles.bind(
             this,
             [
-              'w.attention attention',
-              'w.voici une annonce spéciale',
-              { id: 's.ne laissez pas trainer vos valises', opts: { delayStart: 500 } },
+              's.ne laissez pas trainer vos valises',
               'm.ou vos paquets abandonnés nulle part dans la gare',
               'm.tout articles non accompagné',
               'e.sera enlavé sans aucun avertissement',
@@ -4378,9 +4428,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         {
           label: 'Unattended items (German)',
           play: this.playAudioFiles.bind(this, [
-            'w.achtung bitte',
-            'w.eine sondermeldung',
-            { id: 's.koffer und pakete dürfen', opts: { delayStart: 500 } },
+            's.koffer und pakete dürfen',
             'e.am bahnhof nirgends unbeaufsichtigt gelassen werden',
             { id: 's.unbeaufsichtigte artikel', opts: { delayStart: 500 } },
             'e.können ohne weitere warnung entfernt werden',
@@ -4388,9 +4436,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           download: this.playAudioFiles.bind(
             this,
             [
-              'w.achtung bitte',
-              'w.eine sondermeldung',
-              { id: 's.koffer und pakete dürfen', opts: { delayStart: 500 } },
+              's.koffer und pakete dürfen',
               'e.am bahnhof nirgends unbeaufsichtigt gelassen werden',
               { id: 's.unbeaufsichtigte artikel', opts: { delayStart: 500 } },
               'e.können ohne weitere warnung entfernt werden',

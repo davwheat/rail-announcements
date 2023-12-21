@@ -301,7 +301,7 @@ function CustomAnnouncementPane({ options, playHandler, name, presets, systemId,
               Play announcement
             </span>
           </button>
-          <button disabled={isPlayingAnnouncement} onClick={downloadAnnouncement} className="iconButton" aria-label="Download announcement">
+          <button disabled={isPlayingAnnouncement} onClick={downloadAnnouncement} className="icon" aria-label="Download announcement">
             <DownloadIcon />
           </button>
         </div>

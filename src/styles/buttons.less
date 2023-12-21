@@ -8,6 +8,9 @@ button {
   font-weight: bold;
   font-size: 1rem;
 
+  // No text wrapping
+  white-space: nowrap;
+
   &:hover,
   &:focus {
     background: #00528a;
@@ -28,9 +31,17 @@ button {
 
     svg {
       margin-top: -1px;
-      margin-right: 4px;
+      margin-right: 6px;
       margin-left: -4px;
     }
+  }
+
+  &.icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 6px;
+    aspect-ratio: 1 / 1;
   }
 
   &.outlined {
@@ -65,12 +76,5 @@ button {
       border-top-left-radius: 0;
       border-bottom-left-radius: 0;
     }
-  }
-
-  button.iconButton {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 8px;
   }
 }

@@ -259,6 +259,7 @@ function CustomAnnouncementPane({
           })
 
           enqueueSnackbar('Saved as personal preset', { variant: 'success' })
+          loadPersonalPresetsForTab()
         } catch (e) {
           console.error(e)
           enqueueSnackbar('An error occurred while trying to save this preset', { variant: 'error' })
@@ -266,7 +267,7 @@ function CustomAnnouncementPane({
         }
       })()
     },
-    [optionsState, systemId, tabId, enqueueSnackbar, savePersonalPreset],
+    [optionsState, systemId, tabId, enqueueSnackbar, savePersonalPreset, loadPersonalPresetsForTab],
   )
 
   const loadPersonalPresetsForTab = React.useCallback(
@@ -275,7 +276,6 @@ function CustomAnnouncementPane({
 
       try {
         const presets = await getPersonalPresets(systemId, tabId)
-        console.log(presets)
 
         setPersonalPresets(presets)
       } catch (e) {

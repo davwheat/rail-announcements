@@ -1,6 +1,8 @@
 import AmeyPhil, { ChimeType } from './AmeyPhil'
 import DelayCodeMapping from './DarwinDelayCodes_Female1.json'
 
+import type { CustomAnnouncementButton } from '@announcement-data/AnnouncementSystem'
+
 export default class AmeyCelia extends AmeyPhil {
   readonly NAME = 'Amey/Ditra - Celia Drummond'
   readonly ID = 'AMEY_CELIA_V1'
@@ -3072,6 +3074,40 @@ export default class AmeyCelia extends AmeyPhil {
       //   } else {
       //     return 'west midlands railway'
       //   }
+    }
+  }
+
+  protected getAnnouncementButtons(): Record<string, CustomAnnouncementButton[]> {
+    return {
+      General: [
+        {
+          label: '3 chimes',
+          play: this.playAudioFiles.bind(this, [this.getChime('three')!!]),
+          download: this.playAudioFiles.bind(this, [this.getChime('three')!!], true),
+        },
+        {
+          label: '4 chimes',
+          play: this.playAudioFiles.bind(this, [this.getChime('four')!!]),
+          download: this.playAudioFiles.bind(this, [this.getChime('four')!!], true),
+        },
+      ],
+      Emergency: [
+        {
+          label: 'Superintendent to carriage depot',
+          play: this.playAudioFiles.bind(this, ['w.would the superindendent of the line please go to the carriage depot']),
+          download: this.playAudioFiles.bind(this, ['w.would the superindendent of the line please go to the carriage depot'], true),
+        },
+        {
+          label: 'Mr Neptune to town centre',
+          play: this.playAudioFiles.bind(this, ['w.would mr neptune please go to the town centre immediately']),
+          download: this.playAudioFiles.bind(this, ['w.would mr neptune please go to the town centre immediately'], true),
+        },
+        {
+          label: 'Please leave the station immediately',
+          play: this.playAudioFiles.bind(this, ['w.please leave the station immediately']),
+          download: this.playAudioFiles.bind(this, ['w.please leave the station immediately'], true),
+        },
+      ],
     }
   }
 }

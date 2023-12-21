@@ -1,7 +1,6 @@
-import React from 'react'
 import StationAnnouncementSystem from '@announcement-data/StationAnnouncementSystem'
 import CallingAtSelector, { CallingAtPoint } from '@components/CallingAtSelector'
-import CustomAnnouncementPane, { ICustomAnnouncementPaneProps, ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
+import CustomAnnouncementPane, { ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
 import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
 import { getStationByCrs } from '@data/StationManipulators'
 import crsToStationItemMapper, { stationItemCompleter } from '@helpers/crsToStationItemMapper'

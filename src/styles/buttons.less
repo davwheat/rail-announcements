@@ -1,8 +1,8 @@
 button {
   padding: 8px 12px;
-  background: #0160a0;
+  background: var(--main);
   color: #fff;
-  border: none;
+  border: 1px solid var(--main);
   border-radius: 4px;
   cursor: pointer;
   font-weight: bold;
@@ -11,13 +11,27 @@ button {
   // No text wrapping
   white-space: nowrap;
 
+  --main: #0160a0;
+  --accent1: #00528a;
+  --accent1-faded: #007acc12;
+  --accent2: #004574;
+  --accent2-faded: #006bb31f;
+
+  &.danger {
+    --main: #900000;
+    --accent1: #ac0000;
+    --accent1-faded: #cc000012;
+    --accent2: #6b0000;
+    --accent2-faded: #b300001f;
+  }
+
   &:hover,
   &:focus {
-    background: #00528a;
+    background: var(--accent1);
   }
 
   &:active {
-    background: #004574;
+    background: var(--accent2);
   }
 
   &:disabled {
@@ -46,18 +60,18 @@ button {
 
   &.outlined {
     background: transparent;
-    border: 1px solid #0160a0;
-    color: #0160a0;
+    border: 1px solid var(--main);
+    color: var(--main);
 
     &:hover,
     &:focus {
-      border-color: #00528a;
-      background-color: hsla(204, 100%, 40%, 0.07);
+      border-color: var(--accent1);
+      background-color: var(--accent1-faded);
     }
 
     &:active {
-      border-color: #004574;
-      background-color: hsla(204, 100%, 35%, 0.12);
+      border-color: var(--accent2);
+      background-color: var(--accent2-faded);
     }
   }
 }

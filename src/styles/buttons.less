@@ -90,5 +90,11 @@ button {
       border-top-left-radius: 0;
       border-bottom-left-radius: 0;
     }
+
+    &:not(.outlined) {
+      &:not(:first-of-type) {
+        border-left: none;
+      }
+    }
   }
 }

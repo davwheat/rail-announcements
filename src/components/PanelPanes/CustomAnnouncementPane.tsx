@@ -237,6 +237,24 @@ function CustomAnnouncementPane({
     [optionsState, systemId, tabId, setIsSharing, enqueueSnackbar],
   )
 
+  const loadPersonalPresetsForTab = React.useCallback(
+    async function getPersonalPresetsForTab() {
+      setLoadingPersonalPresets(true)
+
+      try {
+        const presets = await getPersonalPresets(systemId, tabId)
+
+        setPersonalPresets(presets)
+      } catch (e) {
+        console.error(e)
+        Sentry.captureException(e)
+      } finally {
+        setLoadingPersonalPresets(false)
+      }
+    },
+    [systemId, tabId, getPersonalPresets, setLoadingPersonalPresets],
+  )
+
   const saveAnnouncementAsPersonalPreset = React.useCallback(
     function saveAnnouncementAsPersonalPreset() {
       const name = window.prompt('Enter a name for this preset')?.trim()
@@ -268,24 +286,6 @@ function CustomAnnouncementPane({
       })()
     },
     [optionsState, systemId, tabId, enqueueSnackbar, savePersonalPreset, loadPersonalPresetsForTab],
-  )
-
-  const loadPersonalPresetsForTab = React.useCallback(
-    async function getPersonalPresetsForTab() {
-      setLoadingPersonalPresets(true)
-
-      try {
-        const presets = await getPersonalPresets(systemId, tabId)
-
-        setPersonalPresets(presets)
-      } catch (e) {
-        console.error(e)
-        Sentry.captureException(e)
-      } finally {
-        setLoadingPersonalPresets(false)
-      }
-    },
-    [systemId, tabId, getPersonalPresets, setLoadingPersonalPresets],
   )
 
   useEffect(() => {

@@ -4693,6 +4693,20 @@ export default class AmeyPhil extends StationAnnouncementSystem {
                 true,
               ),
             },
+            {
+              label: 'Inspector Sands',
+              play: this.playAudioFiles.bind(this, ['w.would inspector sands please go to the operations room immediately']),
+              download: this.playAudioFiles.bind(this, ['w.would inspector sands please go to the operations room immediately'], true),
+            },
+            {
+              label: 'Station evacuation',
+              play: this.playAudioFiles.bind(this, ['w.due to a reported emergency would all passengers leave the station immediately']),
+              download: this.playAudioFiles.bind(
+                this,
+                ['w.due to a reported emergency would all passengers leave the station immediately'],
+                true,
+              ),
+            },
           ],
         },
       },

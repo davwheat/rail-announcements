@@ -122,7 +122,7 @@ function CustomButtonPane({ buttons, buttonSections }: ICustomButtonPaneProps) {
                         setPlayError(e)
                       })
                     }
-                    className="iconButton"
+                    className="icon"
                     aria-label="Download announcement"
                   >
                     <DownloadIcon />

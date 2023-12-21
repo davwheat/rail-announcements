@@ -308,7 +308,7 @@ function CustomAnnouncementPane({ options, playHandler, name, presets, systemId,
 
         <button className="outlined" onClick={shareAnnouncement} disabled={isSharing}>
           <span className="buttonLabel">
-            <ShareIcon /> Share announcement
+            <ShareIcon /> Copy sharable link to announcement
           </span>
         </button>
       </div>

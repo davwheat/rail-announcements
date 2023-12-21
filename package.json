@@ -26,7 +26,6 @@
     "@material-ui/styles": "^4.11.5",
     "@sentry/gatsby": "^7.89.0",
     "@sentry/tracing": "^7.89.0",
-    "base65536": "^4.0.3",
     "clsx": "^2.0.0",
     "copy-to-clipboard": "^3.3.3",
     "crunker": "^2.3.0",
@@ -53,11 +52,13 @@
     "react-tabs": "^6.0.2",
     "recoil": "^0.7.7",
     "recoil-persistence": "^0.3.0-beta.1",
-    "uk-railway-stations": "^1.5.1"
+    "uk-railway-stations": "^1.5.1",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@sentry/cli": "^2.23.0",
     "@types/react-beautiful-dnd": "^13.1.7",
+    "@types/uuid": "^9",
     "cross-env": "^7.0.3",
     "gatsby-plugin-webpack-bundle-analyser-v2": "^1.1.32",
     "prettier": "^3.1.1",

@@ -3700,6 +3700,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/uuid@npm:^9":
+  version: 9.0.7
+  resolution: "@types/uuid@npm:9.0.7"
+  checksum: c7321194aeba9ea173efd1e721403bdf4e7ae6945f8f8cdbc87c791f4b505ccf3dbc4a8883d90b394ef13b7c2dc778045792b05dbb23b3c746f8ea347804d448
+  languageName: node
+  linkType: hard
+
 "@types/yoga-layout@npm:1.9.2":
   version: 1.9.2
   resolution: "@types/yoga-layout@npm:1.9.2"
@@ -4791,13 +4798,6 @@ __metadata:
   version: 2.0.0
   resolution: "base64id@npm:2.0.0"
   checksum: e3312328429e512b0713469c5312f80b447e71592cae0a5bddf3f1adc9c89d1b2ed94156ad7bb9f529398f310df7ff6f3dbe9550735c6a759f247c088ea67364
-  languageName: node
-  linkType: hard
-
-"base65536@npm:^4.0.3":
-  version: 4.0.3
-  resolution: "base65536@npm:4.0.3"
-  checksum: 7d479a103d7d637118c63484f4dd028cd823293cafc9ceebe4a67ec1d17e729432c18b8c76fa08d9e51ce57e23bb769f009d0691f7c73e7d8e6fa52d15bb1728
   languageName: node
   linkType: hard
 
@@ -12419,7 +12419,7 @@ __metadata:
     "@sentry/gatsby": "npm:^7.89.0"
     "@sentry/tracing": "npm:^7.89.0"
     "@types/react-beautiful-dnd": "npm:^13.1.7"
-    base65536: "npm:^4.0.3"
+    "@types/uuid": "npm:^9"
     clsx: "npm:^2.0.0"
     copy-to-clipboard: "npm:^3.3.3"
     cross-env: "npm:^7.0.3"
@@ -12451,6 +12451,7 @@ __metadata:
     recoil-persistence: "npm:^0.3.0-beta.1"
     typescript: "npm:^5.3.3"
     uk-railway-stations: "npm:^1.5.1"
+    uuid: "npm:^9.0.1"
   languageName: unknown
   linkType: soft
 
@@ -14875,6 +14876,15 @@ __metadata:
   bin:
     uuid: dist/bin/uuid
   checksum: 9a5f7aa1d6f56dd1e8d5f2478f855f25c645e64e26e347a98e98d95781d5ed20062d6cca2eecb58ba7c84bc3910be95c0451ef4161906abaab44f9cb68ffbdd1
+  languageName: node
+  linkType: hard
+
+"uuid@npm:^9.0.1":
+  version: 9.0.1
+  resolution: "uuid@npm:9.0.1"
+  bin:
+    uuid: dist/bin/uuid
+  checksum: 9d0b6adb72b736e36f2b1b53da0d559125ba3e39d913b6072f6f033e0c87835b414f0836b45bcfaf2bdf698f92297fea1c3cc19b0b258bc182c9c43cc0fab9f2
   languageName: node
   linkType: hard
 

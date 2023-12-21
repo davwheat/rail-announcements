@@ -1,7 +1,6 @@
-import React from 'react'
 import StationAnnouncementSystem from '@announcement-data/StationAnnouncementSystem'
 import CallingAtSelector, { CallingAtPoint } from '@components/CallingAtSelector'
-import CustomAnnouncementPane, { ICustomAnnouncementPaneProps, ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
+import CustomAnnouncementPane, { ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
 import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
 import { getStationByCrs } from '@data/StationManipulators'
 import crsToStationItemMapper, { stationItemCompleter } from '@helpers/crsToStationItemMapper'
@@ -3453,7 +3452,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     return null
   }
 
-  private getChime(chime: ChimeType): AudioItem | null {
+  protected getChime(chime: ChimeType): AudioItem | null {
     switch (chime) {
       case 'none':
         return null
@@ -4245,6 +4244,237 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     await this.playAudioFiles(files, download)
   }
 
+  protected getAnnouncementButtons(): Record<string, CustomAnnouncementButton[]> {
+    return {
+      General: [
+        {
+          label: '3 chimes',
+          play: this.playAudioFiles.bind(this, [this.getChime('three')!!]),
+          download: this.playAudioFiles.bind(this, [this.getChime('three')!!], true),
+        },
+        {
+          label: '4 chimes',
+          play: this.playAudioFiles.bind(this, [this.getChime('four')!!]),
+          download: this.playAudioFiles.bind(this, [this.getChime('four')!!], true),
+        },
+      ],
+      Emergency: [
+        {
+          label: 'Newton Aycliffe chemical emergency',
+          play: this.playAudioFiles.bind(this, [
+            's.this is an emergency announcement',
+            'e.for customers at newton aycliffe station',
+            { id: 's.there is an emergency at a nearby chemical works', opts: { delayStart: 300 } },
+            { id: 'm.please leave the station by the ramp from platform 1', opts: { delayStart: 300 } },
+            'e.and turning left make your way to a position of safety',
+            { id: 'e.listen for announcement by the emergency services', opts: { delayStart: 300 } },
+          ]),
+          download: this.playAudioFiles.bind(
+            this,
+            [
+              's.this is an emergency announcement',
+              'e.for customers at newton aycliffe station',
+              { id: 's.there is an emergency at a nearby chemical works', opts: { delayStart: 300 } },
+              { id: 'm.please leave the station by the ramp from platform 1', opts: { delayStart: 300 } },
+              'e.and turning left make your way to a position of safety',
+              { id: 'e.listen for announcement by the emergency services', opts: { delayStart: 300 } },
+            ],
+            true,
+          ),
+        },
+        {
+          label: 'Castleford chemical emergency',
+          play: this.playAudioFiles.bind(this, [
+            's.this is an emergency announcement',
+            'e.for customers at castleford station',
+            { id: 's.there is an emergency at a nearby chemical works', opts: { delayStart: 300 } },
+            { id: 'm.please leave the station by the main exit', opts: { delayStart: 300 } },
+            'e.and proceed to the town centre',
+            { id: 'e.listen for announcement by the emergency services', opts: { delayStart: 300 } },
+          ]),
+          download: this.playAudioFiles.bind(
+            this,
+            [
+              's.this is an emergency announcement',
+              'e.for customers at castleford station',
+              { id: 's.there is an emergency at a nearby chemical works', opts: { delayStart: 300 } },
+              { id: 'm.please leave the station by the main exit', opts: { delayStart: 300 } },
+              'e.and proceed to the town centre',
+              { id: 'e.listen for announcement by the emergency services', opts: { delayStart: 300 } },
+            ],
+            true,
+          ),
+        },
+        {
+          label: 'Inspector Sands',
+          play: this.playAudioFiles.bind(this, ['w.would inspector sands please go to the operations room immediately']),
+          download: this.playAudioFiles.bind(this, ['w.would inspector sands please go to the operations room immediately'], true),
+        },
+        {
+          label: 'Station evacuation',
+          play: this.playAudioFiles.bind(this, ['w.due to a reported emergency would all passengers leave the station immediately']),
+          download: this.playAudioFiles.bind(this, ['w.due to a reported emergency would all passengers leave the station immediately'], true),
+        },
+        {
+          label: 'Superintendent to carriage depot',
+          play: this.playAudioFiles.bind(this, ['w.would the superindendent of the line please go to the carriage depot']),
+          download: this.playAudioFiles.bind(this, ['w.would the superindendent of the line please go to the carriage depot'], true),
+        },
+        {
+          label: 'Mr Neptune to town centre',
+          play: this.playAudioFiles.bind(this, ['w.would mr neptune please go to the town centre immediately']),
+          download: this.playAudioFiles.bind(this, ['w.would mr neptune please go to the town centre immediately'], true),
+        },
+        {
+          label: 'Unattended items',
+          play: this.playAudioFiles.bind(this, [
+            'm.please do not leave cases or parcels',
+            'm.unattended anywhere on the station',
+            'm.any unattended articles are likely to be removed',
+            'e.without warning',
+          ]),
+          download: this.playAudioFiles.bind(
+            this,
+            [
+              'm.please do not leave cases or parcels',
+              'm.unattended anywhere on the station',
+              'm.any unattended articles are likely to be removed',
+              'e.without warning',
+            ],
+            true,
+          ),
+        },
+        {
+          label: 'Station evacuation',
+          play: this.playAudioFiles.bind(this, [
+            'w.attention please',
+            { id: 'w.here is a special announcement', opts: { delayStart: 250 } },
+            { id: 's.for reasons of security', opts: { delayStart: 500 } },
+            'e.we are having to close the station',
+            { id: 's.would all passengers kindly leave the station', opts: { delayStart: 500 } },
+            'm.as quickly and as orderly as possible',
+            'e.by the nearest available exit',
+            { id: 's.please take your luggage with you', opts: { delayStart: 500 } },
+            'e.and ensure that you keep it with you',
+            { id: 's.there is no cause for panic', opts: { delayStart: 500 } },
+            { id: 'm.i repeat', opts: { delayStart: 500 } },
+            { id: 's.there is no cause for panic', opts: { delayStart: 200 } },
+          ]),
+          download: this.playAudioFiles.bind(
+            this,
+            [
+              'w.attention please',
+              { id: 'w.here is a special announcement', opts: { delayStart: 250 } },
+              { id: 's.for reasons of security', opts: { delayStart: 500 } },
+              'e.we are having to close the station',
+              { id: 's.would all passengers kindly leave the station', opts: { delayStart: 500 } },
+              'm.as quickly and as orderly as possible',
+              'e.by the nearest available exit',
+              { id: 's.please take your luggage with you', opts: { delayStart: 500 } },
+              'e.and ensure that you keep it with you',
+              { id: 's.there is no cause for panic', opts: { delayStart: 500 } },
+              { id: 'm.i repeat', opts: { delayStart: 500 } },
+              { id: 's.there is no cause for panic', opts: { delayStart: 200 } },
+            ],
+            true,
+          ),
+        },
+        {
+          label: 'Unattended items (French)',
+          play: this.playAudioFiles.bind(this, [
+            's.ne laissez pas trainer vos valises',
+            'm.ou vos paquets abandonnés nulle part dans la gare',
+            'm.tout articles non accompagné',
+            'e.sera enlavé sans aucun avertissement',
+          ]),
+          download: this.playAudioFiles.bind(
+            this,
+            [
+              's.ne laissez pas trainer vos valises',
+              'm.ou vos paquets abandonnés nulle part dans la gare',
+              'm.tout articles non accompagné',
+              'e.sera enlavé sans aucun avertissement',
+            ],
+            true,
+          ),
+        },
+        {
+          label: 'Station evacuation (French)',
+          play: this.playAudioFiles.bind(this, [
+            'w.attention attention',
+            'w.voici une annonce spéciale',
+            { id: 's.pour de motifs et entrer à la sécurité', opts: { delayStart: 500 } },
+            'e.nous sommes contraint de fermer la gare',
+            { id: 's.vous êtes prier de quitter la gare aussi vite que possible', opts: { delayStart: 500 } },
+            'e.et en bonne autre par la sortie la plus proche',
+            { id: 's.emporter tous vos bagages avec vous', opts: { delayStart: 500 } },
+            'e.et prenez soin de les garder avec vous',
+          ]),
+          download: this.playAudioFiles.bind(
+            this,
+            [
+              'w.attention attention',
+              'w.voici une annonce spéciale',
+              { id: 's.pour de motifs et entrer à la sécurité', opts: { delayStart: 500 } },
+              'e.nous sommes contraint de fermer la gare',
+              { id: 's.vous êtes prier de quitter la gare aussi vite que possible', opts: { delayStart: 500 } },
+              'e.et en bonne autre par la sortie la plus proche',
+              { id: 's.emporter tous vos bagages avec vous', opts: { delayStart: 500 } },
+              'e.et prenez soin de les garder avec vous',
+            ],
+            true,
+          ),
+        },
+        {
+          label: 'Unattended items (German)',
+          play: this.playAudioFiles.bind(this, [
+            's.koffer und pakete dürfen',
+            'e.am bahnhof nirgends unbeaufsichtigt gelassen werden',
+            { id: 's.unbeaufsichtigte artikel', opts: { delayStart: 500 } },
+            'e.können ohne weitere warnung entfernt werden',
+          ]),
+          download: this.playAudioFiles.bind(
+            this,
+            [
+              's.koffer und pakete dürfen',
+              'e.am bahnhof nirgends unbeaufsichtigt gelassen werden',
+              { id: 's.unbeaufsichtigte artikel', opts: { delayStart: 500 } },
+              'e.können ohne weitere warnung entfernt werden',
+            ],
+            true,
+          ),
+        },
+        {
+          label: 'Station evacuation (German)',
+          play: this.playAudioFiles.bind(this, [
+            'w.achtung bitte',
+            'w.eine sondermeldung',
+            { id: 's.aus sicherheitsgründen', opts: { delayStart: 500 } },
+            'e.muss der bahnhof geschlossen werden',
+            { id: 's.bitte verlassen sie den bahnhof beim nächsten ausgang', opts: { delayStart: 500 } },
+            'e.so schnell und so ruhig wie möglich',
+            { id: 's.bitte nehmen sie ihr gepäck mit', opts: { delayStart: 500 } },
+            'e.und behalten sie es bei sich',
+          ]),
+          download: this.playAudioFiles.bind(
+            this,
+            [
+              'w.achtung bitte',
+              'w.eine sondermeldung',
+              { id: 's.aus sicherheitsgründen', opts: { delayStart: 500 } },
+              'e.muss der bahnhof geschlossen werden',
+              { id: 's.bitte verlassen sie den bahnhof beim nächsten ausgang', opts: { delayStart: 500 } },
+              'e.so schnell und so ruhig wie möglich',
+              { id: 's.bitte nehmen sie ihr gepäck mit', opts: { delayStart: 500 } },
+              'e.und behalten sie es bei sich',
+            ],
+            true,
+          ),
+        },
+      ],
+    }
+  }
+
   readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab<string>> = {
     nextTrain: {
       name: 'Next train',
@@ -4634,68 +4864,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       name: 'Announcement buttons',
       component: CustomButtonPane,
       props: {
-        buttonSections: {
-          General: [
-            {
-              label: '3 chimes',
-              play: this.playAudioFiles.bind(this, [this.getChime('three')!!]),
-              download: this.playAudioFiles.bind(this, [this.getChime('three')!!], true),
-            },
-            {
-              label: '4 chimes',
-              play: this.playAudioFiles.bind(this, [this.getChime('four')!!]),
-              download: this.playAudioFiles.bind(this, [this.getChime('four')!!], true),
-            },
-          ],
-          Emergency: [
-            {
-              label: 'Newton Aycliffe chemical emergency',
-              play: this.playAudioFiles.bind(this, [
-                's.this is an emergency announcement',
-                'e.for customers at newton aycliffe station',
-                { id: 's.there is an emergency at a nearby chemical works', opts: { delayStart: 300 } },
-                { id: 'm.please leave the station by the ramp from platform 1', opts: { delayStart: 300 } },
-                'e.and turning left make your way to a position of safety',
-                { id: 'e.listen for announcement by the emergency services', opts: { delayStart: 300 } },
-              ]),
-              download: this.playAudioFiles.bind(
-                this,
-                [
-                  's.this is an emergency announcement',
-                  'e.for customers at newton aycliffe station',
-                  { id: 's.there is an emergency at a nearby chemical works', opts: { delayStart: 300 } },
-                  { id: 'm.please leave the station by the ramp from platform 1', opts: { delayStart: 300 } },
-                  'e.and turning left make your way to a position of safety',
-                  { id: 'e.listen for announcement by the emergency services', opts: { delayStart: 300 } },
-                ],
-                true,
-              ),
-            },
-            {
-              label: 'Castleford chemical emergency',
-              play: this.playAudioFiles.bind(this, [
-                's.this is an emergency announcement',
-                'e.for customers at castleford station',
-                { id: 's.there is an emergency at a nearby chemical works', opts: { delayStart: 300 } },
-                { id: 'm.please leave the station by the main exit', opts: { delayStart: 300 } },
-                'e.and proceed to the town centre',
-                { id: 'e.listen for announcement by the emergency services', opts: { delayStart: 300 } },
-              ]),
-              download: this.playAudioFiles.bind(
-                this,
-                [
-                  's.this is an emergency announcement',
-                  'e.for customers at castleford station',
-                  { id: 's.there is an emergency at a nearby chemical works', opts: { delayStart: 300 } },
-                  { id: 'm.please leave the station by the main exit', opts: { delayStart: 300 } },
-                  'e.and proceed to the town centre',
-                  { id: 'e.listen for announcement by the emergency services', opts: { delayStart: 300 } },
-                ],
-                true,
-              ),
-            },
-          ],
-        },
+        buttonSections: this.getAnnouncementButtons(),
       },
     },
   }

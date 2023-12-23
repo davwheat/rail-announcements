@@ -4306,12 +4306,12 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           ),
         },
         {
-          label: 'Inspector Sands',
+          label: 'Inspector Sands (Telent)',
           play: this.playAudioFiles.bind(this, ['w.would inspector sands please go to the operations room immediately']),
           download: this.playAudioFiles.bind(this, ['w.would inspector sands please go to the operations room immediately'], true),
         },
         {
-          label: 'Station evacuation',
+          label: 'Station evacuation (Telent)',
           play: this.playAudioFiles.bind(this, ['w.due to a reported emergency would all passengers leave the station immediately']),
           download: this.playAudioFiles.bind(this, ['w.due to a reported emergency would all passengers leave the station immediately'], true),
         },
@@ -4850,7 +4850,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           },
         },
       },
-    },
+    } as CustomAnnouncementTab<keyof IFastTrainAnnouncementOptions>,
     liveTrains: {
       name: 'Live trains (beta)',
       component: LiveTrainAnnouncements,

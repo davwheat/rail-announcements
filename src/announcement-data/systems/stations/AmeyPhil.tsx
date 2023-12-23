@@ -4,7 +4,7 @@ import CustomAnnouncementPane, { ICustomAnnouncementPaneProps, ICustomAnnounceme
 import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
 import { getStationByCrs } from '@data/StationManipulators'
 import crsToStationItemMapper, { stationItemCompleter } from '@helpers/crsToStationItemMapper'
-import { AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
+import { AudioItem, CustomAnnouncementButton, CustomAnnouncementTab } from '../../AnnouncementSystem'
 import DelayCodeMapping from './DarwinDelayCodes_Male1.json'
 import { LiveTrainAnnouncements, LiveTrainAnnouncementsProps } from '../../../components/AmeyLiveTrainAnnouncements'
 

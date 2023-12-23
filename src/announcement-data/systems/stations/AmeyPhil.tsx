@@ -1,12 +1,12 @@
 import StationAnnouncementSystem from '@announcement-data/StationAnnouncementSystem'
 import CallingAtSelector, { CallingAtPoint } from '@components/CallingAtSelector'
-import CustomAnnouncementPane, { ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
+import CustomAnnouncementPane, { ICustomAnnouncementPaneProps, ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
 import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
 import { getStationByCrs } from '@data/StationManipulators'
 import crsToStationItemMapper, { stationItemCompleter } from '@helpers/crsToStationItemMapper'
 import { AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
 import DelayCodeMapping from './DarwinDelayCodes_Male1.json'
-import { LiveTrainAnnouncements } from '../../../components/AmeyLiveTrainAnnouncements'
+import { LiveTrainAnnouncements, LiveTrainAnnouncementsProps } from '../../../components/AmeyLiveTrainAnnouncements'
 
 export type ChimeType = 'three' | 'four' | 'none'
 
@@ -41,7 +41,7 @@ interface IFastTrainAnnouncementOptions {
   fastTrainApproaching: boolean
 }
 
-interface ITrainApproachingAnnouncementOptions {
+export interface ITrainApproachingAnnouncementOptions {
   chime: ChimeType
   platform: string
   hour: string
@@ -4857,8 +4857,9 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       props: {
         nextTrainHandler: this.playNextTrainAnnouncement.bind(this),
         disruptedTrainHandler: this.playDisruptedTrainAnnouncement.bind(this),
+        approachingTrainHandler: this.playTrainApproachingAnnouncement.bind(this),
         system: this,
-      } as any,
+      } as Omit<LiveTrainAnnouncementsProps, keyof ICustomAnnouncementPaneProps<never>> as LiveTrainAnnouncementsProps,
     },
     announcementButtons: {
       name: 'Announcement buttons',

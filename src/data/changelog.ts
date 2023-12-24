@@ -332,6 +332,19 @@ const changelog: IChangelogVersion[] = [
     ],
     fixes: ['[Amey Phil] Fix broken Warwick Parkway announcement', '[Bombardier XStar] Correct announcement when terminating at station'],
   },
+  {
+    date: '2023-12-21',
+    additions: ['Save your own announcements to on-device custom presets'],
+  },
+  {
+    date: '2023-12-24',
+    additions: [
+      '[Amey Live Trains] Trigger approaching train announcements',
+      '[Amey Phil] Many additional bodged station recordings',
+      '[Amey Phil] Additional announcement buttons',
+    ],
+    fixes: ['[TfL Elizabeth line] Fix broken Cambridge Heath announcement', '[Amey Celia] Fix broken TOCs'],
+  },
 ]
 
 export default changelog

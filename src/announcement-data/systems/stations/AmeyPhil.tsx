@@ -4,7 +4,7 @@ import CustomAnnouncementPane, { ICustomAnnouncementPaneProps, ICustomAnnounceme
 import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
 import { getStationByCrs } from '@data/StationManipulators'
 import crsToStationItemMapper, { stationItemCompleter } from '@helpers/crsToStationItemMapper'
-import { AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
+import { AudioItem, CustomAnnouncementButton, CustomAnnouncementTab } from '../../AnnouncementSystem'
 import DelayCodeMapping from './DarwinDelayCodes_Male1.json'
 import { LiveTrainAnnouncements, LiveTrainAnnouncementsProps } from '../../../components/AmeyLiveTrainAnnouncements'
 
@@ -72,6 +72,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
 
   protected readonly BEFORE_TOC_DELAY: number = 150
   protected readonly BEFORE_SECTION_DELAY: number = 870
+  protected readonly SHORT_DELAY: number = 500
 
   readonly DelayCodeMapping = DelayCodeMapping
 
@@ -4236,10 +4237,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       )),
     )
 
-    files.push(
-      { id: 's.this train is the service from', opts: { delayStart: this.BEFORE_SECTION_DELAY } },
-      `station.e.${options.originStationCode}`,
-    )
+    files.push({ id: 's.this train is the service from', opts: { delayStart: this.SHORT_DELAY } }, `station.e.${options.originStationCode}`)
 
     await this.playAudioFiles(files, download)
   }
@@ -4306,12 +4304,12 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           ),
         },
         {
-          label: 'Inspector Sands',
+          label: 'Inspector Sands (Telent)',
           play: this.playAudioFiles.bind(this, ['w.would inspector sands please go to the operations room immediately']),
           download: this.playAudioFiles.bind(this, ['w.would inspector sands please go to the operations room immediately'], true),
         },
         {
-          label: 'Station evacuation',
+          label: 'Station evacuation (Telent)',
           play: this.playAudioFiles.bind(this, ['w.due to a reported emergency would all passengers leave the station immediately']),
           download: this.playAudioFiles.bind(this, ['w.due to a reported emergency would all passengers leave the station immediately'], true),
         },
@@ -4850,7 +4848,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           },
         },
       },
-    },
+    } as CustomAnnouncementTab<keyof IFastTrainAnnouncementOptions>,
     liveTrains: {
       name: 'Live trains (beta)',
       component: LiveTrainAnnouncements,

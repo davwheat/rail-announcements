@@ -72,6 +72,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
 
   protected readonly BEFORE_TOC_DELAY: number = 150
   protected readonly BEFORE_SECTION_DELAY: number = 870
+  protected readonly SHORT_DELAY: number = 500
 
   readonly DelayCodeMapping = DelayCodeMapping
 
@@ -4236,10 +4237,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       )),
     )
 
-    files.push(
-      { id: 's.this train is the service from', opts: { delayStart: this.BEFORE_SECTION_DELAY } },
-      `station.e.${options.originStationCode}`,
-    )
+    files.push({ id: 's.this train is the service from', opts: { delayStart: this.SHORT_DELAY } }, `station.e.${options.originStationCode}`)
 
     await this.playAudioFiles(files, download)
   }

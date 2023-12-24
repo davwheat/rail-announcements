@@ -11,6 +11,7 @@ export default class AmeyCelia extends AmeyPhil {
 
   protected readonly BEFORE_TOC_DELAY: number = 30
   protected readonly BEFORE_SECTION_DELAY: number = 520
+  protected readonly SHORT_DELAY: number = 500
 
   readonly DelayCodeMapping = DelayCodeMapping
 

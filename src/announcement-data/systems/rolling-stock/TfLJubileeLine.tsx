@@ -72,7 +72,7 @@ const StationData: IStationDataItem[] = [
   {
     name: 'West Hampstead',
     approachingFiles: ['west hampstead', 'change for national rail and london overground'],
-    standingFiles: ['west hampstead'],
+    standingFiles: ['west hampstead change here'],
     canTerminate: true,
   },
   {

@@ -791,7 +791,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
   get PLATFORMS() {
     return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
       .flatMap(x => [`${x}`, `${x}a`, `${x}b`, `${x}c`, `${x}d`])
-      .concat(['13', '14', '15', '16', '17', '18', '19', '20', 'a', 'b'])
+      .concat(['13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', 'a', 'b', 'c', 'd'])
   }
 
   get STATIONS() {
@@ -4008,6 +4008,12 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       if (plat <= 12 || ['a', 'b'].includes(options.platform.toLowerCase())) {
         platFiles.push({ id: `s.platform ${options.platform} for the`, opts: { delayStart: 250 } })
         if (options.isDelayed) platFiles.push('m.delayed')
+      } else if (plat >= 21) {
+        files.push(
+          { id: `s.platform`, opts: { delayStart: 250 } },
+          `mins.m.${options.platform}`,
+          options.isDelayed ? `m.for the delayed` : `m.for the`,
+        )
       } else {
         platFiles.push(
           { id: `s.platform`, opts: { delayStart: 250 } },
@@ -4089,7 +4095,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
   }
 
   protected readonly disruptionOptions = {
-    thisStationAudio: 'm.this station-2',
+    thisStationAudio: 'e.this station-2',
   }
 
   private async playDisruptedTrainAnnouncement(options: IDisruptedTrainAnnouncementOptions, download: boolean = false): Promise<void> {
@@ -4194,7 +4200,9 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     const chime = this.getChime(options.chime)
     if (chime) files.push(chime)
 
-    files.push('s.stand well away from the edge of platform', `platform.e.${options.platform}`, {
+    let plat = parseInt(options.platform)
+
+    files.push('s.stand well away from the edge of platform', plat >= 21 ? `mins.e.${options.platform}` : `platform.e.${options.platform}`, {
       id: 'w.the approaching train is not scheduled to stop at this station',
       opts: { delayStart: this.BEFORE_SECTION_DELAY },
     })
@@ -4216,6 +4224,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
 
     if (plat <= 20 && options.platform.match(/^\d+$/)) {
       files.push(`s.the train now approaching platform ${plat}`)
+    } else if (plat >= 21) {
+      files.push(`s.the train now approaching platform`, `mins.m.${options.platform}`)
     } else {
       files.push(`s.the train now approaching platform`, `platform.m.${options.platform}`)
     }

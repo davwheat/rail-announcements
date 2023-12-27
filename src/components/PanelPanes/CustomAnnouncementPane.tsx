@@ -4,7 +4,6 @@ import LoadingSpinner from '@components/LoadingSpinner'
 import { makeStyles } from '@material-ui/styles'
 import getActiveSystem from '@helpers/getActiveSystem'
 import createOptionField from '@helpers/createOptionField'
-import type { OptionsExplanation } from '@announcement-data/AnnouncementSystem'
 import useIsPlayingAnnouncement from '@helpers/useIsPlayingAnnouncement'
 
 import * as Sentry from '@sentry/gatsby'
@@ -18,6 +17,7 @@ import ReloadIcon from 'mdi-react/ReloadIcon'
 import DownloadIcon from 'mdi-react/DownloadIcon'
 import TickIcon from 'mdi-react/CheckIcon'
 import DeleteIcon from 'mdi-react/DeleteOutlineIcon'
+import CopyIcon from 'mdi-react/ContentCopyIcon'
 
 import { useRecoilState } from 'recoil'
 import { tabStatesState } from '@atoms/index'
@@ -25,9 +25,11 @@ import { SystemTabState } from '@data/SystemTabState'
 
 import clsx from 'clsx'
 import copy from 'copy-to-clipboard'
-import { useSnackbar } from 'notistack'
-import { IPersonalPresetObject } from '@data/db'
+import { enqueueSnackbar, useSnackbar } from 'notistack'
 import { v4 as uuid } from 'uuid'
+
+import type { OptionsExplanation } from '@announcement-data/AnnouncementSystem'
+import type { IPersonalPresetObject } from '@data/db'
 
 const useStyles = makeStyles({
   root: {
@@ -466,12 +468,27 @@ function PersonalPresetButton({ presetData, onClick, onDelete, disabled }: IPers
 
   return (
     <div className="buttonGroup">
-      <button disabled={disabled} onClick={() => onClick()}>
+      <button disabled={disabled} onClick={() => onClick()} data-state={JSON.stringify(presetData.state)}>
         <span className="buttonLabel">
           <PersonalPresetIcon />
           {presetData.name}
         </span>
       </button>
+      {process.env.NODE_ENV === 'development' && (
+        <button
+          className="icon outlined"
+          disabled={disabled}
+          onClick={() => {
+            copy(JSON.stringify(presetData.state, null, 2), {
+              format: 'text/plain',
+              message: 'Copied preset state to clipboard',
+            })
+            enqueueSnackbar('Copied preset state to clipboard', { variant: 'success' })
+          }}
+        >
+          <CopyIcon />
+        </button>
+      )}
       <button
         className={clsx('icon danger', { outlined: !awaitingDeleteConfirmation })}
         disabled={disabled}

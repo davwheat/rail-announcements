@@ -314,6 +314,21 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             coaches: '3 coaches',
           },
         },
+        {
+          name: 'Elizabeth | PAD to ABW',
+          state: {
+            chime: 'four',
+            platform: 'a',
+            hour: '12',
+            min: '04',
+            isDelayed: false,
+            toc: '',
+            terminatingStationCode: 'ABW',
+            vias: ['CWX'].map(crsToStationItemMapper),
+            callingAt: ['BDS', 'TCR', 'ZFD', 'LST', 'ZLW', 'ZCW', 'CUS', 'WWC'].map(crsToStationItemMapper),
+            coaches: '9 coaches',
+          },
+        },
       ],
       disruptedTrain: [
         {

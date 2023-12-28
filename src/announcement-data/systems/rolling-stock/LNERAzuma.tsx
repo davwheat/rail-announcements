@@ -74,11 +74,20 @@ const announcementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>>
   ],
 }
 
+interface StationInfo {
+  changeFor?: AudioItem[]
+}
+
 export default class LnerAzuma extends TrainAnnouncementSystem {
   readonly NAME = 'LNER Azuma'
   readonly ID = 'LNER_AZUMA_V1'
   readonly FILE_PREFIX = 'LNER/Azuma'
   readonly SYSTEM_TYPE = 'train'
+
+  readonly STATION_INFO: Record<string, AudioItem[]> = {
+    NCL: ['station.CAR', 'station.HEX', 'and', 'tyne and wear metro'],
+    GRA: ['station.SKG'],
+  }
 
   readonly ALL_STATIONS = [
     'AAP',
@@ -268,7 +277,6 @@ export default class LnerAzuma extends TrainAnnouncementSystem {
     'TBY',
     'THI',
     'TTF',
-    'TWM',
     'WAF',
     'WDD',
     'WET',
@@ -336,8 +344,12 @@ export default class LnerAzuma extends TrainAnnouncementSystem {
       files.push('where we finish our journey today')
     }
 
-    files.push({ id: 'if youre leaving us here please make sure to take all your personal belongings with you', opts: { delayStart: 1000 } })
-    files.push({ id: 'thank you for travelling with lner', opts: { delayStart: 1000 } })
+    if (this.STATION_INFO[nextStationCode]) {
+      files.push({ id: 'change here', opts: { delayStart: 5_000 } }, 'for trains to', ...this.STATION_INFO[nextStationCode])
+    }
+
+    files.push({ id: 'if youre leaving us here please make sure to take all your personal belongings with you', opts: { delayStart: 5_000 } })
+    files.push({ id: 'thank you for travelling with lner', opts: { delayStart: 10_000 } })
 
     await this.playAudioFiles(files, download)
   }
@@ -348,7 +360,7 @@ export default class LnerAzuma extends TrainAnnouncementSystem {
     files.push(
       { id: 'hello and welcome on board this lner azuma to', opts: { delayStart: delay } },
       { id: `station.${terminatesAtCode}`, opts: { delayStart: 150 } },
-      { id: `we will call at`, opts: { delayStart: 5000 } },
+      { id: `we will call at`, opts: { delayStart: 6_000 } },
     )
 
     if (callingAtCodes.length === 0) {
@@ -365,8 +377,8 @@ export default class LnerAzuma extends TrainAnnouncementSystem {
 
     const nextStation = callingAtCodes.at(0)?.crsCode ?? terminatesAtCode
 
-    files.push({ id: 'the next station will be', opts: { delayStart: 3000 } }, { id: `station.${nextStation}`, opts: { delayStart: 150 } })
-    files.push({ id: 'male.cctv is in operation', opts: { delayStart: 3000 } }, { id: 'male.btp 61016', opts: { delayStart: 3000 } })
+    files.push({ id: 'the next station will be', opts: { delayStart: 5_000 } }, { id: `station.${nextStation}`, opts: { delayStart: 150 } })
+    files.push({ id: 'male.cctv is in operation', opts: { delayStart: 3_000 } }, { id: 'male.btp 61016', opts: { delayStart: 5_000 } })
 
     return files
   }

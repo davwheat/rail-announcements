@@ -49,6 +49,11 @@ export default class TfWTrainFx extends TrainAnnouncementSystem {
       ),
     )
 
+    files.push({
+      id: 'conjoiners.thank you',
+      opts: { delayStart: 750 },
+    })
+
     await this.playAudioFiles(files, download)
   }
 

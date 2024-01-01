@@ -347,7 +347,7 @@ const changelog: IChangelogVersion[] = [
   },
   {
     date: '2024-01-01',
-    additions: ['[TfW TrainFX] Add missing "thank you" to start of journey announcement'],
+    additions: ['[TfW TrainFX] Add missing "thank you" to start of journey announcement', '[Amey Live Trains] Pick your own display type'],
     fixes: ['[TfW TrainFX] Correct station code and name for Clarbeston Road'],
   },
 ]

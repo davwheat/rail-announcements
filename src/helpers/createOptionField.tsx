@@ -12,9 +12,9 @@ interface OptionFieldOptions {
   activeState?: Record<string, unknown>
 }
 
-export interface Option {
+export interface Option<Value extends string = string> {
   readonly label: string
-  readonly value: string
+  readonly value: Value
 }
 
 export default function createOptionField(optionData: OptionsExplanation, options: OptionFieldOptions): JSX.Element {

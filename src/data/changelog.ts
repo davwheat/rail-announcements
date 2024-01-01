@@ -345,6 +345,11 @@ const changelog: IChangelogVersion[] = [
     ],
     fixes: ['[TfL Elizabeth line] Fix broken Cambridge Heath announcement', '[Amey Celia] Fix broken TOCs'],
   },
+  {
+    date: '2024-01-01',
+    additions: ['[TfW TrainFX] Add missing "thank you" to start of journey announcement'],
+    fixes: ['[TfW TrainFX] Correct station code and name for Clarbeston Road'],
+  },
 ]
 
 export default changelog

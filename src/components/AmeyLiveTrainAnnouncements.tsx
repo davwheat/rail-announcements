@@ -217,6 +217,13 @@ const useLiveTrainsStyles = makeStyles({
   },
 })
 
+type DisplayType = 'gtr-new' | 'tfwm-lcd'
+
+const DisplayNames: Record<DisplayType, string> = {
+  'gtr-new': 'Infotec DMI (yellow)',
+  'tfwm-lcd': 'WMR/LNWR LCD',
+}
+
 export function LiveTrainAnnouncements({
   nextTrainHandler,
   disruptedTrainHandler,
@@ -238,6 +245,7 @@ export function LiveTrainAnnouncements({
     [system.STATIONS],
   )
 
+  const [displayType, setDisplayType] = useState<DisplayType>('gtr-new')
   const [isFullscreen, setFullscreen] = useState(false)
   const [selectedCrs, setSelectedCrs] = useState('ECR')
   const [hasEnabledFeature, setHasEnabledFeature] = useState(false)
@@ -841,6 +849,16 @@ export function LiveTrainAnnouncements({
         />
       </label>
 
+      <label htmlFor="display-type-select" className="option-select">
+        Display type
+        <Select<Option<DisplayType>, false>
+          id="display-type-select"
+          value={{ value: displayType, label: DisplayNames[displayType] }}
+          onChange={val => setDisplayType(val!!.value)}
+          options={Object.entries(DisplayNames).map(([value, label]) => ({ value: value as DisplayType, label }))}
+        />
+      </label>
+
       <p style={{ margin: '16px 0' }}>
         This is a beta feature, and isn't complete or fully functional. Please report any issues you face on GitHub.
       </p>
@@ -874,7 +892,7 @@ export function LiveTrainAnnouncements({
           <FullScreen enabled={isFullscreen} onChange={setFullscreen}>
             <iframe
               className={classes.iframe}
-              src={`https://raildotmatrix.co.uk/board/?type=gtr-new&station=${selectedCrs}&noBg=1&hideSettings=1`}
+              src={`https://raildotmatrix.co.uk/board/?type=${encodeURIComponent(displayType)}&station=${selectedCrs}&noBg=1&hideSettings=1`}
             />
           </FullScreen>
 

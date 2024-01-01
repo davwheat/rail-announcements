@@ -49,6 +49,11 @@ export default class TfWTrainFx extends TrainAnnouncementSystem {
       ),
     )
 
+    files.push({
+      id: 'conjoiners.thank you',
+      opts: { delayStart: 750 },
+    })
+
     await this.playAudioFiles(files, download)
   }
 
@@ -182,7 +187,6 @@ export default class TfWTrainFx extends TrainAnnouncementSystem {
     'BYE',
     'BYI',
     'CAD',
-    'CBR',
     'CCC',
     'CDB',
     'CDF',
@@ -192,6 +196,7 @@ export default class TfWTrainFx extends TrainAnnouncementSystem {
     'CGW',
     'CIM',
     'CKY',
+    'CLR',
     'CMH',
     'CMN',
     'CNM',

@@ -500,7 +500,7 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
     files.push('bing bong')
 
     files.push(
-      'this train is the southern service to',
+      'welcome aboard the southern service to',
       `stations.${options.terminatesAtCode}`,
       'the next station is',
       `stations.${options.nextStationCode}`,

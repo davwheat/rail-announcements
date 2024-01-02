@@ -356,13 +356,20 @@ export function LiveTrainAnnouncements({
     [system],
   )
 
-  const guessViaPoint = useCallback(function guessViaPoint(via: string): string | null {
+  const guessViaPoint = useCallback(function guessViaPoint(via: string, stops: (SubsequentLocation | Destination)[]): string | null {
     if (stationNameToCrsMap[via]) return stationNameToCrsMap[via]
 
     // Manual entries
     switch (via) {
       case 'cobham':
         return 'CSD'
+
+      case 'worcester':
+        const stopCrs = stops.find(s => s.crs === 'WOF' || s.crs === 'WOS' || s.crs === 'WOP')
+        return stopCrs?.crs ?? null
+
+      case 'university':
+        return 'UNI'
     }
 
     return null

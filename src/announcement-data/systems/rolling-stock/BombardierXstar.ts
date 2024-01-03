@@ -113,6 +113,20 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
     await this.playAudioFiles(files, download)
   }
 
+  private async playDepartingStationAnnouncement(options: IDepartingStationAnnouncementOptions, download: boolean = false): Promise<void> {
+    const files: AudioItem[] = []
+    files.push('bing bong')
+
+    files.push(
+      'welcome aboard the southern service to',
+      `stations.${options.terminatesAtCode}`,
+      'the next station is',
+      `stations.${options.nextStationCode}`,
+    )
+
+    await this.playAudioFiles(files, download)
+  }
+
   private RealAvailableStationNames = [
     'ABW',
     'ADM',
@@ -493,19 +507,5 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
         ],
       },
     },
-  }
-
-  private async playDepartingStationAnnouncement(options: IDepartingStationAnnouncementOptions): Promise<void> {
-    const files: AudioItem[] = []
-    files.push('bing bong')
-
-    files.push(
-      'welcome aboard the southern service to',
-      `stations.${options.terminatesAtCode}`,
-      'the next station is',
-      `stations.${options.nextStationCode}`,
-    )
-
-    await this.playAudioFiles(files)
   }
 }

@@ -4,7 +4,6 @@ import FullscreenIcon from 'mdi-react/FullscreenIcon'
 import NREPowered from '@assets/NRE_Powered_logo.png'
 import FullScreen from 'react-fullscreen-crossbrowser'
 import Select from 'react-select'
-import dayjs from 'dayjs'
 import { makeStyles } from '@material-ui/styles'
 
 import type { CallingAtPoint } from '@components/CallingAtSelector'
@@ -14,8 +13,18 @@ import type {
   IDisruptedTrainAnnouncementOptions,
   default as AmeyPhil,
   ITrainApproachingAnnouncementOptions,
+  IStandingTrainAnnouncementOptions,
 } from '../announcement-data/systems/stations/AmeyPhil'
 import type { ICustomAnnouncementPaneProps } from './PanelPanes/CustomAnnouncementPane'
+
+import dayjs from 'dayjs'
+import dayjsUtc from 'dayjs/plugin/utc'
+import dayjsTz from 'dayjs/plugin/timezone'
+
+dayjs.extend(dayjsUtc)
+dayjs.extend(dayjsTz)
+
+dayjs.tz.setDefault('Europe/London')
 
 const MIN_TIME_TO_ANNOUNCE = 4
 
@@ -24,6 +33,7 @@ export interface LiveTrainAnnouncementsProps extends ICustomAnnouncementPaneProp
   nextTrainHandler: (options: INextTrainAnnouncementOptions) => Promise<void>
   disruptedTrainHandler: (options: IDisruptedTrainAnnouncementOptions) => Promise<void>
   approachingTrainHandler: (options: ITrainApproachingAnnouncementOptions) => Promise<void>
+  standingTrainHandler: (options: IStandingTrainAnnouncementOptions) => Promise<void>
 }
 
 interface ServicesResponse {
@@ -219,6 +229,8 @@ const useLiveTrainsStyles = makeStyles({
 
 type DisplayType = 'gtr-new' | 'tfwm-lcd'
 
+const MindTheGapStations = new Set(['WVF', 'LWS'])
+
 const DisplayNames: Record<DisplayType, string> = {
   'gtr-new': 'Infotec DMI (yellow)',
   'tfwm-lcd': 'WMR/LNWR LCD',
@@ -228,6 +240,7 @@ export function LiveTrainAnnouncements({
   nextTrainHandler,
   disruptedTrainHandler,
   approachingTrainHandler,
+  standingTrainHandler,
   system,
 }: LiveTrainAnnouncementsProps) {
   const classes = useLiveTrainsStyles()
@@ -254,6 +267,7 @@ export function LiveTrainAnnouncements({
   // Array of log messages using useReducer
   const [logs, addLog] = useReducer((state: string[], action: string) => [action, ...state].slice(0, 200), [])
 
+  const standingTrainAnnounced = useRef<Record<string, number>>({})
   const approachingTrainAnnounced = useRef<Record<string, number>>({})
   const nextTrainAnnounced = useRef<Record<string, number>>({})
   const disruptedTrainAnnounced = useRef<Record<string, number>>({})
@@ -280,6 +294,10 @@ export function LiveTrainAnnouncements({
       const now = Date.now()
 
       // Remove older than 1h
+      const nextStanding = Object.fromEntries(Object.entries(standingTrainAnnounced.current).filter(([_, v]) => now - v < 1000 * 60 * 60))
+      standingTrainAnnounced.current = nextStanding
+
+      // Remove older than 1h
       const nextApproaching = Object.fromEntries(Object.entries(approachingTrainAnnounced.current).filter(([_, v]) => now - v < 1000 * 60 * 60))
       approachingTrainAnnounced.current = nextApproaching
 
@@ -292,6 +310,16 @@ export function LiveTrainAnnouncements({
       disruptedTrainAnnounced.current = nextDisrupted
     },
     [approachingTrainAnnounced, nextTrainAnnounced, disruptedTrainAnnounced],
+  )
+
+  const markStandingTrainAnnounced = useCallback(
+    function markStandingTrainAnnounced(id: string) {
+      standingTrainAnnounced.current[id] = Date.now()
+      // We don't want to announce this train again
+      approachingTrainAnnounced.current[id] = Date.now()
+      nextTrainAnnounced.current[id] = Date.now()
+    },
+    [standingTrainAnnounced, nextTrainAnnounced],
   )
 
   const markApproachingTrainAnnounced = useCallback(
@@ -374,6 +402,111 @@ export function LiveTrainAnnouncements({
 
     return null
   }, [])
+
+  const announceStandingTrain = useCallback(
+    async function announceStandingTrain(train: TrainService, abortController: AbortController) {
+      console.log(train)
+      addLog(`Announcing standing train: ${train.rid} (${train.std} to ${train.destination[0].locationName})`)
+
+      markStandingTrainAnnounced(train.rid)
+
+      const h = dayjs(train.std).format('HH')
+      const m = dayjs(train.std).format('mm')
+
+      const delayMins = calculateDelayMins(new Date(train.std), new Date(train.etd))
+
+      addLog(`Train is delayed by ${delayMins} mins`)
+      console.log(`[Live Trains] Train is delayed by ${delayMins} mins`)
+
+      const toc = system.processTocForLiveTrains(train.operator, train.origin[0].crs, train.destination[0].crs)
+
+      const callingPoints = train.subsequentLocations.filter(s => {
+        if (!s.crs) return false
+        if (s.isCancelled || s.isOperational || s.isPass) return false
+        if (!system.STATIONS.includes(s.crs)) return false
+        return true
+      })
+
+      if (train.destination[0].tiploc !== callingPoints[callingPoints.length - 1].tiploc) {
+        // False destination -- need to trim calling points
+        const lastRealCallingPoint = callingPoints.findIndex(s => s.tiploc == train.destination[0].tiploc)
+
+        console.log(`Fake destination detected. Last real calling point index is ${lastRealCallingPoint}`)
+
+        for (let i = lastRealCallingPoint; i < callingPoints.length; i++) delete callingPoints[i]
+      }
+
+      const callingAt = callingPoints
+        .map((p, i, arr): CallingAtPoint | null => {
+          console.log(`[${i} of ${arr.length - 1}]: ${p.crs} - ${p.tiploc}`)
+
+          // Hide last station if it's the train destination
+          if (i === arr.length - 1 && p.crs === train.destination[0].crs) return null
+
+          return {
+            crsCode: getStation(p),
+            name: '',
+            randomId: '',
+          }
+        })
+        .filter(x => !!x) as CallingAtPoint[]
+
+      const vias: CallingAtPoint[] = []
+
+      if (train.destination[0].via) {
+        const v: string = train.destination[0].via.startsWith('via ') ? train.destination[0].via.slice(4) : train.destination[0].via
+
+        v.split(/(&|and)/).forEach(via => {
+          const guessViaCrs = guessViaPoint(via.trim().toLowerCase(), train.subsequentLocations)
+
+          addLog(`Guessed via ${guessViaCrs} for ${via}`)
+          console.log(`[Live Trains] Guessed via ${guessViaCrs} for ${via}`)
+
+          if (guessViaCrs && system.STATIONS.includes(guessViaCrs)) {
+            const point = train.subsequentLocations.find(p => p.crs === guessViaCrs)
+
+            vias.push({
+              crsCode: point ? getStation(point) : guessViaCrs,
+              name: '',
+              randomId: '',
+            })
+          }
+        })
+      }
+
+      const options: IStandingTrainAnnouncementOptions = {
+        thisStationCode: selectedCrs,
+        mindTheGap: MindTheGapStations.has(selectedCrs),
+        hour: h === '00' ? '00 - midnight' : h,
+        min: m === '00' ? '00 - hundred-hours' : m,
+        isDelayed: delayMins > 5,
+        toc,
+        coaches: train.length ? `${train.length} coaches` : null,
+        platform: getPlatform(train.platform),
+        terminatingStationCode: getStation(train.destination[0]),
+        vias,
+        callingAt,
+      }
+
+      console.log(options)
+      try {
+        if (abortController.signal.aborted) {
+          console.warn('[Live Trains] Aborted; skipping announcement')
+          return
+        }
+
+        setIsPlaying(true)
+        console.log(`[Live Trains] Playing standing train announcement for ${train.rid} (${train.std} to ${train.destination[0].locationName})`)
+        await standingTrainHandler(options)
+      } catch (e) {
+        console.warn(`[Live Trains] Error playing announcement for ${train.rid}; see below`)
+        console.error(e)
+      }
+      console.log(`[Live Trains] Announcement for ${train.rid} complete: waiting 5s until next`)
+      setTimeout(() => setIsPlaying(false), 5000)
+    },
+    [markNextTrainAnnounced, calculateDelayMins, system, setIsPlaying, standingTrainHandler, selectedCrs, getStation, addLog],
+  )
 
   const announceApproachingTrain = useCallback(
     async function announceApproachingTrain(train: TrainService, abortController: AbortController) {
@@ -699,6 +832,43 @@ export function LiveTrainAnnouncements({
       services = services.filter(s => s.isPassengerService)
       addLog(`${services.length} of which are passenger services`)
       console.log(`[Live Trains] ${services.length} of which are passenger services`)
+
+      addLog("Finding suitable train for 'standing train'")
+      console.log("[Live Trains] Finding suitable train for 'standing train'")
+
+      const unannouncedStandingTrain = services.find(s => {
+        if (standingTrainAnnounced.current[s.rid]) {
+          addLog(`Skipping ${s.trainid} ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it was announced recently`)
+          console.log(`[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it was announced recently`)
+          return false
+        }
+
+        if (s.isCancelled) {
+          addLog(`Skipping ${s.trainid} ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it is cancelled`)
+          console.log(`[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it is cancelled`)
+          return false
+        }
+
+        if (s.atdSpecified) {
+          addLog(`Skipping ${s.trainid} ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has already departed`)
+          console.log(`[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has already departed`)
+          return false
+        }
+
+        if (s.platform === null) {
+          addLog(`Skipping ${s.trainid} ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has no confirmed platform`)
+          console.log(`[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has no confirmed platform`)
+          return false
+        }
+
+        // Wait n seconds after arrival to announce
+        return s.ataSpecified && dayjs(s.ata).isBefore(dayjs().add(15, 'seconds'))
+      })
+
+      if (unannouncedStandingTrain) {
+        announceStandingTrain(unannouncedStandingTrain, abortController)
+        return
+      }
 
       addLog("Finding suitable train for 'approaching train'")
       console.log("[Live Trains] Finding suitable train for 'approaching train'")

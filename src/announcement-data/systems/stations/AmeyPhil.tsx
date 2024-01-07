@@ -5129,6 +5129,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         nextTrainHandler: this.playNextTrainAnnouncement.bind(this),
         disruptedTrainHandler: this.playDisruptedTrainAnnouncement.bind(this),
         approachingTrainHandler: this.playTrainApproachingAnnouncement.bind(this),
+        standingTrainHandler: this.playStandingTrainAnnouncement.bind(this),
         system: this,
       } as Omit<LiveTrainAnnouncementsProps, keyof ICustomAnnouncementPaneProps<never>> as LiveTrainAnnouncementsProps,
     },

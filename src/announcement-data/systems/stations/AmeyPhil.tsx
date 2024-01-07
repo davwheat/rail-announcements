@@ -5077,7 +5077,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           delayTime: {
             name: 'Delay length',
             type: 'select',
-            options: new Array(60).fill(0).map((_, i) => ({ value: (i + 1).toString(), title: `${i + 1} minute${i === 0 ? '' : 's'}` })),
+            options: new Array(59).fill(0).map((_, i) => ({ value: (i + 1).toString(), title: `${i + 1} minute${i === 0 ? '' : 's'}` })),
             default: '10',
             onlyShowWhen(activeState) {
               return activeState.disruptionType === 'delayedBy'

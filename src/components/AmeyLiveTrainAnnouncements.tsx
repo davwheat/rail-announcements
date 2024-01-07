@@ -861,7 +861,7 @@ export function LiveTrainAnnouncements({
           return false
         }
 
-        if (!s.ataSpecified || dayjs(s.ata).isAfter(dayjs().add(15, 'seconds'))) {
+        if (!s.ataSpecified || dayjs(s.ata).add(15, 'seconds').isAfter(dayjs())) {
           addLog(`Skipping ${s.trainid} ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has not stopped yet (${s.ata} +15s)`)
         }
 

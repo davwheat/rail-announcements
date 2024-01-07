@@ -398,7 +398,7 @@ export function LiveTrainAnnouncements({
         const v: string = train.destination[0].via.startsWith('via ') ? train.destination[0].via.slice(4) : train.destination[0].via
 
         v.split(/(&|and)/).forEach(via => {
-          const guessViaCrs = guessViaPoint(via.trim().toLowerCase())
+          const guessViaCrs = guessViaPoint(via.trim().toLowerCase(), train.subsequentLocations)
 
           addLog(`Guessed via ${guessViaCrs} for ${via}`)
           console.log(`[Live Trains] Guessed via ${guessViaCrs} for ${via}`)
@@ -501,7 +501,7 @@ export function LiveTrainAnnouncements({
         const v: string = train.destination[0].via.startsWith('via ') ? train.destination[0].via.slice(4) : train.destination[0].via
 
         v.split(/(&|and)/).forEach(via => {
-          const guessViaCrs = guessViaPoint(via.trim().toLowerCase())
+          const guessViaCrs = guessViaPoint(via.trim().toLowerCase(), train.subsequentLocations)
 
           addLog(`Guessed via ${guessViaCrs} for ${via}`)
           console.log(`[Live Trains] Guessed via ${guessViaCrs} for ${via}`)

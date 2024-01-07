@@ -863,6 +863,8 @@ export function LiveTrainAnnouncements({
 
         if (!s.ataSpecified || dayjs(s.ata).add(15, 'seconds').isAfter(dayjs())) {
           addLog(`Skipping ${s.trainid} ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has not stopped yet (${s.ata} +15s)`)
+          console.log(`[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has not stopped yet (${s.ata} +15s)`)
+          return false
         }
 
         // Wait n seconds after arrival to announce

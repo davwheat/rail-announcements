@@ -1,3 +1,4 @@
+import { getStationByCrs } from '@data/StationManipulators'
 import AmeyPhil, { ChimeType } from './AmeyPhil'
 import DelayCodeMapping from './DarwinDelayCodes_Female1.json'
 
@@ -20,6 +21,11 @@ export default class AmeyCelia extends AmeyPhil {
     afterCallingAtDelay: 0,
     betweenStopsDelay: 220,
     aroundAndDelay: 0,
+  }
+
+  protected readonly standingOptions = {
+    thisIsId: 's.this is-2',
+    nowStandingAtId: 's.the train now standing at platform',
   }
 
   get DEFAULT_CHIME(): ChimeType {
@@ -2965,6 +2971,10 @@ export default class AmeyCelia extends AmeyPhil {
       'ZFD',
       'ZLW',
     ]
+  }
+
+  get ADDITIONAL_STATIONS() {
+    return []
   }
 
   protected get SHORT_PLATFORMS() {

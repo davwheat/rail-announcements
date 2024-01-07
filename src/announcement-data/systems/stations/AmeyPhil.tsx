@@ -23,6 +23,11 @@ export interface INextTrainAnnouncementOptions {
   coaches: string | null
 }
 
+export interface IStandingTrainAnnouncementOptions extends Omit<INextTrainAnnouncementOptions, 'chime'> {
+  thisStationCode: string
+  mindTheGap: boolean
+}
+
 export interface IDisruptedTrainAnnouncementOptions {
   chime: ChimeType
   hour: string
@@ -87,17 +92,26 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     andId: 'm.or-2',
   }
 
+  protected readonly standingOptions = {
+    thisIsId: 's.this is',
+    nowStandingAtId: 's.the train now standing at platform-4',
+  }
+
   get DEFAULT_CHIME(): ChimeType {
     return 'four'
   }
 
-  private get announcementPresets(): Readonly<Record<string, ICustomAnnouncementPreset[]>> {
+  private get announcementPresets(): Readonly<{
+    nextTrain: ICustomAnnouncementPreset<INextTrainAnnouncementOptions | (INextTrainAnnouncementOptions & IStandingTrainAnnouncementOptions)>[]
+    disruptedTrain: ICustomAnnouncementPreset<IDisruptedTrainAnnouncementOptions>[]
+  }> {
     return {
       nextTrain: [
         {
           name: '12:28 | SN Littlehampton to Brighton',
           state: {
             chime: this.DEFAULT_CHIME,
+            isDelayed: false,
             platform: '2',
             hour: '12',
             min: '28',
@@ -112,6 +126,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           name: '16:05 | SN Victoria to Portsmouth & Bognor',
           state: {
             chime: this.DEFAULT_CHIME,
+            isDelayed: false,
             platform: '12',
             hour: '16',
             min: '05',
@@ -146,6 +161,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           name: '17:15 | GX Brighton to London Victoria',
           state: {
             chime: this.DEFAULT_CHIME,
+            isDelayed: false,
             platform: '5',
             hour: '17',
             min: '15',
@@ -160,6 +176,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           name: '11:18 | VT Euston to Edinburgh',
           state: {
             chime: this.DEFAULT_CHIME,
+            thisStationCode: 'WFJ',
+            isDelayed: false,
             platform: '6',
             hour: '11',
             min: '18',
@@ -191,6 +209,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           name: '13:15 | VT Manchester to Euston',
           state: {
             chime: this.DEFAULT_CHIME,
+            isDelayed: false,
             platform: '6',
             hour: '13',
             min: '15',
@@ -205,6 +224,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           name: '08:20 | XC Aberdeen to Penzance',
           state: {
             chime: this.DEFAULT_CHIME,
+            isDelayed: false,
             platform: '3',
             hour: '08',
             min: '20',
@@ -260,6 +280,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           name: '08:20 | 1O23 XC Manchester to Brighton (2008)',
           state: {
             chime: this.DEFAULT_CHIME,
+            isDelayed: false,
             platform: '3',
             hour: '08',
             min: '20',
@@ -276,6 +297,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           name: '18:07 | Chiltern MYB - Stourbridge',
           state: {
             chime: this.DEFAULT_CHIME,
+            isDelayed: false,
             platform: '2',
             hour: '18',
             min: '07',
@@ -290,6 +312,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           name: '12:50 | SN Eastbourne - Ashford',
           state: {
             chime: this.DEFAULT_CHIME,
+            thisStationCode: 'EBN',
+            isDelayed: false,
             platform: '2',
             hour: '12',
             min: '50',
@@ -321,6 +345,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             platform: 'a',
             hour: '12',
             min: '04',
+            thisStationCode: 'PAD',
             isDelayed: false,
             toc: '',
             terminatingStationCode: 'ABW',
@@ -2470,7 +2495,6 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       'NUN',
       'NUT',
       'NVH',
-      'NVM',
       'NVN',
       'NVR',
       'NWA',
@@ -3367,6 +3391,28 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     ]
   }
 
+  get ADDITIONAL_STATIONS() {
+    return [
+      {
+        title: 'Newhaven Marine (closed) (NVM)',
+        value: 'NVM',
+      },
+    ]
+  }
+
+  protected stationItemCache: { title: string; value: string }[] | null = null
+
+  get STATIONS_AS_ITEMS(): { title: string; value: string }[] {
+    if (!this.stationItemCache) {
+      this.stationItemCache = this.STATIONS.map(s => {
+        const stn = getStationByCrs(s)
+        return { title: stn ? `${stn.stationName} (${s})` : `Unknown name (${s})`, value: s }
+      }).concat(this.ADDITIONAL_STATIONS)
+    }
+
+    return this.stationItemCache
+  }
+
   protected get SHORT_PLATFORMS() {
     return [
       { value: 'front.1', title: 'Front coach' },
@@ -3500,8 +3546,9 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     callingPoints: CallingAtPoint[],
     stationsAlwaysMiddle: boolean = false,
     fromAudio: AudioItem[] = [],
+    delay: number = 0,
   ): Promise<AudioItem[]> {
-    const files: AudioItem[] = [`hour.s.${hour}`, `mins.m.${min}`]
+    const files: AudioItem[] = [{ id: `hour.s.${hour}`, opts: { delayStart: delay } }, `mins.m.${min}`]
 
     const _fromAudio = fromAudio.length ? [...fromAudio, 'm.to'] : []
 
@@ -4122,6 +4169,80 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     await this.playAudioFiles(files, download)
   }
 
+  private async playStandingTrainAnnouncement(options: IStandingTrainAnnouncementOptions, download: boolean = false): Promise<void> {
+    const files: AudioItem[] = []
+
+    files.push(`station.m.${options.thisStationCode}`, this.standingOptions.thisIsId, `station.e.${options.thisStationCode}`)
+
+    if (options.mindTheGap) {
+      files.push(
+        { id: 'w.mind the gap between the train and the platform', opts: { delayStart: 250 } },
+        { id: 'w.mind the gap', opts: { delayStart: 100 } },
+      )
+    }
+
+    files.push({ id: this.standingOptions.nowStandingAtId, opts: { delayStart: this.BEFORE_SECTION_DELAY } })
+
+    const plat = parseInt(options.platform)
+    function getPlatFiles() {
+      const platFiles: AudioItem[] = []
+
+      if (plat >= 21) {
+        files.push(`mins.m.${options.platform}`, options.isDelayed ? `m.is the delayed` : `m.is the`)
+      } else {
+        platFiles.push(`platform.s.${options.platform}`, options.isDelayed ? `m.is the delayed` : `m.is the`)
+      }
+
+      return platFiles
+    }
+
+    files.push(
+      ...getPlatFiles(),
+      ...(await this.getFilesForBasicTrainInfo(
+        options.hour,
+        options.min,
+        options.toc,
+        options.vias.map(s => s.crsCode),
+        options.terminatingStationCode,
+        options.callingAt,
+      )),
+    )
+
+    try {
+      files.push(
+        ...(await this.getCallingPoints(
+          options.callingAt,
+          options.terminatingStationCode,
+          options.coaches ? parseInt(options.coaches.split(' ')[0]) : null,
+        )),
+      )
+    } catch (e) {
+      if (e instanceof Error) {
+        alert(e.message)
+        console.error(e)
+        return
+      }
+    }
+
+    files.push(
+      ...(await this.getShortPlatforms(
+        options.callingAt,
+        options.terminatingStationCode,
+        options.coaches ? parseInt(options.coaches.split(' ')[0]) : null,
+      )),
+    )
+
+    files.push(
+      ...(await this.getRequestStops(
+        options.callingAt,
+        options.terminatingStationCode,
+        options.coaches ? parseInt(options.coaches.split(' ')[0]) : null,
+      )),
+    )
+
+    await this.playAudioFiles(files, download)
+  }
+
   protected readonly disruptionOptions = {
     thisStationAudio: 'e.this station-2',
   }
@@ -4588,10 +4709,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           terminatingStationCode: {
             name: 'Terminating station',
             default: this.STATIONS[0],
-            options: this.STATIONS.map(s => {
-              const stn = getStationByCrs(s)
-              return { title: stn ? `${stn.stationName} (${s})` : `Unknown name (${s})`, value: s }
-            }),
+            options: this.STATIONS_AS_ITEMS,
             type: 'select',
           },
           vias: {
@@ -4716,10 +4834,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           terminatingStationCode: {
             name: 'Terminating station',
             default: this.STATIONS[0],
-            options: this.STATIONS.map(s => {
-              const stn = getStationByCrs(s)
-              return { title: stn ? `${stn.stationName} (${s})` : `Unknown name (${s})`, value: s }
-            }),
+            options: this.STATIONS_AS_ITEMS,
             type: 'select',
           },
           vias: {
@@ -4737,10 +4852,133 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           originStationCode: {
             name: 'Origin station',
             default: this.STATIONS[0],
-            options: this.STATIONS.map(s => {
-              const stn = getStationByCrs(s)
-              return { title: stn ? `${stn.stationName} (${s})` : `Unknown name (${s})`, value: s }
-            }),
+            options: this.STATIONS_AS_ITEMS,
+            type: 'select',
+          },
+        },
+      },
+    },
+    standingTrain: {
+      name: 'Standing train',
+      component: CustomAnnouncementPane,
+      props: {
+        presets: this.announcementPresets.nextTrain.filter(x => 'thisStationCode' in x.state),
+        playHandler: this.playStandingTrainAnnouncement.bind(this),
+        options: {
+          thisStationCode: {
+            name: 'This station',
+            default: this.STATIONS[0],
+            options: this.STATIONS_AS_ITEMS,
+            type: 'select',
+          },
+          mindTheGap: {
+            name: 'Mind the gap?',
+            default: false,
+            type: 'boolean',
+          },
+          platform: {
+            name: 'Platform',
+            default: this.PLATFORMS[0],
+            options: this.PLATFORMS.map(p => ({ title: `Platform ${p.toUpperCase()}`, value: p })),
+            type: 'select',
+          },
+          hour: {
+            name: 'Hour',
+            default: '07',
+            options: [
+              '00 - midnight',
+              '01',
+              '02',
+              '03',
+              '04',
+              '05',
+              '06',
+              '07',
+              '08',
+              '09',
+              '10',
+              '11',
+              '12',
+              '13',
+              '14',
+              '15',
+              '16',
+              '17',
+              '18',
+              '19',
+              '20',
+              '21',
+              '22',
+              '23',
+            ].map(h => ({ title: h, value: h })),
+            type: 'select',
+          },
+          min: {
+            name: 'Minute',
+            default: '33',
+            options: ['00 - hundred', '00 - hundred-hours']
+              .concat(new Array(58).fill(0).map((_, i) => (i + 2).toString()))
+              .map(m => ({ title: m.toString().padStart(2, '0'), value: m.toString().padStart(2, '0') })),
+            type: 'select',
+          },
+          isDelayed: {
+            name: 'Delayed?',
+            default: false,
+            type: 'boolean',
+          },
+          toc: {
+            name: 'TOC',
+            default: '',
+            options: [{ title: 'None', value: '' }].concat(this.ALL_AVAILABLE_TOCS.map(m => ({ title: m, value: m.toLowerCase() }))),
+            type: 'select',
+          },
+          terminatingStationCode: {
+            name: 'Terminating station',
+            default: this.STATIONS[0],
+            options: this.STATIONS_AS_ITEMS,
+            type: 'select',
+          },
+          vias: {
+            name: '',
+            type: 'custom',
+            component: CallingAtSelector,
+            props: {
+              availableStations: this.STATIONS,
+              selectLabel: 'Via points (non-splitting services only)',
+              placeholder: 'Add a via point…',
+              heading: 'Via... (optional)',
+            },
+            default: [],
+          },
+          callingAt: {
+            name: '',
+            type: 'custom',
+            component: CallingAtSelector,
+            props: {
+              availableStations: this.STATIONS,
+              enableShortPlatforms: this.SHORT_PLATFORMS,
+              enableRequestStops: true,
+              enableSplits: this.SPLITS,
+            },
+            default: [],
+          },
+          coaches: {
+            name: 'Coach count',
+            default: '8 coaches',
+            options: [
+              '1 coach',
+              '2 coaches',
+              '3 coaches',
+              '4 coaches',
+              '5 coaches',
+              '6 coaches',
+              '7 coaches',
+              '8 coaches',
+              '9 coaches',
+              '10 coaches',
+              '11 coaches',
+              '12 coaches',
+            ].map(c => ({ title: c, value: c })),
             type: 'select',
           },
         },
@@ -4811,10 +5049,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           terminatingStationCode: {
             name: 'Terminating station',
             default: this.STATIONS[0],
-            options: this.STATIONS.map(s => {
-              const stn = getStationByCrs(s)
-              return { title: stn ? `${stn.stationName} (${s})` : `Unknown name (${s})`, value: s }
-            }),
+            options: this.STATIONS_AS_ITEMS,
             type: 'select',
           },
           vias: {
@@ -4842,7 +5077,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           delayTime: {
             name: 'Delay length',
             type: 'select',
-            options: new Array(60).fill(0).map((_, i) => ({ value: (i + 1).toString(), title: `${i + 1} minute${i === 0 ? '' : 's'}` })),
+            options: new Array(59).fill(0).map((_, i) => ({ value: (i + 1).toString(), title: `${i + 1} minute${i === 0 ? '' : 's'}` })),
             default: '10',
             onlyShowWhen(activeState) {
               return activeState.disruptionType === 'delayedBy'
@@ -4894,6 +5129,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         nextTrainHandler: this.playNextTrainAnnouncement.bind(this),
         disruptedTrainHandler: this.playDisruptedTrainAnnouncement.bind(this),
         approachingTrainHandler: this.playTrainApproachingAnnouncement.bind(this),
+        standingTrainHandler: this.playStandingTrainAnnouncement.bind(this),
         system: this,
       } as Omit<LiveTrainAnnouncementsProps, keyof ICustomAnnouncementPaneProps<never>> as LiveTrainAnnouncementsProps,
     },

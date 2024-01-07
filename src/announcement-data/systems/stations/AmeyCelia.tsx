@@ -22,6 +22,11 @@ export default class AmeyCelia extends AmeyPhil {
     aroundAndDelay: 0,
   }
 
+  protected readonly standingOptions = {
+    thisIsId: 's.this is-2',
+    nowStandingAtId: 's.the train now standing at platform',
+  }
+
   get DEFAULT_CHIME(): ChimeType {
     return 'three'
   }
@@ -2965,6 +2970,10 @@ export default class AmeyCelia extends AmeyPhil {
       'ZFD',
       'ZLW',
     ]
+  }
+
+  get ADDITIONAL_STATIONS() {
+    return []
   }
 
   protected get SHORT_PLATFORMS() {

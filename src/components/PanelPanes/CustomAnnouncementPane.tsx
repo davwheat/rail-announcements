@@ -80,9 +80,9 @@ const useStyles = makeStyles({
   },
 })
 
-export interface ICustomAnnouncementPreset {
+export interface ICustomAnnouncementPreset<State = Record<string, unknown>> {
   name: string
-  state: Record<string, unknown>
+  state: State
 }
 
 export interface ICustomAnnouncementPaneProps<OptionIds extends string> {

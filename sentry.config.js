@@ -3,7 +3,7 @@ import * as Sentry from '@sentry/gatsby'
 const __IS_DEV__ = process.env.NODE_ENV !== 'production'
 
 Sentry.init({
-  dsn: 'https://ec40c9d067e1bd042eff07c66d80dec6@sentry.service.davw.network/2',
+  dsn: 'https://12ca1bd33865c52610522771477dd4ab@sentry.service.davw.network/2',
   sampleRate: 1.0,
   release: process.env.RELEASE,
 

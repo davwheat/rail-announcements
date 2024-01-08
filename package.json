@@ -20,7 +20,7 @@
     "clean": "gatsby clean",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md,less,mdx}\"",
     "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,md,less,mdx}\"",
-    "sentry:sourcemaps": "yarn sentry-cli sourcemaps inject --org davwheat --project rail-announcements ./public && sentry-cli sourcemaps upload --org davwheat --project rail-announcements ./public"
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org davw-network --project rail-announcements-web ./public && sentry-cli --url https://sentry.service.davw.network/ sourcemaps upload --org davw-network --project rail-announcements-web ./public"
   },
   "dependencies": {
     "@material-ui/styles": "^4.11.5",
@@ -56,7 +56,7 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "@sentry/cli": "^2.23.0",
+    "@sentry/cli": "^2.24.1",
     "@types/react-beautiful-dnd": "^13.1.7",
     "@types/uuid": "^9.0.7",
     "cross-env": "^7.0.3",

@@ -82,5 +82,5 @@ __temp_audio/
 
 static/temp/
 
-# Sentry Auth Token
+# Sentry Config File
 .sentryclirc

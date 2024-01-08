@@ -3,7 +3,7 @@ import * as Sentry from '@sentry/gatsby'
 const __IS_DEV__ = process.env.NODE_ENV !== 'production'
 
 Sentry.init({
-  dsn: 'https://e2561f72b4484d0c874eecbde0ad297d@o991058.ingest.sentry.io/5947974',
+  dsn: 'https://12ca1bd33865c52610522771477dd4ab@sentry.service.davw.network/2',
   sampleRate: 1.0,
   release: process.env.RELEASE,
 
@@ -16,7 +16,13 @@ Sentry.init({
 
   tracesSampleRate: __IS_DEV__ ? 1.0 : 0.3,
 
-  integrations: [new Sentry.Replay(), new Sentry.BrowserTracing()],
+  integrations: [
+    new Sentry.Replay({
+      maskAllText: false,
+      blockAllMedia: false,
+    }),
+    new Sentry.BrowserTracing(),
+  ],
 
   ignoreErrors: [
     /minified react error/i,

@@ -74,16 +74,17 @@ jobs:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
       - name: Publish Sentry release
+        if: github.ref == 'refs/heads/deploy' && github.event_name == 'push'
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: davw-network
           SENTRY_PROJECT: rail-announcements-web
         run: |
-          VERSION=`sentry-cli releases propose-version`
+          VERSION=`yarn sentry-cli releases propose-version`
 
-          sentry-cli --url https://sentry.davw.network releases new "$VERSION"
-          sentry-cli --url https://sentry.davw.network releases set-commits "$VERSION" --auto
-          sentry-cli --url https://sentry.davw.network releases finalize "$VERSION"
+          yarn sentry-cli --url https://sentry.davw.network releases new "$VERSION"
+          yarn sentry-cli --url https://sentry.davw.network releases set-commits "$VERSION" --auto
+          yarn sentry-cli --url https://sentry.davw.network releases finalize "$VERSION"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2

@@ -80,11 +80,11 @@ jobs:
           SENTRY_ORG: davw-network
           SENTRY_PROJECT: rail-announcements-web
         run: |
-          VERSION=`yarn sentry-cli releases propose-version`
+          VERSION=`yarn sentry-cli --url https://sentry.service.davw.network releases propose-version`
 
-          yarn sentry-cli --url https://sentry.davw.network releases new "$VERSION"
-          yarn sentry-cli --url https://sentry.davw.network releases set-commits "$VERSION" --auto
-          yarn sentry-cli --url https://sentry.davw.network releases finalize "$VERSION"
+          yarn sentry-cli --url https://sentry.service.davw.network releases new "$VERSION"
+          yarn sentry-cli --url https://sentry.service.davw.network releases set-commits "$VERSION" --auto
+          yarn sentry-cli --url https://sentry.service.davw.network releases finalize "$VERSION"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2

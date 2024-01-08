@@ -73,6 +73,18 @@ jobs:
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
+      - name: Publish Sentry release
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: davw-network
+          SENTRY_PROJECT: rail-announcements-web
+        run: |
+          VERSION=`sentry-cli releases propose-version`
+
+          sentry-cli --url https://sentry.davw.network releases new "$VERSION"
+          sentry-cli --url https://sentry.davw.network releases set-commits "$VERSION" --auto
+          sentry-cli --url https://sentry.davw.network releases finalize "$VERSION"
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
         with:

@@ -94,7 +94,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
 
   protected readonly standingOptions = {
     thisIsId: 's.this is',
-    nowStandingAtId: 's.the train now standing at platform-4',
+    nowStandingAtId: 's.the train now standing at platform',
   }
 
   get DEFAULT_CHIME(): ChimeType {

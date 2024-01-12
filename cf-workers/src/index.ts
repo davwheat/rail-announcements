@@ -3,6 +3,7 @@ import { createCors } from 'itty-cors'
 
 import { saveAnnouncementHandler } from './save-announcement'
 import { getAnnouncementHandler } from './get-announcement'
+import { getServicesHandler } from './get-services'
 
 export interface Env {
   DB: D1Database
@@ -16,6 +17,7 @@ router.all('*', preflight)
 
 router.post('/save-announcement', saveAnnouncementHandler)
 router.get('/get-announcement', getAnnouncementHandler)
+router.get('/get-services', getServicesHandler)
 
 router.all('*', () => error(404))
 

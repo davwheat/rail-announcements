@@ -796,9 +796,17 @@ export function LiveTrainAnnouncements({
 
       let services: TrainService[] | null = null
 
+      const params = new URLSearchParams()
+      params.set('station', selectedCrs)
+      params.set('maxServices', '10')
+      params.set('timeOffset', '0')
+      params.set('timeWindow', '40')
+
       try {
         const resp = await fetch(
-          `https://national-rail-api.davwheat.dev/staffdepartures/${selectedCrs}/10?expand=true&timeOffset=0&timeWindow=30`,
+          process.env.NODE_ENV === 'development'
+            ? `http://localhost:8787/get-services?${params}`
+            : `https://api.railannouncements.co.uk/get-services?${params}`,
         )
 
         if (!resp.ok) {

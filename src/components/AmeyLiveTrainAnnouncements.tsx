@@ -12,7 +12,7 @@ import type {
   INextTrainAnnouncementOptions,
   IDisruptedTrainAnnouncementOptions,
   default as AmeyPhil,
-  ITrainApproachingAnnouncementOptions,
+  ILiveTrainApproachingAnnouncementOptions,
   IStandingTrainAnnouncementOptions,
 } from '../announcement-data/systems/stations/AmeyPhil'
 import type { ICustomAnnouncementPaneProps } from './PanelPanes/CustomAnnouncementPane'
@@ -28,11 +28,19 @@ dayjs.tz.setDefault('Europe/London')
 
 const MIN_TIME_TO_ANNOUNCE = 4
 
+function pluraliseStrings(...strings: string[]): string {
+  if (strings.length === 1) return strings[0]
+
+  const last = strings.pop()!!
+
+  return `${strings.join(', ')} and ${last}`
+}
+
 export interface LiveTrainAnnouncementsProps extends ICustomAnnouncementPaneProps<never> {
   system: AmeyPhil
   nextTrainHandler: (options: INextTrainAnnouncementOptions) => Promise<void>
   disruptedTrainHandler: (options: IDisruptedTrainAnnouncementOptions) => Promise<void>
-  approachingTrainHandler: (options: ITrainApproachingAnnouncementOptions) => Promise<void>
+  approachingTrainHandler: (options: ILiveTrainApproachingAnnouncementOptions) => Promise<void>
   standingTrainHandler: (options: IStandingTrainAnnouncementOptions) => Promise<void>
 }
 
@@ -56,7 +64,7 @@ interface ServicesResponse {
 
 interface TrainService {
   previousLocations: any
-  subsequentLocations: SubsequentLocation[]
+  subsequentLocations: TimingLocation[]
   cancelReason: CancelReason | null
   delayReason: DelayReason | null
   category: string
@@ -66,8 +74,8 @@ interface TrainService {
   detachFront: boolean
   origin: Origin[]
   destination: Destination[]
-  currentOrigins: any
-  currentDestinations: any
+  currentOrigins: null | Origin[]
+  currentDestinations: null | Destination[]
   formation: any
   rid: string
   uid: string
@@ -109,7 +117,7 @@ interface TrainService {
   adhocAlerts: any
 }
 
-interface SubsequentLocation {
+interface TimingLocation {
   locationName: string
   tiploc: string
   crs?: string
@@ -144,8 +152,39 @@ interface SubsequentLocation {
   adhocAlerts: any
 }
 
-interface Association {
-  category: number
+interface AssociatedServiceLocation extends TimingLocation {
+  length: number | null
+  falseDest: null | Destination[]
+}
+
+interface AssociatedServiceDetail {
+  cancelReason: CancelReason | null
+  delayReason: DelayReason | null
+  category: string
+  sta: string
+  staSpecified: boolean
+  ata: string
+  ataSpecified: boolean
+  eta: string
+  etaSpecified: boolean
+  std: string
+  stdSpecified: boolean
+  atd: string
+  atdSpecified: boolean
+  etd: string
+  etdSpecified: boolean
+  rid: string
+  uid: string
+  locations: AssociatedServiceLocation[]
+}
+
+enum AssociationCategory {
+  Join = 0,
+  Divide = 1,
+}
+
+interface Association<Category extends AssociationCategory = AssociationCategory> {
+  category: Category
   rid: string
   uid: string
   trainid: string
@@ -158,6 +197,7 @@ interface Association {
   destCRS: string
   destTiploc: string
   isCancelled: boolean
+  service: Category extends AssociationCategory.Divide ? AssociatedServiceDetail : undefined
 }
 
 interface CancelReason {
@@ -378,13 +418,13 @@ export function LiveTrainAnnouncements({
   }, [])
 
   const getStation = useCallback(
-    function getStation(location: SubsequentLocation | Destination | Origin): string {
+    function getStation(location: TimingLocation | Destination | Origin): string {
       return system.liveTrainsTiplocStationOverrides(location.tiploc) ?? location.crs!!
     },
     [system],
   )
 
-  const guessViaPoint = useCallback(function guessViaPoint(via: string, stops: (SubsequentLocation | Destination)[]): string | null {
+  const guessViaPoint = useCallback(function guessViaPoint(via: string, stops: (TimingLocation | Destination)[]): string | null {
     if (stationNameToCrsMap[via]) return stationNameToCrsMap[via]
 
     // Manual entries
@@ -406,7 +446,7 @@ export function LiveTrainAnnouncements({
   const announceStandingTrain = useCallback(
     async function announceStandingTrain(train: TrainService, abortController: AbortController) {
       console.log(train)
-      addLog(`Announcing standing train: ${train.rid} (${train.std} to ${train.destination[0].locationName})`)
+      addLog(`Announcing standing train: ${train.rid} (${train.std} to ${pluraliseStrings(...train.destination.map(l => l.locationName))})`)
 
       markStandingTrainAnnounced(train.rid)
 
@@ -443,11 +483,30 @@ export function LiveTrainAnnouncements({
           // Hide last station if it's the train destination
           if (i === arr.length - 1 && p.crs === train.destination[0].crs) return null
 
-          return {
+          const stop: CallingAtPoint = {
             crsCode: getStation(p),
             name: '',
             randomId: '',
           }
+
+          p.associations
+            ?.filter(a => a.category === AssociationCategory.Divide)
+            .forEach(a => {
+              // We have a dividing service
+              stop.splitType = 'splits'
+              const len = a.service!!.locations[0].length
+              stop.splitForm = `rear.${len}`
+              stop.splitCallingPoints = a
+                .service!!.locations.filter(s => {
+                  if (!s.crs) return false
+                  if (s.isCancelled || s.isOperational || s.isPass) return false
+                  if (!system.STATIONS.includes(s.crs)) return false
+                  return true
+                })
+                .map(l => ({ crsCode: l.crs!!, name: l.locationName, randomId: '' }))
+            })
+
+          return stop
         })
         .filter(x => !!x) as CallingAtPoint[]
 
@@ -496,7 +555,11 @@ export function LiveTrainAnnouncements({
         }
 
         setIsPlaying(true)
-        console.log(`[Live Trains] Playing standing train announcement for ${train.rid} (${train.std} to ${train.destination[0].locationName})`)
+        console.log(
+          `[Live Trains] Playing standing train announcement for ${train.rid} (${train.std} to ${pluraliseStrings(
+            ...train.destination.map(l => l.locationName),
+          )})`,
+        )
         await standingTrainHandler(options)
       } catch (e) {
         console.warn(`[Live Trains] Error playing announcement for ${train.rid}; see below`)
@@ -511,7 +574,7 @@ export function LiveTrainAnnouncements({
   const announceApproachingTrain = useCallback(
     async function announceApproachingTrain(train: TrainService, abortController: AbortController) {
       console.log(train)
-      addLog(`Announcing approaching train: ${train.rid} (${train.std} to ${train.destination[0].locationName})`)
+      addLog(`Announcing approaching train: ${train.rid} (${train.std} to ${pluraliseStrings(...train.destination.map(l => l.locationName))})`)
 
       markApproachingTrainAnnounced(train.rid)
 
@@ -525,39 +588,44 @@ export function LiveTrainAnnouncements({
 
       const toc = system.processTocForLiveTrains(train.operator, train.origin[0].crs, train.destination[0].crs)
 
-      const vias: CallingAtPoint[] = []
+      const vias: CallingAtPoint[][] = []
 
-      if (train.destination[0].via) {
-        const v: string = train.destination[0].via.startsWith('via ') ? train.destination[0].via.slice(4) : train.destination[0].via
+      ;(train.currentDestinations ?? train.destination).forEach((d, i) => {
+        vias[i] ||= []
 
-        v.split(/(&|and)/).forEach(via => {
-          const guessViaCrs = guessViaPoint(via.trim().toLowerCase(), train.subsequentLocations)
+        if (d.via) {
+          const v: string = d.via.startsWith('via ') ? d.via.slice(4) : d.via
 
-          addLog(`Guessed via ${guessViaCrs} for ${via}`)
-          console.log(`[Live Trains] Guessed via ${guessViaCrs} for ${via}`)
+          v.split(/(&|and)/).forEach(via => {
+            const guessViaCrs = guessViaPoint(via.trim().toLowerCase(), train.subsequentLocations)
 
-          if (guessViaCrs && system.STATIONS.includes(guessViaCrs)) {
-            const point = train.subsequentLocations.find(p => p.crs === guessViaCrs)
+            addLog(`Guessed via ${guessViaCrs} for ${via}`)
+            console.log(`[Live Trains] Guessed via ${guessViaCrs} for ${via}`)
 
-            vias.push({
-              crsCode: point ? getStation(point) : guessViaCrs,
-              name: '',
-              randomId: '',
-            })
-          }
-        })
-      }
+            if (guessViaCrs && system.STATIONS.includes(guessViaCrs)) {
+              const point = train.subsequentLocations.find(p => p.crs === guessViaCrs)
 
-      const options: ITrainApproachingAnnouncementOptions = {
+              vias[i].push({
+                crsCode: point ? getStation(point) : guessViaCrs,
+                name: '',
+                randomId: '',
+              })
+            }
+          })
+        }
+      })
+
+      const options: ILiveTrainApproachingAnnouncementOptions = {
         chime: system.DEFAULT_CHIME,
         hour: h === '00' ? '00 - midnight' : h,
         min: m === '00' ? '00 - hundred-hours' : m,
         isDelayed: delayMins > 5,
         toc,
         platform: getPlatform(train.platform),
-        terminatingStationCode: getStation(train.destination[0]),
-        vias,
+        terminatingStationCode: (train.currentDestinations ?? train.destination).map(d => getStation(d)),
+        vias: vias,
         originStationCode: getStation(train.origin[0]),
+        fromLive: true,
       }
 
       console.log(options)
@@ -568,7 +636,11 @@ export function LiveTrainAnnouncements({
         }
 
         setIsPlaying(true)
-        console.log(`[Live Trains] Playing next train announcement for ${train.rid} (${train.std} to ${train.destination[0].locationName})`)
+        console.log(
+          `[Live Trains] Playing next train announcement for ${train.rid} (${train.std} to ${pluraliseStrings(
+            ...train.destination.map(l => l.locationName),
+          )})`,
+        )
         await approachingTrainHandler(options)
       } catch (e) {
         console.warn(`[Live Trains] Error playing announcement for ${train.rid}; see below`)
@@ -583,7 +655,7 @@ export function LiveTrainAnnouncements({
   const announceNextTrain = useCallback(
     async function announceNextTrain(train: TrainService, abortController: AbortController) {
       console.log(train)
-      addLog(`Announcing next train: ${train.rid} (${train.std} to ${train.destination[0].locationName})`)
+      addLog(`Announcing next train: ${train.rid} (${train.std} to ${pluraliseStrings(...train.destination.map(l => l.locationName))})`)
 
       markNextTrainAnnounced(train.rid)
 
@@ -620,11 +692,30 @@ export function LiveTrainAnnouncements({
           // Hide last station if it's the train destination
           if (i === arr.length - 1 && p.crs === train.destination[0].crs) return null
 
-          return {
+          const stop: CallingAtPoint = {
             crsCode: getStation(p),
             name: '',
             randomId: '',
           }
+
+          p.associations
+            ?.filter(a => a.category === AssociationCategory.Divide)
+            .forEach(a => {
+              // We have a dividing service
+              stop.splitType = 'splits'
+              const len = a.service!!.locations[0].length
+              stop.splitForm = `rear.${len}`
+              stop.splitCallingPoints = a
+                .service!!.locations.filter(s => {
+                  if (!s.crs) return false
+                  if (s.isCancelled || s.isOperational || s.isPass) return false
+                  if (!system.STATIONS.includes(s.crs)) return false
+                  return true
+                })
+                .map(l => ({ crsCode: l.crs!!, name: l.locationName, randomId: '' }))
+            })
+
+          return stop
         })
         .filter(x => !!x) as CallingAtPoint[]
 
@@ -672,7 +763,11 @@ export function LiveTrainAnnouncements({
         }
 
         setIsPlaying(true)
-        console.log(`[Live Trains] Playing next train announcement for ${train.rid} (${train.std} to ${train.destination[0].locationName})`)
+        console.log(
+          `[Live Trains] Playing next train announcement for ${train.rid} (${train.std} to ${pluraliseStrings(
+            ...train.destination.map(l => l.locationName),
+          )})`,
+        )
         await nextTrainHandler(options)
       } catch (e) {
         console.warn(`[Live Trains] Error playing announcement for ${train.rid}; see below`)
@@ -751,7 +846,11 @@ export function LiveTrainAnnouncements({
         }
 
         setIsPlaying(true)
-        console.log(`[Live Trains] Playing disrupted announcement for ${train.rid} (${train.std} to ${train.destination[0].locationName})`)
+        console.log(
+          `[Live Trains] Playing disrupted announcement for ${train.rid} (${train.std} to ${pluraliseStrings(
+            ...train.destination.map(l => l.locationName),
+          )})`,
+        )
         await disruptedTrainHandler(options)
       } catch (e) {
         console.warn(`[Live Trains] Error playing announcement for ${train.rid}; see below`)
@@ -762,7 +861,9 @@ export function LiveTrainAnnouncements({
 
           try {
             console.log(
-              `[Live Trains] Playing disrupted announcement (attempt 2) for ${train.rid} (${train.std} to ${train.destination[0].locationName})`,
+              `[Live Trains] Playing disrupted announcement (attempt 2) for ${train.rid} (${train.std} to ${pluraliseStrings(
+                ...train.destination.map(l => l.locationName),
+              )})`,
             )
             await disruptedTrainHandler(options2)
           } catch (e) {
@@ -796,9 +897,17 @@ export function LiveTrainAnnouncements({
 
       let services: TrainService[] | null = null
 
+      const params = new URLSearchParams()
+      params.set('station', selectedCrs)
+      params.set('maxServices', '10')
+      params.set('timeOffset', '0')
+      params.set('timeWindow', '40')
+
       try {
         const resp = await fetch(
-          `https://national-rail-api.davwheat.dev/staffdepartures/${selectedCrs}/10?expand=true&timeOffset=0&timeWindow=30`,
+          process.env.NODE_ENV === 'development'
+            ? `http://localhost:8787/get-services?${params}`
+            : `https://api.railannouncements.co.uk/get-services?${params}`,
         )
 
         if (!resp.ok) {

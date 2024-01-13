@@ -1,4 +1,4 @@
-import { Env } from '.'
+import type { Env } from '.'
 
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'

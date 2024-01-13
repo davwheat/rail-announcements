@@ -1,4 +1,4 @@
-import { Env } from '.'
+import type { Env } from '.'
 
 export async function getAnnouncementHandler(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
   const { searchParams } = new URL(request.url)

@@ -59,6 +59,20 @@ export interface ITrainApproachingAnnouncementOptions {
   callingAt?: CallingAtPoint[]
 }
 
+export interface ILiveTrainApproachingAnnouncementOptions {
+  chime: ChimeType
+  platform: string
+  hour: string
+  min: string
+  isDelayed: boolean
+  toc: string
+  terminatingStationCode: string[]
+  vias: CallingAtPoint[][]
+  originStationCode: string
+  callingAt?: CallingAtPoint[]
+  fromLive: true
+}
+
 interface SplitInfoStop {
   crsCode: string
   shortPlatform: string
@@ -3617,6 +3631,80 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     return files
   }
 
+  private async getFilesForBasicTrainInfoLive(
+    hour: string,
+    min: string,
+    toc: string,
+    vias: string[][],
+    terminatingStation: string[],
+    stationsAlwaysMiddle: boolean = false,
+    fromAudio: AudioItem[] = [],
+    delay: number = 0,
+  ): Promise<AudioItem[]> {
+    const files: AudioItem[] = [{ id: `hour.s.${hour}`, opts: { delayStart: delay } }, `mins.m.${min}`]
+
+    const _fromAudio = fromAudio.length ? [...fromAudio, 'm.to'] : []
+
+    if (toc === '') {
+      files.push(
+        {
+          id: _fromAudio.length ? `m.service from` : `m.service to`,
+          opts: { delayStart: 50 },
+        },
+        ..._fromAudio,
+      )
+    } else {
+      if (this.AVAILABLE_TOCS.standaloneOnly.some(x => x.toLowerCase() === toc.toLowerCase())) {
+        files.push(
+          {
+            id: `toc.m.${toc.toLowerCase()}`,
+            opts: { delayStart: this.BEFORE_TOC_DELAY },
+          },
+          _fromAudio.length ? `m.service from` : `m.service to`,
+          ..._fromAudio,
+        )
+      } else {
+        files.push(
+          {
+            id: `toc.m.${toc.toLowerCase()} ${_fromAudio.length ? 'service from' : 'service to'}`,
+            opts: { delayStart: this.BEFORE_TOC_DELAY },
+          },
+          ..._fromAudio,
+        )
+      }
+    }
+
+    const tStationLength = terminatingStation.length
+    terminatingStation.forEach((t, i) => {
+      const viasForThisTerminatingStation = vias[i]
+      const isEnd = i === tStationLength - 1
+
+      if (viasForThisTerminatingStation.length !== 0) {
+        files.push(
+          `station.m.${t}`,
+          'm.via',
+          ...this.pluraliseAudio(
+            viasForThisTerminatingStation.map(
+              (stn, i) => `station.${!stationsAlwaysMiddle && i === viasForThisTerminatingStation.length - 1 ? 'e' : 'm'}.${stn}`,
+            ),
+            {
+              andId: 'm.and',
+              beforeAndDelay: 100,
+            },
+          ),
+        )
+      } else {
+        files.push(`station.${isEnd && !stationsAlwaysMiddle ? 'e' : 'm'}.${t}`)
+      }
+
+      if (!isEnd) {
+        files.push('m.and')
+      }
+    })
+
+    return files
+  }
+
   private async getShortPlatforms(
     callingPoints: CallingAtPoint[],
     terminatingStation: string,
@@ -4363,7 +4451,10 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     await this.playAudioFiles(files, download)
   }
 
-  private async playTrainApproachingAnnouncement(options: ITrainApproachingAnnouncementOptions, download: boolean = false): Promise<void> {
+  private async playTrainApproachingAnnouncement(
+    options: ITrainApproachingAnnouncementOptions | ILiveTrainApproachingAnnouncementOptions,
+    download: boolean = false,
+  ): Promise<void> {
     const files: AudioItem[] = []
 
     const chime = this.getChime(options.chime)
@@ -4385,16 +4476,28 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       files.push('m.delayed')
     }
 
-    files.push(
-      ...(await this.getFilesForBasicTrainInfo(
-        options.hour,
-        options.min,
-        options.toc,
-        options.vias.map(s => s.crsCode),
-        options.terminatingStationCode,
-        options.callingAt || [],
-      )),
-    )
+    if ('fromLive' in options) {
+      files.push(
+        ...(await this.getFilesForBasicTrainInfoLive(
+          options.hour,
+          options.min,
+          options.toc,
+          options.vias.map(l => l.map(v => v.crsCode)),
+          options.terminatingStationCode,
+        )),
+      )
+    } else {
+      files.push(
+        ...(await this.getFilesForBasicTrainInfo(
+          options.hour,
+          options.min,
+          options.toc,
+          options.vias.map(s => s.crsCode),
+          options.terminatingStationCode,
+          options.callingAt || [],
+        )),
+      )
+    }
 
     files.push({ id: 's.this train is the service from', opts: { delayStart: this.SHORT_DELAY } }, `station.e.${options.originStationCode}`)
 

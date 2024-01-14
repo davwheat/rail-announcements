@@ -1,12 +1,17 @@
-button {
+button,
+.button {
+  display: inline-block;
   padding: 8px 12px;
   background: var(--main);
-  color: #fff;
   border: 1px solid var(--main);
   border-radius: 4px;
   cursor: pointer;
   font-weight: bold;
   font-size: 1rem;
+  --text-color: #fff;
+  text-decoration: none;
+
+  color: var(--text-color) !important;
 
   // No text wrapping
   white-space: nowrap;
@@ -61,7 +66,7 @@ button {
   &.outlined {
     background: transparent;
     border: 1px solid var(--main);
-    color: var(--main);
+    --text-color: var(--main);
 
     &:hover,
     &:focus {

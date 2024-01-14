@@ -7,10 +7,11 @@ import NavBar from '@components/NavBar'
 import Disclaimers from '@components/Disclaimers'
 
 import RailSymbol from '@assets/rail-symbol-2/white-on-red-inset.svg'
+import MegaphoneIcon from 'mdi-react/MegaphoneOutlineIcon'
 
 import { makeStyles } from '@material-ui/styles'
 import { Link } from 'gatsby'
-import clsx from 'clsx'
+import Breakpoints from '@data/breakpoints'
 
 const useStyles = makeStyles({
   heading: {
@@ -24,6 +25,21 @@ const useStyles = makeStyles({
     width: 64,
     marginRight: 16,
     marginTop: -3,
+  },
+  hero: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    textAlign: 'center',
+    padding: 24,
+    background: 'hsl(204 50% 85% / 1)',
+    gap: 16,
+    marginTop: 16,
+    [Breakpoints.upTo.tablet]: {
+      flexDirection: 'column',
+      justifyContent: 'center',
+    },
   },
 })
 
@@ -43,6 +59,16 @@ function IndexPage({ location }): JSX.Element {
 
       <main>
         <MainSelector />
+
+        <aside className={classes.hero}>
+          Listen to real-time train announcements for almost any UK station
+          <Link className="button" to="/amey-live-train-announcements">
+            <span className="buttonLabel">
+              <MegaphoneIcon />
+              Yes please!
+            </span>
+          </Link>
+        </aside>
 
         <AnnouncementPanel />
       </main>

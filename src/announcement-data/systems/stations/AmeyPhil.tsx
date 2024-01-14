@@ -1,12 +1,14 @@
 import StationAnnouncementSystem from '@announcement-data/StationAnnouncementSystem'
 import CallingAtSelector, { CallingAtPoint } from '@components/CallingAtSelector'
-import CustomAnnouncementPane, { ICustomAnnouncementPaneProps, ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
+import CustomAnnouncementPane, { ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
 import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
 import { getStationByCrs } from '@data/StationManipulators'
 import crsToStationItemMapper, { stationItemCompleter } from '@helpers/crsToStationItemMapper'
 import { AudioItem, CustomAnnouncementButton, CustomAnnouncementTab } from '../../AnnouncementSystem'
 import DelayCodeMapping from './DarwinDelayCodes_Male1.json'
-import { LiveTrainAnnouncements, LiveTrainAnnouncementsProps } from '../../../components/AmeyLiveTrainAnnouncements'
+
+import React from 'react'
+import { Link } from 'gatsby'
 
 export type ChimeType = 'three' | 'four' | 'none'
 
@@ -4157,7 +4159,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     return files
   }
 
-  private async playNextTrainAnnouncement(options: INextTrainAnnouncementOptions, download: boolean = false): Promise<void> {
+  async playNextTrainAnnouncement(options: INextTrainAnnouncementOptions, download: boolean = false): Promise<void> {
     const files: AudioItem[] = []
 
     const chime = this.getChime(options.chime)
@@ -4257,7 +4259,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     await this.playAudioFiles(files, download)
   }
 
-  private async playStandingTrainAnnouncement(options: IStandingTrainAnnouncementOptions, download: boolean = false): Promise<void> {
+  async playStandingTrainAnnouncement(options: IStandingTrainAnnouncementOptions, download: boolean = false): Promise<void> {
     const files: AudioItem[] = []
 
     files.push(`station.m.${options.thisStationCode}`, this.standingOptions.thisIsId, `station.e.${options.thisStationCode}`)
@@ -4335,7 +4337,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     thisStationAudio: 'e.this station-2',
   }
 
-  private async playDisruptedTrainAnnouncement(options: IDisruptedTrainAnnouncementOptions, download: boolean = false): Promise<void> {
+  async playDisruptedTrainAnnouncement(options: IDisruptedTrainAnnouncementOptions, download: boolean = false): Promise<void> {
     const files: AudioItem[] = []
 
     const chime = this.getChime(options.chime)
@@ -4431,7 +4433,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     await this.playAudioFiles(files, download)
   }
 
-  private async playFastTrainAnnouncement(options: IFastTrainAnnouncementOptions, download: boolean = false): Promise<void> {
+  async playFastTrainAnnouncement(options: IFastTrainAnnouncementOptions, download: boolean = false): Promise<void> {
     const files: AudioItem[] = []
 
     const chime = this.getChime(options.chime)
@@ -4451,7 +4453,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     await this.playAudioFiles(files, download)
   }
 
-  private async playTrainApproachingAnnouncement(
+  async playTrainApproachingAnnouncement(
     options: ITrainApproachingAnnouncementOptions | ILiveTrainApproachingAnnouncementOptions,
     download: boolean = false,
   ): Promise<void> {
@@ -5226,15 +5228,17 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       },
     } as CustomAnnouncementTab<keyof IFastTrainAnnouncementOptions>,
     liveTrains: {
-      name: 'Live trains (beta)',
-      component: LiveTrainAnnouncements,
-      props: {
-        nextTrainHandler: this.playNextTrainAnnouncement.bind(this),
-        disruptedTrainHandler: this.playDisruptedTrainAnnouncement.bind(this),
-        approachingTrainHandler: this.playTrainApproachingAnnouncement.bind(this),
-        standingTrainHandler: this.playStandingTrainAnnouncement.bind(this),
-        system: this,
-      } as Omit<LiveTrainAnnouncementsProps, keyof ICustomAnnouncementPaneProps<never>> as LiveTrainAnnouncementsProps,
+      name: 'Live trains',
+      component: () => {
+        return (
+          <div>
+            <p>
+              This functionality has moved to a <Link to="/amey-live-train-announcements">new dedicated page</Link>.
+            </p>
+          </div>
+        )
+      },
+      props: {},
     },
     announcementButtons: {
       name: 'Announcement buttons',

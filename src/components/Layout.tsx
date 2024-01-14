@@ -21,18 +21,19 @@ const useStyles = makeStyles({
 
 interface Props {
   description?: string
+  title?: string
   location: LocationContext
   children: React.ReactNode
 }
 
-const Layout: React.FC<Props> = ({ children, description, location }) => {
+const Layout: React.FC<Props> = ({ children, title, description, location }) => {
   const classes = useStyles()
 
   return (
     <ScrollContext location={location}>
       <RecoilRoot>
         <SnackbarProvider>
-          <SEO description={description} />
+          <SEO title={title} description={description} />
 
           <main className={classes.mainContent}>{children}</main>
 

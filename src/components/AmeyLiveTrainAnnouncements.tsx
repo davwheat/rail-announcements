@@ -20,6 +20,7 @@ import type { ICustomAnnouncementPaneProps } from './PanelPanes/CustomAnnounceme
 import dayjs from 'dayjs'
 import dayjsUtc from 'dayjs/plugin/utc'
 import dayjsTz from 'dayjs/plugin/timezone'
+import Breakpoints from '@data/breakpoints'
 
 dayjs.extend(dayjsUtc)
 dayjs.extend(dayjsTz)
@@ -36,12 +37,13 @@ function pluraliseStrings(...strings: string[]): string {
   return `${strings.join(', ')} and ${last}`
 }
 
-export interface LiveTrainAnnouncementsProps extends ICustomAnnouncementPaneProps<never> {
-  system: AmeyPhil
-  nextTrainHandler: (options: INextTrainAnnouncementOptions) => Promise<void>
-  disruptedTrainHandler: (options: IDisruptedTrainAnnouncementOptions) => Promise<void>
-  approachingTrainHandler: (options: ILiveTrainApproachingAnnouncementOptions) => Promise<void>
-  standingTrainHandler: (options: IStandingTrainAnnouncementOptions) => Promise<void>
+export interface LiveTrainAnnouncementsProps<SystemKeys extends string> {
+  systems: Record<SystemKeys, AmeyPhil>
+  supportedPlatforms: Record<string, SystemKeys[]>
+  nextTrainHandler: Record<SystemKeys, (options: INextTrainAnnouncementOptions) => Promise<void>>
+  disruptedTrainHandler: Record<SystemKeys, (options: IDisruptedTrainAnnouncementOptions) => Promise<void>>
+  approachingTrainHandler: Record<SystemKeys, (options: ILiveTrainApproachingAnnouncementOptions) => Promise<void>>
+  standingTrainHandler: Record<SystemKeys, (options: IStandingTrainAnnouncementOptions) => Promise<void>>
 }
 
 interface ServicesResponse {
@@ -265,6 +267,95 @@ const useLiveTrainsStyles = makeStyles({
   logs: {
     marginTop: 16,
   },
+  perPlatformSelection: {
+    padding: 0,
+    width: '100%',
+
+    '& .list': {
+      display: 'grid',
+      overflowX: 'scroll',
+
+      [Breakpoints.downTo.desktopLarge]: {
+        gridTemplateColumns: '1fr 1fr',
+
+        '& fieldset:nth-child(4n - 1), & fieldset:nth-child(4n)': {
+          background: '#eee',
+        },
+      },
+
+      [Breakpoints.upTo.desktopLarge]: {
+        gridTemplateColumns: 'minmax(0, 1fr)',
+
+        '& fieldset:nth-child(even)': {
+          background: '#eee',
+        },
+      },
+    },
+
+    '& summary': {
+      userSelect: 'none',
+      display: 'flex',
+      alignItems: 'center',
+      padding: '8px 16px',
+      background: '#eee',
+      cursor: 'pointer',
+
+      '&::before': {
+        '--size': '6px',
+        content: '""',
+        display: 'inline-block',
+        width: 0,
+        height: 0,
+        borderLeft: 'var(--size) solid transparent',
+        borderRight: 'var(--size) solid transparent',
+        borderTop: 'calc(2 * var(--size)) solid currentColor',
+        marginRight: 8,
+      },
+    },
+
+    '& details:not([open]) summary::before': {
+      transform: 'rotate(-90deg)',
+    },
+
+    '& fieldset': {
+      appearance: 'none',
+      padding: 0,
+      margin: 0,
+      border: 'none',
+      minInlineSize: 'min-content',
+
+      display: 'flex',
+      alignItems: 'center',
+      gap: 8,
+      paddingLeft: 16,
+      paddingRight: 16,
+
+      '& legend': {
+        appearance: 'none',
+        display: 'inline-block',
+        padding: 0,
+        margin: 0,
+        float: 'left',
+        width: '150px',
+        fontWeight: 'bold',
+      },
+    },
+
+    '& label': {
+      display: 'flex',
+      whiteSpace: 'nowrap',
+      alignItems: 'center',
+      fontWeight: 'normal',
+
+      '&:has([disabled])': {
+        color: '#666',
+
+        '&, & input': {
+          cursor: 'not-allowed',
+        },
+      },
+    },
+  },
 })
 
 type DisplayType = 'gtr-new' | 'tfwm-lcd'
@@ -276,26 +367,52 @@ const DisplayNames: Record<DisplayType, string> = {
   'tfwm-lcd': 'WMR/LNWR LCD',
 }
 
-export function LiveTrainAnnouncements({
+export function LiveTrainAnnouncements<SystemKeys extends string>({
   nextTrainHandler,
   disruptedTrainHandler,
   approachingTrainHandler,
   standingTrainHandler,
-  system,
-}: LiveTrainAnnouncementsProps) {
+  systems,
+  supportedPlatforms,
+}: LiveTrainAnnouncementsProps<SystemKeys>) {
   const classes = useLiveTrainsStyles()
 
-  const supportedStations: Option[] = useMemo(
+  const perSystemSupportedStations: Record<string, Option[]> = useMemo(
     () =>
-      system.STATIONS.map(s => {
-        const r = crsToStationItemMapper(s)
+      Object.fromEntries(
+        Object.entries<AmeyPhil>(systems).map(([key, system]) => {
+          return [
+            key,
+            system.STATIONS.map(s => {
+              const r = crsToStationItemMapper(s)
 
-        return {
-          value: r.crsCode,
-          label: r.name,
-        }
-      }),
-    [system.STATIONS],
+              return {
+                value: r.crsCode,
+                label: r.name,
+              }
+            }),
+          ] as [string, Option[]]
+        }),
+      ),
+    [systems],
+  )
+
+  // Ignore duplicates
+  const allSupportedStations = useMemo(
+    () =>
+      Object.values(perSystemSupportedStations)
+        .flat()
+        .filter((s, i, arr) => arr.findIndex(s2 => s2.value === s.value) === i),
+    [perSystemSupportedStations],
+  )
+
+  const [systemKeyForPlatform, dispatchSystemKeyForPlatform] = useReducer(
+    (state: Record<string, SystemKeys>, action: [string, SystemKeys]) => {
+      const [platform, systemKey] = action
+
+      return { ...state, [platform]: systemKey }
+    },
+    Object.fromEntries(Object.entries(supportedPlatforms).map(([platform, systemKeys]) => [platform, systemKeys[0]] as [string, SystemKeys])),
   )
 
   const [displayType, setDisplayType] = useState<DisplayType>('gtr-new')
@@ -315,10 +432,10 @@ export function LiveTrainAnnouncements({
   const stationNameToCrsMap = useMemo(
     () =>
       Object.fromEntries(
-        supportedStations
+        Object.values(perSystemSupportedStations)
+          .flat()
           .map(s => {
             if (!s.label) {
-              // console.warn(`[Live Trains] Station ${s.value} has no label!`)
               return null
             }
 
@@ -326,7 +443,7 @@ export function LiveTrainAnnouncements({
           })
           .filter(x => x) as [string, string][],
       ),
-    [supportedStations],
+    [perSystemSupportedStations],
   )
 
   const removeOldIds = useCallback(
@@ -386,20 +503,40 @@ export function LiveTrainAnnouncements({
   )
 
   const getPlatform = useCallback(
-    function getPlatform(dataPlatform: string) {
+    function getPlatform(dataPlatform: string, systemKey: string) {
       dataPlatform = dataPlatform.toLowerCase()
 
-      if (system.PLATFORMS.includes(dataPlatform)) return dataPlatform
+      if (systems[systemKey].PLATFORMS.includes(dataPlatform)) return dataPlatform
 
       // Fix for stations with letter-suffixed platforms
       dataPlatform = dataPlatform.replace(/[a-z]/g, '')
 
-      if (system.PLATFORMS.includes(dataPlatform)) return dataPlatform
+      if (systems[systemKey].PLATFORMS.includes(dataPlatform)) return dataPlatform
 
       return '1'
     },
-    [system.PLATFORMS],
+    [systems],
   )
+
+  const getPlatformForSystemSelection = useCallback(function getPlatform(dataPlatform: string) {
+    dataPlatform = dataPlatform.toLowerCase()
+
+    if (dataPlatform.match(/^[a-z]$/)) return dataPlatform
+
+    const intVal = parseInt(dataPlatform)
+
+    if (intVal <= 12) {
+      // Fix for stations with letter-suffixed platforms
+      dataPlatform = dataPlatform.replace(/[e-z]/gi, '')
+
+      return dataPlatform
+    } else {
+      // Fix for stations with letter-suffixed platforms
+      dataPlatform = dataPlatform.replace(/[a-z]/gi, '')
+
+      return dataPlatform
+    }
+  }, [])
 
   useEffect(() => {
     const key = setInterval(removeOldIds, 1000 * 60)
@@ -418,10 +555,10 @@ export function LiveTrainAnnouncements({
   }, [])
 
   const getStation = useCallback(
-    function getStation(location: TimingLocation | Destination | Origin): string {
-      return system.liveTrainsTiplocStationOverrides(location.tiploc) ?? location.crs!!
+    function getStation(location: TimingLocation | Destination | Origin, systemKey: string): string {
+      return systems[systemKey].liveTrainsTiplocStationOverrides(location.tiploc) ?? location.crs!!
     },
-    [system],
+    [systems],
   )
 
   const guessViaPoint = useCallback(function guessViaPoint(via: string, stops: (TimingLocation | Destination)[]): string | null {
@@ -444,7 +581,7 @@ export function LiveTrainAnnouncements({
   }, [])
 
   const announceStandingTrain = useCallback(
-    async function announceStandingTrain(train: TrainService, abortController: AbortController) {
+    async function announceStandingTrain(train: TrainService, abortController: AbortController, systemKey: string) {
       console.log(train)
       addLog(`Announcing standing train: ${train.rid} (${train.std} to ${pluraliseStrings(...train.destination.map(l => l.locationName))})`)
 
@@ -458,12 +595,12 @@ export function LiveTrainAnnouncements({
       addLog(`Train is delayed by ${delayMins} mins`)
       console.log(`[Live Trains] Train is delayed by ${delayMins} mins`)
 
-      const toc = system.processTocForLiveTrains(train.operator, train.origin[0].crs, train.destination[0].crs)
+      const toc = systems[systemKey].processTocForLiveTrains(train.operator, train.origin[0].crs, train.destination[0].crs)
 
       const callingPoints = train.subsequentLocations.filter(s => {
         if (!s.crs) return false
         if (s.isCancelled || s.isOperational || s.isPass) return false
-        if (!system.STATIONS.includes(s.crs)) return false
+        if (!systems[systemKey].STATIONS.includes(s.crs)) return false
         return true
       })
 
@@ -484,7 +621,7 @@ export function LiveTrainAnnouncements({
           if (i === arr.length - 1 && p.crs === train.destination[0].crs) return null
 
           const stop: CallingAtPoint = {
-            crsCode: getStation(p),
+            crsCode: getStation(p, systemKey),
             name: '',
             randomId: '',
           }
@@ -500,7 +637,7 @@ export function LiveTrainAnnouncements({
                 .service!!.locations.filter(s => {
                   if (!s.crs) return false
                   if (s.isCancelled || s.isOperational || s.isPass) return false
-                  if (!system.STATIONS.includes(s.crs)) return false
+                  if (!systems[systemKey].STATIONS.includes(s.crs)) return false
                   return true
                 })
                 .map(l => ({ crsCode: l.crs!!, name: l.locationName, randomId: '' }))
@@ -521,11 +658,11 @@ export function LiveTrainAnnouncements({
           addLog(`Guessed via ${guessViaCrs} for ${via}`)
           console.log(`[Live Trains] Guessed via ${guessViaCrs} for ${via}`)
 
-          if (guessViaCrs && system.STATIONS.includes(guessViaCrs)) {
+          if (guessViaCrs && systems[systemKey].STATIONS.includes(guessViaCrs)) {
             const point = train.subsequentLocations.find(p => p.crs === guessViaCrs)
 
             vias.push({
-              crsCode: point ? getStation(point) : guessViaCrs,
+              crsCode: point ? getStation(point, systemKey) : guessViaCrs,
               name: '',
               randomId: '',
             })
@@ -541,8 +678,8 @@ export function LiveTrainAnnouncements({
         isDelayed: delayMins > 5,
         toc,
         coaches: train.length ? `${train.length} coaches` : null,
-        platform: getPlatform(train.platform),
-        terminatingStationCode: getStation(train.destination[0]),
+        platform: getPlatform(train.platform, systemKey),
+        terminatingStationCode: getStation(train.destination[0], systemKey),
         vias,
         callingAt,
       }
@@ -560,7 +697,7 @@ export function LiveTrainAnnouncements({
             ...train.destination.map(l => l.locationName),
           )})`,
         )
-        await standingTrainHandler(options)
+        await standingTrainHandler[systemKey](options)
       } catch (e) {
         console.warn(`[Live Trains] Error playing announcement for ${train.rid}; see below`)
         console.error(e)
@@ -568,11 +705,11 @@ export function LiveTrainAnnouncements({
       console.log(`[Live Trains] Announcement for ${train.rid} complete: waiting 5s until next`)
       setTimeout(() => setIsPlaying(false), 5000)
     },
-    [markNextTrainAnnounced, calculateDelayMins, system, setIsPlaying, standingTrainHandler, selectedCrs, getStation, addLog],
+    [markNextTrainAnnounced, calculateDelayMins, systems, setIsPlaying, standingTrainHandler, selectedCrs, getStation, addLog],
   )
 
   const announceApproachingTrain = useCallback(
-    async function announceApproachingTrain(train: TrainService, abortController: AbortController) {
+    async function announceApproachingTrain(train: TrainService, abortController: AbortController, systemKey: string) {
       console.log(train)
       addLog(`Announcing approaching train: ${train.rid} (${train.std} to ${pluraliseStrings(...train.destination.map(l => l.locationName))})`)
 
@@ -586,7 +723,7 @@ export function LiveTrainAnnouncements({
       addLog(`Train is delayed by ${delayMins} mins`)
       console.log(`[Live Trains] Train is delayed by ${delayMins} mins`)
 
-      const toc = system.processTocForLiveTrains(train.operator, train.origin[0].crs, train.destination[0].crs)
+      const toc = systems[systemKey].processTocForLiveTrains(train.operator, train.origin[0].crs, train.destination[0].crs)
 
       const vias: CallingAtPoint[][] = []
 
@@ -602,11 +739,11 @@ export function LiveTrainAnnouncements({
             addLog(`Guessed via ${guessViaCrs} for ${via}`)
             console.log(`[Live Trains] Guessed via ${guessViaCrs} for ${via}`)
 
-            if (guessViaCrs && system.STATIONS.includes(guessViaCrs)) {
+            if (guessViaCrs && systems[systemKey].STATIONS.includes(guessViaCrs)) {
               const point = train.subsequentLocations.find(p => p.crs === guessViaCrs)
 
               vias[i].push({
-                crsCode: point ? getStation(point) : guessViaCrs,
+                crsCode: point ? getStation(point, systemKey) : guessViaCrs,
                 name: '',
                 randomId: '',
               })
@@ -616,15 +753,15 @@ export function LiveTrainAnnouncements({
       })
 
       const options: ILiveTrainApproachingAnnouncementOptions = {
-        chime: system.DEFAULT_CHIME,
+        chime: systems[systemKey].DEFAULT_CHIME,
         hour: h === '00' ? '00 - midnight' : h,
         min: m === '00' ? '00 - hundred-hours' : m,
         isDelayed: delayMins > 5,
         toc,
-        platform: getPlatform(train.platform),
-        terminatingStationCode: (train.currentDestinations ?? train.destination).map(d => getStation(d)),
+        platform: getPlatform(train.platform, systemKey),
+        terminatingStationCode: (train.currentDestinations ?? train.destination).map(d => getStation(d, systemKey)),
         vias: vias,
-        originStationCode: getStation(train.origin[0]),
+        originStationCode: getStation(train.origin[0], systemKey),
         fromLive: true,
       }
 
@@ -641,7 +778,7 @@ export function LiveTrainAnnouncements({
             ...train.destination.map(l => l.locationName),
           )})`,
         )
-        await approachingTrainHandler(options)
+        await approachingTrainHandler[systemKey](options)
       } catch (e) {
         console.warn(`[Live Trains] Error playing announcement for ${train.rid}; see below`)
         console.error(e)
@@ -649,11 +786,11 @@ export function LiveTrainAnnouncements({
       console.log(`[Live Trains] Announcement for ${train.rid} complete: waiting 5s until next`)
       setTimeout(() => setIsPlaying(false), 5000)
     },
-    [markNextTrainAnnounced, calculateDelayMins, system, setIsPlaying, approachingTrainHandler, getStation, addLog],
+    [markNextTrainAnnounced, calculateDelayMins, systems, setIsPlaying, approachingTrainHandler, getStation, addLog],
   )
 
   const announceNextTrain = useCallback(
-    async function announceNextTrain(train: TrainService, abortController: AbortController) {
+    async function announceNextTrain(train: TrainService, abortController: AbortController, systemKey: string) {
       console.log(train)
       addLog(`Announcing next train: ${train.rid} (${train.std} to ${pluraliseStrings(...train.destination.map(l => l.locationName))})`)
 
@@ -667,12 +804,12 @@ export function LiveTrainAnnouncements({
       addLog(`Train is delayed by ${delayMins} mins`)
       console.log(`[Live Trains] Train is delayed by ${delayMins} mins`)
 
-      const toc = system.processTocForLiveTrains(train.operator, train.origin[0].crs, train.destination[0].crs)
+      const toc = systems[systemKey].processTocForLiveTrains(train.operator, train.origin[0].crs, train.destination[0].crs)
 
       const callingPoints = train.subsequentLocations.filter(s => {
         if (!s.crs) return false
         if (s.isCancelled || s.isOperational || s.isPass) return false
-        if (!system.STATIONS.includes(s.crs)) return false
+        if (!systems[systemKey].STATIONS.includes(s.crs)) return false
         return true
       })
 
@@ -693,7 +830,7 @@ export function LiveTrainAnnouncements({
           if (i === arr.length - 1 && p.crs === train.destination[0].crs) return null
 
           const stop: CallingAtPoint = {
-            crsCode: getStation(p),
+            crsCode: getStation(p, systemKey),
             name: '',
             randomId: '',
           }
@@ -709,7 +846,7 @@ export function LiveTrainAnnouncements({
                 .service!!.locations.filter(s => {
                   if (!s.crs) return false
                   if (s.isCancelled || s.isOperational || s.isPass) return false
-                  if (!system.STATIONS.includes(s.crs)) return false
+                  if (!systems[systemKey].STATIONS.includes(s.crs)) return false
                   return true
                 })
                 .map(l => ({ crsCode: l.crs!!, name: l.locationName, randomId: '' }))
@@ -730,11 +867,11 @@ export function LiveTrainAnnouncements({
           addLog(`Guessed via ${guessViaCrs} for ${via}`)
           console.log(`[Live Trains] Guessed via ${guessViaCrs} for ${via}`)
 
-          if (guessViaCrs && system.STATIONS.includes(guessViaCrs)) {
+          if (guessViaCrs && systems[systemKey].STATIONS.includes(guessViaCrs)) {
             const point = train.subsequentLocations.find(p => p.crs === guessViaCrs)
 
             vias.push({
-              crsCode: point ? getStation(point) : guessViaCrs,
+              crsCode: point ? getStation(point, systemKey) : guessViaCrs,
               name: '',
               randomId: '',
             })
@@ -743,14 +880,14 @@ export function LiveTrainAnnouncements({
       }
 
       const options: INextTrainAnnouncementOptions = {
-        chime: system.DEFAULT_CHIME,
+        chime: systems[systemKey].DEFAULT_CHIME,
         hour: h === '00' ? '00 - midnight' : h,
         min: m === '00' ? '00 - hundred-hours' : m,
         isDelayed: delayMins > 5,
         toc,
         coaches: train.length ? `${train.length} coaches` : null,
-        platform: getPlatform(train.platform),
-        terminatingStationCode: getStation(train.destination[0]),
+        platform: getPlatform(train.platform, systemKey),
+        terminatingStationCode: getStation(train.destination[0], systemKey),
         vias,
         callingAt,
       }
@@ -768,7 +905,7 @@ export function LiveTrainAnnouncements({
             ...train.destination.map(l => l.locationName),
           )})`,
         )
-        await nextTrainHandler(options)
+        await nextTrainHandler[systemKey](options)
       } catch (e) {
         console.warn(`[Live Trains] Error playing announcement for ${train.rid}; see below`)
         console.error(e)
@@ -776,11 +913,11 @@ export function LiveTrainAnnouncements({
       console.log(`[Live Trains] Announcement for ${train.rid} complete: waiting 5s until next`)
       setTimeout(() => setIsPlaying(false), 5000)
     },
-    [markNextTrainAnnounced, calculateDelayMins, system, setIsPlaying, nextTrainHandler, getStation, addLog],
+    [markNextTrainAnnounced, calculateDelayMins, systems, setIsPlaying, nextTrainHandler, getStation, addLog],
   )
 
   const announceDisruptedTrain = useCallback(
-    async function announceNextTrain(train: TrainService, abortController: AbortController) {
+    async function announceNextTrain(train: TrainService, abortController: AbortController, systemKey: string) {
       console.log(train)
 
       markDisruptedTrainAnnounced(train.rid)
@@ -792,7 +929,7 @@ export function LiveTrainAnnouncements({
       const unknownDelay = !train.etdSpecified
       const delayMins = calculateDelayMins(new Date(train.std), new Date(train.etd))
 
-      const toc = system.processTocForLiveTrains(train.operator, train.origin[0].crs, train.destination[0].crs)
+      const toc = systems[systemKey].processTocForLiveTrains(train.operator, train.origin[0].crs, train.destination[0].crs)
 
       const vias: CallingAtPoint[] = []
 
@@ -819,7 +956,7 @@ export function LiveTrainAnnouncements({
       const reasonData = cancelled ? train.cancelReason : train.delayReason
 
       if (reasonData?.value) {
-        const audioOptions = system.DelayCodeMapping[reasonData.value.toString()]?.e
+        const audioOptions = systems[systemKey].DelayCodeMapping[reasonData.value.toString()]?.e
 
         if (audioOptions) {
           delayReason = audioOptions.split(',')
@@ -827,7 +964,7 @@ export function LiveTrainAnnouncements({
       }
 
       const options: IDisruptedTrainAnnouncementOptions = {
-        chime: system.DEFAULT_CHIME,
+        chime: systems[systemKey].DEFAULT_CHIME,
         hour: h === '00' ? '00 - midnight' : h,
         min: m === '00' ? '00 - hundred-hours' : m,
         toc,
@@ -851,7 +988,7 @@ export function LiveTrainAnnouncements({
             ...train.destination.map(l => l.locationName),
           )})`,
         )
-        await disruptedTrainHandler(options)
+        await disruptedTrainHandler[systemKey](options)
       } catch (e) {
         console.warn(`[Live Trains] Error playing announcement for ${train.rid}; see below`)
 
@@ -865,7 +1002,7 @@ export function LiveTrainAnnouncements({
                 ...train.destination.map(l => l.locationName),
               )})`,
             )
-            await disruptedTrainHandler(options2)
+            await disruptedTrainHandler[systemKey](options2)
           } catch (e) {
             console.warn(`[Live Trains] Error playing announcement for ${train.rid}; see below`)
             console.error(e)
@@ -877,7 +1014,7 @@ export function LiveTrainAnnouncements({
       console.log(`[Live Trains] Announcement for ${train.rid} complete: waiting 5s until next`)
       setTimeout(() => setIsPlaying(false), 5000)
     },
-    [markDisruptedTrainAnnounced, calculateDelayMins, system, setIsPlaying, disruptedTrainHandler, addLog],
+    [markDisruptedTrainAnnounced, calculateDelayMins, systems, setIsPlaying, disruptedTrainHandler, addLog],
   )
 
   useEffect(() => {
@@ -981,7 +1118,8 @@ export function LiveTrainAnnouncements({
       })
 
       if (unannouncedStandingTrain) {
-        announceStandingTrain(unannouncedStandingTrain, abortController)
+        const systemKey = systemKeyForPlatform[getPlatformForSystemSelection(unannouncedStandingTrain.platform)]
+        announceStandingTrain(unannouncedStandingTrain, abortController, systemKey)
         return
       }
 
@@ -1017,7 +1155,8 @@ export function LiveTrainAnnouncements({
       })
 
       if (unannouncedApproachingTrain) {
-        announceApproachingTrain(unannouncedApproachingTrain, abortController)
+        const systemKey = systemKeyForPlatform[getPlatformForSystemSelection(unannouncedApproachingTrain.platform)]
+        announceApproachingTrain(unannouncedApproachingTrain, abortController, systemKey)
         return
       }
 
@@ -1066,7 +1205,8 @@ export function LiveTrainAnnouncements({
       })
 
       if (unannouncedNextTrain) {
-        announceNextTrain(unannouncedNextTrain, abortController)
+        const systemKey = systemKeyForPlatform[getPlatformForSystemSelection(unannouncedNextTrain.platform)]
+        announceNextTrain(unannouncedNextTrain, abortController, systemKey)
         return
       }
 
@@ -1094,7 +1234,8 @@ export function LiveTrainAnnouncements({
       })
 
       if (unannouncedDisruptedTrain) {
-        announceDisruptedTrain(unannouncedDisruptedTrain, abortController)
+        const systemKey = systemKeyForPlatform[getPlatformForSystemSelection(unannouncedDisruptedTrain.platform)]
+        announceDisruptedTrain(unannouncedDisruptedTrain, abortController, systemKey)
         return
       }
 
@@ -1116,7 +1257,7 @@ export function LiveTrainAnnouncements({
     nextTrainAnnounced,
     disruptedTrainAnnounced,
     markNextTrainAnnounced,
-    system,
+    systems,
     nextTrainHandler,
     selectedCrs,
     isPlaying,
@@ -1124,20 +1265,22 @@ export function LiveTrainAnnouncements({
     addLog,
   ])
 
+  const systemKeys = Object.keys(systems)
+
   return (
-    <div>
+    <div style={{ width: '100%' }}>
       <label className="option-select" htmlFor="station-select">
         Station
         <Select<Option, false>
           id="station-select"
-          value={{ value: selectedCrs, label: supportedStations.find(option => option.value === selectedCrs)?.label || '' }}
+          value={{ value: selectedCrs, label: allSupportedStations.find(option => option.value === selectedCrs)?.label || '' }}
           onChange={val => {
             nextTrainAnnounced.current = {}
             disruptedTrainAnnounced.current = {}
 
             setSelectedCrs(val!!.value)
           }}
-          options={supportedStations}
+          options={allSupportedStations}
         />
       </label>
 
@@ -1150,6 +1293,56 @@ export function LiveTrainAnnouncements({
           options={Object.entries(DisplayNames).map(([value, label]) => ({ value: value as DisplayType, label }))}
         />
       </label>
+
+      <fieldset className={classes.perPlatformSelection}>
+        <details>
+          <summary>
+            <legend>Configure per-platform voices</legend>
+          </summary>
+
+          <div className="list">
+            {Object.entries(supportedPlatforms)
+              .sort(([a], [b]) => {
+                const aInt = parseInt(a)
+                const bInt = parseInt(b)
+
+                if (!isNaN(aInt) && !isNaN(bInt)) {
+                  const diff = aInt - bInt
+
+                  if (diff !== 0) return diff
+                }
+
+                return a.localeCompare(b)
+              })
+              .map(([platform, systems]) => {
+                return (
+                  <fieldset>
+                    <legend>Platform {platform}</legend>
+
+                    {systemKeys.map(systemKey => {
+                      return (
+                        <label htmlFor={`platform-system-select-${platform}-${systemKey}`}>
+                          {systemKey}
+
+                          <input
+                            type="radio"
+                            name={`platform-system-select-${platform}`}
+                            id={`platform-system-select-${platform}-${systemKey}`}
+                            disabled={!systems.includes(systemKey as any)}
+                            checked={systemKeyForPlatform[platform] === systemKey}
+                            onChange={() => {
+                              dispatchSystemKeyForPlatform([platform, systemKey as SystemKeys])
+                            }}
+                          />
+                        </label>
+                      )
+                    })}
+                  </fieldset>
+                )
+              })}
+          </div>
+        </details>
+      </fieldset>
 
       <p style={{ margin: '16px 0' }}>
         This is a beta feature, and isn't complete or fully functional. Please report any issues you face on GitHub.
@@ -1165,8 +1358,8 @@ export function LiveTrainAnnouncements({
         <li>are terminating at the selected station</li>
       </ul>
       <p>
-        We also can't handle splits (we'll only announce the main portion), request stops, short platforms and several more features. As I said,
-        it's a beta!
+        We also can't handle request stops, short platforms and several more features as this information isn't contained within the open data
+        provided by National Rail.
       </p>
 
       {!hasEnabledFeature ? (

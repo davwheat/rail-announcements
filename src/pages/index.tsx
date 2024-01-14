@@ -4,12 +4,14 @@ import MainSelector from '@components/MainSelector'
 import Layout from '@components/Layout'
 import AnnouncementPanel from '@components/AnnouncementPanel'
 import NavBar from '@components/NavBar'
+import Disclaimers from '@components/Disclaimers'
 
 import RailSymbol from '@assets/rail-symbol-2/white-on-red-inset.svg'
+import MegaphoneIcon from 'mdi-react/MegaphoneOutlineIcon'
 
 import { makeStyles } from '@material-ui/styles'
 import { Link } from 'gatsby'
-import clsx from 'clsx'
+import Breakpoints from '@data/breakpoints'
 
 const useStyles = makeStyles({
   heading: {
@@ -24,20 +26,19 @@ const useStyles = makeStyles({
     marginRight: 16,
     marginTop: -3,
   },
-  atosNotice: {
-    background: '#fee',
-  },
-  noticeBlock: {
-    marginTop: 24,
-    padding: '24px 16px',
-    background: '#eee',
-
-    '& > :last-child': {
-      marginBottom: 0,
-    },
-
-    '& > h2:not(:first-child)': {
-      marginTop: 16,
+  hero: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    textAlign: 'center',
+    padding: 24,
+    background: 'hsl(204 50% 85% / 1)',
+    gap: 16,
+    marginTop: 16,
+    [Breakpoints.upTo.tablet]: {
+      flexDirection: 'column',
+      justifyContent: 'center',
     },
   },
 })
@@ -59,33 +60,26 @@ function IndexPage({ location }): JSX.Element {
       <main>
         <MainSelector />
 
+        <aside className={classes.hero}>
+          Listen to real-time train announcements for almost any UK station
+          <Link className="button" to="/amey-live-train-announcements">
+            <span className="buttonLabel">
+              <MegaphoneIcon />
+              Yes please!
+            </span>
+          </Link>
+        </aside>
+
         <AnnouncementPanel />
       </main>
 
-      <aside className={clsx(classes.noticeBlock, classes.atosNotice)}>
-        <p>
-          Files relating to the Atos Worldline system have been removed from this site. <Link to="/atos-worldline">Learn more</Link>
-        </p>
-      </aside>
-
-      <aside className={classes.noticeBlock}>
-        <h2>Attribution and copyright</h2>
-        <p>
-          Content on this site has either been self-recorded, or released into the public domain via Freedom of Information requests. Copyright
-          may still apply to these files, and may be held by either the respective TOCs, PIS/CIS manufacturers or even the voice artists.
-        </p>
-        <p>
-          You <u>must not</u> use the content on this site for commercial purposes. These files and systems are provided for personal use only in
-          an attempt to archive present-day and historical PIS/CIS systems. Abuse of the website and its contents could result in legal action
-          against you by copyright holders, and/or cause this site to be taken down.
-        </p>
-
-        <h2>Health and safety</h2>
-        <p>
-          This website is provided for educations and entertainment purposes only. It may not be used as a replacement for a public customer
-          information system or be used as a source of accurate real-time data.
-        </p>
-      </aside>
+      <Disclaimers
+        customDisclaimers={[
+          <p>
+            Files relating to the Atos Worldline system have been removed from this site. <Link to="/atos-worldline">Learn more</Link>
+          </p>,
+        ]}
+      />
     </Layout>
   )
 }

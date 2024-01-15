@@ -3998,7 +3998,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
   }
 
   protected readonly splitOptions = {
-    travelInCorrectPartId: 'w.please make sure you travel in the correct part of this train-2',
+    travelInCorrectPartId: ['s.please make sure you travel', 'e.in the correct part of this train'],
   }
 
   private async getCallingPointsWithSplits(
@@ -4031,10 +4031,14 @@ export default class AmeyPhil extends StationAnnouncementSystem {
 
     switch (splitData.divideType) {
       case 'splitTerminates':
-        files.push('e.where the train will divide', {
-          id: this.splitOptions.travelInCorrectPartId,
-          opts: { delayStart: 400 },
-        })
+        files.push(
+          'e.where the train will divide',
+          {
+            id: this.splitOptions.travelInCorrectPartId[0],
+            opts: { delayStart: 400 },
+          },
+          ...this.splitOptions.travelInCorrectPartId.slice(1),
+        )
 
         if (splitData.splitB!!.position === 'unknown') {
           files.push({ id: `s.please note that`, opts: { delayStart: 400 } }, `m.coaches`, `m.will be detached and will terminate at`)
@@ -4049,10 +4053,14 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         break
 
       case 'splits':
-        files.push('e.where the train will divide', {
-          id: 'w.please make sure you travel in the correct part of this train',
-          opts: { delayStart: 400 },
-        })
+        files.push(
+          'e.where the train will divide',
+          {
+            id: this.splitOptions.travelInCorrectPartId[0],
+            opts: { delayStart: 400 },
+          },
+          ...this.splitOptions.travelInCorrectPartId.slice(1),
+        )
 
         if (!splitData.splitB!!.stops.length) throw new Error("Splitting train doesn't have any calling points")
         break

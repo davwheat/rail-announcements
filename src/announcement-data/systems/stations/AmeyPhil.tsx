@@ -3600,7 +3600,12 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     const dividesAt = callingPoints.find(s => s.splitType === 'splitTerminates' || s.splitType === 'splits')
 
     if (dividesAt && (dividesAt.splitCallingPoints?.length ?? 0) > 0) {
-      const allDestinations = [terminatingStation, dividesAt.splitCallingPoints!![dividesAt.splitCallingPoints!!.length - 1].crsCode]
+      const allDestinations = [
+        terminatingStation,
+        dividesAt.splitType === 'splitTerminates'
+          ? dividesAt.crsCode
+          : dividesAt.splitCallingPoints!![dividesAt.splitCallingPoints!!.length - 1].crsCode,
+      ]
 
       files.push(
         ...this.pluraliseAudio(allDestinations, {

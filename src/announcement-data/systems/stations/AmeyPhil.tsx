@@ -4096,6 +4096,20 @@ export default class AmeyPhil extends StationAnnouncementSystem {
 
     if (anyPortionStops.size !== 0) files.push(...listStops(Array.from(anyPortionStops)), 'e.may travel in any part of the train')
 
+    function shouldTravelIn(length: number | null, position: 'front' | 'middle' | 'rear'): AudioItem[] {
+      if (length === null) {
+        return [`e.should travel in the ${position} coaches of the train`]
+      }
+
+      if (length >= 2 && length <= 8) {
+        return [`m.should travel in the ${position}`, `e.${length} coaches of the train`]
+      } else if (length === 1) {
+        return [`e.should travel in the ${position} coach of the train`]
+      } else {
+        return [`m.should travel in the ${position}`, `platform.s.${length}`, `e.coaches of the train`]
+      }
+    }
+
     const aFiles =
       aPortionStops.size === 0
         ? []
@@ -4103,11 +4117,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             ...listStops(Array.from(aPortionStops)),
             ...(splitData.splitA!!.position === 'unknown'
               ? ['w.please listen for announcements on board the train']
-              : [
-                  `m.should travel in the ${splitData.splitA!!.position}`,
-                  ...(splitData.splitA!!.length === null ? [] : [`platform.s.${splitData.splitA!!.length}`]),
-                  'e.coaches of the train',
-                ]),
+              : shouldTravelIn(splitData.splitA!!.length, splitData.splitA!!.position)),
           ]
     const bFiles =
       bPortionStops.size === 0
@@ -4116,11 +4126,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             ...listStops(Array.from(bPortionStops)),
             ...(splitData.splitB!!.position === 'unknown'
               ? ['w.please listen for announcements on board the train']
-              : [
-                  `m.should travel in the ${splitData.splitB!!.position}`,
-                  ...(splitData.splitB!!.length === null ? [] : [`platform.s.${splitData.splitB!!.length}`]),
-                  'e.coaches of the train',
-                ]),
+              : shouldTravelIn(splitData.splitB!!.length, splitData.splitB!!.position)),
           ]
 
     if (splitData.splitA!!.position === 'front') {

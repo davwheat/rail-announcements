@@ -354,6 +354,20 @@ const changelog: IChangelogVersion[] = [
     date: '2024-01-07',
     additions: ['[Amey Phil/Celia/Live Trains] Add standing at announcement support', '[Amey Celia] Additional platforms'],
   },
+  {
+    date: '2024-01-15',
+    additions: [
+      '[Amey Live Trains] Moved to dedicated page',
+      '[Amey Live Trains] Combine both Phil and Celia for zoned announcements',
+      'Additional information when errors occur',
+    ],
+    otherChanges: ['[Amey Phil & Celia] Improved splitting formation audio'],
+    fixes: [
+      '[Bombardier XStar] Improved audio files for Hove and Preston Park',
+      '[Elizabeth Line] Swap some audio files for the correct ones',
+      'Migrate to self-hosted Sentry issue tracker',
+    ],
+  },
 ]
 
 export default changelog

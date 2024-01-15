@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import crsToStationItemMapper from '@helpers/crsToStationItemMapper'
 import FullscreenIcon from 'mdi-react/FullscreenIcon'
+import ShuffleIcon from 'mdi-react/DieMultipleIcon'
 import NREPowered from '@assets/NRE_Powered_logo.png'
 import FullScreen from 'react-fullscreen-crossbrowser'
 import Select from 'react-select'
@@ -265,6 +266,12 @@ const useLiveTrainsStyles = makeStyles({
   },
   logs: {
     marginTop: 16,
+  },
+  setAllContainer: {
+    display: 'flex',
+    alignItems: 'stretch',
+    gap: 8,
+    marginBottom: 16,
   },
   perPlatformSelection: {
     padding: 0,
@@ -1328,6 +1335,47 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       </label>
 
       <fieldset className={classes.perPlatformSelection}>
+        <div className={classes.setAllContainer}>
+          {systemKeys.map(systemKey => {
+            return (
+              <button
+                key={systemKey}
+                className="danger"
+                onClick={() => {
+                  const platformsSupportedBySystem = Object.entries(supportedPlatforms)
+                    .filter(([_, keys]) => keys.includes(systemKey))
+                    .map(([key]) => key)
+
+                  dispatchSystemKeyForPlatform({ platforms: platformsSupportedBySystem, systemKey })
+                }}
+              >
+                Use {systemKey} on all platforms
+              </button>
+            )
+          })}
+
+          <button
+            key="__random"
+            className="danger"
+            onClick={() => {
+              const platforms: Record<string, SystemKeys> = {}
+
+              for (const [p, keys] of Object.entries(supportedPlatforms)) {
+                platforms[p] = keys[Math.floor(Math.random() * keys.length)]
+              }
+
+              Object.entries(platforms).forEach(([p, systemKey]) => {
+                dispatchSystemKeyForPlatform({ platforms: [p], systemKey })
+              })
+            }}
+          >
+            <span className="buttonLabel">
+              <ShuffleIcon />
+              Randomise
+            </span>
+          </button>
+        </div>
+
         <details>
           <summary>
             <legend>Configure per-platform voices</legend>

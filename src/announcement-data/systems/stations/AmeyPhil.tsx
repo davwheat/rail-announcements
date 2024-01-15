@@ -3600,7 +3600,12 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     const dividesAt = callingPoints.find(s => s.splitType === 'splitTerminates' || s.splitType === 'splits')
 
     if (dividesAt && (dividesAt.splitCallingPoints?.length ?? 0) > 0) {
-      const allDestinations = [terminatingStation, dividesAt.splitCallingPoints!![dividesAt.splitCallingPoints!!.length - 1].crsCode]
+      const allDestinations = [
+        terminatingStation,
+        dividesAt.splitType === 'splitTerminates'
+          ? dividesAt.crsCode
+          : dividesAt.splitCallingPoints!![dividesAt.splitCallingPoints!!.length - 1].crsCode,
+      ]
 
       files.push(
         ...this.pluraliseAudio(allDestinations, {
@@ -3993,7 +3998,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
   }
 
   protected readonly splitOptions = {
-    travelInCorrectPartId: 'w.please make sure you travel in the correct part of this train-2',
+    travelInCorrectPartId: ['s.please make sure you travel', 'e.in the correct part of this train'],
   }
 
   private async getCallingPointsWithSplits(
@@ -4026,10 +4031,14 @@ export default class AmeyPhil extends StationAnnouncementSystem {
 
     switch (splitData.divideType) {
       case 'splitTerminates':
-        files.push('e.where the train will divide', {
-          id: this.splitOptions.travelInCorrectPartId,
-          opts: { delayStart: 400 },
-        })
+        files.push(
+          'e.where the train will divide',
+          {
+            id: this.splitOptions.travelInCorrectPartId[0],
+            opts: { delayStart: 400 },
+          },
+          ...this.splitOptions.travelInCorrectPartId.slice(1),
+        )
 
         if (splitData.splitB!!.position === 'unknown') {
           files.push({ id: `s.please note that`, opts: { delayStart: 400 } }, `m.coaches`, `m.will be detached and will terminate at`)
@@ -4044,10 +4053,14 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         break
 
       case 'splits':
-        files.push('e.where the train will divide', {
-          id: 'w.please make sure you travel in the correct part of this train',
-          opts: { delayStart: 400 },
-        })
+        files.push(
+          'e.where the train will divide',
+          {
+            id: this.splitOptions.travelInCorrectPartId[0],
+            opts: { delayStart: 400 },
+          },
+          ...this.splitOptions.travelInCorrectPartId.slice(1),
+        )
 
         if (!splitData.splitB!!.stops.length) throw new Error("Splitting train doesn't have any calling points")
         break
@@ -4083,6 +4096,20 @@ export default class AmeyPhil extends StationAnnouncementSystem {
 
     if (anyPortionStops.size !== 0) files.push(...listStops(Array.from(anyPortionStops)), 'e.may travel in any part of the train')
 
+    function shouldTravelIn(length: number | null, position: 'front' | 'middle' | 'rear'): AudioItem[] {
+      if (length === null) {
+        return [`e.should travel in the ${position} coaches of the train`]
+      }
+
+      if (length >= 2 && length <= 8) {
+        return [`m.should travel in the ${position}`, `e.${length} coaches of the train`]
+      } else if (length === 1) {
+        return [`e.should travel in the ${position} coach of the train`]
+      } else {
+        return [`m.should travel in the ${position}`, `platform.s.${length}`, `e.coaches of the train`]
+      }
+    }
+
     const aFiles =
       aPortionStops.size === 0
         ? []
@@ -4090,11 +4117,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             ...listStops(Array.from(aPortionStops)),
             ...(splitData.splitA!!.position === 'unknown'
               ? ['w.please listen for announcements on board the train']
-              : [
-                  `m.should travel in the ${splitData.splitA!!.position}`,
-                  ...(splitData.splitA!!.length === null ? [] : [`platform.s.${splitData.splitA!!.length}`]),
-                  'e.coaches of the train',
-                ]),
+              : shouldTravelIn(splitData.splitA!!.length, splitData.splitA!!.position)),
           ]
     const bFiles =
       bPortionStops.size === 0
@@ -4103,11 +4126,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             ...listStops(Array.from(bPortionStops)),
             ...(splitData.splitB!!.position === 'unknown'
               ? ['w.please listen for announcements on board the train']
-              : [
-                  `m.should travel in the ${splitData.splitB!!.position}`,
-                  ...(splitData.splitB!!.length === null ? [] : [`platform.s.${splitData.splitB!!.length}`]),
-                  'e.coaches of the train',
-                ]),
+              : shouldTravelIn(splitData.splitB!!.length, splitData.splitB!!.position)),
           ]
 
     if (splitData.splitA!!.position === 'front') {

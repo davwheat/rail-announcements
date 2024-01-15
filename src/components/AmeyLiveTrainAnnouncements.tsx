@@ -15,7 +15,6 @@ import type {
   ILiveTrainApproachingAnnouncementOptions,
   IStandingTrainAnnouncementOptions,
 } from '../announcement-data/systems/stations/AmeyPhil'
-import type { ICustomAnnouncementPaneProps } from './PanelPanes/CustomAnnouncementPane'
 
 import dayjs from 'dayjs'
 import dayjsUtc from 'dayjs/plugin/utc'
@@ -377,6 +376,8 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
 }: LiveTrainAnnouncementsProps<SystemKeys>) {
   const classes = useLiveTrainsStyles()
 
+  const systemKeys = Object.keys(systems) as SystemKeys[]
+
   const perSystemSupportedStations: Record<string, Option[]> = useMemo(
     () =>
       Object.fromEntries(
@@ -406,13 +407,47 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
     [perSystemSupportedStations],
   )
 
-  const [systemKeyForPlatform, dispatchSystemKeyForPlatform] = useReducer(
-    (state: Record<string, SystemKeys>, action: [string, SystemKeys]) => {
-      const [platform, systemKey] = action
+  interface SetSystemForPlatformAction {
+    platforms: string[]
+    systemKey: SystemKeys
+  }
 
-      return { ...state, [platform]: systemKey }
+  const [systemKeyForPlatform, dispatchSystemKeyForPlatform] = useReducer(
+    (state: Record<string, SystemKeys>, action: SetSystemForPlatformAction) => {
+      const { platforms, systemKey } = action
+
+      const current = { ...state }
+
+      platforms.forEach(p => {
+        current[p] = systemKey
+      })
+
+      localStorage.setItem('amey.live-trains.system-per-platform', JSON.stringify(current))
+
+      return current
     },
     Object.fromEntries(Object.entries(supportedPlatforms).map(([platform, systemKeys]) => [platform, systemKeys[0]] as [string, SystemKeys])),
+    init => {
+      try {
+        const stored = localStorage.getItem('amey.live-trains.system-per-platform')
+
+        if (stored) {
+          const objData = JSON.parse(stored)
+
+          if (typeof objData === 'object') {
+            Object.keys(init).forEach(k => {
+              if (objData[k] && systemKeys.includes(objData[k])) {
+                init[k] = objData[k]
+              }
+            })
+          }
+        }
+      } catch (e) {
+        console.error(e)
+      } finally {
+        return init
+      }
+    },
   )
 
   const [displayType, setDisplayType] = useState<DisplayType>('gtr-new')
@@ -1265,8 +1300,6 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
     addLog,
   ])
 
-  const systemKeys = Object.keys(systems)
-
   return (
     <div style={{ width: '100%' }}>
       <label className="option-select" htmlFor="station-select">
@@ -1300,6 +1333,8 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
             <legend>Configure per-platform voices</legend>
           </summary>
 
+          <p style={{ marginTop: 16 }}>We'll remember these settings on your device.</p>
+
           <div className="list">
             {Object.entries(supportedPlatforms)
               .sort(([a], [b]) => {
@@ -1316,12 +1351,15 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
               })
               .map(([platform, systems]) => {
                 return (
-                  <fieldset>
+                  <fieldset key={platform}>
                     <legend>Platform {platform}</legend>
 
                     {systemKeys.map(systemKey => {
                       return (
-                        <label htmlFor={`platform-system-select-${platform}-${systemKey}`}>
+                        <label
+                          key={`platform-system-select-${platform}-${systemKey}`}
+                          htmlFor={`platform-system-select-${platform}-${systemKey}`}
+                        >
                           {systemKey}
 
                           <input
@@ -1331,7 +1369,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
                             disabled={!systems.includes(systemKey as any)}
                             checked={systemKeyForPlatform[platform] === systemKey}
                             onChange={() => {
-                              dispatchSystemKeyForPlatform([platform, systemKey as SystemKeys])
+                              dispatchSystemKeyForPlatform({ platforms: [platform], systemKey: systemKey as SystemKeys })
                             }}
                           />
                         </label>

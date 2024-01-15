@@ -416,11 +416,11 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
 
   interface SetSystemForPlatformAction {
     platforms: string[]
-    systemKey: SystemKeys
+    systemKey: SystemKeys | null
   }
 
   const [systemKeyForPlatform, dispatchSystemKeyForPlatform] = useReducer(
-    (state: Record<string, SystemKeys>, action: SetSystemForPlatformAction) => {
+    (state: Record<string, SystemKeys | null>, action: SetSystemForPlatformAction) => {
       const { platforms, systemKey } = action
 
       const current = { ...state }
@@ -443,7 +443,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
 
           if (typeof objData === 'object') {
             Object.keys(init).forEach(k => {
-              if (objData[k] && systemKeys.includes(objData[k])) {
+              if (objData[k] && (systemKeys.includes(objData[k]) || objData[k] === null)) {
                 init[k] = objData[k]
               }
             })
@@ -1117,7 +1117,9 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
 
       addLog(`${services.length} services found`)
       console.log(`[Live Trains] ${services.length} services found`)
-      services = services.filter(s => s.isPassengerService)
+      services = services.filter(
+        s => s.isPassengerService && (s.platform === null || systemKeyForPlatform[getPlatformForSystemSelection(s.platform)] !== null),
+      )
       addLog(`${services.length} of which are passenger services`)
       console.log(`[Live Trains] ${services.length} of which are passenger services`)
 
@@ -1160,7 +1162,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       })
 
       if (unannouncedStandingTrain) {
-        const systemKey = systemKeyForPlatform[getPlatformForSystemSelection(unannouncedStandingTrain.platform)]
+        const systemKey = systemKeyForPlatform[getPlatformForSystemSelection(unannouncedStandingTrain.platform)]!!
         announceStandingTrain(unannouncedStandingTrain, abortController, systemKey)
         return
       }
@@ -1197,7 +1199,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       })
 
       if (unannouncedApproachingTrain) {
-        const systemKey = systemKeyForPlatform[getPlatformForSystemSelection(unannouncedApproachingTrain.platform)]
+        const systemKey = systemKeyForPlatform[getPlatformForSystemSelection(unannouncedApproachingTrain.platform)]!!
         announceApproachingTrain(unannouncedApproachingTrain, abortController, systemKey)
         return
       }
@@ -1247,7 +1249,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       })
 
       if (unannouncedNextTrain) {
-        const systemKey = systemKeyForPlatform[getPlatformForSystemSelection(unannouncedNextTrain.platform)]
+        const systemKey = systemKeyForPlatform[getPlatformForSystemSelection(unannouncedNextTrain.platform)]!!
         announceNextTrain(unannouncedNextTrain, abortController, systemKey)
         return
       }
@@ -1276,7 +1278,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       })
 
       if (unannouncedDisruptedTrain) {
-        const systemKey = systemKeyForPlatform[getPlatformForSystemSelection(unannouncedDisruptedTrain.platform)]
+        const systemKey = systemKeyForPlatform[getPlatformForSystemSelection(unannouncedDisruptedTrain.platform)]!!
         announceDisruptedTrain(unannouncedDisruptedTrain, abortController, systemKey)
         return
       }
@@ -1340,7 +1342,6 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
             return (
               <button
                 key={systemKey}
-                className="danger"
                 onClick={() => {
                   const platformsSupportedBySystem = Object.entries(supportedPlatforms)
                     .filter(([_, keys]) => keys.includes(systemKey))
@@ -1371,8 +1372,18 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
           >
             <span className="buttonLabel">
               <ShuffleIcon />
-              Randomise
+              Randomise (on)
             </span>
+          </button>
+
+          <button
+            key="__off"
+            className="danger"
+            onClick={() => {
+              dispatchSystemKeyForPlatform({ platforms: Object.keys(supportedPlatforms), systemKey: null })
+            }}
+          >
+            <span className="buttonLabel">All off</span>
           </button>
         </div>
 
@@ -1401,6 +1412,19 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
                 return (
                   <fieldset key={platform}>
                     <legend>Platform {platform}</legend>
+
+                    <label key={`platform-system-select-${platform}-none`} htmlFor={`platform-system-select-${platform}-none`}>
+                      None
+                      <input
+                        type="radio"
+                        name={`platform-system-select-${platform}`}
+                        id={`platform-system-select-${platform}-none`}
+                        checked={systemKeyForPlatform[platform] === null}
+                        onChange={() => {
+                          dispatchSystemKeyForPlatform({ platforms: [platform], systemKey: null })
+                        }}
+                      />
+                    </label>
 
                     {systemKeys.map(systemKey => {
                       return (

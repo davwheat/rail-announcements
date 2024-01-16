@@ -18,7 +18,7 @@ export default function Disclaimers({ customDisclaimers = [] }: DisclaimersProps
             marginBottom: 0,
           },
 
-          '& > h2:not(:first-child)': {
+          '& > h2:not(:first-of-type)': {
             marginTop: 16,
           },
         }}
@@ -53,7 +53,7 @@ export default function Disclaimers({ customDisclaimers = [] }: DisclaimersProps
               marginBottom: 0,
             },
 
-            '& > h2:not(:first-child)': {
+            '& > h2:not(:first-of-type)': {
               marginTop: 16,
             },
           }}

@@ -148,7 +148,7 @@ function CallingAtSelector({
                                 padding: '4px 0',
                                 gap: 8,
 
-                                '& > :not(:first-child)': {
+                                '& > :not(:first-of-type)': {
                                   fontSize: 18,
                                 },
 

@@ -4070,15 +4070,23 @@ export default class AmeyPhil extends StationAnnouncementSystem {
 
     const aPortionStops = new Set([...splitData.splitA!!.stops.map(s => s.crsCode)])
     const bPortionStops = new Set([...splitData.splitB!!.stops.map(s => s.crsCode)])
+
+    // Note to future me:
+    //
+    // The commented logic below handled common calling points in both portions of the train.
+    // However, this is not needed as the logic on the real-world system didn't account for this.
+    //
+    // F.
+
     const anyPortionStops = new Set([
       ...splitData.stopsUpToSplit.map(s => s.crsCode),
-      ...Array.from(aPortionStops).filter(x => bPortionStops.has(x)),
+      // ...Array.from(aPortionStops).filter(x => bPortionStops.has(x)),
     ])
 
-    Array.from(anyPortionStops).forEach(s => {
-      if (aPortionStops.has(s)) aPortionStops.delete(s)
-      if (bPortionStops.has(s)) bPortionStops.delete(s)
-    })
+    // Array.from(anyPortionStops).forEach(s => {
+    //   if (aPortionStops.has(s)) aPortionStops.delete(s)
+    //   if (bPortionStops.has(s)) bPortionStops.delete(s)
+    // })
 
     const listStops = (stops: string[]): AudioItem[] => {
       return [

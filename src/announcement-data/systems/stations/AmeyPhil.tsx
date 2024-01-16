@@ -4006,6 +4006,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     callingPoints: CallingAtPoint[],
     terminatingStation: string,
     overallLength: number | null,
+    arriving: boolean,
   ): Promise<AudioItem[]> {
     const files: AudioItem[] = []
 
@@ -4139,7 +4140,10 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     switch (splitData.divideType) {
       case 'splitTerminates':
       case 'splits':
-        files.push({ id: 's.this train will divide at', opts: { delayStart: 200 } }, `station.e.${splitPoint.crsCode}`)
+        files.push(
+          { id: `s.${arriving ? 'this' : 'the next'} train will divide at`, opts: { delayStart: 200 } },
+          `station.e.${splitPoint.crsCode}`,
+        )
         break
     }
 
@@ -4150,10 +4154,11 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     callingPoints: CallingAtPoint[],
     terminatingStation: string,
     overallLength: number | null,
+    arriving: boolean,
   ): Promise<AudioItem[]> {
     const files: AudioItem[] = []
 
-    const callingPointsWithSplits = await this.getCallingPointsWithSplits(callingPoints, terminatingStation, overallLength)
+    const callingPointsWithSplits = await this.getCallingPointsWithSplits(callingPoints, terminatingStation, overallLength, arriving)
 
     if (callingPointsWithSplits.length !== 0) {
       files.push({ id: 'm.calling at', opts: { delayStart: this.callingPointsOptions.beforeCallingAtDelay } }, ...callingPointsWithSplits)
@@ -4228,6 +4233,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           options.callingAt,
           options.terminatingStationCode,
           options.coaches ? parseInt(options.coaches.split(' ')[0]) : null,
+          false,
         )),
       )
     } catch (e) {
@@ -4324,6 +4330,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           options.callingAt,
           options.terminatingStationCode,
           options.coaches ? parseInt(options.coaches.split(' ')[0]) : null,
+          true,
         )),
       )
     } catch (e) {

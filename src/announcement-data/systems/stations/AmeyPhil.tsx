@@ -3999,6 +3999,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
 
   protected readonly splitOptions = {
     travelInCorrectPartId: ['s.please make sure you travel', 'e.in the correct part of this train'],
+    travelInAnyPartIds: ['e.may travel in any part of the train'],
   }
 
   private async getCallingPointsWithSplits(
@@ -4094,7 +4095,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       ]
     }
 
-    if (anyPortionStops.size !== 0) files.push(...listStops(Array.from(anyPortionStops)), 'e.may travel in any part of the train')
+    if (anyPortionStops.size !== 0) files.push(...listStops(Array.from(anyPortionStops)), ...this.splitOptions.travelInAnyPartIds)
 
     function shouldTravelIn(length: number | null, position: 'front' | 'middle' | 'rear'): AudioItem[] {
       if (length === null) {

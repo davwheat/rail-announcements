@@ -3064,6 +3064,7 @@ export default class AmeyCelia extends AmeyPhil {
 
   protected readonly splitOptions = {
     travelInCorrectPartId: ['s.please make sure you travel', 'e.in the correct part of this train'],
+    travelInAnyPartIds: ['e.may travel in any part of the train-2'],
   }
 
   protected readonly disruptionOptions = {

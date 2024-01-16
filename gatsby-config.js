@@ -16,9 +16,18 @@ module.exports = {
     `gatsby-plugin-sharp`,
     `gatsby-transformer-sharp`,
     `gatsby-plugin-react-head`,
-    `gatsby-plugin-material-ui`,
+    {
+      resolve: `gatsby-plugin-emotion`,
+      options: {
+        sourceMap: true,
+        autoLabel: 'always',
+        labelFormat: `[local]`,
+        cssPropOptimization: true,
+      },
+    },
     `gatsby-plugin-less`,
     `gatsby-plugin-webpack-bundle-analyser-v2`,
+    `gatsby-plugin-provide-react`,
     {
       resolve: `gatsby-plugin-manifest`,
       options: {

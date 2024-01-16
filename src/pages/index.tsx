@@ -1,5 +1,3 @@
-import React from 'react'
-
 import MainSelector from '@components/MainSelector'
 import Layout from '@components/Layout'
 import AnnouncementPanel from '@components/AnnouncementPanel'
@@ -9,48 +7,32 @@ import Disclaimers from '@components/Disclaimers'
 import RailSymbol from '@assets/rail-symbol-2/white-on-red-inset.svg'
 import MegaphoneIcon from 'mdi-react/MegaphoneOutlineIcon'
 
-import { makeStyles } from '@material-ui/styles'
-import { Link } from 'gatsby'
+import { Link, PageProps } from 'gatsby'
 import Breakpoints from '@data/breakpoints'
 
-const useStyles = makeStyles({
-  heading: {
-    fontSize: '2rem',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logo: {
-    height: 64,
-    width: 64,
-    marginRight: 16,
-    marginTop: -3,
-  },
-  hero: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    textAlign: 'center',
-    padding: 24,
-    background: 'hsl(204 50% 85% / 1)',
-    gap: 16,
-    marginTop: 16,
-    [Breakpoints.upTo.tablet]: {
-      flexDirection: 'column',
-      justifyContent: 'center',
-    },
-  },
-})
-
-function IndexPage({ location }): JSX.Element {
-  const classes = useStyles()
-
+function IndexPage({ location }: PageProps) {
   return (
     <Layout location={location}>
       <header>
-        <h1 className={classes.heading}>
-          <img alt="" role="presentation" className={classes.logo} src={RailSymbol} />
+        <h1
+          css={{
+            fontSize: '2rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <img
+            alt=""
+            role="presentation"
+            css={{
+              height: 64,
+              width: 64,
+              marginRight: 16,
+              marginTop: -3,
+            }}
+            src={RailSymbol}
+          />
           <span>Rail announcements</span>
         </h1>
       </header>
@@ -60,7 +42,23 @@ function IndexPage({ location }): JSX.Element {
       <main>
         <MainSelector />
 
-        <aside className={classes.hero}>
+        <aside
+          css={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            textAlign: 'center',
+            padding: 24,
+            background: 'hsl(204 50% 85% / 1)',
+            gap: 16,
+            marginTop: 16,
+            [Breakpoints.upTo.tablet]: {
+              flexDirection: 'column',
+              justifyContent: 'center',
+            },
+          }}
+        >
           Listen to real-time train announcements for almost any UK station
           <Link className="button" to="/amey-live-train-announcements">
             <span className="buttonLabel">

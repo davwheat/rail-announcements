@@ -25,6 +25,6 @@ declare module '*.inline.svg' {
 declare global {
   interface Window {
     __audio?: AudioItem[]
-    __system?: typeof AnnouncementSystem | null
+    __system?: { new (): AnnouncementSystem } | null
   }
 }

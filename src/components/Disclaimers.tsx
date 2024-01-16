@@ -1,32 +1,28 @@
 import React from 'react'
-import { makeStyles } from '@material-ui/styles'
-
-const useStyles = makeStyles({
-  noticeBlock: {
-    marginTop: 24,
-    padding: '24px 16px',
-    background: '#eee',
-
-    '& > :last-child': {
-      marginBottom: 0,
-    },
-
-    '& > h2:not(:first-child)': {
-      marginTop: 16,
-    },
-  },
-})
 
 interface DisclaimersProps {
   customDisclaimers?: React.ReactNode[]
 }
 
 export default function Disclaimers({ customDisclaimers = [] }: DisclaimersProps) {
-  const classes = useStyles()
-
   return (
     <>
-      <aside key="base" className={classes.noticeBlock}>
+      <aside
+        key="base"
+        css={{
+          marginTop: 24,
+          padding: '24px 16px',
+          background: '#eee',
+
+          '& > :last-child': {
+            marginBottom: 0,
+          },
+
+          '& > h2:not(:first-child)': {
+            marginTop: 16,
+          },
+        }}
+      >
         <h2>Attribution and copyright</h2>
         <p>
           Content on this site has either been self-recorded, or released into the public domain via Freedom of Information requests. Copyright
@@ -46,7 +42,22 @@ export default function Disclaimers({ customDisclaimers = [] }: DisclaimersProps
       </aside>
 
       {customDisclaimers.map((disclaimer, index) => (
-        <aside key={index} className={classes.noticeBlock}>
+        <aside
+          key={index}
+          css={{
+            marginTop: 24,
+            padding: '24px 16px',
+            background: '#eee',
+
+            '& > :last-child': {
+              marginBottom: 0,
+            },
+
+            '& > h2:not(:first-child)': {
+              marginTop: 16,
+            },
+          }}
+        >
           {disclaimer}
         </aside>
       ))}

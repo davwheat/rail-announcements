@@ -1,32 +1,16 @@
 import React, { useCallback, useEffect, useState } from 'react'
 
-import { makeStyles } from '@material-ui/styles'
 import Tabs from './Tabs'
 import getActiveSystem from '@helpers/getActiveSystem'
 import AnnouncementTabErrorBoundary from './AnnouncementTabErrorBoundary'
 
 import { useRecoilState } from 'recoil'
 import { selectedTabIdsState } from '@atoms'
-import { IPersonalPresetObject, deletePersonalPreset, getPersonalPresets, initPersonalPresetsDb, savePersonalPreset } from '@data/db'
+import { deletePersonalPreset, getPersonalPresets, initPersonalPresetsDb, savePersonalPreset } from '@data/db'
 
 import * as Sentry from '@sentry/gatsby'
 
-const useStyles = makeStyles({
-  root: {
-    padding: 16,
-    backgroundColor: '#eee',
-    marginTop: 24,
-  },
-  heading: {
-    marginBottom: 16,
-  },
-  instanceHeader: {
-    marginBottom: 16,
-  },
-})
-
 function AnnouncementPanel() {
-  const classes = useStyles()
   const AnnouncementSystem = getActiveSystem()
 
   const [isPresetsDbReady, setIsPresetsDbReady] = useState<boolean>(false)
@@ -121,10 +105,28 @@ function AnnouncementPanel() {
   if (!AnnouncementSystem) return null
 
   return (
-    <div className={classes.root}>
-      <h2 className={classes.heading}>{AnnouncementSystemInstance?.NAME}</h2>
+    <div
+      css={{
+        padding: 16,
+        backgroundColor: '#eee',
+        marginTop: 24,
+      }}
+    >
+      <h2
+        css={{
+          marginBottom: 16,
+        }}
+      >
+        {AnnouncementSystemInstance?.NAME}
+      </h2>
 
-      <div className={classes.instanceHeader}>{AnnouncementSystemInstance?.headerComponent()}</div>
+      <div
+        css={{
+          marginBottom: 16,
+        }}
+      >
+        {AnnouncementSystemInstance?.headerComponent()}
+      </div>
 
       <Tabs
         selectedTabIndex={getSelectedTab()}

@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react'
 
 import LoadingSpinner from '@components/LoadingSpinner'
-import { makeStyles } from '@material-ui/styles'
 import getActiveSystem from '@helpers/getActiveSystem'
 import createOptionField from '@helpers/createOptionField'
 import useIsPlayingAnnouncement from '@helpers/useIsPlayingAnnouncement'
@@ -23,62 +22,13 @@ import { useRecoilState } from 'recoil'
 import { tabStatesState } from '@atoms/index'
 import { SystemTabState } from '@data/SystemTabState'
 
-import clsx from 'clsx'
 import copy from 'copy-to-clipboard'
 import { enqueueSnackbar, useSnackbar } from 'notistack'
 import { v4 as uuid } from 'uuid'
+import clsx from 'clsx'
 
 import type { OptionsExplanation } from '@announcement-data/AnnouncementSystem'
 import type { IPersonalPresetObject } from '@data/db'
-
-const useStyles = makeStyles({
-  root: {
-    padding: 16,
-    backgroundColor: '#eee',
-  },
-  disabledMessage: {
-    background: 'rgba(255, 0, 0, 0.15)',
-    borderLeft: '#f00 4px solid',
-    padding: '8px 16px',
-  },
-  optionsDisabled: {
-    position: 'relative',
-    '&::after': {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontSize: '2em',
-      content: '"Please wait..."',
-      position: 'absolute',
-      top: 0,
-      bottom: 0,
-      right: 0,
-      left: 0,
-      background: 'rgba(0, 0, 0, 0.25)',
-      zIndex: 1,
-    },
-  },
-  optionsDisabledPlaying: {
-    '&::after': {
-      content: '"Playing announcement..."',
-    },
-  },
-  optionsDisabledSharing: {
-    '&::after': {
-      content: '"Sharing announcement..."',
-    },
-  },
-  presets: {
-    paddingBottom: 24,
-    marginBottom: 24,
-    borderBottom: '2px solid black',
-  },
-  presetButtonList: {
-    display: 'flex',
-    gap: 8,
-    flexWrap: 'wrap',
-  },
-})
 
 export interface ICustomAnnouncementPreset<State = Record<string, unknown>> {
   name: string
@@ -110,7 +60,6 @@ function CustomAnnouncementPane({
   getPersonalPresets,
   deletePersonalPreset,
 }: ICustomAnnouncementPaneProps<string>) {
-  const classes = useStyles()
   const { enqueueSnackbar } = useSnackbar()
 
   const [playError, setPlayError] = React.useState<Error | null>(null)
@@ -143,7 +92,7 @@ function CustomAnnouncementPane({
   const AnnouncementSystem = getActiveSystem()
   const AnnouncementSystemInstance = new AnnouncementSystem!!()
 
-  function createFieldUpdater(field: string): (value) => void {
+  function createFieldUpdater(field: string): (value: any) => void {
     return (value): void => {
       if (isPlayingAnnouncement) return
 
@@ -172,7 +121,7 @@ function CustomAnnouncementPane({
       try {
         await playHandler(optionsState!!)
       } catch (err) {
-        setPlayError(err)
+        setPlayError(err as any)
       }
 
       setIsPlayingAnnouncement(false)
@@ -201,7 +150,7 @@ function CustomAnnouncementPane({
       try {
         await playHandler(optionsState!!, true)
       } catch (err) {
-        setPlayError(err)
+        setPlayError(err as any)
       }
 
       setIsPlayingAnnouncement(false)
@@ -304,7 +253,12 @@ function CustomAnnouncementPane({
 
   if (!optionsState) {
     return (
-      <div className={classes.root}>
+      <div
+        css={{
+          padding: 16,
+          backgroundColor: '#eee',
+        }}
+      >
         <div
           style={{
             display: 'flex',
@@ -323,12 +277,29 @@ function CustomAnnouncementPane({
   }
 
   return (
-    <div className={classes.root}>
+    <div
+      css={{
+        padding: 16,
+        backgroundColor: '#eee',
+      }}
+    >
       {presets && (
-        <section className={classes.presets}>
+        <section
+          css={{
+            paddingBottom: 24,
+            marginBottom: 24,
+            borderBottom: '2px solid black',
+          }}
+        >
           <h3>Presets</h3>
 
-          <div className={classes.presetButtonList}>
+          <div
+            css={{
+              display: 'flex',
+              gap: 8,
+              flexWrap: 'wrap',
+            }}
+          >
             {presets.length === 0 && <p>Sorry, no presets are available for this announcement.</p>}
 
             {presets.map(preset => (
@@ -349,18 +320,24 @@ function CustomAnnouncementPane({
         </section>
       )}
 
-      <section className={classes.presets}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: '0.7rem' }}>
-          <h3 style={{ margin: 0 }}>Personal presets</h3>
+      <section
+        css={{
+          paddingBottom: 24,
+          marginBottom: 24,
+          borderBottom: '2px solid black',
+        }}
+      >
+        <div css={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: '0.7rem' }}>
+          <h3 css={{ margin: 0 }}>Personal presets</h3>
           <button className="outlined icon" onClick={loadPersonalPresetsForTab}>
-            <ReloadIcon size={24} style={{ verticalAlign: 'middle' }} />
+            <ReloadIcon size={24} css={{ verticalAlign: 'middle' }} />
             <span className="sr-only">Reload</span>
           </button>
         </div>
 
         {!isPersonalPresetsReady || loadingPersonalPresets || !personalPresets ? (
           <div
-            style={{
+            css={{
               alignSelf: 'center',
               justifySelf: 'center',
               textAlign: 'center',
@@ -375,9 +352,15 @@ function CustomAnnouncementPane({
             <p>Loading your personal presets&hellip;</p>
           </div>
         ) : (
-          <div className={classes.presetButtonList}>
+          <div
+            css={{
+              display: 'flex',
+              gap: 8,
+              flexWrap: 'wrap',
+            }}
+          >
             {personalPresets.length === 0 && (
-              <p style={{ marginTop: 8, marginBottom: 0 }}>You have no personal presets for this announcement type.</p>
+              <p css={{ marginTop: 8, marginBottom: 0 }}>You have no personal presets for this announcement type.</p>
             )}
 
             {personalPresets.map(preset => (
@@ -394,17 +377,48 @@ function CustomAnnouncementPane({
       </section>
 
       {isPlayingAnnouncement && (
-        <p className={classes.disabledMessage}>
+        <p
+          css={{
+            background: 'rgba(255, 0, 0, 0.15)',
+            borderLeft: '#f00 4px solid',
+            padding: '8px 16px',
+          }}
+        >
           <strong>All options are disabled while an announcement is playing.</strong>
         </p>
       )}
 
       <fieldset
-        className={clsx({
-          [classes.optionsDisabled]: isPlayingAnnouncement || isSharing,
-          [classes.optionsDisabledPlaying]: isPlayingAnnouncement,
-          [classes.optionsDisabledSharing]: isSharing,
-        })}
+        css={[
+          isPlayingAnnouncement ||
+            (isSharing && {
+              position: 'relative',
+              '&::after': {
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '2em',
+                content: '"Please wait..."',
+                position: 'absolute',
+                top: 0,
+                bottom: 0,
+                right: 0,
+                left: 0,
+                background: 'rgba(0, 0, 0, 0.25)',
+                zIndex: 1,
+              },
+            }),
+          isPlayingAnnouncement && {
+            '&::after': {
+              content: '"Playing announcement..."',
+            },
+          },
+          isSharing && {
+            '&::after': {
+              content: '"Sharing announcement..."',
+            },
+          },
+        ]}
       >
         <h3>Options</h3>
 
@@ -421,7 +435,7 @@ function CustomAnnouncementPane({
         </>
       </fieldset>
 
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
+      <div css={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
         <div className="buttonGroup">
           <button disabled={isPlayingAnnouncement} onClick={playAnnouncement}>
             <span className="buttonLabel">
@@ -447,7 +461,7 @@ function CustomAnnouncementPane({
         </button>
       </div>
 
-      {isPlayingAnnouncement && <p style={{ marginTop: 8 }}>Assembling and playing announcement...</p>}
+      {isPlayingAnnouncement && <p css={{ marginTop: 8 }}>Assembling and playing announcement...</p>}
     </div>
   )
 }

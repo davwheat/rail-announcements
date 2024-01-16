@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 
 import Layout from '@components/Layout'
 import NavBar from '@components/NavBar'
@@ -6,7 +6,6 @@ import Disclaimers from '@components/Disclaimers'
 import { LiveTrainAnnouncements } from '@components/AmeyLiveTrainAnnouncements'
 
 import Breakpoints from '@data/breakpoints'
-import { makeStyles } from '@material-ui/styles'
 import { PageProps } from 'gatsby'
 
 import RailSymbol from '@assets/rail-symbol-2/white-on-red-inset.svg'
@@ -14,43 +13,7 @@ import AmeyPhil from '@announcement-data/systems/stations/AmeyPhil'
 import AmeyCelia from '@announcement-data/systems/stations/AmeyCelia'
 import AnnouncementTabErrorBoundary from '@components/AnnouncementTabErrorBoundary'
 
-const useStyles = makeStyles({
-  root: {
-    margin: 'auto',
-    maxWidth: 1280,
-
-    [Breakpoints.downTo.bigPhone]: {
-      marginTop: 64,
-    },
-
-    [Breakpoints.upTo.bigPhone]: {
-      marginTop: 38,
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-    },
-
-    '& p': {
-      marginBottom: 16,
-    },
-  },
-  heading: {
-    fontSize: '2rem',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logo: {
-    height: 64,
-    width: 64,
-    marginRight: 16,
-    marginTop: -3,
-  },
-})
-
 function AmeyTrainAnnouncementsPage({ location }: PageProps): JSX.Element {
-  const classes = useStyles()
-
   const systems = useMemo<Record<'Phil Sayer' | 'Celia Drummond', AmeyPhil>>(() => {
     return {
       'Phil Sayer': new AmeyPhil(),
@@ -84,15 +47,52 @@ function AmeyTrainAnnouncementsPage({ location }: PageProps): JSX.Element {
       description="Listen to real-time train announcements for (almost) any UK railway station."
     >
       <header>
-        <h1 className={classes.heading}>
-          <img alt="" role="presentation" className={classes.logo} src={RailSymbol} />
+        <h1
+          css={{
+            fontSize: '2rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <img
+            alt=""
+            role="presentation"
+            css={{
+              height: 64,
+              width: 64,
+              marginRight: 16,
+              marginTop: -3,
+            }}
+            src={RailSymbol}
+          />
           <span>Amey Live Train Announcements</span>
         </h1>
       </header>
 
       <NavBar />
 
-      <main className={classes.root}>
+      <main
+        css={{
+          margin: 'auto',
+          maxWidth: 1280,
+
+          [Breakpoints.downTo.bigPhone]: {
+            marginTop: 64,
+          },
+
+          [Breakpoints.upTo.bigPhone]: {
+            marginTop: 38,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          },
+
+          '& p': {
+            marginBottom: 16,
+          },
+        }}
+      >
         <p style={{ fontWeight: 'bold' }}>Listen to live train announcements for (almost) any UK railway station</p>
         <p>
           Live train announcements is powered by audio snippets released under Ireland's Freedom of Information Act 2014 by Irish Rail. These

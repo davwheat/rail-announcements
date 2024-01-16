@@ -1,6 +1,7 @@
 import React from 'react'
-import { Tab, Tabs as OGTabs, TabList, TabPanel } from 'react-tabs'
+import { Tabs as OGTabs, TabList, Tab, TabPanels, TabPanel } from '@reach/tabs'
 import Breakpoints from '@data/breakpoints'
+import styled from '@emotion/styled'
 
 interface TabProps {
   tabNames: string[]
@@ -10,7 +11,9 @@ interface TabProps {
   onTabChange?: (index: number) => void
 }
 
-const Tabs: React.FC<TabProps> = React.memo(({ tabNames, tabItems, customKeyPrefix = '', selectedTabIndex, onTabChange }) => {
+const MyTab = styled(Tab, { shouldForwardProp: prop => prop === 'children' })()
+
+const Tabs = React.memo(({ tabNames, tabItems, customKeyPrefix = '', selectedTabIndex, onTabChange }: TabProps) => {
   if (tabNames.length !== tabItems.length) {
     throw new Error('Different amount of tabNames and tabItems provided.')
   }
@@ -44,7 +47,11 @@ const Tabs: React.FC<TabProps> = React.memo(({ tabNames, tabItems, customKeyPref
         {tabNames.map(name => (
           <Tab
             key={name}
+            className="native-button"
             css={{
+              font: 'inherit',
+              border: 'none',
+              appearance: 'none',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -75,22 +82,18 @@ const Tabs: React.FC<TabProps> = React.memo(({ tabNames, tabItems, customKeyPref
               '&:hover::after': {
                 border: `2px solid #000`,
               },
-
-              '&:focus-visible)': {
-                // outline: '4px solid #999',
-              },
             }}
           >
-            {name}
+            <div>{name}</div>
           </Tab>
         ))}
       </TabList>
 
-      {tabItems.map((tab, i) => (
-        <TabPanel forceRender key={`${customKeyPrefix}${tabNames[i]}`}>
-          {tab}
-        </TabPanel>
-      ))}
+      <TabPanels>
+        {tabItems.map((tab, i) => (
+          <TabPanel key={`${customKeyPrefix}${tabNames[i]}`}>{tab}</TabPanel>
+        ))}
+      </TabPanels>
     </OGTabs>
   )
 })

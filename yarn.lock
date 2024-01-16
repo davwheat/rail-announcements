@@ -3050,6 +3050,64 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@reach/auto-id@npm:0.18.0":
+  version: 0.18.0
+  resolution: "@reach/auto-id@npm:0.18.0"
+  dependencies:
+    "@reach/utils": "npm:0.18.0"
+  peerDependencies:
+    react: ^16.8.0 || 17.x
+    react-dom: ^16.8.0 || 17.x
+  checksum: 545ff94eb4898ad0e1359e604deeebbabc753e004ca3ed5a817272e61422413faf4f68268ba41b61432c157999f3be0d18cf2c52c7d57ae2b988a88a602e4a0c
+  languageName: node
+  linkType: hard
+
+"@reach/descendants@npm:0.18.0":
+  version: 0.18.0
+  resolution: "@reach/descendants@npm:0.18.0"
+  dependencies:
+    "@reach/utils": "npm:0.18.0"
+  peerDependencies:
+    react: ^16.8.0 || 17.x
+    react-dom: ^16.8.0 || 17.x
+  checksum: dbf784cebe0e8cf003d9ce3c8a5fb88d6cb089819ee6149ccb46e6655ce2505e5524d5e95e25e22df974351315d037c08d73149b8748cb8c040dd7d5b6545750
+  languageName: node
+  linkType: hard
+
+"@reach/polymorphic@npm:0.18.0":
+  version: 0.18.0
+  resolution: "@reach/polymorphic@npm:0.18.0"
+  peerDependencies:
+    react: ^16.8.0 || 17.x
+  checksum: 68b432dd9c3750213f0b0748eb81c3cf78b4cbc18274aa0ff9b77519f9fdf62f1c598bcd5c3893a0283be1cc7fb610e6b44edf3aff3f4fe0232c49653334246a
+  languageName: node
+  linkType: hard
+
+"@reach/tabs@npm:^0.18.0":
+  version: 0.18.0
+  resolution: "@reach/tabs@npm:0.18.0"
+  dependencies:
+    "@reach/auto-id": "npm:0.18.0"
+    "@reach/descendants": "npm:0.18.0"
+    "@reach/polymorphic": "npm:0.18.0"
+    "@reach/utils": "npm:0.18.0"
+  peerDependencies:
+    react: ^16.8.0 || 17.x
+    react-dom: ^16.8.0 || 17.x
+  checksum: d22ba83fc3a6d5a2b1eff0ff152ef6a005d7d4a71b93d0628a666e1446c1893975ba51e494e35fab691c4f28dc0c2c19589ea347b0e557c6875628047edd59dd
+  languageName: node
+  linkType: hard
+
+"@reach/utils@npm:0.18.0":
+  version: 0.18.0
+  resolution: "@reach/utils@npm:0.18.0"
+  peerDependencies:
+    react: ^16.8.0 || 17.x
+    react-dom: ^16.8.0 || 17.x
+  checksum: 7686b0cba3653fcddfc49b7887a77c438c1f3d4da35fda0694f771f64669a615129edebf7c62fb2e960c39cb23ab1518a10bb3e818330d57df976de77ada4e5b
+  languageName: node
+  linkType: hard
+
 "@react-native-async-storage/async-storage@npm:^1.15.0":
   version: 1.21.0
   resolution: "@react-native-async-storage/async-storage@npm:1.21.0"
@@ -5373,13 +5431,6 @@ __metadata:
   version: 1.2.1
   resolution: "clsx@npm:1.2.1"
   checksum: 5ded6f61f15f1fa0350e691ccec43a28b12fb8e64c8e94715f2a937bc3722d4c3ed41d6e945c971fc4dcc2a7213a43323beaf2e1c28654af63ba70c9968a8643
-  languageName: node
-  linkType: hard
-
-"clsx@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "clsx@npm:2.0.0"
-  checksum: 943766d1b02fee3538c871e56638d87f973fbc2d6291ce221215ea436fdecb9be97ad323f411839c2d52c45640c449b1a53fbfe7e8b3d529b4e263308b630c9a
   languageName: node
   linkType: hard
 
@@ -12180,7 +12231,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:^15.5.0, prop-types@npm:^15.6.0, prop-types@npm:^15.6.2, prop-types@npm:^15.7.2, prop-types@npm:^15.8.1":
+"prop-types@npm:^15.6.0, prop-types@npm:^15.6.2, prop-types@npm:^15.7.2, prop-types@npm:^15.8.1":
   version: 15.8.1
   resolution: "prop-types@npm:15.8.1"
   dependencies:
@@ -12319,6 +12370,7 @@ __metadata:
   dependencies:
     "@emotion/react": "npm:^11.11.3"
     "@emotion/styled": "npm:^11.11.0"
+    "@reach/tabs": "npm:^0.18.0"
     "@sentry/cli": "npm:^2.25.0"
     "@sentry/gatsby": "npm:^7.93.0"
     "@sentry/tracing": "npm:^7.93.0"
@@ -12355,7 +12407,6 @@ __metadata:
     react-fullscreen-crossbrowser: "npm:^1.1.3"
     react-head: "npm:^3.4.2"
     react-select: "npm:^5.8.0"
-    react-tabs: "npm:^6.0.2"
     recoil: "npm:^0.7.7"
     recoil-persist: "npm:^5.1.0"
     recoil-persistence: "npm:^0.3.0-beta.1"
@@ -12599,18 +12650,6 @@ __metadata:
     react: 0.0.0-experimental-c8b778b7f-20220825
     webpack: ^5.59.0
   checksum: 63ce72dd8e4399ad835e8b3e220d458f4e44665310edf4e136919faf7f8b80bac238ce91c237c248b477466035c92de4b7bce3ad14215025f14ecb8e42ebd202
-  languageName: node
-  linkType: hard
-
-"react-tabs@npm:^6.0.2":
-  version: 6.0.2
-  resolution: "react-tabs@npm:6.0.2"
-  dependencies:
-    clsx: "npm:^2.0.0"
-    prop-types: "npm:^15.5.0"
-  peerDependencies:
-    react: ^18.0.0
-  checksum: 7bb3eebb75470515ec898a9f53fff2a1a21c92176f7b788e3ad1f5aa8f123d5323ba56eeabdc290dafaf116bbc9636844d95f500f2e32f001af9688d46d20434
   languageName: node
   linkType: hard
 

@@ -767,7 +767,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       'no driver available',
       'objects being thrown onto the line',
       'objects on the line',
-      'on a preceding train',
+      // 'on a preceding train',
       'overcrowding caused by the short formation of this service today',
       'overcrowding caused by the',
       'overcrowding on the train',
@@ -787,7 +787,6 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       'poor rail conditions caused by leaf fall',
       'poor rail conditions',
       'power car problems',
-      'refueling',
       'replacing emergency equipment on this train',
       'reports of a blockage on the line',
       'reports of a disturbance on board this train',
@@ -820,7 +819,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       'the fire brigade attending an incident on this train',
       'the late arrival of an incoming train',
       // 'the late arrival of the coaches and train crew to form this service',
-      'the late running of a preceding train',
+      // 'the late running of a preceding train',
       'the london fire brigade attending an incident on the train',
       'the london fire brigade attending an incident on this train',
       'the previous service being delayed',
@@ -4068,8 +4067,13 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         break
     }
 
-    const aPortionStops = new Set([...splitData.splitA!!.stops.map(s => s.crsCode)])
-    const bPortionStops = new Set([...splitData.splitB!!.stops.map(s => s.crsCode)])
+    const aPortionStops = splitData.splitA!!.stops.map(s => s.crsCode)
+    const bPortionStops = splitData.splitB!!.stops.map(s => s.crsCode)
+    const anyPortionStops = splitData.stopsUpToSplit.map(s => s.crsCode)
+
+    // Fix for the split point being in the split portion calling points
+    if (aPortionStops[0] === splitPoint.crsCode) aPortionStops.shift()
+    if (bPortionStops[0] === splitPoint.crsCode) bPortionStops.shift()
 
     // Note to future me:
     //
@@ -4078,10 +4082,13 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     //
     // F.
 
-    const anyPortionStops = new Set([
-      ...splitData.stopsUpToSplit.map(s => s.crsCode),
-      // ...Array.from(aPortionStops).filter(x => bPortionStops.has(x)),
-    ])
+    // const aPortionStops = new Set([...splitData.splitA!!.stops.map(s => s.crsCode)])
+    // const bPortionStops = new Set([...splitData.splitB!!.stops.map(s => s.crsCode)])
+
+    // const anyPortionStops = new Set([
+    //   ...splitData.stopsUpToSplit.map(s => s.crsCode),
+    //   ...Array.from(aPortionStops).filter(x => bPortionStops.has(x)),
+    // ])
 
     // Array.from(anyPortionStops).forEach(s => {
     //   if (aPortionStops.has(s)) aPortionStops.delete(s)

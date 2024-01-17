@@ -4067,8 +4067,13 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         break
     }
 
-    const aPortionStops = new Set([...splitData.splitA!!.stops.map(s => s.crsCode)])
-    const bPortionStops = new Set([...splitData.splitB!!.stops.map(s => s.crsCode)])
+    const aPortionStops = splitData.splitA!!.stops.map(s => s.crsCode)
+    const bPortionStops = splitData.splitB!!.stops.map(s => s.crsCode)
+    const anyPortionStops = splitData.stopsUpToSplit.map(s => s.crsCode)
+
+    // Fix for the split point being in the split portion calling points
+    if (aPortionStops[0] === splitPoint.crsCode) aPortionStops.shift()
+    if (bPortionStops[0] === splitPoint.crsCode) bPortionStops.shift()
 
     // Note to future me:
     //
@@ -4077,10 +4082,13 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     //
     // F.
 
-    const anyPortionStops = new Set([
-      ...splitData.stopsUpToSplit.map(s => s.crsCode),
-      // ...Array.from(aPortionStops).filter(x => bPortionStops.has(x)),
-    ])
+    // const aPortionStops = new Set([...splitData.splitA!!.stops.map(s => s.crsCode)])
+    // const bPortionStops = new Set([...splitData.splitB!!.stops.map(s => s.crsCode)])
+
+    // const anyPortionStops = new Set([
+    //   ...splitData.stopsUpToSplit.map(s => s.crsCode),
+    //   ...Array.from(aPortionStops).filter(x => bPortionStops.has(x)),
+    // ])
 
     // Array.from(anyPortionStops).forEach(s => {
     //   if (aPortionStops.has(s)) aPortionStops.delete(s)

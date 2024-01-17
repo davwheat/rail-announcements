@@ -368,6 +368,11 @@ const changelog: IChangelogVersion[] = [
       'Migrate to self-hosted Sentry issue tracker',
     ],
   },
+  {
+    date: '2024-01-16',
+    otherChanges: ['Migrated to new style library'],
+    fixes: ['[Amey Phil & Celia] Simplify logic for splitting trains with common calling points to match the real world'],
+  },
 ]
 
 export default changelog

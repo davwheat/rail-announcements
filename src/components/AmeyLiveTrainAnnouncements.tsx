@@ -1308,7 +1308,6 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
                 padding: 0,
                 margin: 0,
                 float: 'left',
-                width: '150px',
                 fontWeight: 'bold',
               }}
             >

@@ -1,76 +1,31 @@
-import React from 'react'
-
 import Layout from '@components/Layout'
 import NavBar from '@components/NavBar'
 import Breakpoints from '@data/breakpoints'
+import { css } from '@emotion/react'
 
-import { makeStyles } from '@material-ui/styles'
-import { PageProps } from 'gatsby'
+import type { PageProps } from 'gatsby'
 
-const useStyles = makeStyles({
-  root: {
-    margin: 'auto',
-    maxWidth: 900,
+const email = css({
+  padding: 12,
+  background: '#f0f0f0',
+  marginBottom: 16,
+  border: '2px solid #000',
 
-    [Breakpoints.downTo.bigPhone]: {
-      marginTop: 64,
-    },
-
-    [Breakpoints.upTo.bigPhone]: {
-      marginTop: 38,
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-    },
-
-    '& p': {
-      marginBottom: 16,
-    },
-  },
-  comms: {
-    marginTop: 32,
-
-    '& > h2': {
-      marginBottom: 24,
-    },
-  },
-  email: {
-    padding: 12,
-    background: '#f0f0f0',
+  '& figcaption': {
     marginBottom: 16,
-    border: '2px solid #000',
-
-    '& figcaption': {
-      marginBottom: 16,
-      padding: 8,
-      background: 'white',
-    },
-
-    '& pre': {
-      padding: 8,
-      whiteSpace: 'normal',
-      fontSize: 16,
-    },
-  },
-  emailAttachments: {
     padding: 8,
     background: 'white',
-    marginTop: 12,
+  },
 
-    '& h3': {
-      marginBottom: 8,
-      fontSize: '0.9em',
-    },
-
-    '& .list': {
-      fontSize: '0.85em',
-    },
+  '& pre': {
+    padding: 8,
+    whiteSpace: 'normal',
+    fontSize: 16,
+    fontFamily: 'Consolas, "Courier New", monospace',
   },
 })
 
 function AtosWorldlinePage({ location }: PageProps): JSX.Element {
-  const classes = useStyles()
-
   return (
     <Layout location={location}>
       <header>
@@ -79,7 +34,27 @@ function AtosWorldlinePage({ location }: PageProps): JSX.Element {
 
       <NavBar />
 
-      <main className={classes.root}>
+      <main
+        css={{
+          margin: 'auto',
+          maxWidth: 900,
+
+          [Breakpoints.downTo.bigPhone]: {
+            marginTop: 64,
+          },
+
+          [Breakpoints.upTo.bigPhone]: {
+            marginTop: 38,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          },
+
+          '& p': {
+            marginBottom: 16,
+          },
+        }}
+      >
         <article>
           <h2>An open letter</h2>
 
@@ -133,12 +108,20 @@ function AtosWorldlinePage({ location }: PageProps): JSX.Element {
           </p>
         </article>
 
-        <section className={classes.comms}>
+        <section
+          css={{
+            marginTop: 32,
+
+            '& > h2': {
+              marginBottom: 24,
+            },
+          }}
+        >
           <h2>Communications with Worldline</h2>
 
-          <figure className={classes.email}>
+          <figure css={email}>
             <figcaption>Wordline legal team's first email to me</figcaption>
-            <pre style={{ fontFamily: 'Consolas, "Courier New", monospace' }}>
+            <pre>
               On 17 August 2023 10:36 BST, XXXX &lt;XXXX@worldline.com&gt; wrote:
               <br />
               &gt; Dear Mr Wheatley,
@@ -163,7 +146,22 @@ function AtosWorldlinePage({ location }: PageProps): JSX.Element {
               <br />
               &gt; worldline.com
             </pre>
-            <div className={classes.emailAttachments}>
+            <div
+              css={{
+                padding: 8,
+                background: 'white',
+                marginTop: 12,
+
+                '& h3': {
+                  marginBottom: 8,
+                  fontSize: '0.9em',
+                },
+
+                '& .list': {
+                  fontSize: '0.85em',
+                },
+              }}
+            >
               <h3>Attachments</h3>
               <ul className="list">
                 <li>
@@ -173,9 +171,9 @@ function AtosWorldlinePage({ location }: PageProps): JSX.Element {
             </div>
           </figure>
 
-          <figure className={classes.email}>
+          <figure css={email}>
             <figcaption>My reply</figcaption>
-            <pre style={{ fontFamily: 'Consolas, "Courier New", monospace' }}>
+            <pre>
               On 17 August 2023 12:46 BST, David Wheatley &lt;david@davwheat.dev&gt; wrote:
               <br />
               &gt; Hi XXXX,
@@ -216,9 +214,9 @@ function AtosWorldlinePage({ location }: PageProps): JSX.Element {
             </pre>
           </figure>
 
-          <figure className={classes.email}>
+          <figure css={email}>
             <figcaption>Worldline's reply</figcaption>
-            <pre style={{ fontFamily: 'Consolas, "Courier New", monospace' }}>
+            <pre>
               On 18 August 2023 09:06 BST, XXXX &lt;XXXX@worldline.com&gt; wrote:
               <br />
               &gt; Good morning David,
@@ -236,9 +234,9 @@ function AtosWorldlinePage({ location }: PageProps): JSX.Element {
             </pre>
           </figure>
 
-          <figure className={classes.email}>
+          <figure css={email}>
             <figcaption>My reply</figcaption>
-            <pre style={{ fontFamily: 'Consolas, "Courier New", monospace' }}>
+            <pre>
               On 18 August 2023 10:04 BST, David Wheatley &lt;david@davwheat.dev&gt; wrote:
               <br />
               &gt; Hi XXXX,
@@ -266,9 +264,9 @@ function AtosWorldlinePage({ location }: PageProps): JSX.Element {
             </pre>
           </figure>
 
-          <figure className={classes.email}>
+          <figure css={email}>
             <figcaption>Worldline's reply</figcaption>
-            <pre style={{ fontFamily: 'Consolas, "Courier New", monospace' }}>
+            <pre>
               On 21 August 2023 09:44 BST, XXXX &lt;XXXX@worldline.com&gt; wrote:
               <br />
               &gt; Good morning David,
@@ -287,9 +285,9 @@ function AtosWorldlinePage({ location }: PageProps): JSX.Element {
             </pre>
           </figure>
 
-          <figure className={classes.email}>
+          <figure css={email}>
             <figcaption>My reply</figcaption>
-            <pre style={{ fontFamily: 'Consolas, "Courier New", monospace' }}>
+            <pre>
               On 21 August 2023 11:00 BST, David Wheatley &lt;david@davwheat.dev&gt; wrote:
               <br />
               &gt; Hi XXXX,

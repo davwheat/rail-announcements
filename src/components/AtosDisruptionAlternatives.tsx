@@ -1,7 +1,3 @@
-import React from 'react'
-
-import { makeStyles } from '@material-ui/styles'
-
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd'
 import Select from 'react-select'
 import { nanoid } from 'nanoid'
@@ -11,24 +7,6 @@ interface Option {
   readonly label: string
   readonly value: string
 }
-
-const useStyles = makeStyles({
-  root: {
-    padding: 16,
-    backgroundColor: '#eee',
-  },
-  disabledMessage: {
-    background: 'rgba(255, 0, 0, 0.15)',
-    borderLeft: '#f00 4px solid',
-    padding: '8px 16px',
-  },
-  addAltButton: {
-    marginTop: 12,
-  },
-  draggableItem: {
-    marginBottom: 24,
-  },
-})
 
 export type IAlternativeServicesState = {
   randomId: string
@@ -56,8 +34,6 @@ interface ICallingAtSelectorProps {
 }
 
 function AtosDisruptionAlternatives({ onChange, value, availableStations, hours, mins, platforms }: ICallingAtSelectorProps): JSX.Element {
-  const classes = useStyles()
-
   const firstTerminatingStation = availableStations.low[0]
 
   return (
@@ -82,7 +58,11 @@ function AtosDisruptionAlternatives({ onChange, value, availableStations, hours,
         Add alternative service
       </button>
 
-      <div className={classes.addAltButton}>
+      <div
+        css={{
+          marginTop: 12,
+        }}
+      >
         <DragDropContext
           onDragEnd={result => {
             if (!result.destination) return
@@ -106,7 +86,9 @@ function AtosDisruptionAlternatives({ onChange, value, availableStations, hours,
                     <Draggable key={alternateService.randomId} draggableId={alternateService.randomId} index={i}>
                       {(provided, snapshot) => (
                         <div
-                          className={classes.draggableItem}
+                          css={{
+                            marginBottom: 24,
+                          }}
                           ref={provided.innerRef}
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
@@ -150,47 +132,6 @@ interface IAtosDisruptionAlternativeServicePanelProps {
   mins: string[]
   platforms: string[]
 }
-
-const useAltServiceStyles = makeStyles({
-  deleteButton: {
-    boxSizing: 'content-box',
-    padding: 8,
-    display: 'inline-block',
-    height: '1em',
-    marginLeft: 8,
-
-    '& > svg': {
-      height: '1em',
-    },
-  },
-  root: {
-    padding: 16,
-    paddingBottom: 8,
-
-    background: '#fff',
-
-    '& > label': {
-      paddingTop: 0,
-    },
-  },
-  draggableItem: {
-    border: '1px solid black',
-    padding: '4px 8px',
-    marginBottom: 8,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  topRow: {
-    display: 'flex',
-    justifyContent: 'space-between',
-  },
-  passengersFor: {
-    marginBottom: 8,
-    maxWidth: 400,
-  },
-})
-
 function AtosDisruptionAlternativeServicePanel({
   value,
   onChange,
@@ -200,29 +141,60 @@ function AtosDisruptionAlternativeServicePanel({
   mins,
   platforms,
 }: IAtosDisruptionAlternativeServicePanelProps): JSX.Element {
-  const classes = useAltServiceStyles()
-
   return (
-    <div className={classes.root}>
-      <div className={classes.topRow}>
+    <div
+      css={{
+        padding: 16,
+        paddingBottom: 8,
+
+        background: '#fff',
+
+        '& > label': {
+          paddingTop: 0,
+        },
+      }}
+    >
+      <div
+        css={{
+          display: 'flex',
+          justifyContent: 'space-between',
+        }}
+      >
         <p>Passengers for...</p>
 
-        <button className={classes.deleteButton} onClick={onRemove}>
-          <svg viewBox="0 0 24 24">
+        <button
+          css={{
+            boxSizing: 'content-box',
+            padding: 8,
+            display: 'inline-block',
+            height: '1em',
+            marginLeft: 8,
+          }}
+          onClick={onRemove}
+        >
+          <svg
+            viewBox="0 0 24 24"
+            css={{
+              height: '1em',
+            }}
+          >
             <path fill="currentColor" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
           </svg>
         </button>
       </div>
 
       <Select<Option, false>
-        className={classes.passengersFor}
+        css={{
+          marginBottom: 8,
+          maxWidth: 400,
+        }}
         value={{
           value: 'none',
           label: 'Select station…',
         }}
         onChange={val => {
-          const stn = getStationByCrs(val.value)
-          value.passengersFor.push({ crsCode: stn.crsCode, name: stn.stationName, randomId: nanoid() })
+          const stn = getStationByCrs(val!!.value)
+          value.passengersFor.push({ crsCode: stn!!.crsCode, name: stn!!.stationName, randomId: nanoid() })
           onChange(value)
         }}
         options={[
@@ -246,40 +218,11 @@ function AtosDisruptionAlternativeServicePanel({
 
               return {
                 value: s,
-                label: getStationByCrs(s).stationName,
+                label: getStationByCrs(s)!!.stationName,
               }
             }),
         )}
       />
-
-      {/* <select
-        className={classes.passengersFor}
-        value="none"
-        onChange={e => {
-          const stn = getStationByCrs(e.target.value)
-          value.passengersFor.push({ crsCode: stn.crsCode, name: stn.stationName, randomId: nanoid() })
-          onChange(value)
-        }}
-      >
-        <option value="none">Select station...</option>
-
-        {availableStations.high
-          .filter(stn => !value.passengersFor.map(x => x.crsCode).includes(stn))
-          .sort()
-          .map(s => {
-            if (!getStationByCrs(s)) {
-              console.warn('No station found for', s)
-
-              return null
-            }
-
-            return (
-              <option key={s} value={s}>
-                {getStationByCrs(s).stationName}
-              </option>
-            )
-          })}
-      </select> */}
 
       <DragDropContext
         onDragEnd={result => {
@@ -303,17 +246,40 @@ function AtosDisruptionAlternativeServicePanel({
                 return (
                   <Draggable key={stop.randomId} draggableId={stop.randomId} index={i}>
                     {(provided, snapshot) => (
-                      <div className={classes.draggableItem} ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
+                      <div
+                        css={{
+                          border: '1px solid black',
+                          padding: '4px 8px',
+                          marginBottom: 8,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                        }}
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                      >
                         <span>{stop.name}</span>{' '}
                         <button
-                          className={classes.deleteButton}
+                          css={{
+                            boxSizing: 'content-box',
+                            padding: 8,
+                            display: 'inline-block',
+                            height: '1em',
+                            marginLeft: 8,
+                          }}
                           onClick={() => {
                             const newFor = value.passengersFor.filter(s => s.randomId !== stop.randomId)
                             value.passengersFor = newFor
                             onChange(value)
                           }}
                         >
-                          <svg viewBox="0 0 24 24">
+                          <svg
+                            viewBox="0 0 24 24"
+                            css={{
+                              height: '1em',
+                            }}
+                          >
                             <path fill="currentColor" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
                           </svg>
                         </button>

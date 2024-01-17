@@ -1,11 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import crsToStationItemMapper from '@helpers/crsToStationItemMapper'
 import FullscreenIcon from 'mdi-react/FullscreenIcon'
 import ShuffleIcon from 'mdi-react/DieMultipleIcon'
 import NREPowered from '@assets/NRE_Powered_logo.png'
 import FullScreen from 'react-fullscreen-crossbrowser'
 import Select from 'react-select'
-import { makeStyles } from '@material-ui/styles'
 
 import type { CallingAtPoint } from '@components/CallingAtSelector'
 import type { Option } from '@helpers/createOptionField'
@@ -240,130 +239,6 @@ interface NrccMessage {
   xhtmlMessage: string
 }
 
-const useLiveTrainsStyles = makeStyles({
-  fullscreenButton: {
-    display: 'flex',
-    alignItems: 'center',
-    marginBottom: 16,
-
-    '&:last-child': {
-      marginBottom: 0,
-    },
-  },
-  iframe: {
-    border: 'none',
-    width: '100%',
-    height: 400,
-
-    ':fullscreen &': {
-      height: '100%',
-    },
-  },
-  poweredBy: {
-    maxWidth: '100%',
-    width: 300,
-    marginTop: 16,
-  },
-  logs: {
-    marginTop: 16,
-  },
-  setAllContainer: {
-    display: 'flex',
-    alignItems: 'stretch',
-    gap: 8,
-    marginBottom: 16,
-  },
-  perPlatformSelection: {
-    padding: 0,
-    width: '100%',
-
-    '& .list': {
-      display: 'grid',
-      overflowX: 'scroll',
-
-      [Breakpoints.downTo.desktopLarge]: {
-        gridTemplateColumns: '1fr 1fr',
-
-        '& fieldset:nth-child(4n - 1), & fieldset:nth-child(4n)': {
-          background: '#eee',
-        },
-      },
-
-      [Breakpoints.upTo.desktopLarge]: {
-        gridTemplateColumns: 'minmax(0, 1fr)',
-
-        '& fieldset:nth-child(even)': {
-          background: '#eee',
-        },
-      },
-    },
-
-    '& summary': {
-      userSelect: 'none',
-      display: 'flex',
-      alignItems: 'center',
-      padding: '8px 16px',
-      background: '#eee',
-      cursor: 'pointer',
-
-      '&::before': {
-        '--size': '6px',
-        content: '""',
-        display: 'inline-block',
-        width: 0,
-        height: 0,
-        borderLeft: 'var(--size) solid transparent',
-        borderRight: 'var(--size) solid transparent',
-        borderTop: 'calc(2 * var(--size)) solid currentColor',
-        marginRight: 8,
-      },
-    },
-
-    '& details:not([open]) summary::before': {
-      transform: 'rotate(-90deg)',
-    },
-
-    '& fieldset': {
-      appearance: 'none',
-      padding: 0,
-      margin: 0,
-      border: 'none',
-      minInlineSize: 'min-content',
-
-      display: 'flex',
-      alignItems: 'center',
-      gap: 8,
-      paddingLeft: 16,
-      paddingRight: 16,
-
-      '& legend': {
-        appearance: 'none',
-        display: 'inline-block',
-        padding: 0,
-        margin: 0,
-        float: 'left',
-        width: '150px',
-        fontWeight: 'bold',
-      },
-    },
-
-    '& label': {
-      display: 'flex',
-      whiteSpace: 'nowrap',
-      alignItems: 'center',
-      fontWeight: 'normal',
-
-      '&:has([disabled])': {
-        color: '#666',
-
-        '&, & input': {
-          cursor: 'not-allowed',
-        },
-      },
-    },
-  },
-})
-
 type DisplayType = 'gtr-new' | 'tfwm-lcd'
 
 const MindTheGapStations = new Set(['WVF', 'LWS'])
@@ -381,8 +256,6 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
   systems,
   supportedPlatforms,
 }: LiveTrainAnnouncementsProps<SystemKeys>) {
-  const classes = useLiveTrainsStyles()
-
   const systemKeys = Object.keys(systems) as SystemKeys[]
 
   const perSystemSupportedStations: Record<string, Option[]> = useMemo(
@@ -1336,8 +1209,20 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         />
       </label>
 
-      <fieldset className={classes.perPlatformSelection}>
-        <div className={classes.setAllContainer}>
+      <fieldset
+        css={{
+          padding: 0,
+          width: '100%',
+        }}
+      >
+        <div
+          css={{
+            display: 'flex',
+            alignItems: 'stretch',
+            gap: 8,
+            marginBottom: 16,
+          }}
+        >
           {systemKeys.map(systemKey => {
             return (
               <button
@@ -1387,14 +1272,74 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
           </button>
         </div>
 
-        <details>
-          <summary>
-            <legend>Configure per-platform voices</legend>
+        <details
+          css={{
+            '&:not([open]) summary::before': {
+              transform: 'rotate(-90deg)',
+            },
+          }}
+        >
+          <summary
+            css={{
+              userSelect: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              padding: '8px 16px',
+              background: '#eee',
+              cursor: 'pointer',
+
+              '&::before': {
+                '--size': '6px',
+                content: '""',
+                display: 'inline-block',
+                width: 0,
+                height: 0,
+                borderLeft: 'var(--size) solid transparent',
+                borderRight: 'var(--size) solid transparent',
+                borderTop: 'calc(2 * var(--size)) solid currentColor',
+                marginRight: 8,
+              },
+            }}
+          >
+            <legend
+              css={{
+                appearance: 'none',
+                display: 'inline-block',
+                padding: 0,
+                margin: 0,
+                float: 'left',
+                width: '150px',
+                fontWeight: 'bold',
+              }}
+            >
+              Configure per-platform voices
+            </legend>
           </summary>
 
           <p style={{ marginTop: 16 }}>We'll remember these settings on your device.</p>
 
-          <div className="list">
+          <div
+            css={{
+              display: 'grid',
+              overflowX: 'scroll',
+
+              [Breakpoints.downTo.desktopLarge]: {
+                gridTemplateColumns: '1fr 1fr',
+
+                '& fieldset:nth-child(4n - 1), & fieldset:nth-child(4n)': {
+                  background: '#eee',
+                },
+              },
+
+              [Breakpoints.upTo.desktopLarge]: {
+                gridTemplateColumns: 'minmax(0, 1fr)',
+
+                '& fieldset:nth-child(even)': {
+                  background: '#eee',
+                },
+              },
+            }}
+          >
             {Object.entries(supportedPlatforms)
               .sort(([a], [b]) => {
                 const aInt = parseInt(a)
@@ -1410,10 +1355,54 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
               })
               .map(([platform, systems]) => {
                 return (
-                  <fieldset key={platform}>
-                    <legend>Platform {platform}</legend>
+                  <fieldset
+                    css={{
+                      appearance: 'none',
+                      padding: 0,
+                      margin: 0,
+                      border: 'none',
+                      minInlineSize: 'min-content',
 
-                    <label key={`platform-system-select-${platform}-none`} htmlFor={`platform-system-select-${platform}-none`}>
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      paddingLeft: 16,
+                      paddingRight: 16,
+                    }}
+                    key={platform}
+                  >
+                    <legend
+                      css={{
+                        appearance: 'none',
+                        display: 'inline-block',
+                        padding: 0,
+                        margin: 0,
+                        float: 'left',
+                        width: '150px',
+                        fontWeight: 'bold',
+                      }}
+                    >
+                      Platform {platform}
+                    </legend>
+
+                    <label
+                      key={`platform-system-select-${platform}-none`}
+                      htmlFor={`platform-system-select-${platform}-none`}
+                      css={{
+                        display: 'flex',
+                        whiteSpace: 'nowrap',
+                        alignItems: 'center',
+                        fontWeight: 'normal',
+
+                        '&:has([disabled])': {
+                          color: '#666',
+
+                          '&, & input': {
+                            cursor: 'not-allowed',
+                          },
+                        },
+                      }}
+                    >
                       None
                       <input
                         type="radio"
@@ -1474,26 +1463,56 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
 
       {!hasEnabledFeature ? (
         <>
-          <button className={classes.fullscreenButton} onClick={() => setHasEnabledFeature(true)}>
+          <button
+            css={{
+              display: 'flex',
+              alignItems: 'center',
+              marginBottom: 0,
+            }}
+            onClick={() => setHasEnabledFeature(true)}
+          >
             Enable live trains
           </button>
         </>
       ) : (
         <>
-          <button className={classes.fullscreenButton} onClick={() => setFullscreen(true)}>
+          <button
+            css={{
+              display: 'flex',
+              alignItems: 'center',
+              marginBottom: 16,
+            }}
+            onClick={() => setFullscreen(true)}
+          >
             <FullscreenIcon style={{ marginRight: 4 }} /> Fullscreen
           </button>
 
           <FullScreen enabled={isFullscreen} onChange={setFullscreen}>
             <iframe
-              className={classes.iframe}
+              css={{
+                border: 'none',
+                width: '100%',
+                height: 400,
+
+                ':fullscreen &': {
+                  height: '100%',
+                },
+              }}
               src={`https://raildotmatrix.co.uk/board/?type=${encodeURIComponent(displayType)}&station=${selectedCrs}&noBg=1&hideSettings=1`}
             />
           </FullScreen>
 
-          <Logs className={classes.logs} logs={logs} />
+          <Logs css={{ marginTop: 16 }} logs={logs} />
 
-          <img src={NREPowered} alt="Powered by National Rail Enquiries" className={classes.poweredBy} />
+          <img
+            src={NREPowered}
+            alt="Powered by National Rail Enquiries"
+            css={{
+              maxWidth: '100%',
+              width: 300,
+              marginTop: 16,
+            }}
+          />
         </>
       )}
     </div>

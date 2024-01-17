@@ -2,42 +2,39 @@ import React from 'react'
 
 import SEO from './SEO'
 
-import { makeStyles } from '@material-ui/styles'
-
 import { ScrollContext } from 'gatsby-react-router-scroll'
 import { RecoilRoot } from 'recoil'
 import { SnackbarProvider } from 'notistack'
 
-import type { LocationContext } from '@gatsbyjs/reach-router'
-
-const useStyles = makeStyles({
-  mainContent: {
-    padding: 24,
-  },
-  footer: {
-    padding: 24,
-  },
-})
+import type { WindowLocation } from '@gatsbyjs/reach-router'
 
 interface Props {
   description?: string
   title?: string
-  location: LocationContext
+  location: WindowLocation<unknown>
   children: React.ReactNode
 }
 
 const Layout: React.FC<Props> = ({ children, title, description, location }) => {
-  const classes = useStyles()
-
   return (
     <ScrollContext location={location}>
       <RecoilRoot>
         <SnackbarProvider>
           <SEO title={title} description={description} />
 
-          <main className={classes.mainContent}>{children}</main>
+          <main
+            css={{
+              padding: 24,
+            }}
+          >
+            {children}
+          </main>
 
-          <footer className={classes.footer}>
+          <footer
+            css={{
+              padding: 24,
+            }}
+          >
             <p>
               Made with love by{' '}
               <a href="https://davwheat.dev/" target="_blank">

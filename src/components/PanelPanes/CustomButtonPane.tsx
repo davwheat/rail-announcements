@@ -1,39 +1,19 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 
-import { makeStyles } from '@material-ui/styles'
 import getActiveSystem from '@helpers/getActiveSystem'
-import type { CustomAnnouncementButton } from '@announcement-data/AnnouncementSystem'
 import useIsPlayingAnnouncement from '@helpers/useIsPlayingAnnouncement'
 import DownloadIcon from 'mdi-react/DownloadIcon'
 import PlayIcon from 'mdi-react/PlayIcon'
 
 import * as Sentry from '@sentry/react'
 
-const useStyles = makeStyles({
-  root: {
-    padding: 16,
-    backgroundColor: '#eee',
-  },
-  disabledMessage: {
-    background: 'rgba(255, 0, 0, 0.15)',
-    borderLeft: '#f00 4px solid',
-    padding: '8px 16px',
-  },
-  buttonList: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-})
-
+import type { CustomAnnouncementButton } from '@announcement-data/AnnouncementSystem'
 export interface ICustomButtonPaneProps {
   buttons?: CustomAnnouncementButton[]
   buttonSections?: Record<string, CustomAnnouncementButton[]>
 }
 
 function CustomButtonPane({ buttons, buttonSections }: ICustomButtonPaneProps) {
-  const classes = useStyles()
-
   const [playError, setPlayError] = useState<Error | null>(null)
 
   const AnnouncementSystem = getActiveSystem()
@@ -80,9 +60,20 @@ function CustomButtonPane({ buttons, buttonSections }: ICustomButtonPaneProps) {
   }
 
   return (
-    <div className={classes.root}>
+    <div
+      css={{
+        padding: 16,
+        backgroundColor: '#eee',
+      }}
+    >
       {isDisabled && (
-        <p className={classes.disabledMessage}>
+        <p
+          css={{
+            background: 'rgba(255, 0, 0, 0.15)',
+            borderLeft: '#f00 4px solid',
+            padding: '8px 16px',
+          }}
+        >
           <strong>All options are disabled while an announcement is playing.</strong>
         </p>
       )}
@@ -93,11 +84,17 @@ function CustomButtonPane({ buttons, buttonSections }: ICustomButtonPaneProps) {
 
           {sectionButtons?.length === 0 && <p>No announcements available</p>}
 
-          <div className={classes.buttonList}>
-            {sectionButtons?.map?.(btn => {
+          <div
+            css={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 8,
+            }}
+          >
+            {sectionButtons?.map?.((btn: any) => {
               if (btn.files) {
-                btn.play ||= () => AnnouncementSystemInstance.playAudioFiles(btn.files)
-                btn.download ||= () => AnnouncementSystemInstance.playAudioFiles(btn.files, true)
+                btn.play ||= () => AnnouncementSystemInstance.playAudioFiles(btn.files!!)
+                btn.download ||= () => AnnouncementSystemInstance.playAudioFiles(btn.files!!, true)
               }
 
               return (

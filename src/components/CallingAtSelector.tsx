@@ -1,68 +1,9 @@
 import React from 'react'
 
-import { makeStyles } from '@material-ui/styles'
-
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd'
 import createOptionField from '@helpers/createOptionField'
 import { nanoid } from 'nanoid'
 import { AllStationsTitleValueMap } from '@data/StationManipulators'
-import { clsx } from 'clsx'
-
-const useStyles = makeStyles({
-  root: {
-    padding: 16,
-    backgroundColor: '#eee',
-  },
-  disabledMessage: {
-    background: 'rgba(255, 0, 0, 0.15)',
-    borderLeft: '#f00 4px solid',
-    padding: '8px 16px',
-  },
-  callingAtRoot: {
-    padding: 16,
-    paddingBottom: 8,
-    marginBottom: 24,
-
-    background: '#fff',
-
-    '& > label': {
-      paddingTop: 0,
-    },
-  },
-  draggableItem: {
-    border: '1px solid black',
-    padding: '4px 8px',
-    marginBottom: 8,
-    display: 'flex',
-    alignItems: 'center',
-    gap: 8,
-  },
-  mainInfo: {
-    display: 'flex',
-    flexDirection: 'column',
-    padding: '4px 0',
-    gap: 8,
-
-    '& > :not(:first-child)': {
-      fontSize: 18,
-    },
-
-    '& > *': {
-      padding: 0,
-    },
-  },
-  deleteButton: {
-    boxSizing: 'content-box',
-    padding: 8,
-    display: 'inline-block',
-    height: '1em',
-    marginLeft: 'auto',
-
-    '& > svg': {
-      height: '1em',
-    },
-  },
-})
 
 export interface CallingAtPoint {
   crsCode: string
@@ -111,8 +52,6 @@ function CallingAtSelector({
   enableSplits = false,
   className,
 }: ICallingAtSelectorProps): JSX.Element {
-  const classes = useStyles()
-
   const AvailableStations = React.useMemo(() => {
     const options = AllStationsTitleValueMap.filter(s => availableStations.includes(s.value))
 
@@ -141,7 +80,7 @@ function CallingAtSelector({
               ...value,
               {
                 crsCode: newStop,
-                name: AvailableStations.find(s => s.value === newStop).title,
+                name: AvailableStations.find(s => s.value === newStop)!!.title,
                 randomId: nanoid(),
               },
             ])
@@ -151,7 +90,20 @@ function CallingAtSelector({
         },
       )}
 
-      <div className={clsx(classes.callingAtRoot, className)}>
+      <div
+        className={className}
+        css={{
+          padding: 16,
+          paddingBottom: 8,
+          marginBottom: 24,
+
+          background: '#fff',
+
+          '& > label': {
+            paddingTop: 0,
+          },
+        }}
+      >
         <label>{heading}</label>
         {value.length > 0 && (
           <DragDropContext
@@ -177,12 +129,34 @@ function CallingAtSelector({
                       <Draggable key={stop.randomId} draggableId={stop.randomId} index={i}>
                         {(provided, snapshot) => (
                           <div
-                            className={classes.draggableItem}
+                            css={{
+                              border: '1px solid black',
+                              padding: '4px 8px',
+                              marginBottom: 8,
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 8,
+                            }}
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
                           >
-                            <div className={classes.mainInfo}>
+                            <div
+                              css={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                padding: '4px 0',
+                                gap: 8,
+
+                                '& > :not(:first-of-type)': {
+                                  fontSize: 18,
+                                },
+
+                                '& > *': {
+                                  padding: 0,
+                                },
+                              }}
+                            >
                               <span>{stop.name}</span>
 
                               {enableShortPlatforms &&
@@ -266,7 +240,7 @@ function CallingAtSelector({
                                       default: [],
                                       name: '',
                                       type: 'custom',
-                                      component: CallingAtSelector,
+                                      component: CallingAtSelector as any,
                                       props: {
                                         availableStations: availableStations,
                                         selectLabel: 'Split calling points',
@@ -297,9 +271,20 @@ function CallingAtSelector({
                               onClick={() => {
                                 onChange(value.filter(s => s.randomId !== stop.randomId))
                               }}
-                              className={classes.deleteButton}
+                              css={{
+                                boxSizing: 'content-box',
+                                padding: 8,
+                                display: 'inline-block',
+                                height: '1em',
+                                marginLeft: 'auto',
+                              }}
                             >
-                              <svg viewBox="0 0 24 24">
+                              <svg
+                                viewBox="0 0 24 24"
+                                css={{
+                                  height: '1em',
+                                }}
+                              >
                                 <path
                                   fill="currentColor"
                                   d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"

@@ -1574,13 +1574,13 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         <>
           <button
             css={{
-              display: 'flex',
-              alignItems: 'center',
               marginBottom: 16,
             }}
             onClick={() => setFullscreen(true)}
           >
-            <FullscreenIcon style={{ marginRight: 4 }} /> Fullscreen
+            <span className="buttonLabel">
+              <FullscreenIcon /> Fullscreen
+            </span>
           </button>
 
           <FullScreen enabled={isFullscreen} onChange={setFullscreen}>

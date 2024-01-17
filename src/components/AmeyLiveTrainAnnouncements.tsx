@@ -249,7 +249,10 @@ interface NrccMessage {
 
 type DisplayType = 'gtr-new' | 'tfwm-lcd'
 
-const MindTheGapStations = new Set(['WVF', 'LWS'])
+const MindTheGapStations: Record<string, string[]> = {
+  WVF: ['1', '2'],
+  LWS: ['1', '2', '3', '4', '5'],
+}
 
 const DisplayNames: Record<DisplayType, string> = {
   'gtr-new': 'Infotec DMI (yellow)',
@@ -599,9 +602,13 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         })
       }
 
+      const mindTheGap = !!MindTheGapStations[selectedCrs]?.includes(train.platform)
+
+      console.log(`Mind the gap: ${mindTheGap}`)
+
       const options: IStandingTrainAnnouncementOptions = {
         thisStationCode: selectedCrs,
-        mindTheGap: MindTheGapStations.has(selectedCrs),
+        mindTheGap: mindTheGap,
         hour: h === '00' ? '00 - midnight' : h,
         min: m === '00' ? '00 - hundred-hours' : m,
         isDelayed: delayMins > 5,

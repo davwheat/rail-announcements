@@ -15,9 +15,6 @@ const Tabs = React.memo(({ tabNames, tabItems, customKeyPrefix = '', selectedTab
     throw new Error('Different amount of tabNames and tabItems provided.')
   }
 
-  console.log('tabNames', tabNames)
-  console.log('tabItems', tabItems)
-
   return (
     <OGTabs
       index={selectedTabIndex}

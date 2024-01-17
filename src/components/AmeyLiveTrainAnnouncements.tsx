@@ -418,7 +418,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
   )
 
   const getPlatform = useCallback(
-    function getPlatform(dataPlatform: string, systemKey: string) {
+    function getPlatform(dataPlatform: string, systemKey: SystemKeys) {
       dataPlatform = dataPlatform.toLowerCase()
 
       if (systems[systemKey].PLATFORMS.includes(dataPlatform)) return dataPlatform
@@ -470,7 +470,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
   }, [])
 
   const getStation = useCallback(
-    function getStation(location: TimingLocation | Destination | Origin, systemKey: string): string {
+    function getStation(location: TimingLocation | Destination | Origin, systemKey: SystemKeys): string {
       return systems[systemKey].liveTrainsTiplocStationOverrides(location.tiploc) ?? location.crs!!
     },
     [systems],
@@ -496,7 +496,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
   }, [])
 
   const announceStandingTrain = useCallback(
-    async function announceStandingTrain(train: TrainService, abortController: AbortController, systemKey: string) {
+    async function announceStandingTrain(train: TrainService, abortController: AbortController, systemKey: SystemKeys) {
       console.log(train)
       addLog(`Announcing standing train: ${train.rid} (${train.std} to ${pluraliseStrings(...train.destination.map(l => l.locationName))})`)
 
@@ -624,7 +624,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
   )
 
   const announceApproachingTrain = useCallback(
-    async function announceApproachingTrain(train: TrainService, abortController: AbortController, systemKey: string) {
+    async function announceApproachingTrain(train: TrainService, abortController: AbortController, systemKey: SystemKeys) {
       console.log(train)
       addLog(`Announcing approaching train: ${train.rid} (${train.std} to ${pluraliseStrings(...train.destination.map(l => l.locationName))})`)
 
@@ -705,7 +705,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
   )
 
   const announceNextTrain = useCallback(
-    async function announceNextTrain(train: TrainService, abortController: AbortController, systemKey: string) {
+    async function announceNextTrain(train: TrainService, abortController: AbortController, systemKey: SystemKeys) {
       console.log(train)
       addLog(`Announcing next train: ${train.rid} (${train.std} to ${pluraliseStrings(...train.destination.map(l => l.locationName))})`)
 
@@ -832,7 +832,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
   )
 
   const announceDisruptedTrain = useCallback(
-    async function announceNextTrain(train: TrainService, abortController: AbortController, systemKey: string) {
+    async function announceNextTrain(train: TrainService, abortController: AbortController, systemKey: SystemKeys) {
       console.log(train)
 
       markDisruptedTrainAnnounced(train.rid)
@@ -1430,7 +1430,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
                             disabled={!systems.includes(systemKey as any)}
                             checked={systemKeyForPlatform[platform] === systemKey}
                             onChange={() => {
-                              dispatchSystemKeyForPlatform({ platforms: [platform], systemKey: systemKey as SystemKeys })
+                              dispatchSystemKeyForPlatform({ platforms: [platform], systemKey: systemKey })
                             }}
                           />
                         </label>

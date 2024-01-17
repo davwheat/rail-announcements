@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import crsToStationItemMapper from '@helpers/crsToStationItemMapper'
+import useStateWithLocalStorage from '@hooks/useStateWithLocalStorage'
 import FullscreenIcon from 'mdi-react/FullscreenIcon'
 import ShuffleIcon from 'mdi-react/DieMultipleIcon'
 import NREPowered from '@assets/NRE_Powered_logo.png'
@@ -34,6 +35,13 @@ function pluraliseStrings(...strings: string[]): string {
   const last = strings.pop()!!
 
   return `${strings.join(', ')} and ${last}`
+}
+
+enum AnnouncementType {
+  Next = 'next',
+  Approaching = 'approaching',
+  Standing = 'standing',
+  Disrupted = 'disrupted',
 }
 
 export interface LiveTrainAnnouncementsProps<SystemKeys extends string> {
@@ -335,6 +343,12 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
   const [selectedCrs, setSelectedCrs] = useState('ECR')
   const [hasEnabledFeature, setHasEnabledFeature] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
+  const [enabledAnnouncements, setEnabledAnnouncements] = useStateWithLocalStorage<AnnouncementType[]>('amey.live-trains.announcement-types', [
+    AnnouncementType.Next,
+    AnnouncementType.Approaching,
+    AnnouncementType.Disrupted,
+    AnnouncementType.Standing,
+  ])
 
   // Array of log messages using useReducer
   const [logs, addLog] = useReducer((state: string[], action: string) => [action, ...state].slice(0, 200), [])
@@ -418,7 +432,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
   )
 
   const getPlatform = useCallback(
-    function getPlatform(dataPlatform: string, systemKey: string) {
+    function getPlatform(dataPlatform: string, systemKey: SystemKeys) {
       dataPlatform = dataPlatform.toLowerCase()
 
       if (systems[systemKey].PLATFORMS.includes(dataPlatform)) return dataPlatform
@@ -470,7 +484,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
   }, [])
 
   const getStation = useCallback(
-    function getStation(location: TimingLocation | Destination | Origin, systemKey: string): string {
+    function getStation(location: TimingLocation | Destination | Origin, systemKey: SystemKeys): string {
       return systems[systemKey].liveTrainsTiplocStationOverrides(location.tiploc) ?? location.crs!!
     },
     [systems],
@@ -496,7 +510,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
   }, [])
 
   const announceStandingTrain = useCallback(
-    async function announceStandingTrain(train: TrainService, abortController: AbortController, systemKey: string) {
+    async function announceStandingTrain(train: TrainService, abortController: AbortController, systemKey: SystemKeys) {
       console.log(train)
       addLog(`Announcing standing train: ${train.rid} (${train.std} to ${pluraliseStrings(...train.destination.map(l => l.locationName))})`)
 
@@ -624,7 +638,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
   )
 
   const announceApproachingTrain = useCallback(
-    async function announceApproachingTrain(train: TrainService, abortController: AbortController, systemKey: string) {
+    async function announceApproachingTrain(train: TrainService, abortController: AbortController, systemKey: SystemKeys) {
       console.log(train)
       addLog(`Announcing approaching train: ${train.rid} (${train.std} to ${pluraliseStrings(...train.destination.map(l => l.locationName))})`)
 
@@ -705,7 +719,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
   )
 
   const announceNextTrain = useCallback(
-    async function announceNextTrain(train: TrainService, abortController: AbortController, systemKey: string) {
+    async function announceNextTrain(train: TrainService, abortController: AbortController, systemKey: SystemKeys) {
       console.log(train)
       addLog(`Announcing next train: ${train.rid} (${train.std} to ${pluraliseStrings(...train.destination.map(l => l.locationName))})`)
 
@@ -832,7 +846,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
   )
 
   const announceDisruptedTrain = useCallback(
-    async function announceNextTrain(train: TrainService, abortController: AbortController, systemKey: string) {
+    async function announceNextTrain(train: TrainService, abortController: AbortController, systemKey: SystemKeys) {
       console.log(train)
 
       markDisruptedTrainAnnounced(train.rid)
@@ -999,40 +1013,44 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       addLog("Finding suitable train for 'standing train'")
       console.log("[Live Trains] Finding suitable train for 'standing train'")
 
-      const unannouncedStandingTrain = services.find(s => {
-        if (standingTrainAnnounced.current[s.rid]) {
-          addLog(`Skipping ${s.trainid} ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it was announced recently`)
-          console.log(`[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it was announced recently`)
-          return false
-        }
+      const unannouncedStandingTrain = !enabledAnnouncements.includes(AnnouncementType.Standing)
+        ? null
+        : services.find(s => {
+            if (standingTrainAnnounced.current[s.rid]) {
+              addLog(`Skipping ${s.trainid} ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it was announced recently`)
+              console.log(`[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it was announced recently`)
+              return false
+            }
 
-        if (s.isCancelled) {
-          addLog(`Skipping ${s.trainid} ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it is cancelled`)
-          console.log(`[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it is cancelled`)
-          return false
-        }
+            if (s.isCancelled) {
+              addLog(`Skipping ${s.trainid} ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it is cancelled`)
+              console.log(`[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it is cancelled`)
+              return false
+            }
 
-        if (s.atdSpecified) {
-          addLog(`Skipping ${s.trainid} ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has already departed`)
-          console.log(`[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has already departed`)
-          return false
-        }
+            if (s.atdSpecified) {
+              addLog(`Skipping ${s.trainid} ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has already departed`)
+              console.log(`[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has already departed`)
+              return false
+            }
 
-        if (s.platform === null) {
-          addLog(`Skipping ${s.trainid} ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has no confirmed platform`)
-          console.log(`[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has no confirmed platform`)
-          return false
-        }
+            if (s.platform === null) {
+              addLog(`Skipping ${s.trainid} ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has no confirmed platform`)
+              console.log(`[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has no confirmed platform`)
+              return false
+            }
 
-        if (!s.ataSpecified || dayjs(s.ata).add(15, 'seconds').isAfter(dayjs())) {
-          addLog(`Skipping ${s.trainid} ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has not stopped yet (${s.ata} +15s)`)
-          console.log(`[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has not stopped yet (${s.ata} +15s)`)
-          return false
-        }
+            if (!s.ataSpecified || dayjs(s.ata).add(15, 'seconds').isAfter(dayjs())) {
+              addLog(`Skipping ${s.trainid} ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has not stopped yet (${s.ata} +15s)`)
+              console.log(
+                `[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has not stopped yet (${s.ata} +15s)`,
+              )
+              return false
+            }
 
-        // Wait n seconds after arrival to announce
-        return true
-      })
+            // Wait n seconds after arrival to announce
+            return true
+          })
 
       if (unannouncedStandingTrain) {
         const systemKey = systemKeyForPlatform[getPlatformForSystemSelection(unannouncedStandingTrain.platform)]!!
@@ -1043,33 +1061,35 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       addLog("Finding suitable train for 'approaching train'")
       console.log("[Live Trains] Finding suitable train for 'approaching train'")
 
-      const unannouncedApproachingTrain = services.find(s => {
-        if (approachingTrainAnnounced.current[s.rid]) {
-          addLog(`Skipping ${s.trainid} ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it was announced recently`)
-          console.log(`[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it was announced recently`)
-          return false
-        }
+      const unannouncedApproachingTrain = !enabledAnnouncements.includes(AnnouncementType.Approaching)
+        ? null
+        : services.find(s => {
+            if (approachingTrainAnnounced.current[s.rid]) {
+              addLog(`Skipping ${s.trainid} ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it was announced recently`)
+              console.log(`[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it was announced recently`)
+              return false
+            }
 
-        if (s.isCancelled) {
-          addLog(`Skipping ${s.trainid} ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it is cancelled`)
-          console.log(`[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it is cancelled`)
-          return false
-        }
+            if (s.isCancelled) {
+              addLog(`Skipping ${s.trainid} ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it is cancelled`)
+              console.log(`[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it is cancelled`)
+              return false
+            }
 
-        if (s.atdSpecified) {
-          addLog(`Skipping ${s.trainid} ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has already departed`)
-          console.log(`[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has already departed`)
-          return false
-        }
+            if (s.atdSpecified) {
+              addLog(`Skipping ${s.trainid} ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has already departed`)
+              console.log(`[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has already departed`)
+              return false
+            }
 
-        if (s.platform === null) {
-          addLog(`Skipping ${s.trainid} ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has no confirmed platform`)
-          console.log(`[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has no confirmed platform`)
-          return false
-        }
+            if (s.platform === null) {
+              addLog(`Skipping ${s.trainid} ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has no confirmed platform`)
+              console.log(`[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has no confirmed platform`)
+              return false
+            }
 
-        return s.ataSpecified
-      })
+            return s.ataSpecified
+          })
 
       if (unannouncedApproachingTrain) {
         const systemKey = systemKeyForPlatform[getPlatformForSystemSelection(unannouncedApproachingTrain.platform)]!!
@@ -1080,46 +1100,48 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       addLog("Finding suitable train for 'next train'")
       console.log("[Live Trains] Finding suitable train for 'next train'")
 
-      const unannouncedNextTrain = services.find(s => {
-        const std = new Date(s.std).toLocaleString('en-GB', { hour12: false })
+      const unannouncedNextTrain = !enabledAnnouncements.includes(AnnouncementType.Next)
+        ? null
+        : services.find(s => {
+            const std = new Date(s.std).toLocaleString('en-GB', { hour12: false })
 
-        if (nextTrainAnnounced.current[s.rid]) {
-          addLog(`Skipping ${s.trainid} ${s.rid} (${std} to ${s.destination[0].locationName}) as it was announced recently`)
-          console.log(`[Live Trains] Skipping ${s.rid} (${std} to ${s.destination[0].locationName}) as it was announced recently`)
-          return false
-        }
-        if (s.isCancelled) {
-          addLog(`Skipping ${s.trainid} ${s.rid} (${std} to ${s.destination[0].locationName}) as it is cancelled`)
-          console.log(`[Live Trains] Skipping ${s.rid} (${std} to ${s.destination[0].locationName}) as it is cancelled`)
-          return false
-        }
-        if (s.atdSpecified) {
-          addLog(`Skipping ${s.trainid} ${s.rid} (${std} to ${s.destination[0].locationName}) as it has already departed`)
-          console.log(`[Live Trains] Skipping ${s.rid} (${std} to ${s.destination[0].locationName}) as it has already departed`)
-          return false
-        }
-        if (!s.etdSpecified) {
-          addLog(`Skipping ${s.trainid} ${s.rid} (${std} to ${s.destination[0].locationName}) as it has no estimated time`)
-          console.log(`[Live Trains] Skipping ${s.rid} (${std} to ${s.destination[0].locationName}) as it has no estimated time`)
-          return false
-        }
-        if (s.platform === null) {
-          addLog(`Skipping ${s.trainid} ${s.rid} (${std} to ${s.destination[0].locationName}) as it has no confirmed platform`)
-          console.log(`[Live Trains] Skipping ${s.rid} (${std} to ${s.destination[0].locationName}) as it has no confirmed platform`)
-          return false
-        }
-        if (calculateArrivalInMins(new Date(s.etd)) > MIN_TIME_TO_ANNOUNCE) {
-          addLog(
-            `Skipping ${s.trainid} ${s.rid} (${std} to ${s.destination[0].locationName}) as it is more than ${MIN_TIME_TO_ANNOUNCE} mins away`,
-          )
-          console.log(
-            `[Live Trains] Skipping ${s.rid} (${std} to ${s.destination[0].locationName}) as it is more than ${MIN_TIME_TO_ANNOUNCE} mins away`,
-          )
-          return false
-        }
+            if (nextTrainAnnounced.current[s.rid]) {
+              addLog(`Skipping ${s.trainid} ${s.rid} (${std} to ${s.destination[0].locationName}) as it was announced recently`)
+              console.log(`[Live Trains] Skipping ${s.rid} (${std} to ${s.destination[0].locationName}) as it was announced recently`)
+              return false
+            }
+            if (s.isCancelled) {
+              addLog(`Skipping ${s.trainid} ${s.rid} (${std} to ${s.destination[0].locationName}) as it is cancelled`)
+              console.log(`[Live Trains] Skipping ${s.rid} (${std} to ${s.destination[0].locationName}) as it is cancelled`)
+              return false
+            }
+            if (s.atdSpecified) {
+              addLog(`Skipping ${s.trainid} ${s.rid} (${std} to ${s.destination[0].locationName}) as it has already departed`)
+              console.log(`[Live Trains] Skipping ${s.rid} (${std} to ${s.destination[0].locationName}) as it has already departed`)
+              return false
+            }
+            if (!s.etdSpecified) {
+              addLog(`Skipping ${s.trainid} ${s.rid} (${std} to ${s.destination[0].locationName}) as it has no estimated time`)
+              console.log(`[Live Trains] Skipping ${s.rid} (${std} to ${s.destination[0].locationName}) as it has no estimated time`)
+              return false
+            }
+            if (s.platform === null) {
+              addLog(`Skipping ${s.trainid} ${s.rid} (${std} to ${s.destination[0].locationName}) as it has no confirmed platform`)
+              console.log(`[Live Trains] Skipping ${s.rid} (${std} to ${s.destination[0].locationName}) as it has no confirmed platform`)
+              return false
+            }
+            if (calculateArrivalInMins(new Date(s.etd)) > MIN_TIME_TO_ANNOUNCE) {
+              addLog(
+                `Skipping ${s.trainid} ${s.rid} (${std} to ${s.destination[0].locationName}) as it is more than ${MIN_TIME_TO_ANNOUNCE} mins away`,
+              )
+              console.log(
+                `[Live Trains] Skipping ${s.rid} (${std} to ${s.destination[0].locationName}) as it is more than ${MIN_TIME_TO_ANNOUNCE} mins away`,
+              )
+              return false
+            }
 
-        return true
-      })
+            return true
+          })
 
       if (unannouncedNextTrain) {
         const systemKey = systemKeyForPlatform[getPlatformForSystemSelection(unannouncedNextTrain.platform)]!!
@@ -1130,25 +1152,27 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       addLog("Finding suitable train for 'disrupted train'")
       console.log("[Live Trains] Finding suitable train for 'disrupted train'")
 
-      const unannouncedDisruptedTrain = services.find(s => {
-        if (disruptedTrainAnnounced.current[s.rid]) {
-          addLog(`Skipping ${s.trainid} ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it was announced recently`)
-          console.log(`[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it was announced recently`)
-          return false
-        }
-        if (s.atdSpecified) {
-          addLog(`Skipping ${s.trainid} ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has already departed`)
-          console.log(`[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has already departed`)
-          return false
-        }
-        if (!s.isCancelled && calculateDelayMins(new Date(s.std), new Date(s.etd)) < 5 && s.etdSpecified && s.stdSpecified) {
-          addLog(`Skipping ${s.trainid} ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it is not delayed`)
-          console.log(`[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it is not delayed`)
-          return false
-        }
+      const unannouncedDisruptedTrain = !enabledAnnouncements.includes(AnnouncementType.Disrupted)
+        ? null
+        : services.find(s => {
+            if (disruptedTrainAnnounced.current[s.rid]) {
+              addLog(`Skipping ${s.trainid} ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it was announced recently`)
+              console.log(`[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it was announced recently`)
+              return false
+            }
+            if (s.atdSpecified) {
+              addLog(`Skipping ${s.trainid} ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has already departed`)
+              console.log(`[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has already departed`)
+              return false
+            }
+            if (!s.isCancelled && calculateDelayMins(new Date(s.std), new Date(s.etd)) < 5 && s.etdSpecified && s.stdSpecified) {
+              addLog(`Skipping ${s.trainid} ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it is not delayed`)
+              console.log(`[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it is not delayed`)
+              return false
+            }
 
-        return true
-      })
+            return true
+          })
 
       if (unannouncedDisruptedTrain) {
         const systemKey = systemKeyForPlatform[getPlatformForSystemSelection(unannouncedDisruptedTrain.platform)]!!
@@ -1180,6 +1204,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
     isPlaying,
     announceNextTrain,
     addLog,
+    enabledAnnouncements,
   ])
 
   return (
@@ -1208,6 +1233,78 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
           options={Object.entries(DisplayNames).map(([value, label]) => ({ value: value as DisplayType, label }))}
         />
       </label>
+
+      <fieldset>
+        <legend>Toggle announcement types</legend>
+
+        <label htmlFor="announcement-types--next">
+          <input
+            type="checkbox"
+            name="announcement-types"
+            id="announcement-types--next"
+            checked={enabledAnnouncements.includes(AnnouncementType.Next)}
+            onChange={e => {
+              if (e.target.checked) {
+                setEnabledAnnouncements([...enabledAnnouncements, AnnouncementType.Next])
+              } else {
+                setEnabledAnnouncements(enabledAnnouncements.filter(x => x !== AnnouncementType.Next))
+              }
+            }}
+          />
+          Next train
+        </label>
+
+        <label htmlFor="announcement-types--approaching">
+          <input
+            type="checkbox"
+            name="announcement-types"
+            id="announcement-types--approaching"
+            checked={enabledAnnouncements.includes(AnnouncementType.Approaching)}
+            onChange={e => {
+              if (e.target.checked) {
+                setEnabledAnnouncements([...enabledAnnouncements, AnnouncementType.Approaching])
+              } else {
+                setEnabledAnnouncements(enabledAnnouncements.filter(x => x !== AnnouncementType.Approaching))
+              }
+            }}
+          />
+          Approaching train
+        </label>
+
+        <label htmlFor="announcement-types--standing">
+          <input
+            type="checkbox"
+            name="announcement-types"
+            id="announcement-types--standing"
+            checked={enabledAnnouncements.includes(AnnouncementType.Standing)}
+            onChange={e => {
+              if (e.target.checked) {
+                setEnabledAnnouncements([...enabledAnnouncements, AnnouncementType.Standing])
+              } else {
+                setEnabledAnnouncements(enabledAnnouncements.filter(x => x !== AnnouncementType.Standing))
+              }
+            }}
+          />
+          Standing train
+        </label>
+
+        <label htmlFor="announcement-types--disruption">
+          <input
+            type="checkbox"
+            name="announcement-types"
+            id="announcement-types--disruption"
+            checked={enabledAnnouncements.includes(AnnouncementType.Disrupted)}
+            onChange={e => {
+              if (e.target.checked) {
+                setEnabledAnnouncements([...enabledAnnouncements, AnnouncementType.Disrupted])
+              } else {
+                setEnabledAnnouncements(enabledAnnouncements.filter(x => x !== AnnouncementType.Disrupted))
+              }
+            }}
+          />
+          Delays and cancellations
+        </label>
+      </fieldset>
 
       <fieldset
         css={{
@@ -1308,7 +1405,6 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
                 padding: 0,
                 margin: 0,
                 float: 'left',
-                width: '150px',
                 fontWeight: 'bold',
               }}
             >
@@ -1430,7 +1526,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
                             disabled={!systems.includes(systemKey as any)}
                             checked={systemKeyForPlatform[platform] === systemKey}
                             onChange={() => {
-                              dispatchSystemKeyForPlatform({ platforms: [platform], systemKey: systemKey as SystemKeys })
+                              dispatchSystemKeyForPlatform({ platforms: [platform], systemKey: systemKey })
                             }}
                           />
                         </label>

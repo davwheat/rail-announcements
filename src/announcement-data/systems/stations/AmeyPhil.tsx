@@ -95,7 +95,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
   protected readonly BEFORE_SECTION_DELAY: number = 870
   protected readonly SHORT_DELAY: number = 500
 
-  readonly DelayCodeMapping = DelayCodeMapping
+  readonly DelayCodeMapping: Record<string, { e: string; m: string }> = DelayCodeMapping
 
   protected readonly callingPointsOptions = {
     beforeCallingAtDelay: this.BEFORE_SECTION_DELAY,

@@ -1,7 +1,6 @@
 import React from 'react'
 import { Tabs as OGTabs, TabList, Tab, TabPanels, TabPanel } from '@reach/tabs'
 import Breakpoints from '@data/breakpoints'
-import styled from '@emotion/styled'
 
 interface TabProps {
   tabNames: string[]
@@ -11,17 +10,18 @@ interface TabProps {
   onTabChange?: (index: number) => void
 }
 
-const MyTab = styled(Tab, { shouldForwardProp: prop => prop === 'children' })()
-
 const Tabs = React.memo(({ tabNames, tabItems, customKeyPrefix = '', selectedTabIndex, onTabChange }: TabProps) => {
   if (tabNames.length !== tabItems.length) {
     throw new Error('Different amount of tabNames and tabItems provided.')
   }
 
+  console.log('tabNames', tabNames)
+  console.log('tabItems', tabItems)
+
   return (
     <OGTabs
-      selectedIndex={selectedTabIndex}
-      onSelect={index => {
+      index={selectedTabIndex}
+      onChange={index => {
         onTabChange?.(index)
       }}
     >

@@ -255,7 +255,7 @@ const MindTheGapStations: Record<string, string[]> = {
 }
 
 const DisplayNames: Record<DisplayType, string> = {
-  'gtr-new': 'Infotec DMI (yellow)',
+  'gtr-new': 'Infotec dot matrix (GTR-style)',
   'tfwm-lcd': 'WMR/LNWR LCD',
 }
 

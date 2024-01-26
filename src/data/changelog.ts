@@ -373,6 +373,11 @@ const changelog: IChangelogVersion[] = [
     otherChanges: ['Migrated to new style library'],
     fixes: ['[Amey Phil & Celia] Simplify logic for splitting trains with common calling points to match the real world'],
   },
+  {
+    date: '2024-01-26',
+    additions: ['[Amey Live Trains] Announce Eurostar services'],
+    fixes: ['[Amey Live Trains] Fix error when no stations are in calling points list'],
+  },
 ]
 
 export default changelog

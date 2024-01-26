@@ -488,7 +488,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
 
   const getStation = useCallback(
     function getStation(location: TimingLocation | Destination | Origin, systemKey: SystemKeys): string {
-      return systems[systemKey].liveTrainsTiplocStationOverrides(location.tiploc) ?? location.crs!!
+      return systems[systemKey].liveTrainsTiplocStationOverrides(location?.tiploc) ?? location.crs!!
     },
     [systems],
   )
@@ -536,9 +536,9 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         return true
       })
 
-      if (train.destination[0].tiploc !== callingPoints[callingPoints.length - 1].tiploc) {
+      if (train.destination[0].tiploc !== callingPoints[callingPoints.length - 1]?.tiploc) {
         // False destination -- need to trim calling points
-        const lastRealCallingPoint = callingPoints.findIndex(s => s.tiploc == train.destination[0].tiploc)
+        const lastRealCallingPoint = callingPoints.findIndex(s => s.tiploc === train.destination[0].tiploc)
 
         console.log(`Fake destination detected. Last real calling point index is ${lastRealCallingPoint}`)
 
@@ -749,9 +749,9 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         return true
       })
 
-      if (train.destination[0].tiploc !== callingPoints[callingPoints.length - 1].tiploc) {
+      if (train.destination[0].tiploc !== callingPoints[callingPoints.length - 1]?.tiploc) {
         // False destination -- need to trim calling points
-        const lastRealCallingPoint = callingPoints.findIndex(s => s.tiploc == train.destination[0].tiploc)
+        const lastRealCallingPoint = callingPoints.findIndex(s => s.tiploc === train.destination[0].tiploc)
 
         console.log(`Fake destination detected. Last real calling point index is ${lastRealCallingPoint}`)
 

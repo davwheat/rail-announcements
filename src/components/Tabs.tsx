@@ -18,7 +18,7 @@ const Tabs = React.memo(({ tabNames, tabItems, customKeyPrefix = '', selectedTab
   return (
     <OGTabs
       index={selectedTabIndex}
-      onChange={index => {
+      onChange={(index: number) => {
         onTabChange?.(index)
       }}
     >
@@ -41,14 +41,15 @@ const Tabs = React.memo(({ tabNames, tabItems, customKeyPrefix = '', selectedTab
           },
         }}
       >
-        {tabNames.map(name => (
+        {tabNames.map((name, i) => (
           <Tab
-            key={name}
+            key={`${i}__${name}`}
             className="native-button"
             css={{
               font: 'inherit',
               border: 'none',
               appearance: 'none',
+              backgroundColor: 'transparent',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',

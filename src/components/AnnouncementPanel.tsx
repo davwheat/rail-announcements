@@ -129,6 +129,7 @@ function AnnouncementPanel() {
       </div>
 
       <Tabs
+        key={AnnouncementSystemInstance?.ID}
         selectedTabIndex={getSelectedTab()}
         onTabChange={setSelectedTab}
         tabNames={Object.values(customTabs).map(tab => tab.name)}

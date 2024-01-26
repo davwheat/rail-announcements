@@ -10,11 +10,11 @@
     "format:check": "prettier --check \"**/*.{js,ts,json,md}\""
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20231218.0",
-    "@types/uuid": "^9.0.7",
-    "prettier": "^3.1.1",
+    "@cloudflare/workers-types": "^4.20240117.0",
+    "@types/uuid": "^9.0.8",
+    "prettier": "^3.2.4",
     "typescript": "^5.3.3",
-    "wrangler": "^3.22.4"
+    "wrangler": "^3.24.0"
   },
   "dependencies": {
     "@cfworker/json-schema": "^1.12.7",

@@ -23,8 +23,8 @@
       "@helpers/*": ["./src/helpers/*"],
       "@announcement-data/*": ["./src/announcement-data/*"],
       "@hooks/*": ["./src/hooks/*"],
-      "@assets/*": ["./src/assets/*"]
-    }
+      "@assets/*": ["./src/assets/*"],
+    },
   },
-  "include": ["./src/**/*", "./gatsby-node.ts", "./gatsby-config.ts", "./gatsby-browser.tsx", "./gatsby-ssr.tsx", "./plugins/**/*"]
+  "include": ["./src/**/*", "./gatsby-node.ts", "./gatsby-config.ts", "./gatsby-browser.tsx", "./gatsby-ssr.tsx", "./plugins/**/*"],
 }

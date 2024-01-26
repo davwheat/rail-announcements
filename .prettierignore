@@ -3,3 +3,4 @@ package.json
 package-lock.json
 public
 size-plugin.json
+cf-workers/.wrangler

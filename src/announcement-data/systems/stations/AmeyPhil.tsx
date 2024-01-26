@@ -910,6 +910,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       'AMF',
       'AML',
       'AMR',
+      'AMS',
       'AMT',
       'AMY',
       'ANC',
@@ -1242,6 +1243,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       'BXB',
       'BXD',
       'BXH',
+      'BXS',
       'BXW',
       'BXY',
       'BYA',
@@ -2319,6 +2321,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       'MCB',
       'MCE',
       'MCH',
+      'MCK',
       'MCM',
       'MCN',
       'MCO',
@@ -2560,6 +2563,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       'PAT',
       'PAW',
       'PBL',
+      'PBN',
       'PBO',
       'PBR',
       'PBS',
@@ -2756,6 +2760,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       'ROM',
       'ROO',
       'ROS',
+      'ROT',
       'ROW',
       'RRB',
       'RSB',
@@ -4281,7 +4286,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       files.push(
         { id: 's.this train is formed of', opts: { delayStart: 250 } },
         `platform.s.${coaches}`,
-        `e.${coaches == '1' ? 'coach' : 'coaches'}`,
+        `e.${coaches === '1' ? 'coach' : 'coaches'}`,
       )
     }
 

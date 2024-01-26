@@ -17,7 +17,7 @@ import type {
   IStandingTrainAnnouncementOptions,
 } from '../announcement-data/systems/stations/AmeyPhil'
 
-import dayjs from 'dayjs'
+import dayjs, { Dayjs } from 'dayjs'
 import dayjsUtc from 'dayjs/plugin/utc'
 import dayjsTz from 'dayjs/plugin/timezone'
 import Breakpoints from '@data/breakpoints'
@@ -478,14 +478,6 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
     }
   }, [removeOldIds])
 
-  const calculateDelayMins = useCallback(function calculateDelayMins(std: Date, etd: Date): number {
-    return Math.floor((etd.getTime() - std.getTime()) / 1000 / 60)
-  }, [])
-
-  const calculateArrivalInMins = useCallback(function calculateArrivalInMins(etd: Date): number {
-    return Math.floor((etd.getTime() - new Date().getTime()) / 1000 / 60)
-  }, [])
-
   const getStation = useCallback(
     function getStation(location: TimingLocation | Destination | Origin, systemKey: SystemKeys): string {
       return systems[systemKey].liveTrainsTiplocStationOverrides(location?.tiploc) ?? location.crs!!
@@ -522,7 +514,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       const h = dayjs(train.std).format('HH')
       const m = dayjs(train.std).format('mm')
 
-      const delayMins = calculateDelayMins(new Date(train.std), new Date(train.etd))
+      const delayMins = dayjs(train.std).diff(dayjs(train.etd))
 
       addLog(`Train is delayed by ${delayMins} mins`)
       console.log(`[Live Trains] Train is delayed by ${delayMins} mins`)
@@ -641,7 +633,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       console.log(`[Live Trains] Announcement for ${train.rid} complete: waiting 5s until next`)
       setTimeout(() => setIsPlaying(false), 5000)
     },
-    [markNextTrainAnnounced, calculateDelayMins, systems, setIsPlaying, standingTrainHandler, selectedCrs, getStation, addLog],
+    [markNextTrainAnnounced, systems, setIsPlaying, standingTrainHandler, selectedCrs, getStation, addLog],
   )
 
   const announceApproachingTrain = useCallback(
@@ -654,7 +646,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       const h = dayjs(train.std).format('HH')
       const m = dayjs(train.std).format('mm')
 
-      const delayMins = calculateDelayMins(new Date(train.std), new Date(train.etd))
+      const delayMins = dayjs(train.std).diff(dayjs(train.etd))
 
       addLog(`Train is delayed by ${delayMins} mins`)
       console.log(`[Live Trains] Train is delayed by ${delayMins} mins`)
@@ -722,7 +714,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       console.log(`[Live Trains] Announcement for ${train.rid} complete: waiting 5s until next`)
       setTimeout(() => setIsPlaying(false), 5000)
     },
-    [markNextTrainAnnounced, calculateDelayMins, systems, setIsPlaying, approachingTrainHandler, getStation, addLog],
+    [markNextTrainAnnounced, systems, setIsPlaying, approachingTrainHandler, getStation, addLog],
   )
 
   const announceNextTrain = useCallback(
@@ -735,7 +727,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       const h = dayjs(train.std).format('HH')
       const m = dayjs(train.std).format('mm')
 
-      const delayMins = calculateDelayMins(new Date(train.std), new Date(train.etd))
+      const delayMins = dayjs(train.std).diff(dayjs(train.etd))
 
       addLog(`Train is delayed by ${delayMins} mins`)
       console.log(`[Live Trains] Train is delayed by ${delayMins} mins`)
@@ -849,7 +841,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       console.log(`[Live Trains] Announcement for ${train.rid} complete: waiting 5s until next`)
       setTimeout(() => setIsPlaying(false), 5000)
     },
-    [markNextTrainAnnounced, calculateDelayMins, systems, setIsPlaying, nextTrainHandler, getStation, addLog],
+    [markNextTrainAnnounced, systems, setIsPlaying, nextTrainHandler, getStation, addLog],
   )
 
   const announceDisruptedTrain = useCallback(
@@ -863,7 +855,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
 
       const cancelled = train.isCancelled
       const unknownDelay = !train.etdSpecified
-      const delayMins = calculateDelayMins(new Date(train.std), new Date(train.etd))
+      const delayMins = dayjs(train.std).diff(dayjs(train.etd))
 
       const toc = systems[systemKey].processTocForLiveTrains(train.operator, train.origin[0].crs, train.destination[0].crs)
 
@@ -950,7 +942,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       console.log(`[Live Trains] Announcement for ${train.rid} complete: waiting 5s until next`)
       setTimeout(() => setIsPlaying(false), 5000)
     },
-    [markDisruptedTrainAnnounced, calculateDelayMins, systems, setIsPlaying, disruptedTrainHandler, addLog],
+    [markDisruptedTrainAnnounced, systems, setIsPlaying, disruptedTrainHandler, addLog],
   )
 
   useEffect(() => {
@@ -1137,7 +1129,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
               console.log(`[Live Trains] Skipping ${s.rid} (${std} to ${s.destination[0].locationName}) as it has no confirmed platform`)
               return false
             }
-            if (calculateArrivalInMins(new Date(s.etd)) > MIN_TIME_TO_ANNOUNCE) {
+            if (dayjs().diff(s.etd, 'minute') > MIN_TIME_TO_ANNOUNCE) {
               addLog(
                 `Skipping ${s.trainid} ${s.rid} (${std} to ${s.destination[0].locationName}) as it is more than ${MIN_TIME_TO_ANNOUNCE} mins away`,
               )
@@ -1172,7 +1164,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
               console.log(`[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has already departed`)
               return false
             }
-            if (!s.isCancelled && calculateDelayMins(new Date(s.std), new Date(s.etd)) < 5 && s.etdSpecified && s.stdSpecified) {
+            if (!s.isCancelled && dayjs(s.std).diff(dayjs(s.etd)) < 5 && s.etdSpecified && s.stdSpecified) {
               addLog(`Skipping ${s.trainid} ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it is not delayed`)
               console.log(`[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it is not delayed`)
               return false

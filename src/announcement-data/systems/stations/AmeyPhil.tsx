@@ -3979,12 +3979,15 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         portion: { position: 'any', length: overallLength },
       })),
       splitB: {
-        stops: (dividePoint!!.splitCallingPoints ?? []).map(p => ({
-          crsCode: p.crsCode,
-          shortPlatform: p.shortPlatform ?? '',
-          requestStop: p.requestStop ?? false,
-          portion: { position: bPos as 'front' | 'middle' | 'rear', length: bCount },
-        })),
+        stops:
+          dividePoint!!.splitType === 'splitTerminates'
+            ? []
+            : (dividePoint!!.splitCallingPoints ?? []).map(p => ({
+                crsCode: p.crsCode,
+                shortPlatform: p.shortPlatform ?? '',
+                requestStop: p.requestStop ?? false,
+                portion: { position: bPos as 'front' | 'middle' | 'rear', length: bCount },
+              })),
         position: bPos as 'front' | 'middle' | 'rear',
         length: bCount,
       },

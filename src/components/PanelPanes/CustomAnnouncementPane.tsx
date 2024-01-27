@@ -390,24 +390,23 @@ function CustomAnnouncementPane({
 
       <fieldset
         css={[
-          isPlayingAnnouncement ||
-            (isSharing && {
-              position: 'relative',
-              '&::after': {
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '2em',
-                content: '"Please wait..."',
-                position: 'absolute',
-                top: 0,
-                bottom: 0,
-                right: 0,
-                left: 0,
-                background: 'rgba(0, 0, 0, 0.25)',
-                zIndex: 1,
-              },
-            }),
+          (isPlayingAnnouncement || isSharing) && {
+            position: 'relative',
+            '&::after': {
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '2em',
+              content: '"Please wait..."',
+              position: 'absolute',
+              top: 0,
+              bottom: 0,
+              right: 0,
+              left: 0,
+              background: 'rgba(0, 0, 0, 0.25)',
+              zIndex: 1,
+            },
+          },
           isPlayingAnnouncement && {
             '&::after': {
               content: '"Playing announcement..."',

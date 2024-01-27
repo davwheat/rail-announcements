@@ -7,6 +7,8 @@ import NREPowered from '@assets/NRE_Powered_logo.png'
 import FullScreen from 'react-fullscreen-crossbrowser'
 import Select from 'react-select'
 
+import './AmeyLiveTrainAnnouncements.css'
+
 import type { CallingAtPoint } from '@components/CallingAtSelector'
 import type { Option } from '@helpers/createOptionField'
 import type {
@@ -514,7 +516,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       const h = dayjs(train.std).format('HH')
       const m = dayjs(train.std).format('mm')
 
-      const delayMins = dayjs(train.std).diff(dayjs(train.etd))
+      const delayMins = dayjs(train.etd).diff(dayjs(train.std), 'minutes')
 
       addLog(`Train is delayed by ${delayMins} mins`)
       console.log(`[Live Trains] Train is delayed by ${delayMins} mins`)
@@ -646,7 +648,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       const h = dayjs(train.std).format('HH')
       const m = dayjs(train.std).format('mm')
 
-      const delayMins = dayjs(train.std).diff(dayjs(train.etd))
+      const delayMins = dayjs(train.etd).diff(dayjs(train.std), 'minutes')
 
       addLog(`Train is delayed by ${delayMins} mins`)
       console.log(`[Live Trains] Train is delayed by ${delayMins} mins`)
@@ -727,7 +729,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       const h = dayjs(train.std).format('HH')
       const m = dayjs(train.std).format('mm')
 
-      const delayMins = dayjs(train.std).diff(dayjs(train.etd))
+      const delayMins = dayjs(train.etd).diff(dayjs(train.std), 'minutes')
 
       addLog(`Train is delayed by ${delayMins} mins`)
       console.log(`[Live Trains] Train is delayed by ${delayMins} mins`)
@@ -768,7 +770,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
             .forEach(a => {
               // We have a dividing service
               stop.splitType = 'splits'
-              const len = a.service!!.locations[0].length
+              const len = a.service!!.locations[0].length || 0
               stop.splitForm = `rear.${len}`
               stop.splitCallingPoints = a
                 .service!!.locations.filter(s => {
@@ -855,7 +857,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
 
       const cancelled = train.isCancelled
       const unknownDelay = !train.etdSpecified
-      const delayMins = dayjs(train.std).diff(dayjs(train.etd))
+      const delayMins = dayjs(train.etd).diff(dayjs(train.std), 'minutes')
 
       const toc = systems[systemKey].processTocForLiveTrains(train.operator, train.origin[0].crs, train.destination[0].crs)
 
@@ -1129,7 +1131,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
               console.log(`[Live Trains] Skipping ${s.rid} (${std} to ${s.destination[0].locationName}) as it has no confirmed platform`)
               return false
             }
-            if (dayjs().diff(s.etd, 'minute') > MIN_TIME_TO_ANNOUNCE) {
+            if (dayjs(s.etd).diff(dayjs(), 'minutes') > MIN_TIME_TO_ANNOUNCE) {
               addLog(
                 `Skipping ${s.trainid} ${s.rid} (${std} to ${s.destination[0].locationName}) as it is more than ${MIN_TIME_TO_ANNOUNCE} mins away`,
               )
@@ -1164,7 +1166,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
               console.log(`[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has already departed`)
               return false
             }
-            if (!s.isCancelled && dayjs(s.std).diff(dayjs(s.etd)) < 5 && s.etdSpecified && s.stdSpecified) {
+            if (!s.isCancelled && dayjs(s.etd).diff(dayjs(s.std), 'minutes') < 5 && s.etdSpecified && s.stdSpecified) {
               addLog(`Skipping ${s.trainid} ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it is not delayed`)
               console.log(`[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it is not delayed`)
               return false

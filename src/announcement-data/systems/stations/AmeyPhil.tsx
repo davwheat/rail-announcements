@@ -3934,7 +3934,18 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       }),
     )
 
-    if (overallLength === null) {
+    const [bPos, bCount] = (dividePoint!!.splitForm ?? 'front.1').split('.').map((x, i) => (i === 1 ? parseInt(x) : x)) as [
+      'front' | 'middle' | 'rear' | 'unknown',
+      number,
+    ]
+    const aPos = bPos === 'front' ? 'rear' : 'front'
+    const aCount = !overallLength ? null : Math.min(Math.max(1, overallLength - bCount), 12)
+
+    const missingLengthData = !overallLength || !bCount || !aCount
+
+    console.log({ missingLengthData, overallLength, bPos, bCount, aPos, aCount })
+
+    if (missingLengthData) {
       return {
         divideType: dividePoint!!.splitType,
         stopsUpToSplit: stopsUntilFormationChange.map(p => ({
@@ -3948,9 +3959,9 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             crsCode: p.crsCode,
             shortPlatform: p.shortPlatform ?? '',
             requestStop: p.requestStop ?? false,
-            portion: { position: 'unknown', length: null },
+            portion: { position: bPos, length: null },
           })),
-          position: 'unknown',
+          position: bPos,
           length: null,
         },
         splitA: {
@@ -3958,17 +3969,13 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             crsCode: p.crsCode,
             shortPlatform: p.shortPlatform ?? '',
             requestStop: p.requestStop ?? false,
-            portion: { position: aPos, length: aCount },
+            portion: { position: aPos, length: null },
           })),
-          position: 'unknown',
+          position: aPos,
           length: null,
         },
       }
     }
-
-    const [bPos, bCount] = (dividePoint!!.splitForm ?? 'front.1').split('.').map((x, i) => (i === 1 ? parseInt(x) : x)) as [string, number]
-    const aPos = bPos === 'front' ? 'rear' : 'front'
-    const aCount = Math.min(Math.max(1, overallLength - bCount), 12)
 
     return {
       divideType: dividePoint!!.splitType,
@@ -3979,12 +3986,15 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         portion: { position: 'any', length: overallLength },
       })),
       splitB: {
-        stops: (dividePoint!!.splitCallingPoints ?? []).map(p => ({
-          crsCode: p.crsCode,
-          shortPlatform: p.shortPlatform ?? '',
-          requestStop: p.requestStop ?? false,
-          portion: { position: bPos as 'front' | 'middle' | 'rear', length: bCount },
-        })),
+        stops:
+          dividePoint!!.splitType === 'splitTerminates'
+            ? []
+            : (dividePoint!!.splitCallingPoints ?? []).map(p => ({
+                crsCode: p.crsCode,
+                shortPlatform: p.shortPlatform ?? '',
+                requestStop: p.requestStop ?? false,
+                portion: { position: bPos as 'front' | 'middle' | 'rear', length: bCount },
+              })),
         position: bPos as 'front' | 'middle' | 'rear',
         length: bCount,
       },
@@ -4116,7 +4126,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       ]
     }
 
-    if (anyPortionStops.size !== 0) files.push(...listStops(Array.from(anyPortionStops)), ...this.splitOptions.travelInAnyPartIds)
+    if (anyPortionStops.length !== 0) files.push(...listStops(Array.from(anyPortionStops)), ...this.splitOptions.travelInAnyPartIds)
 
     function shouldTravelIn(length: number | null, position: 'front' | 'middle' | 'rear'): AudioItem[] {
       if (length === null) {
@@ -4133,7 +4143,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     }
 
     const aFiles =
-      aPortionStops.size === 0
+      aPortionStops.length === 0
         ? []
         : [
             ...listStops(Array.from(aPortionStops)),
@@ -4142,7 +4152,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
               : shouldTravelIn(splitData.splitA!!.length, splitData.splitA!!.position)),
           ]
     const bFiles =
-      bPortionStops.size === 0
+      bPortionStops.length === 0
         ? []
         : [
             ...listStops(Array.from(bPortionStops)),

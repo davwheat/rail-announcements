@@ -16,7 +16,7 @@ export interface CallingAtPoint {
   splitCallingPoints?: CallingAtPoint[]
 }
 
-interface ICallingAtSelectorProps {
+export interface ICallingAtSelectorProps {
   className?: string
   value: CallingAtPoint[]
   onChange: (newValue: CallingAtPoint[]) => void

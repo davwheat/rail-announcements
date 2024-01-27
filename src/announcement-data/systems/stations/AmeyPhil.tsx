@@ -1,5 +1,5 @@
 import StationAnnouncementSystem from '@announcement-data/StationAnnouncementSystem'
-import CallingAtSelector, { CallingAtPoint } from '@components/CallingAtSelector'
+import CallingAtSelector, { CallingAtPoint, ICallingAtSelectorProps } from '@components/CallingAtSelector'
 import CustomAnnouncementPane, { ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
 import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
 import { getStationByCrs } from '@data/StationManipulators'
@@ -4879,11 +4879,12 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             type: 'custom',
             component: CallingAtSelector,
             props: {
-              availableStations: this.STATIONS,
+              availableStations: [] as string[],
+              additionalOptions: this.STATIONS_AS_ITEMS,
               selectLabel: 'Via points (non-splitting services only)',
               placeholder: 'Add a via point…',
               heading: 'Via... (optional)',
-            },
+            } as ICallingAtSelectorProps,
             default: [],
           },
           callingAt: {
@@ -4891,11 +4892,12 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             type: 'custom',
             component: CallingAtSelector,
             props: {
-              availableStations: this.STATIONS,
+              availableStations: [] as string[],
+              additionalOptions: this.STATIONS_AS_ITEMS,
               enableShortPlatforms: this.SHORT_PLATFORMS,
               enableRequestStops: true,
               enableSplits: this.SPLITS,
-            },
+            } as ICallingAtSelectorProps,
             default: [],
           },
           coaches: {
@@ -4919,7 +4921,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           },
         },
       },
-    },
+    } as CustomAnnouncementTab<keyof INextTrainAnnouncementOptions>,
     approachingTrain: {
       name: 'Approaching train',
       component: CustomAnnouncementPane,
@@ -5004,11 +5006,12 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             type: 'custom',
             component: CallingAtSelector,
             props: {
-              availableStations: this.STATIONS,
+              availableStations: [] as string[],
+              additionalOptions: this.STATIONS_AS_ITEMS,
               selectLabel: 'Via points (non-splitting services only)',
               placeholder: 'Add a via point…',
               heading: 'Via... (optional)',
-            },
+            } as ICallingAtSelectorProps,
             default: [],
           },
           originStationCode: {
@@ -5019,7 +5022,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           },
         },
       },
-    },
+    } as CustomAnnouncementTab<keyof ITrainApproachingAnnouncementOptions>,
     standingTrain: {
       name: 'Standing train',
       component: CustomAnnouncementPane,
@@ -5105,11 +5108,12 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             type: 'custom',
             component: CallingAtSelector,
             props: {
-              availableStations: this.STATIONS,
+              availableStations: [] as string[],
+              additionalOptions: this.STATIONS_AS_ITEMS,
               selectLabel: 'Via points (non-splitting services only)',
               placeholder: 'Add a via point…',
               heading: 'Via... (optional)',
-            },
+            } as ICallingAtSelectorProps,
             default: [],
           },
           callingAt: {
@@ -5117,11 +5121,12 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             type: 'custom',
             component: CallingAtSelector,
             props: {
-              availableStations: this.STATIONS,
+              availableStations: [] as string[],
+              additionalOptions: this.STATIONS_AS_ITEMS,
               enableShortPlatforms: this.SHORT_PLATFORMS,
               enableRequestStops: true,
               enableSplits: this.SPLITS,
-            },
+            } as ICallingAtSelectorProps,
             default: [],
           },
           coaches: {
@@ -5145,7 +5150,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           },
         },
       },
-    },
+    } as CustomAnnouncementTab<keyof IStandingTrainAnnouncementOptions>,
     disruptedTrain: {
       name: 'Disrupted train',
       component: CustomAnnouncementPane,
@@ -5219,11 +5224,12 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             type: 'custom',
             component: CallingAtSelector,
             props: {
-              availableStations: this.STATIONS,
+              availableStations: [] as string[],
+              additionalOptions: this.STATIONS_AS_ITEMS,
               selectLabel: 'Via points (non-splitting services only)',
               placeholder: 'Add a via point…',
               heading: 'Via... (optional)',
-            },
+            } as ICallingAtSelectorProps,
             default: [],
           },
           disruptionType: {
@@ -5253,7 +5259,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           },
         },
       },
-    },
+    } as CustomAnnouncementTab<keyof IDisruptedTrainAnnouncementOptions>,
     fastTrain: {
       name: 'Fast train',
       component: CustomAnnouncementPane,
@@ -5303,6 +5309,6 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       props: {
         buttonSections: this.getAnnouncementButtons(),
       },
-    },
+    } as CustomAnnouncementTab<string>,
   }
 }

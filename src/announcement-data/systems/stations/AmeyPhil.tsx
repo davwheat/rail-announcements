@@ -3934,7 +3934,18 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       }),
     )
 
-    if (overallLength === null) {
+    const [bPos, bCount] = (dividePoint!!.splitForm ?? 'front.1').split('.').map((x, i) => (i === 1 ? parseInt(x) : x)) as [
+      'front' | 'middle' | 'rear' | 'unknown',
+      number,
+    ]
+    const aPos = bPos === 'front' ? 'rear' : 'front'
+    const aCount = !overallLength ? null : Math.min(Math.max(1, overallLength - bCount), 12)
+
+    const missingLengthData = !overallLength || !bCount || !aCount
+
+    console.log({ missingLengthData, overallLength, bPos, bCount, aPos, aCount })
+
+    if (missingLengthData) {
       return {
         divideType: dividePoint!!.splitType,
         stopsUpToSplit: stopsUntilFormationChange.map(p => ({
@@ -3948,9 +3959,9 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             crsCode: p.crsCode,
             shortPlatform: p.shortPlatform ?? '',
             requestStop: p.requestStop ?? false,
-            portion: { position: 'unknown', length: null },
+            portion: { position: bPos, length: null },
           })),
-          position: 'unknown',
+          position: bPos,
           length: null,
         },
         splitA: {
@@ -3958,17 +3969,13 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             crsCode: p.crsCode,
             shortPlatform: p.shortPlatform ?? '',
             requestStop: p.requestStop ?? false,
-            portion: { position: aPos, length: aCount },
+            portion: { position: aPos, length: null },
           })),
-          position: 'unknown',
+          position: aPos,
           length: null,
         },
       }
     }
-
-    const [bPos, bCount] = (dividePoint!!.splitForm ?? 'front.1').split('.').map((x, i) => (i === 1 ? parseInt(x) : x)) as [string, number]
-    const aPos = bPos === 'front' ? 'rear' : 'front'
-    const aCount = Math.min(Math.max(1, overallLength - bCount), 12)
 
     return {
       divideType: dividePoint!!.splitType,

@@ -770,7 +770,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
             .forEach(a => {
               // We have a dividing service
               stop.splitType = 'splits'
-              const len = a.service!!.locations[0].length
+              const len = a.service!!.locations[0].length || 0
               stop.splitForm = `rear.${len}`
               stop.splitCallingPoints = a
                 .service!!.locations.filter(s => {

@@ -7,6 +7,8 @@ import NREPowered from '@assets/NRE_Powered_logo.png'
 import FullScreen from 'react-fullscreen-crossbrowser'
 import Select from 'react-select'
 
+import './AmeyLiveTrainAnnouncements.css'
+
 import type { CallingAtPoint } from '@components/CallingAtSelector'
 import type { Option } from '@helpers/createOptionField'
 import type {

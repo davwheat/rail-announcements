@@ -4116,7 +4116,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       ]
     }
 
-    if (anyPortionStops.size !== 0) files.push(...listStops(Array.from(anyPortionStops)), ...this.splitOptions.travelInAnyPartIds)
+    if (anyPortionStops.length !== 0) files.push(...listStops(Array.from(anyPortionStops)), ...this.splitOptions.travelInAnyPartIds)
 
     function shouldTravelIn(length: number | null, position: 'front' | 'middle' | 'rear'): AudioItem[] {
       if (length === null) {
@@ -4133,7 +4133,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     }
 
     const aFiles =
-      aPortionStops.size === 0
+      aPortionStops.length === 0
         ? []
         : [
             ...listStops(Array.from(aPortionStops)),
@@ -4142,7 +4142,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
               : shouldTravelIn(splitData.splitA!!.length, splitData.splitA!!.position)),
           ]
     const bFiles =
-      bPortionStops.size === 0
+      bPortionStops.length === 0
         ? []
         : [
             ...listStops(Array.from(bPortionStops)),

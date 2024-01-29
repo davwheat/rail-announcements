@@ -122,12 +122,12 @@ function CallingAtSelector({
             }}
           >
             <Droppable droppableId="callingAtStops">
-              {(provided, snapshot) => (
+              {provided => (
                 <div {...provided.droppableProps} ref={provided.innerRef}>
                   {value.map((stop, i) => {
                     return (
                       <Draggable key={stop.randomId} draggableId={stop.randomId} index={i}>
-                        {(provided, snapshot) => (
+                        {provided => (
                           <div
                             css={{
                               border: '1px solid black',
@@ -243,6 +243,7 @@ function CallingAtSelector({
                                       component: CallingAtSelector as any,
                                       props: {
                                         availableStations: availableStations,
+                                        additionalOptions: additionalOptions,
                                         selectLabel: 'Split calling points',
                                         placeholder: 'Add a split calling point…',
                                         heading: 'Calling points (INCLUDING terminating station)',

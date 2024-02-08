@@ -4039,7 +4039,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
 
     files.push(
       ...this.pluraliseAudio(
-        splitData.stopsUpToSplit.map(s => `station.m.${s.crsCode}`),
+        splitData.stopsUpToSplit.filter(s => !s.requestStop).map(s => `station.m.${s.crsCode}`),
         {
           andId: 'm.and',
           firstItemDelay: this.callingPointsOptions.afterCallingAtDelay,
@@ -4206,13 +4206,16 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       files.push(`station.m.${terminatingStation}`, 'e.only')
     } else {
       files.push(
-        ...this.pluraliseAudio([...callingPoints.map(stn => `station.m.${stn.crsCode}`), `station.e.${terminatingStation}`], {
-          andId: 'm.and',
-          firstItemDelay: this.callingPointsOptions.afterCallingAtDelay,
-          beforeItemDelay: this.callingPointsOptions.betweenStopsDelay,
-          beforeAndDelay: this.callingPointsOptions.aroundAndDelay,
-          afterAndDelay: this.callingPointsOptions.aroundAndDelay,
-        }),
+        ...this.pluraliseAudio(
+          [...callingPoints.filter(s => !s.requestStop).map(stn => `station.m.${stn.crsCode}`), `station.e.${terminatingStation}`],
+          {
+            andId: 'm.and',
+            firstItemDelay: this.callingPointsOptions.afterCallingAtDelay,
+            beforeItemDelay: this.callingPointsOptions.betweenStopsDelay,
+            beforeAndDelay: this.callingPointsOptions.aroundAndDelay,
+            afterAndDelay: this.callingPointsOptions.aroundAndDelay,
+          },
+        ),
       )
     }
 

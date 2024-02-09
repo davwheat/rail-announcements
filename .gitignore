@@ -88,3 +88,5 @@ static/temp/
 .wrangler/
 
 ~$*.xlsx
+
+.dev.vars

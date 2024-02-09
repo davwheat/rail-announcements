@@ -3076,8 +3076,6 @@ export default class AmeyCelia extends AmeyPhil {
     thisStationAudio: 'e.this station',
   }
 
-
-
   processTocForLiveTrains(tocName: string, tocCode: string, originCrs: string, destinationCrs: string, useLegacy: boolean): string {
     if (useLegacy) {
       switch (tocCode.toUpperCase()) {

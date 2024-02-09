@@ -3076,12 +3076,85 @@ export default class AmeyCelia extends AmeyPhil {
     thisStationAudio: 'e.this station',
   }
 
-  processTocForLiveTrains(toc: string, originCrs: string, destinationCrs: string): string {
-    switch (toc.toLowerCase()) {
-      default:
-        return this.ALL_AVAILABLE_TOCS.find(t => t?.toLowerCase() === toc?.toLowerCase()) ?? ''
+  processTocForLiveTrains(tocName: string, tocCode: string, originCrs: string, destinationCrs: string, useLegacy: boolean): string {
+    if (useLegacy) {
+      switch (tocCode.toUpperCase()) {
+        case 'AW':
+          return 'arriva trains wales'
+        case 'CC':
+          return 'c2c'
+        case 'CH':
+          return 'chiltern railways'
+        case 'CS':
+          return 'caledonian sleeper'
+        case 'EM':
+          return 'east midlands trains'
+        case 'ES':
+          return 'eurostar'
+        case 'GC':
+          return 'grand central'
+        case 'GN':
+          return 'first capital connect'
+        case 'GR':
+          return 'national express east coast'
+        case 'GW':
+          return 'first great western'
+        case 'GX':
+          return 'gatwick express'
+        case 'HT':
+          return 'hull trains'
+        case 'HX':
+          return 'heathrow express'
+        case 'IL':
+          return 'island line'
+        // case 'LD':
+        //   return ''
+        case 'LE':
+          // Typically didn't appear in announcements because 'one' presents confusion with times
+          // return 'one'
+          return ''
+        case 'LM':
+          return 'london midland'
+        case 'LO':
+          return 'london overground'
+        // return 'silverlink metro'
+        case 'ME':
+          return 'merseyrail'
+        case 'NT':
+          return 'northern rail'
+        // return 'arriva trains northern'
+        case 'SE':
+          return 'southeastern'
+        case 'SN':
+          return 'southern'
+        case 'SR':
+          return 'scotrail'
+        case 'SW':
+          return 'south west trains'
+        case 'TL':
+          return 'first capital connect'
+        case 'TP':
+          return 'first transpennine express'
+        case 'TW':
+          return 'tyne and wear metro'
+        case 'VT':
+          return 'virgin trains'
+        case 'XC':
+          return 'virgin trains'
+        // case 'XR':
+        //   return ''
 
-      // case 'west midlands trains':
+        default:
+          return this.ALL_AVAILABLE_TOCS.find(t => t?.toLowerCase() === tocName?.toLowerCase()) ?? ''
+      }
+    }
+
+    switch (tocCode.toUpperCase()) {
+      default:
+        return this.ALL_AVAILABLE_TOCS.find(t => t?.toLowerCase() === tocName?.toLowerCase()) ?? ''
+
+      // West Midlands Trains
+      // case 'LM':
       //   // https://www.westmidlandsrailway.co.uk/media/3657/download?inline
       //   const lnwr = ['EUS', 'CRE', 'BDM', 'SAA', 'MKC', 'TRI', 'LIV', 'NMP']
       //   if (lnwr.includes(originCrs) || lnwr.includes(destinationCrs)) {

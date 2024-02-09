@@ -243,6 +243,7 @@ export default class LnerAzuma extends TrainAnnouncementSystem {
     'RET',
     'RMC',
     'RVN',
+    'RSN',
     'RYS',
     'SAE',
     'SBE',

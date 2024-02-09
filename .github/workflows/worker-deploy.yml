@@ -23,6 +23,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
+          cache-dependency-path: cf-workers/yarn.lock
 
       - name: Install dependencies
         working-directory: ./cf-workers

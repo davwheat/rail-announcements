@@ -347,6 +347,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
   const [isFullscreen, setFullscreen] = useState(false)
   const [selectedCrs, setSelectedCrs] = useState('ECR')
   const [hasEnabledFeature, setHasEnabledFeature] = useState(false)
+  const [useLegacyTocNames, setUseLegacyTocNames] = useStateWithLocalStorage<boolean>('amey.live-trains.use-legacy-toc-names', false)
   const [isPlaying, setIsPlaying] = useState(false)
   const [enabledAnnouncements, setEnabledAnnouncements] = useStateWithLocalStorage<AnnouncementType[]>('amey.live-trains.announcement-types', [
     AnnouncementType.Next,
@@ -521,7 +522,13 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       addLog(`Train is delayed by ${delayMins} mins`)
       console.log(`[Live Trains] Train is delayed by ${delayMins} mins`)
 
-      const toc = systems[systemKey].processTocForLiveTrains(train.operator, train.origin[0].crs, train.destination[0].crs)
+      const toc = systems[systemKey].processTocForLiveTrains(
+        train.operator,
+        train.operatorCode,
+        train.origin[0].crs,
+        train.destination[0].crs,
+        useLegacyTocNames,
+      )
 
       const callingPoints = train.subsequentLocations.filter(s => {
         if (!s.crs) return false
@@ -635,7 +642,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       console.log(`[Live Trains] Announcement for ${train.rid} complete: waiting 5s until next`)
       setTimeout(() => setIsPlaying(false), 5000)
     },
-    [markNextTrainAnnounced, systems, setIsPlaying, standingTrainHandler, selectedCrs, getStation, addLog],
+    [markNextTrainAnnounced, systems, setIsPlaying, standingTrainHandler, selectedCrs, getStation, addLog, useLegacyTocNames],
   )
 
   const announceApproachingTrain = useCallback(
@@ -653,7 +660,13 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       addLog(`Train is delayed by ${delayMins} mins`)
       console.log(`[Live Trains] Train is delayed by ${delayMins} mins`)
 
-      const toc = systems[systemKey].processTocForLiveTrains(train.operator, train.origin[0].crs, train.destination[0].crs)
+      const toc = systems[systemKey].processTocForLiveTrains(
+        train.operator,
+        train.operatorCode,
+        train.origin[0].crs,
+        train.destination[0].crs,
+        useLegacyTocNames,
+      )
 
       const vias: CallingAtPoint[][] = []
 
@@ -716,7 +729,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       console.log(`[Live Trains] Announcement for ${train.rid} complete: waiting 5s until next`)
       setTimeout(() => setIsPlaying(false), 5000)
     },
-    [markNextTrainAnnounced, systems, setIsPlaying, approachingTrainHandler, getStation, addLog],
+    [markNextTrainAnnounced, systems, setIsPlaying, approachingTrainHandler, getStation, addLog, useLegacyTocNames],
   )
 
   const announceNextTrain = useCallback(
@@ -734,7 +747,13 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       addLog(`Train is delayed by ${delayMins} mins`)
       console.log(`[Live Trains] Train is delayed by ${delayMins} mins`)
 
-      const toc = systems[systemKey].processTocForLiveTrains(train.operator, train.origin[0].crs, train.destination[0].crs)
+      const toc = systems[systemKey].processTocForLiveTrains(
+        train.operator,
+        train.operatorCode,
+        train.origin[0].crs,
+        train.destination[0].crs,
+        useLegacyTocNames,
+      )
 
       const callingPoints = train.subsequentLocations.filter(s => {
         if (!s.crs) return false
@@ -843,7 +862,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       console.log(`[Live Trains] Announcement for ${train.rid} complete: waiting 5s until next`)
       setTimeout(() => setIsPlaying(false), 5000)
     },
-    [markNextTrainAnnounced, systems, setIsPlaying, nextTrainHandler, getStation, addLog],
+    [markNextTrainAnnounced, systems, setIsPlaying, nextTrainHandler, getStation, addLog, useLegacyTocNames],
   )
 
   const announceDisruptedTrain = useCallback(
@@ -859,7 +878,13 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       const unknownDelay = !train.etdSpecified
       const delayMins = dayjs(train.etd).diff(dayjs(train.std), 'minutes')
 
-      const toc = systems[systemKey].processTocForLiveTrains(train.operator, train.origin[0].crs, train.destination[0].crs)
+      const toc = systems[systemKey].processTocForLiveTrains(
+        train.operator,
+        train.operatorCode,
+        train.origin[0].crs,
+        train.destination[0].crs,
+        useLegacyTocNames,
+      )
 
       const vias: CallingAtPoint[] = []
 
@@ -944,7 +969,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       console.log(`[Live Trains] Announcement for ${train.rid} complete: waiting 5s until next`)
       setTimeout(() => setIsPlaying(false), 5000)
     },
-    [markDisruptedTrainAnnounced, systems, setIsPlaying, disruptedTrainHandler, addLog],
+    [markDisruptedTrainAnnounced, systems, setIsPlaying, disruptedTrainHandler, addLog, useLegacyTocNames],
   )
 
   useEffect(() => {
@@ -1233,6 +1258,17 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
           onChange={val => setDisplayType(val!!.value)}
           options={Object.entries(DisplayNames).map(([value, label]) => ({ value: value as DisplayType, label }))}
         />
+      </label>
+
+      <label htmlFor="use-legacy-tocs">
+        <input
+          type="checkbox"
+          name="use-legacy-tocs"
+          id="use-legacy-tocs"
+          checked={useLegacyTocNames}
+          onChange={e => setUseLegacyTocNames(e.target.checked)}
+        />
+        Use legacy TOC names
       </label>
 
       <fieldset>

@@ -1994,5 +1994,17 @@
   "917": {
     "e": "disruption-reason.e.a staff shortage",
     "m": "disruption-reason.m.a staff shortage"
+  },
+  "918": {
+    "e": "disruption-reason.e.an incident on the line",
+    "m": "disruption-reason.m.an incident on the line"
+  },
+  "919": {
+    "e": "disruption-reason.e.an accident on a level crossing",
+    "m": "disruption-reason.m.an accident on a level crossing"
+  },
+  "920": {
+    "e": "disruption-reason.e.a temporary shortage of train crews",
+    "m": "disruption-reason.m.a temporary shortage of train crews"
   }
 }

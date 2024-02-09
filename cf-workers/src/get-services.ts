@@ -1,5 +1,28 @@
 import type { Env } from '.'
 
+export interface AssociatedServiceDetail {
+  cancelReason: CancelLatenessReason | null
+  delayReason: CancelLatenessReason | null
+  isCharter: boolean
+  isPassengerService: boolean
+  category: string
+  sta: string
+  staSpecified: boolean
+  ata: string
+  ataSpecified: boolean
+  eta: string
+  etaSpecified: boolean
+  std: string
+  stdSpecified: boolean
+  atd: string
+  atdSpecified: boolean
+  etd: string
+  etdSpecified: boolean
+  rid: string
+  uid: string
+  locations: AssociatedServiceLocation[]
+}
+
 export interface StaffServicesResponse {
   trainServices: TrainService[] | null
   busServices: null
@@ -18,14 +41,14 @@ export interface StaffServicesResponse {
   servicesAreUnavailable: boolean
 }
 
-interface TrainService {
+export interface TrainService {
   previousLocations: any
-  subsequentLocations: SubsequentLocation[]
+  subsequentLocations: TimingLocation[]
   cancelReason: CancelLatenessReason | null
   delayReason: CancelLatenessReason | null
   category: string
   activities: string
-  length: number
+  length: number | null
   isReverseFormation: boolean
   detachFront: boolean
   origin: EndPointLocation[]
@@ -73,7 +96,7 @@ interface TrainService {
   adhocAlerts: any
 }
 
-interface SubsequentLocation {
+export interface TimingLocation {
   locationName: string
   tiploc: string
   crs?: string
@@ -106,16 +129,29 @@ interface SubsequentLocation {
   lateness: any
   associations: Association[] | null
   adhocAlerts: any
+  activities?: string
 }
 
-interface Association {
+export enum AssociationCategory {
+  Join = 0,
+  Divide = 1,
+  LinkedFrom = 2,
+  LinkedTo = 3,
+}
+
+interface AssociatedServiceLocation extends TimingLocation {
+  length: number | null
+  falseDest: null | EndPointLocation[]
+}
+
+export interface Association<Category extends AssociationCategory = AssociationCategory> {
   /**
    * 0: Join
    * 1: Divide
    * 2: Linked-From (last service)
    * 3: Linked-To (next service)
    */
-  category: number
+  category: AssociationCategory
   rid: string
   uid: string
   trainid: string
@@ -132,7 +168,7 @@ interface Association {
   /**
    * Added by this proxy
    */
-  service: TrainService
+  service: Category extends AssociationCategory.Divide ? AssociatedServiceDetail : undefined
 }
 
 interface CancelLatenessReason {
@@ -142,7 +178,7 @@ interface CancelLatenessReason {
   stationName?: string | null
 }
 
-interface EndPointLocation {
+export interface EndPointLocation {
   isOperationalEndPoint: boolean
   locationName: string
   crs: string
@@ -160,9 +196,9 @@ interface NrccMessage {
 
 import TiplocToStation from './tiploc_to_station.json'
 
-async function getServiceByRid(rid: string): Promise<TrainService> {
+async function getServiceByRid(rid: string): Promise<AssociatedServiceDetail> {
   const response = await fetch(`https://national-rail-api.davwheat.dev/service/${rid}`)
-  const json: TrainService = await response.json()
+  const json: AssociatedServiceDetail = await response.json()
 
   return json
 }
@@ -196,33 +232,38 @@ export async function getServicesHandler(request: Request, env: Env, ctx: Execut
     const json: StaffServicesResponse = await response.json()
 
     for (const s in json.trainServices) {
-      const service: TrainService = json.trainServices[s]
+      const service: TrainService = json.trainServices[s as any]
+      const serviceData = await getServiceByRid(service.rid)
 
       if (service.cancelReason?.near) {
-        service.cancelReason.stationName = TiplocToStation[service.cancelReason.tiploc] || null
+        service.cancelReason.stationName = TiplocToStation[service.cancelReason.tiploc as keyof typeof TiplocToStation].crs || null
       }
 
       if (service.delayReason?.near) {
-        service.delayReason.stationName = TiplocToStation[service.delayReason.tiploc] || null
+        service.delayReason.stationName = TiplocToStation[service.delayReason.tiploc as keyof typeof TiplocToStation].crs || null
       }
 
       for (const l in service.subsequentLocations) {
-        const location: SubsequentLocation = service.subsequentLocations[l]
+        const location: TimingLocation = service.subsequentLocations[l]
 
         for (const a in location.associations) {
-          const association: Association = location.associations[a]
+          const association: Association = location.associations[a as any]
 
           // Joins/Divides only
           if ([0, 1].includes(association.category)) {
             ;(association as any).service = await getServiceByRid(association.rid)
           }
         }
+
+        location.activities = serviceData.locations.find(l => {
+          return l.tiploc === location.tiploc && (l.sta === location.sta || l.std === location.std)
+        })?.activities
       }
     }
 
     return Response.json(json)
   } catch (ex) {
-    if (ex && ex.message) {
+    if (ex && ex instanceof Error) {
       return Response.json({ error: true, message: ex.message })
     } else {
       return Response.json({ error: true, message: 'Unknown error' })

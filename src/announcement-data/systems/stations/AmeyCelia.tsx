@@ -15,6 +15,12 @@ export default class AmeyCelia extends AmeyPhil {
 
   readonly DelayCodeMapping = DelayCodeMapping
 
+  protected readonly genericOptions = {
+    platform: 's.platform-2',
+    platformZeroM: 'm.0',
+    platformZeroE: 'e.0',
+  }
+
   protected readonly callingPointsOptions = {
     beforeCallingAtDelay: this.BEFORE_SECTION_DELAY,
     afterCallingAtDelay: 0,
@@ -32,9 +38,11 @@ export default class AmeyCelia extends AmeyPhil {
   }
 
   get PLATFORMS() {
-    return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
-      .flatMap(x => [`${x}`, `${x}a`, `${x}b`, `${x}c`, `${x}d`])
-      .concat(['13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24'])
+    return ['0'].concat(
+      [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+        .flatMap(x => [`${x}`, `${x}a`, `${x}b`, `${x}c`, `${x}d`])
+        .concat(['13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24']),
+    )
   }
 
   protected get AVAILABLE_TOCS() {

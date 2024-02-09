@@ -7,6 +7,14 @@ import NREPowered from '@assets/NRE_Powered_logo.png'
 import FullScreen from 'react-fullscreen-crossbrowser'
 import Select from 'react-select'
 
+import {
+  AssociationCategory,
+  type TrainService,
+  type StaffServicesResponse,
+  type TimingLocation,
+  type EndPointLocation,
+} from '../../cf-workers/src/get-services'
+
 import './AmeyLiveTrainAnnouncements.css'
 
 import type { CallingAtPoint } from '@components/CallingAtSelector'
@@ -19,7 +27,7 @@ import type {
   IStandingTrainAnnouncementOptions,
 } from '../announcement-data/systems/stations/AmeyPhil'
 
-import dayjs, { Dayjs } from 'dayjs'
+import dayjs from 'dayjs'
 import dayjsUtc from 'dayjs/plugin/utc'
 import dayjsTz from 'dayjs/plugin/timezone'
 import Breakpoints from '@data/breakpoints'
@@ -53,200 +61,6 @@ export interface LiveTrainAnnouncementsProps<SystemKeys extends string> {
   disruptedTrainHandler: Record<SystemKeys, (options: IDisruptedTrainAnnouncementOptions) => Promise<void>>
   approachingTrainHandler: Record<SystemKeys, (options: ILiveTrainApproachingAnnouncementOptions) => Promise<void>>
   standingTrainHandler: Record<SystemKeys, (options: IStandingTrainAnnouncementOptions) => Promise<void>>
-}
-
-interface ServicesResponse {
-  trainServices: TrainService[] | null
-  busServices: null
-  ferryServices: null
-  isTruncated: boolean
-  generatedAt: string
-  locationName: string
-  crs: string
-  filterLocationName: null
-  filtercrs: null
-  filterType: number
-  stationManager: string
-  stationManagerCode: string
-  nrccMessages: NrccMessage[]
-  platformsAreHidden: boolean
-  servicesAreUnavailable: boolean
-}
-
-interface TrainService {
-  previousLocations: any
-  subsequentLocations: TimingLocation[]
-  cancelReason: CancelReason | null
-  delayReason: DelayReason | null
-  category: string
-  activities: string
-  length: number
-  isReverseFormation: boolean
-  detachFront: boolean
-  origin: Origin[]
-  destination: Destination[]
-  currentOrigins: null | Origin[]
-  currentDestinations: null | Destination[]
-  formation: any
-  rid: string
-  uid: string
-  trainid: string
-  rsid: string | null
-  sdd: string
-  operator: string
-  operatorCode: string
-  isPassengerService: boolean
-  isCharter: boolean
-  isCancelled: boolean
-  isCircularRoute: boolean
-  filterLocationCancelled: boolean
-  filterLocationOperational: boolean
-  isOperationalCall: boolean
-  sta: string
-  staSpecified: boolean
-  ata: string
-  ataSpecified: boolean
-  eta: string
-  etaSpecified: boolean
-  arrivalType: number
-  arrivalTypeSpecified: boolean
-  arrivalSource: string | null
-  arrivalSourceInstance: any
-  std: string
-  stdSpecified: boolean
-  atd: string
-  atdSpecified: boolean
-  etd: string
-  etdSpecified: boolean
-  departureType: number
-  departureTypeSpecified: boolean
-  departureSource: string | null
-  departureSourceInstance: any
-  platform: string
-  platformIsHidden: boolean
-  serviceIsSupressed: boolean
-  adhocAlerts: any
-}
-
-interface TimingLocation {
-  locationName: string
-  tiploc: string
-  crs?: string
-  isOperational: boolean
-  isPass: boolean
-  isCancelled: boolean
-  platform?: string
-  platformIsHidden: boolean
-  serviceIsSuppressed: boolean
-  sta: string
-  staSpecified: boolean
-  ata: string
-  ataSpecified: boolean
-  eta: string
-  etaSpecified: boolean
-  arrivalType: number
-  arrivalTypeSpecified: boolean
-  arrivalSource: string | null
-  arrivalSourceInstance: any
-  std: string
-  stdSpecified: boolean
-  atd: string
-  atdSpecified: boolean
-  etd: string
-  etdSpecified: boolean
-  departureType: number
-  departureTypeSpecified: boolean
-  departureSource: string | null
-  departureSourceInstance: any
-  lateness: any
-  associations?: Association[]
-  adhocAlerts: any
-}
-
-interface AssociatedServiceLocation extends TimingLocation {
-  length: number | null
-  falseDest: null | Destination[]
-}
-
-interface AssociatedServiceDetail {
-  cancelReason: CancelReason | null
-  delayReason: DelayReason | null
-  category: string
-  sta: string
-  staSpecified: boolean
-  ata: string
-  ataSpecified: boolean
-  eta: string
-  etaSpecified: boolean
-  std: string
-  stdSpecified: boolean
-  atd: string
-  atdSpecified: boolean
-  etd: string
-  etdSpecified: boolean
-  rid: string
-  uid: string
-  locations: AssociatedServiceLocation[]
-}
-
-enum AssociationCategory {
-  Join = 0,
-  Divide = 1,
-}
-
-interface Association<Category extends AssociationCategory = AssociationCategory> {
-  category: Category
-  rid: string
-  uid: string
-  trainid: string
-  rsid?: string
-  sdd: string
-  origin: string
-  originCRS: string
-  originTiploc: string
-  destination: string
-  destCRS: string
-  destTiploc: string
-  isCancelled: boolean
-  service: Category extends AssociationCategory.Divide ? AssociatedServiceDetail : undefined
-}
-
-interface CancelReason {
-  tiploc: string
-  near: boolean
-  value: number
-}
-
-interface DelayReason {
-  tiploc: string
-  near: boolean
-  value: number
-}
-
-interface Origin {
-  isOperationalEndPoint: boolean
-  locationName: string
-  crs: string
-  tiploc: string
-  via: any
-  futureChangeTo: number
-  futureChangeToSpecified: boolean
-}
-
-interface Destination {
-  isOperationalEndPoint: boolean
-  locationName: string
-  crs: string
-  tiploc: string
-  via: any
-  futureChangeTo: number
-  futureChangeToSpecified: boolean
-}
-
-interface NrccMessage {
-  category: number
-  severity: number
-  xhtmlMessage: string
 }
 
 type DisplayType = 'gtr-new' | 'tfwm-lcd'
@@ -482,13 +296,13 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
   }, [removeOldIds])
 
   const getStation = useCallback(
-    function getStation(location: TimingLocation | Destination | Origin, systemKey: SystemKeys): string {
+    function getStation(location: TimingLocation | EndPointLocation, systemKey: SystemKeys): string {
       return systems[systemKey].liveTrainsTiplocStationOverrides(location?.tiploc) ?? location.crs!!
     },
     [systems],
   )
 
-  const guessViaPoint = useCallback(function guessViaPoint(via: string, stops: (TimingLocation | Destination)[]): string | null {
+  const guessViaPoint = useCallback(function guessViaPoint(via: string, stops: (TimingLocation | EndPointLocation)[]): string | null {
     if (stationNameToCrsMap[via]) return stationNameToCrsMap[via]
 
     // Manual entries
@@ -557,6 +371,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
             crsCode: getStation(p, systemKey),
             name: '',
             randomId: '',
+            requestStop: p.activities === 'R',
           }
 
           p.associations
@@ -573,7 +388,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
                   if (!systems[systemKey].STATIONS.includes(s.crs)) return false
                   return true
                 })
-                .map(l => ({ crsCode: l.crs!!, name: l.locationName, randomId: '' }))
+                .map(l => ({ crsCode: l.crs!!, name: l.locationName, randomId: '', requestStop: p.activities === 'R' }))
             })
 
           return stop
@@ -782,6 +597,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
             crsCode: getStation(p, systemKey),
             name: '',
             randomId: '',
+            requestStop: p.activities === 'R',
           }
 
           p.associations
@@ -798,7 +614,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
                   if (!systems[systemKey].STATIONS.includes(s.crs)) return false
                   return true
                 })
-                .map(l => ({ crsCode: l.crs!!, name: l.locationName, randomId: '' }))
+                .map(l => ({ crsCode: l.crs!!, name: l.locationName, randomId: '', requestStop: p.activities === 'R' }))
             })
 
           return stop
@@ -1009,7 +825,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         }
 
         try {
-          const data: ServicesResponse = await resp.json()
+          const data: StaffServicesResponse = await resp.json()
           services = data.trainServices
         } catch {
           addLog("Couldn't parse JSON from API")
@@ -1590,8 +1406,8 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         <li>are terminating at the selected station</li>
       </ul>
       <p>
-        We also can't handle request stops, short platforms and several more features as this information isn't contained within the open data
-        provided by National Rail.
+        We also can't handle short platforms and some other features as this information isn't contained within the open data provided by
+        National Rail.
       </p>
 
       {!hasEnabledFeature ? (

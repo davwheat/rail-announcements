@@ -306,6 +306,10 @@ export async function getServicesHandler(request: Request, env: Env, ctx: Execut
         cacheTtl: 10,
         cacheEverything: true,
       },
+      headers: {
+        'User-Agent': 'railannouncements.co.uk',
+        Server: 'cloudflare workers',
+      },
     })
 
     if (!response.ok) {

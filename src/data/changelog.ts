@@ -388,11 +388,11 @@ const changelog: IChangelogVersion[] = [
   },
   {
     date: '2024-02-08',
-    additions: [
-      '[Amey Phil & Celia] Add Platform 0',
-      '[LNER Azuma] Add Reston station',
-      '[Amey Live Trains] Add option to announce legacy TOCs',
-    ],
+    additions: ['[LNER Azuma] Add Reston station', '[Amey Live Trains] Add option to announce legacy TOCs'],
+  },
+  {
+    date: '2024-02-09',
+    additions: ['[Amey Phil & Celia] Add Platform 0'],
     fixes: ['[Amey Phil & Celia] Corrected audio files used for fast train announcements'],
   },
 ]

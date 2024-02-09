@@ -392,7 +392,7 @@ const changelog: IChangelogVersion[] = [
   },
   {
     date: '2024-02-09',
-    additions: ['[Amey Phil & Celia] Add Platform 0'],
+    additions: ['[Amey Phil & Celia] Add Platform 0', '[Amey Live Trains] Recognise and announce request stops'],
     fixes: ['[Amey Phil & Celia] Corrected audio files used for fast train announcements'],
   },
 ]

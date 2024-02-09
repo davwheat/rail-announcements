@@ -371,6 +371,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
             crsCode: getStation(p, systemKey),
             name: '',
             randomId: '',
+            requestStop: p.activities === 'R',
           }
 
           p.associations
@@ -387,7 +388,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
                   if (!systems[systemKey].STATIONS.includes(s.crs)) return false
                   return true
                 })
-                .map(l => ({ crsCode: l.crs!!, name: l.locationName, randomId: '' }))
+                .map(l => ({ crsCode: l.crs!!, name: l.locationName, randomId: '', requestStop: p.activities === 'R' }))
             })
 
           return stop
@@ -596,6 +597,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
             crsCode: getStation(p, systemKey),
             name: '',
             randomId: '',
+            requestStop: p.activities === 'R',
           }
 
           p.associations
@@ -612,7 +614,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
                   if (!systems[systemKey].STATIONS.includes(s.crs)) return false
                   return true
                 })
-                .map(l => ({ crsCode: l.crs!!, name: l.locationName, randomId: '' }))
+                .map(l => ({ crsCode: l.crs!!, name: l.locationName, randomId: '', requestStop: p.activities === 'R' }))
             })
 
           return stop
@@ -1404,8 +1406,8 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         <li>are terminating at the selected station</li>
       </ul>
       <p>
-        We also can't handle request stops, short platforms and several more features as this information isn't contained within the open data
-        provided by National Rail.
+        We also can't handle short platforms and some other features as this information isn't contained within the open data provided by
+        National Rail.
       </p>
 
       {!hasEnabledFeature ? (

@@ -15,6 +15,12 @@ export default class AmeyCelia extends AmeyPhil {
 
   readonly DelayCodeMapping = DelayCodeMapping
 
+  protected readonly genericOptions = {
+    platform: 's.platform-2',
+    platformZeroM: 'm.0',
+    platformZeroE: 'e.0',
+  }
+
   protected readonly callingPointsOptions = {
     beforeCallingAtDelay: this.BEFORE_SECTION_DELAY,
     afterCallingAtDelay: 0,

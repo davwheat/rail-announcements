@@ -97,6 +97,13 @@ export default class AmeyPhil extends StationAnnouncementSystem {
 
   readonly DelayCodeMapping: Record<string, { e: string; m: string }> = DelayCodeMapping
 
+  protected readonly genericOptions = {
+    platform: 's.platform-2',
+    platformZeroM: 'm.0',
+    // No end inflection
+    platformZeroE: 'm.0',
+  }
+
   protected readonly callingPointsOptions = {
     beforeCallingAtDelay: this.BEFORE_SECTION_DELAY,
     afterCallingAtDelay: 0,
@@ -844,9 +851,11 @@ export default class AmeyPhil extends StationAnnouncementSystem {
   }
 
   get PLATFORMS() {
-    return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
-      .flatMap(x => [`${x}`, `${x}a`, `${x}b`, `${x}c`, `${x}d`])
-      .concat(['13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', 'a', 'b', 'c', 'd'])
+    return ['0'].concat(
+      [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+        .flatMap(x => [`${x}`, `${x}a`, `${x}b`, `${x}c`, `${x}d`])
+        .concat(['13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', 'a', 'b', 'c', 'd']),
+    )
   }
 
   get STATIONS() {
@@ -4303,21 +4312,27 @@ export default class AmeyPhil extends StationAnnouncementSystem {
 
     const plat = parseInt(options.platform)
 
-    function getPlatFiles(startDelay: number = 0) {
+    const getPlatFiles = (startDelay: number = 0) => {
       const platFiles: AudioItem[] = []
 
-      if (plat <= 12 || ['a', 'b'].includes(options.platform.toLowerCase())) {
+      if (options.platform === '0') {
+        platFiles.push(
+          { id: this.genericOptions.platform, opts: { delayStart: 250 } },
+          `m.0`,
+          options.isDelayed ? `m.for the delayed` : `m.for the`,
+        )
+      } else if (plat <= 12 || ['a', 'b'].includes(options.platform.toLowerCase())) {
         platFiles.push({ id: `s.platform ${options.platform} for the`, opts: { delayStart: 250 } })
         if (options.isDelayed) platFiles.push('m.delayed')
       } else if (plat >= 21) {
-        files.push(
-          { id: `s.platform`, opts: { delayStart: 250 } },
+        platFiles.push(
+          { id: this.genericOptions.platform, opts: { delayStart: 250 } },
           `mins.m.${options.platform}`,
           options.isDelayed ? `m.for the delayed` : `m.for the`,
         )
       } else {
         platFiles.push(
-          { id: `s.platform`, opts: { delayStart: 250 } },
+          { id: this.genericOptions.platform, opts: { delayStart: 250 } },
           `platform.s.${options.platform}`,
           options.isDelayed ? `m.for the delayed` : `m.for the`,
         )
@@ -4414,8 +4429,10 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     function getPlatFiles() {
       const platFiles: AudioItem[] = []
 
-      if (plat >= 21) {
-        files.push(`mins.m.${options.platform}`, options.isDelayed ? `m.is the delayed` : `m.is the`)
+      if (options.platform === '0') {
+        platFiles.push(`m.0`, options.isDelayed ? `m.is the delayed` : `m.is the`)
+      } else if (plat >= 21) {
+        platFiles.push(`mins.m.${options.platform}`, options.isDelayed ? `m.is the delayed` : `m.is the`)
       } else {
         platFiles.push(`platform.s.${options.platform}`, options.isDelayed ? `m.is the delayed` : `m.is the`)
       }
@@ -4579,7 +4596,17 @@ export default class AmeyPhil extends StationAnnouncementSystem {
 
     let plat = parseInt(options.platform)
 
-    files.push('s.stand well away from the edge of platform', plat >= 21 ? `mins.e.${options.platform}` : `platform.e.${options.platform}`, {
+    const platformAudio = (() => {
+      if (options.platform === '0') {
+        return `e.0`
+      } else if (isNaN(plat) || plat <= 20) {
+        return `platform.e.${options.platform}`
+      } else {
+        return `mins.e.${options.platform}`
+      }
+    })()
+
+    files.push('s.stand well away from the edge of platform', platformAudio, {
       id: 'w.the approaching train is not scheduled to stop at this station',
       opts: { delayStart: this.BEFORE_SECTION_DELAY },
     })
@@ -4602,7 +4629,9 @@ export default class AmeyPhil extends StationAnnouncementSystem {
 
     const plat = parseInt(options.platform)
 
-    if (plat <= 20 && options.platform.match(/^\d+$/)) {
+    if (options.platform === '0') {
+      files.push(`s.the train now approaching platform`, 'm.0')
+    } else if (plat <= 20 && options.platform.match(/^\d+$/)) {
       files.push(`s.the train now approaching platform ${plat}`)
     } else if (plat >= 21) {
       files.push(`s.the train now approaching platform`, `mins.m.${options.platform}`)
@@ -4895,7 +4924,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           },
           platform: {
             name: 'Platform',
-            default: this.PLATFORMS[0],
+            default: this.PLATFORMS[1],
             options: this.PLATFORMS.map(p => ({ title: `Platform ${p.toUpperCase()}`, value: p })),
             type: 'select',
           },
@@ -5022,7 +5051,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           },
           platform: {
             name: 'Platform',
-            default: this.PLATFORMS[0],
+            default: this.PLATFORMS[1],
             options: this.PLATFORMS.map(p => ({ title: `Platform ${p.toUpperCase()}`, value: p })),
             type: 'select',
           },
@@ -5124,7 +5153,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           },
           platform: {
             name: 'Platform',
-            default: this.PLATFORMS[0],
+            default: this.PLATFORMS[1],
             options: this.PLATFORMS.map(p => ({ title: `Platform ${p.toUpperCase()}`, value: p })),
             type: 'select',
           },
@@ -5359,7 +5388,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           },
           platform: {
             name: 'Platform',
-            default: this.PLATFORMS[0],
+            default: this.PLATFORMS[1],
             options: this.PLATFORMS.map(p => ({ title: `Platform ${p.toUpperCase()}`, value: p })),
             type: 'select',
           },

@@ -378,6 +378,23 @@ const changelog: IChangelogVersion[] = [
     additions: ['[Amey Live Trains] Announce Eurostar services'],
     fixes: ['[Amey Live Trains] Fix error when no stations are in calling points list'],
   },
+  {
+    date: '2024-01-27',
+    fixes: ['[Amey Phil & Celia] Improved split handling'],
+  },
+  {
+    date: '2024-01-28',
+    additions: ['[Amey Phil] More bodged station audio files (APY, ASF, AVP, BOW, BYL)'],
+  },
+  {
+    date: '2024-02-08',
+    additions: [
+      '[Amey Phil & Celia] Add Platform 0',
+      '[LNER Azuma] Add Reston station',
+      '[Amey Live Trains] Add option to announce legacy TOCs',
+    ],
+    fixes: ['[Amey Phil & Celia] Corrected audio files used for fast train announcements'],
+  },
 ]
 
 export default changelog

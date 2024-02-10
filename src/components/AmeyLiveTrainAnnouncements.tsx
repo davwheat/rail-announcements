@@ -1168,6 +1168,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         <div
           css={{
             display: 'flex',
+            flexWrap: 'wrap',
             alignItems: 'stretch',
             gap: 8,
             marginBottom: 16,

@@ -196,11 +196,69 @@ interface NrccMessage {
 
 import TiplocToStation from './tiploc_to_station.json'
 
-async function getServiceByRid(rid: string): Promise<AssociatedServiceDetail> {
-  const response = await fetch(`https://national-rail-api.davwheat.dev/service/${rid}`)
+async function getServiceByRidForActivityData(rid: string): Promise<AssociatedServiceDetail | undefined> {
+  const response = await fetch(`https://national-rail-api.davwheat.dev/service/${rid}?activityPull`, {
+    cf: {
+      cacheTtlByStatus: { '200-299': 86400, 404: 0, '500-599': 30 },
+      cacheEverything: true,
+    },
+  })
+
+  if (!response.ok) return undefined
+  if (response.headers.get('CF-Cache-Status') === 'HIT') {
+    console.log(`Activity data cache hit (${rid})`)
+  }
+
   const json: AssociatedServiceDetail = await response.json()
 
   return json
+}
+
+async function getServiceByRid(rid: string): Promise<AssociatedServiceDetail | undefined> {
+  const response = await fetch(`https://national-rail-api.davwheat.dev/service/${rid}?associationPull`, {
+    cf: {
+      cacheTtlByStatus: { '200-299': 120, 404: 0, '500-599': 30 },
+      cacheEverything: true,
+    },
+  })
+
+  if (!response.ok) return undefined
+  if (response.headers.get('CF-Cache-Status') === 'HIT') {
+    console.log(`Associated service cache hit (${rid})`)
+  }
+
+  const json: AssociatedServiceDetail = await response.json()
+
+  return json
+}
+
+async function processService(service: TrainService): Promise<void> {
+  const serviceData = await getServiceByRidForActivityData(service.rid)
+
+  if (service.cancelReason?.near) {
+    service.cancelReason.stationName = TiplocToStation[service.cancelReason.tiploc as keyof typeof TiplocToStation].crs || null
+  }
+
+  if (service.delayReason?.near) {
+    service.delayReason.stationName = TiplocToStation[service.delayReason.tiploc as keyof typeof TiplocToStation].crs || null
+  }
+
+  for (const l in service.subsequentLocations) {
+    const location: TimingLocation = service.subsequentLocations[l]
+
+    for (const a in location.associations) {
+      const association: Association = location.associations[a as any]
+
+      // Joins/Divides only
+      if (association.category === AssociationCategory.Divide) {
+        association.service = await getServiceByRid(association.rid)
+      }
+    }
+
+    location.activities = serviceData?.locations.find(l => {
+      return l.tiploc === location.tiploc && (l.sta === location.sta || l.std === location.std)
+    })?.activities
+  }
 }
 
 export async function getServicesHandler(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
@@ -223,46 +281,31 @@ export async function getServicesHandler(request: Request, env: Env, ctx: Execut
       timeWindow,
     })
 
-    const response = await fetch(`https://national-rail-api.davwheat.dev/staffdepartures/${station}/${maxServices}?${params}`)
+    const response = await fetch(`https://national-rail-api.davwheat.dev/staffdepartures/${station}/${maxServices}?${params}`, {
+      cf: {
+        cacheTtlByStatus: { '200-299': 30, 404: 0, '500-599': 10 },
+        cacheEverything: true,
+      },
+    })
 
     if (!response.ok) {
       return Response.json({ error: true, message: 'Upstream fetch error' })
     }
 
-    const json: StaffServicesResponse = await response.json()
-
-    for (const s in json.trainServices) {
-      const service: TrainService = json.trainServices[s as any]
-      const serviceData = await getServiceByRid(service.rid)
-
-      if (service.cancelReason?.near) {
-        service.cancelReason.stationName = TiplocToStation[service.cancelReason.tiploc as keyof typeof TiplocToStation].crs || null
-      }
-
-      if (service.delayReason?.near) {
-        service.delayReason.stationName = TiplocToStation[service.delayReason.tiploc as keyof typeof TiplocToStation].crs || null
-      }
-
-      for (const l in service.subsequentLocations) {
-        const location: TimingLocation = service.subsequentLocations[l]
-
-        for (const a in location.associations) {
-          const association: Association = location.associations[a as any]
-
-          // Joins/Divides only
-          if ([0, 1].includes(association.category)) {
-            ;(association as any).service = await getServiceByRid(association.rid)
-          }
-        }
-
-        location.activities = serviceData.locations.find(l => {
-          return l.tiploc === location.tiploc && (l.sta === location.sta || l.std === location.std)
-        })?.activities
-      }
+    if (response.headers.get('CF-Cache-Status') === 'HIT') {
+      console.log(`Departure board cache hit (${station})`)
     }
 
-    return Response.json(json)
+    const json: StaffServicesResponse = await response.json()
+
+    await Promise.all(json.trainServices?.map(service => processService(service)) ?? [])
+
+    const resp = Response.json(json)
+    resp.headers.set('Cache-Control', 'public, max-age=5, s-maxage=30')
+    return resp
   } catch (ex) {
+    console.error(ex)
+
     if (ex && ex instanceof Error) {
       return Response.json({ error: true, message: ex.message })
     } else {

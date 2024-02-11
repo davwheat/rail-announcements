@@ -197,41 +197,57 @@ interface NrccMessage {
 import TiplocToStation from './tiploc_to_station.json'
 
 async function getServiceByRidForActivityData(rid: string): Promise<AssociatedServiceDetail | undefined> {
-  const response = await fetch(`https://national-rail-api.davwheat.dev/service/${rid}?activityPull`, {
-    cf: {
-      cacheTtl: 86400,
-      // cacheTtlByStatus: { '200-299': 86400, 404: 0, '500-599': 30 },
-      cacheEverything: true,
-    },
-  })
+  const cache = await caches.open('activity-data')
+  const url = `https://national-rail-api.davwheat.dev/service/${rid}`
 
-  if (!response.ok) return undefined
-  if (response.headers.get('CF-Cache-Status') === 'HIT') {
+  const cachedResponse = await cache.match(url, { ignoreMethod: true })
+  if (cachedResponse) {
     console.log(`Activity data cache hit (${rid})`)
-  } else {
-    console.log(`Activity data cache miss (${rid}): Status ${response.status} / ${response.headers.get('CF-Cache-Status')}`)
+    return cachedResponse.json()
   }
 
+  const response = await fetch(url)
+  if (!response.ok) return undefined
+
   const json: AssociatedServiceDetail = await response.json()
+
+  await cache.put(
+    url,
+    new Response(JSON.stringify(json), {
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'public, max-age=86400',
+      },
+    }),
+  )
 
   return json
 }
 
 async function getServiceByRid(rid: string): Promise<AssociatedServiceDetail | undefined> {
-  const response = await fetch(`https://national-rail-api.davwheat.dev/service/${rid}?associationPull`, {
-    cf: {
-      cacheTtl: 120,
-      // cacheTtlByStatus: { '200-299': 120, 404: 0, '500-599': 30 },
-      cacheEverything: true,
-    },
-  })
+  const cache = await caches.open('associated-service')
+  const url = `https://national-rail-api.davwheat.dev/service/${rid}`
 
-  if (!response.ok) return undefined
-  if (response.headers.get('CF-Cache-Status') === 'HIT') {
+  const cachedResponse = await cache.match(url, { ignoreMethod: true })
+  if (cachedResponse) {
     console.log(`Associated service cache hit (${rid})`)
+    return cachedResponse.json()
   }
 
+  const response = await fetch(url)
+  if (!response.ok) return undefined
+
   const json: AssociatedServiceDetail = await response.json()
+
+  await cache.put(
+    url,
+    new Response(JSON.stringify(json), {
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'public, max-age=120',
+      },
+    }),
+  )
 
   return json
 }
@@ -288,7 +304,6 @@ export async function getServicesHandler(request: Request, env: Env, ctx: Execut
     const response = await fetch(`https://national-rail-api.davwheat.dev/staffdepartures/${station}/${maxServices}?${params}`, {
       cf: {
         cacheTtl: 10,
-        // cacheTtlByStatus: { '200-299': 10, '500-599': 5 },
         cacheEverything: true,
       },
     })

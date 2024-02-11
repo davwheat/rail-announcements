@@ -2,6 +2,9 @@ name = "rail-announcements-worker"
 main = "src/index.ts"
 compatibility_date = "2023-12-18"
 
+[placement]
+mode = "smart"
+
 [[d1_databases]]
 binding = "DB"
 database_name = "rail-announcements"

@@ -199,7 +199,8 @@ import TiplocToStation from './tiploc_to_station.json'
 async function getServiceByRidForActivityData(rid: string): Promise<AssociatedServiceDetail | undefined> {
   const response = await fetch(`https://national-rail-api.davwheat.dev/service/${rid}?activityPull`, {
     cf: {
-      cacheTtlByStatus: { '200-299': 86400, 404: 0, '500-599': 30 },
+      cacheTtl: 86400,
+      // cacheTtlByStatus: { '200-299': 86400, 404: 0, '500-599': 30 },
       cacheEverything: true,
     },
   })
@@ -207,6 +208,8 @@ async function getServiceByRidForActivityData(rid: string): Promise<AssociatedSe
   if (!response.ok) return undefined
   if (response.headers.get('CF-Cache-Status') === 'HIT') {
     console.log(`Activity data cache hit (${rid})`)
+  } else {
+    console.log(`Activity data cache miss (${rid}): Status ${response.status} / ${response.headers.get('CF-Cache-Status')}`)
   }
 
   const json: AssociatedServiceDetail = await response.json()
@@ -217,7 +220,8 @@ async function getServiceByRidForActivityData(rid: string): Promise<AssociatedSe
 async function getServiceByRid(rid: string): Promise<AssociatedServiceDetail | undefined> {
   const response = await fetch(`https://national-rail-api.davwheat.dev/service/${rid}?associationPull`, {
     cf: {
-      cacheTtlByStatus: { '200-299': 120, 404: 0, '500-599': 30 },
+      cacheTtl: 120,
+      // cacheTtlByStatus: { '200-299': 120, 404: 0, '500-599': 30 },
       cacheEverything: true,
     },
   })
@@ -283,7 +287,8 @@ export async function getServicesHandler(request: Request, env: Env, ctx: Execut
 
     const response = await fetch(`https://national-rail-api.davwheat.dev/staffdepartures/${station}/${maxServices}?${params}`, {
       cf: {
-        cacheTtlByStatus: { '200-299': 30, 404: 0, '500-599': 10 },
+        cacheTtl: 10,
+        // cacheTtlByStatus: { '200-299': 10, '500-599': 5 },
         cacheEverything: true,
       },
     })

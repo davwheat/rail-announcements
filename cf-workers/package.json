@@ -10,17 +10,18 @@
     "format:check": "prettier --check \"**/*.{js,ts,json,md}\""
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20240117.0",
+    "@cloudflare/workers-types": "^4.20240208.0",
     "@types/uuid": "^9.0.8",
-    "prettier": "^3.2.4",
+    "prettier": "^3.2.5",
     "typescript": "^5.3.3",
-    "wrangler": "^3.24.0"
+    "wrangler": "^3.28.1"
   },
   "dependencies": {
-    "@cfworker/json-schema": "^1.12.7",
+    "@cfworker/json-schema": "^1.12.8",
     "dayjs": "^1.11.10",
     "itty-cors": "^0.3.6",
     "itty-router": "^4.0.27",
     "uuid": "^9.0.1"
-  }
+  },
+  "packageManager": "yarn@4.1.0"
 }

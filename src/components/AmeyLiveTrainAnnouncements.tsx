@@ -1054,6 +1054,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
     station: selectedCrs,
     noBg: '1',
     hideSettings: '1',
+    useLegacyTocNames: useLegacyTocNames ? '1' : '0',
   })
 
   Object.entries(systemKeyForPlatform)

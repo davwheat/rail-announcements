@@ -1049,6 +1049,19 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
     enabledAnnouncements,
   ])
 
+  const iframeQueryParams = new URLSearchParams({
+    type: displayType,
+    station: selectedCrs,
+    noBg: '1',
+    hideSettings: '1',
+  })
+
+  Object.entries(systemKeyForPlatform)
+    .filter(([_, system]) => system !== null)
+    .forEach(([p]) => {
+      iframeQueryParams.append('platform', p)
+    })
+
   return (
     <div style={{ width: '100%' }}>
       <label className="option-select" htmlFor="station-select">
@@ -1448,7 +1461,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
                   height: '100%',
                 },
               }}
-              src={`https://raildotmatrix.co.uk/board/?type=${encodeURIComponent(displayType)}&station=${selectedCrs}&noBg=1&hideSettings=1`}
+              src={`https://raildotmatrix.co.uk/board/?${iframeQueryParams}`}
             />
           </FullScreen>
 

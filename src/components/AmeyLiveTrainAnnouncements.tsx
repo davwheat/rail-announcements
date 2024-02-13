@@ -1054,8 +1054,11 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
     station: selectedCrs,
     noBg: '1',
     hideSettings: '1',
-    useLegacyTocNames: useLegacyTocNames ? '1' : '0',
   })
+
+  if (useLegacyTocNames) {
+    iframeQueryParams.append('useLegacyTocNames', '1')
+  }
 
   Object.entries(systemKeyForPlatform)
     .filter(([_, system]) => system !== null)

@@ -2053,6 +2053,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       'HYD',
       'HYH',
       'HYK',
+      'HYL',
       'HYM',
       'HYN',
       'HYR',

@@ -14,7 +14,7 @@
     "@types/uuid": "^9.0.8",
     "prettier": "^3.2.5",
     "typescript": "^5.3.3",
-    "wrangler": "^3.28.1"
+    "wrangler": "^3.28.3"
   },
   "dependencies": {
     "@cfworker/json-schema": "^1.12.8",

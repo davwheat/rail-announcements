@@ -28,7 +28,7 @@ const Tabs = React.memo(({ tabNames, tabItems, customKeyPrefix = '', selectedTab
           margin: 0,
           marginBottom: 16,
 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(10px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
 
           [Breakpoints.between.bigPhone.and.desktopSmall]: {
             gridTemplateColumns: '1fr 1fr',

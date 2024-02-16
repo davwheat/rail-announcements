@@ -61,6 +61,21 @@ export interface ITrainApproachingAnnouncementOptions {
   callingAt?: CallingAtPoint[]
 }
 
+export interface IPlatformAlterationAnnouncementOptions {
+  chime: ChimeType
+  announceOldPlatform: boolean
+  oldPlatform: string
+  newPlatform: string
+  hour: string
+  min: string
+  isDelayed: boolean
+  toc: string
+  terminatingStationCode: string
+  vias: CallingAtPoint[]
+  callingAt?: CallingAtPoint[]
+  coaches: string | null
+}
+
 export interface ILiveTrainApproachingAnnouncementOptions {
   chime: ChimeType
   platform: string
@@ -4314,27 +4329,23 @@ export default class AmeyPhil extends StationAnnouncementSystem {
 
     const plat = parseInt(options.platform)
 
-    const getPlatFiles = (startDelay: number = 0) => {
+    const getPlatFiles = (delayStart: number = 250) => {
       const platFiles: AudioItem[] = []
 
       if (options.platform === '0') {
-        platFiles.push(
-          { id: this.genericOptions.platform, opts: { delayStart: 250 } },
-          `m.0`,
-          options.isDelayed ? `m.for the delayed` : `m.for the`,
-        )
+        platFiles.push({ id: this.genericOptions.platform, opts: { delayStart } }, `m.0`, options.isDelayed ? `m.for the delayed` : `m.for the`)
       } else if (plat <= 12 || ['a', 'b'].includes(options.platform.toLowerCase())) {
-        platFiles.push({ id: `s.platform ${options.platform} for the`, opts: { delayStart: 250 } })
+        platFiles.push({ id: `s.platform ${options.platform} for the`, opts: { delayStart } })
         if (options.isDelayed) platFiles.push('m.delayed')
       } else if (plat >= 21) {
         platFiles.push(
-          { id: this.genericOptions.platform, opts: { delayStart: 250 } },
+          { id: this.genericOptions.platform, opts: { delayStart } },
           `mins.m.${options.platform}`,
           options.isDelayed ? `m.for the delayed` : `m.for the`,
         )
       } else {
         platFiles.push(
-          { id: this.genericOptions.platform, opts: { delayStart: 250 } },
+          { id: this.genericOptions.platform, opts: { delayStart } },
           `platform.s.${options.platform}`,
           options.isDelayed ? `m.for the delayed` : `m.for the`,
         )
@@ -4671,6 +4682,105 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     }
 
     files.push({ id: 's.this train is the service from', opts: { delayStart: this.SHORT_DELAY } }, `station.e.${options.originStationCode}`)
+
+    await this.playAudioFiles(files, download)
+  }
+
+  async playPlatformAlterationAnnouncement(options: IPlatformAlterationAnnouncementOptions, download: boolean = false): Promise<void> {
+    const files: AudioItem[] = []
+
+    const chime = this.getChime(options.chime)
+    if (chime) files.push(chime)
+
+    files.push('w.attention please')
+    files.push({ id: 'w.this is a platform alteration', opts: { delayStart: 200 } })
+
+    files.push({ id: 's.the', opts: { delayStart: 400 } })
+
+    const getNewPlatFiles = (delayStart: number = 0) => {
+      const platFiles: AudioItem[] = []
+      const plat = parseInt(options.newPlatform)
+
+      if (options.newPlatform === '0') {
+        platFiles.push({ id: this.genericOptions.platform, opts: { delayStart } }, `m.0`, options.isDelayed ? `m.for the delayed` : `m.for the`)
+      } else if (plat <= 12 || ['a', 'b'].includes(options.newPlatform.toLowerCase())) {
+        platFiles.push({ id: `s.platform ${options.newPlatform} for the`, opts: { delayStart } })
+        if (options.isDelayed) platFiles.push('m.delayed')
+      } else if (plat >= 21) {
+        platFiles.push(
+          { id: this.genericOptions.platform, opts: { delayStart } },
+          `mins.m.${options.newPlatform}`,
+          options.isDelayed ? `m.for the delayed` : `m.for the`,
+        )
+      } else {
+        platFiles.push(
+          { id: this.genericOptions.platform, opts: { delayStart } },
+          `platform.s.${options.newPlatform}`,
+          options.isDelayed ? `m.for the delayed` : `m.for the`,
+        )
+      }
+
+      return platFiles
+    }
+
+    // if ('fromLive' in options) {
+    //   files.push(
+    //     ...(await this.getFilesForBasicTrainInfoLive(
+    //       options.hour,
+    //       options.min,
+    //       options.toc,
+    //       options.vias.map(l => l.map(v => v.crsCode)),
+    //       options.terminatingStationCode,
+    //     )),
+    //   )
+    // } else {
+    files.push(
+      ...(await this.getFilesForBasicTrainInfo(
+        options.hour,
+        options.min,
+        options.toc,
+        options.vias.map(s => s.crsCode),
+        options.terminatingStationCode,
+        options.callingAt || [],
+        true,
+      )),
+    )
+    // }
+
+    if (options.announceOldPlatform) {
+      files.push('m.originally due to depart from platform')
+
+      if (options.oldPlatform === '0') {
+        files.push(`m.0`)
+      } else if (parseInt(options.oldPlatform) >= 21) {
+        files.push(`mins.m.${options.oldPlatform}`)
+      } else {
+        files.push(`platform.m.${options.oldPlatform}`)
+      }
+    }
+
+    files.push('m.will now depart from platform')
+    if (options.newPlatform === '0') {
+      files.push(`m.0`)
+    } else if (parseInt(options.newPlatform) >= 21) {
+      files.push(`mins.e.${options.newPlatform}`)
+    } else {
+      files.push(`platform.e.${options.newPlatform}`)
+    }
+
+    files.push(
+      ...getNewPlatFiles(this.BEFORE_SECTION_DELAY),
+      ...(await this.getFilesForBasicTrainInfo(
+        options.hour,
+        options.min,
+        options.toc,
+        options.vias.map(s => s.crsCode),
+        options.terminatingStationCode,
+        options.callingAt || [],
+        false,
+        undefined,
+      )),
+    )
 
     await this.playAudioFiles(files, download)
   }
@@ -5402,6 +5512,115 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         },
       },
     } as CustomAnnouncementTab<keyof IFastTrainAnnouncementOptions>,
+    platformAlteration: {
+      name: 'Platform alteration',
+      component: CustomAnnouncementPane,
+      props: {
+        presets: this.announcementPresets.nextTrain,
+        playHandler: this.playPlatformAlterationAnnouncement.bind(this),
+        options: {
+          chime: {
+            name: 'Chime',
+            type: 'select',
+            default: this.DEFAULT_CHIME,
+            options: [
+              { title: '3 chimes', value: 'three' },
+              { title: '4 chimes', value: 'four' },
+              { title: 'No chime', value: 'none' },
+            ],
+          },
+          announceOldPlatform: {
+            name: 'Announce old platform?',
+            type: 'boolean',
+            default: false,
+          },
+          oldPlatform: {
+            name: 'Old platform',
+            default: this.PLATFORMS[6],
+            options: this.PLATFORMS.map(p => ({ title: `Platform ${p.toUpperCase()}`, value: p })),
+            type: 'select',
+            onlyShowWhen(activeState) {
+              return activeState.announceOldPlatform
+            },
+          },
+          newPlatform: {
+            name: 'New platform',
+            default: this.PLATFORMS[1],
+            options: this.PLATFORMS.map(p => ({ title: `Platform ${p.toUpperCase()}`, value: p })),
+            type: 'select',
+          },
+          hour: {
+            name: 'Hour',
+            default: '07',
+            options: [
+              '00 - midnight',
+              '01',
+              '02',
+              '03',
+              '04',
+              '05',
+              '06',
+              '07',
+              '08',
+              '09',
+              '10',
+              '11',
+              '12',
+              '13',
+              '14',
+              '15',
+              '16',
+              '17',
+              '18',
+              '19',
+              '20',
+              '21',
+              '22',
+              '23',
+            ].map(h => ({ title: h, value: h })),
+            type: 'select',
+          },
+          min: {
+            name: 'Minute',
+            default: '33',
+            options: ['00 - hundred', '00 - hundred-hours']
+              .concat(new Array(58).fill(0).map((_, i) => (i + 2).toString()))
+              .map(m => ({ title: m.toString().padStart(2, '0'), value: m.toString().padStart(2, '0') })),
+            type: 'select',
+          },
+          isDelayed: {
+            name: 'Delayed?',
+            default: false,
+            type: 'boolean',
+          },
+          toc: {
+            name: 'TOC',
+            default: '',
+            options: [{ title: 'None', value: '' }].concat(this.ALL_AVAILABLE_TOCS.map(m => ({ title: m, value: m.toLowerCase() }))),
+            type: 'select',
+          },
+          terminatingStationCode: {
+            name: 'Terminating station',
+            default: this.STATIONS[0],
+            options: this.STATIONS_AS_ITEMS,
+            type: 'select',
+          },
+          vias: {
+            name: '',
+            type: 'custom',
+            component: CallingAtSelector,
+            props: {
+              availableStations: [] as string[],
+              additionalOptions: this.STATIONS_AS_ITEMS,
+              selectLabel: 'Via points (non-splitting services only)',
+              placeholder: 'Add a via point…',
+              heading: 'Via... (optional)',
+            } as ICallingAtSelectorProps,
+            default: [],
+          },
+        },
+      },
+    } as CustomAnnouncementTab<keyof IPlatformAlterationAnnouncementOptions>,
     liveTrains: {
       name: 'Live trains',
       component: () => {

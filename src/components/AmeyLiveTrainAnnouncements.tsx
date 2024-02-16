@@ -189,7 +189,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
             }
 
             // Remove CRS from end of label
-            return [s.label.toLowerCase().replace(/ ([A-Z0-9]{3})$/i, ''), s.value]
+            return [s.label.toLowerCase().replace(/ \([A-Z0-9]{3}\)$/i, ''), s.value]
           })
           .filter(x => x) as [string, string][],
       ),
@@ -405,7 +405,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
           const guessViaCrs = guessViaPoint(via.trim().toLowerCase(), train.subsequentLocations)
 
           addLog(`Guessed via ${guessViaCrs} for ${via}`)
-          console.log(`[Live Trains] Guessed via ${guessViaCrs} for ${via}`)
+          console.log(`[Live Trains] Guessed via ${guessViaCrs} for ${via.trim()}`)
 
           if (guessViaCrs && systems[systemKey].STATIONS.includes(guessViaCrs)) {
             const point = train.subsequentLocations.find(p => p.crs === guessViaCrs)
@@ -496,7 +496,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
             const guessViaCrs = guessViaPoint(via.trim().toLowerCase(), train.subsequentLocations)
 
             addLog(`Guessed via ${guessViaCrs} for ${via}`)
-            console.log(`[Live Trains] Guessed via ${guessViaCrs} for ${via}`)
+            console.log(`[Live Trains] Guessed via ${guessViaCrs} for ${via.trim()}`)
 
             if (guessViaCrs && systems[systemKey].STATIONS.includes(guessViaCrs)) {
               const point = train.subsequentLocations.find(p => p.crs === guessViaCrs)
@@ -631,7 +631,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
           const guessViaCrs = guessViaPoint(via.trim().toLowerCase(), train.subsequentLocations)
 
           addLog(`Guessed via ${guessViaCrs} for ${via}`)
-          console.log(`[Live Trains] Guessed via ${guessViaCrs} for ${via}`)
+          console.log(`[Live Trains] Guessed via ${guessViaCrs} for ${via.trim()}`)
 
           if (guessViaCrs && systems[systemKey].STATIONS.includes(guessViaCrs)) {
             const point = train.subsequentLocations.find(p => p.crs === guessViaCrs)

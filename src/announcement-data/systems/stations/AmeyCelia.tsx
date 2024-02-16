@@ -115,6 +115,7 @@ export default class AmeyCelia extends AmeyPhil {
         'London Midland',
         'London Midland City',
         'London Midland Express',
+        'London Northwestern Railway',
         'London Overground',
         'London Transport Buses',
         'London Underground',
@@ -191,6 +192,8 @@ export default class AmeyCelia extends AmeyPhil {
         'Wales and West Weymouth Sand and Cycle Explorer',
         'West Anglia',
         'West Anglia Great Northern Railways',
+        'West Midlands Railway',
+        'West Midlands Trains',
         'White Rose',
         'Yorkshire Pullman',
       ],
@@ -210,17 +213,14 @@ export default class AmeyCelia extends AmeyPhil {
         'Island Line',
         'LTS Rail',
         'Merseyside Electrics',
-        // 'London North Western Railway',
         'Network Southeast',
         'North London Railways',
         'South Central Trains',
-        // 'South Western Railway',
         'steam special',
         'Wessex',
         'Virgin Trains the Sussex Scot',
         'West Anglia Great Northern Railway',
         'West Coast Railway Company',
-        // 'West Midlands Railway',
       ],
     }
   }
@@ -3164,14 +3164,14 @@ export default class AmeyCelia extends AmeyPhil {
         return this.ALL_AVAILABLE_TOCS.find(t => t?.toLowerCase() === tocName?.toLowerCase()) ?? ''
 
       // West Midlands Trains
-      // case 'LM':
-      //   // https://www.westmidlandsrailway.co.uk/media/3657/download?inline
-      //   const lnwr = ['EUS', 'CRE', 'BDM', 'SAA', 'MKC', 'TRI', 'LIV', 'NMP']
-      //   if (lnwr.includes(originCrs) || lnwr.includes(destinationCrs)) {
-      //     return 'london north western railway'
-      //   } else {
-      //     return 'west midlands railway'
-      //   }
+      case 'LM':
+        // https://www.westmidlandsrailway.co.uk/media/3657/download?inline
+        const lnwr = ['EUS', 'CRE', 'BDM', 'SAA', 'MKC', 'TRI', 'LIV', 'NMP']
+        if (lnwr.includes(originCrs) || lnwr.includes(destinationCrs)) {
+          return 'london northwestern railway'
+        } else {
+          return 'west midlands railway'
+        }
     }
   }
 

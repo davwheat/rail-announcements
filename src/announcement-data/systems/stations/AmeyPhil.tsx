@@ -584,7 +584,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         'First Transpennine',
         'intercity charter train',
         'international',
-        'London North Western Railway',
+        'London Northwestern Railway',
         'mainline',
         'North London Railways',
         'North Western Trains',
@@ -3617,7 +3617,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         // https://www.westmidlandsrailway.co.uk/media/3657/download?inline
         const lnwr = ['EUS', 'CRE', 'BDM', 'SAA', 'MKC', 'TRI', 'LIV', 'NMP']
         if (lnwr.includes(originCrs) || lnwr.includes(destinationCrs)) {
-          return 'london north western railway'
+          return 'london northwestern railway'
         } else {
           return 'west midlands railway'
         }

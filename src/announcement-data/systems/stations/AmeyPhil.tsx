@@ -3384,6 +3384,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       'WTO',
       'WTR',
       'WTS',
+      'WTT',
       'WTW',
       'WTY',
       'WVF',

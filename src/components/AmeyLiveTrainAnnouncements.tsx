@@ -188,7 +188,8 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
               return null
             }
 
-            return [s.label.toLowerCase(), s.value]
+            // Remove CRS from end of label
+            return [s.label.toLowerCase().replace(/ ([A-Z0-9]{3})$/i, ''), s.value]
           })
           .filter(x => x) as [string, string][],
       ),

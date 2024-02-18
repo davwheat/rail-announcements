@@ -62,7 +62,7 @@ function CustomButtonPane({ buttons, buttonSections }: ICustomButtonPaneProps) {
   return (
     <div
       css={{
-        padding: 16,
+        padding: 24,
         backgroundColor: '#eee',
       }}
     >

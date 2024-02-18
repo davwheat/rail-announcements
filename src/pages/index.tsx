@@ -1,6 +1,4 @@
-import MainSelector from '@components/MainSelector'
 import Layout from '@components/Layout'
-import AnnouncementPanel from '@components/AnnouncementPanel'
 import NavBar from '@components/NavBar'
 import Disclaimers from '@components/Disclaimers'
 
@@ -9,6 +7,31 @@ import MegaphoneIcon from 'mdi-react/MegaphoneOutlineIcon'
 
 import { Link, PageProps } from 'gatsby'
 import Breakpoints from '@data/breakpoints'
+import { Fragment } from 'react'
+import CardLink from '@components/CardLink'
+
+const Systems = [
+  {
+    groupTitle: 'Rolling stock',
+    systems: [
+      { title: 'Bombardier Xstar', url: '/rolling-stock/bombardier-xstar' },
+      { title: 'Class 700/707/717', url: '/rolling-stock/class-700-707-717' },
+      { title: 'LNER Azuma', url: '/rolling-stock/lner-azuma' },
+      { title: 'Transport for Wales TrainFX', url: '/rolling-stock/tfw-trainfx' },
+      { title: 'TfL Jubilee Line', url: '/rolling-stock/tfl/jubilee-line' },
+      { title: 'TfL Northern Line', url: '/rolling-stock/tfl/northern-line' },
+      { title: 'TfL Elizabeth Line', url: '/rolling-stock/tfl/elizabeth-line' },
+    ],
+  },
+  {
+    groupTitle: 'Stations',
+    systems: [
+      { title: 'Amey — Phil Sayer', url: '/stations/amey-phil-sayer' },
+      { title: 'Amey — Celia Drummond', url: '/stations/amey-celia-drummond' },
+      { title: 'ScotRail', url: '/stations/scotrail' },
+    ],
+  },
+]
 
 function IndexPage({ location }: PageProps) {
   return (
@@ -40,8 +63,6 @@ function IndexPage({ location }: PageProps) {
       <NavBar />
 
       <main>
-        <MainSelector />
-
         <aside
           css={{
             display: 'flex',
@@ -52,7 +73,7 @@ function IndexPage({ location }: PageProps) {
             padding: 24,
             background: 'hsl(204 50% 85% / 1)',
             gap: 16,
-            marginTop: 16,
+            marginTop: 32,
             [Breakpoints.upTo.tablet]: {
               flexDirection: 'column',
               justifyContent: 'center',
@@ -68,7 +89,23 @@ function IndexPage({ location }: PageProps) {
           </Link>
         </aside>
 
-        <AnnouncementPanel />
+        <div css={{ maxWidth: 800, margin: '64px auto' }}>
+          <h2 css={{ margin: '32px 12px', fontSize: '1.25em' }}>Select a system</h2>
+
+          {Systems.map(group => (
+            <Fragment key={group.groupTitle}>
+              <h3 css={{ margin: '24px 12px' }}>{group.groupTitle}</h3>
+
+              <ul css={{ padding: 0, margin: 0, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
+                {group.systems.map(system => (
+                  <li key={system.url}>
+                    <CardLink to={system.url} title={system.title} />
+                  </li>
+                ))}
+              </ul>
+            </Fragment>
+          ))}
+        </div>
       </main>
 
       <Disclaimers

@@ -1316,6 +1316,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       'CDD',
       'CDF',
       'CDI',
+      'CDN',
       'CDO',
       'CDQ',
       'CDR',

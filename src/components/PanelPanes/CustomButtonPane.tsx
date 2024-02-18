@@ -1,25 +1,25 @@
 import { useState } from 'react'
 
-import getActiveSystem from '@helpers/getActiveSystem'
 import useIsPlayingAnnouncement from '@helpers/useIsPlayingAnnouncement'
 import DownloadIcon from 'mdi-react/DownloadIcon'
 import PlayIcon from 'mdi-react/PlayIcon'
 
-import * as Sentry from '@sentry/react'
+import { addBreadcrumb } from '@sentry/react'
 
 import type { CustomAnnouncementButton } from '@announcement-data/AnnouncementSystem'
+import type TrainAnnouncementSystem from '@announcement-data/TrainAnnouncementSystem'
+import type StationAnnouncementSystem from '@announcement-data/StationAnnouncementSystem'
+import type AnnouncementSystem from '@announcement-data/AnnouncementSystem'
 export interface ICustomButtonPaneProps {
   buttons?: CustomAnnouncementButton[]
   buttonSections?: Record<string, CustomAnnouncementButton[]>
+  system: new () => TrainAnnouncementSystem | StationAnnouncementSystem | AnnouncementSystem
 }
 
-function CustomButtonPane({ buttons, buttonSections }: ICustomButtonPaneProps) {
+function CustomButtonPane({ system, buttons, buttonSections }: ICustomButtonPaneProps) {
   const [playError, setPlayError] = useState<Error | null>(null)
 
-  const AnnouncementSystem = getActiveSystem()
-  if (!AnnouncementSystem) return null
-
-  const AnnouncementSystemInstance = new AnnouncementSystem()
+  const AnnouncementSystemInstance = new system()
 
   const [isDisabled, setIsDisabled] = useIsPlayingAnnouncement()
 
@@ -28,7 +28,7 @@ function CustomButtonPane({ buttons, buttonSections }: ICustomButtonPaneProps) {
       if (isDisabled) return
       setIsDisabled(true)
 
-      Sentry.addBreadcrumb({
+      addBreadcrumb({
         category: `announcement.${type}`,
         data: {
           systemId: AnnouncementSystemInstance.ID,

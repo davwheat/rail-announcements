@@ -1,11 +1,10 @@
 import React, { useEffect } from 'react'
 
 import LoadingSpinner from '@components/LoadingSpinner'
-import getActiveSystem from '@helpers/getActiveSystem'
 import createOptionField from '@helpers/createOptionField'
 import useIsPlayingAnnouncement from '@helpers/useIsPlayingAnnouncement'
 
-import * as Sentry from '@sentry/gatsby'
+import { addBreadcrumb, captureException } from '@sentry/gatsby'
 
 import PlayIcon from 'mdi-react/PlayIcon'
 import ShareIcon from 'mdi-react/ShareVariantIcon'
@@ -29,6 +28,9 @@ import clsx from 'clsx'
 
 import type { OptionsExplanation } from '@announcement-data/AnnouncementSystem'
 import type { IPersonalPresetObject } from '@data/db'
+import type TrainAnnouncementSystem from '@announcement-data/TrainAnnouncementSystem'
+import type StationAnnouncementSystem from '@announcement-data/StationAnnouncementSystem'
+import type AnnouncementSystem from '@announcement-data/AnnouncementSystem'
 
 export interface ICustomAnnouncementPreset<State = Record<string, unknown>> {
   name: string
@@ -46,6 +48,7 @@ export interface ICustomAnnouncementPaneProps<OptionIds extends string> {
   savePersonalPreset: (preset: IPersonalPresetObject) => Promise<void>
   getPersonalPresets: (systemId: string, tabId: string) => Promise<IPersonalPresetObject[]>
   deletePersonalPreset: (systemId: string, tabId: string, presetId: string) => Promise<void>
+  system: new () => TrainAnnouncementSystem | StationAnnouncementSystem | AnnouncementSystem
 }
 
 function CustomAnnouncementPane({
@@ -53,6 +56,7 @@ function CustomAnnouncementPane({
   playHandler,
   name,
   presets,
+  system,
   systemId,
   tabId,
   isPersonalPresetsReady,
@@ -89,8 +93,7 @@ function CustomAnnouncementPane({
     }
   }, [optionsState])
 
-  const AnnouncementSystem = getActiveSystem()
-  const AnnouncementSystemInstance = new AnnouncementSystem!!()
+  const AnnouncementSystemInstance = new system()
 
   function createFieldUpdater(field: string): (value: any) => void {
     return (value): void => {
@@ -106,7 +109,7 @@ function CustomAnnouncementPane({
 
       setIsPlayingAnnouncement(true)
 
-      Sentry.addBreadcrumb({
+      addBreadcrumb({
         category: 'announcement.play',
         data: {
           systemId: AnnouncementSystemInstance.ID,
@@ -135,7 +138,7 @@ function CustomAnnouncementPane({
 
       setIsPlayingAnnouncement(true)
 
-      Sentry.addBreadcrumb({
+      addBreadcrumb({
         category: 'announcement.download',
         data: {
           systemId: AnnouncementSystemInstance.ID,
@@ -179,7 +182,7 @@ function CustomAnnouncementPane({
         enqueueSnackbar('Copied sharable announcement URL to clipboard', { variant: 'success' })
       })()
         .catch(e => {
-          Sentry.captureException(e)
+          captureException(e)
           enqueueSnackbar('An error occurred while trying to share this announcement', { variant: 'error' })
           console.error(e)
         })
@@ -198,7 +201,7 @@ function CustomAnnouncementPane({
         setPersonalPresets(presets)
       } catch (e) {
         console.error(e)
-        Sentry.captureException(e)
+        captureException(e)
       } finally {
         setLoadingPersonalPresets(false)
       }
@@ -232,7 +235,7 @@ function CustomAnnouncementPane({
         } catch (e) {
           console.error(e)
           enqueueSnackbar('An error occurred while trying to save this preset', { variant: 'error' })
-          Sentry.captureException(e)
+          captureException(e)
         }
       })()
     },
@@ -248,8 +251,6 @@ function CustomAnnouncementPane({
   if (playError) {
     throw playError
   }
-
-  if (!AnnouncementSystem) return null
 
   if (!optionsState) {
     return (

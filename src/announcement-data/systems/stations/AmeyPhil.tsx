@@ -1,3 +1,5 @@
+import React from 'react'
+
 import StationAnnouncementSystem from '@announcement-data/StationAnnouncementSystem'
 import CallingAtSelector, { CallingAtPoint, ICallingAtSelectorProps } from '@components/CallingAtSelector'
 import CustomAnnouncementPane, { ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
@@ -7,7 +9,6 @@ import crsToStationItemMapper, { stationItemCompleter } from '@helpers/crsToStat
 import { AudioItem, CustomAnnouncementButton, CustomAnnouncementTab } from '../../AnnouncementSystem'
 import DelayCodeMapping from './DarwinDelayCodes_Male1.json'
 
-import React from 'react'
 import { Link } from 'gatsby'
 
 export type ChimeType = 'three' | 'four' | 'none'

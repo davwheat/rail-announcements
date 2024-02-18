@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
 
 import Tabs from './Tabs'
-import getActiveSystem from '@helpers/getActiveSystem'
 import AnnouncementTabErrorBoundary from './AnnouncementTabErrorBoundary'
 
 import { useRecoilState } from 'recoil'
@@ -46,6 +45,7 @@ function AnnouncementPanel({ system }: IProps) {
                     {...opts.props}
                     name={opts.name}
                     tabId={id}
+                    system={AnnouncementSystem}
                     systemId={AnnouncementSystemInstance.ID}
                     isPersonalPresetsReady={isPresetsDbReady}
                     savePersonalPreset={savePersonalPreset}

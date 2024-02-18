@@ -3,12 +3,9 @@ import React from 'react'
 import StationAnnouncementSystem from '@announcement-data/StationAnnouncementSystem'
 import CallingAtSelector from '@components/CallingAtSelector'
 import CustomAnnouncementPane, { ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
-import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
 import { AllStationsTitleValueMap } from '@data/StationManipulators'
 import { AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
-import crsToStationItemMapper from '@helpers/crsToStationItemMapper'
-import AtosDisruptionAlternatives, { IAlternativeServicesState } from '@components/AtosDisruptionAlternatives'
-import { nanoid } from 'nanoid'
+import type { IAlternativeServicesState } from '@components/AtosDisruptionAlternatives'
 
 interface INextTrainAnnouncementOptions {
   platform: string

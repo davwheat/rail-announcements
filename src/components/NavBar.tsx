@@ -17,7 +17,7 @@ export default function NavBar() {
         },
       }}
     >
-      <Link to="/">Generator</Link>
+      <Link to="/">Home</Link>
       <Link to="/amey-live-train-announcements">Live announcements</Link>
       <Link to="/about">About</Link>
       <Link to="/changelog">Latest changes</Link>

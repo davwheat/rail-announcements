@@ -255,7 +255,7 @@ function CustomAnnouncementPane({
     return (
       <div
         css={{
-          padding: 16,
+          padding: 24,
           backgroundColor: '#eee',
         }}
       >
@@ -279,7 +279,7 @@ function CustomAnnouncementPane({
   return (
     <div
       css={{
-        padding: 16,
+        padding: 24,
         backgroundColor: '#eee',
       }}
     >

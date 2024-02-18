@@ -10,8 +10,16 @@ import { deletePersonalPreset, getPersonalPresets, initPersonalPresetsDb, savePe
 
 import * as Sentry from '@sentry/gatsby'
 
-function AnnouncementPanel() {
-  const AnnouncementSystem = getActiveSystem()
+import type TrainAnnouncementSystem from '@announcement-data/TrainAnnouncementSystem'
+import type StationAnnouncementSystem from '@announcement-data/StationAnnouncementSystem'
+import type AnnouncementSystem from '@announcement-data/AnnouncementSystem'
+
+interface IProps {
+  system: new () => TrainAnnouncementSystem | StationAnnouncementSystem | AnnouncementSystem
+}
+
+function AnnouncementPanel({ system }: IProps) {
+  const AnnouncementSystem = system
 
   const [isPresetsDbReady, setIsPresetsDbReady] = useState<boolean>(false)
 
@@ -105,16 +113,11 @@ function AnnouncementPanel() {
   if (!AnnouncementSystem) return null
 
   return (
-    <div
-      css={{
-        padding: 16,
-        backgroundColor: '#eee',
-        marginTop: 24,
-      }}
-    >
+    <div>
       <h2
         css={{
-          marginBottom: 16,
+          marginTop: 32,
+          marginBottom: 32,
         }}
       >
         {AnnouncementSystemInstance?.NAME}
@@ -122,20 +125,26 @@ function AnnouncementPanel() {
 
       <div
         css={{
-          marginBottom: 16,
+          marginTop: 24,
         }}
       >
-        {AnnouncementSystemInstance?.headerComponent()}
-      </div>
+        <div
+          css={{
+            marginBottom: 16,
+          }}
+        >
+          {AnnouncementSystemInstance?.headerComponent()}
+        </div>
 
-      <Tabs
-        key={AnnouncementSystemInstance?.ID}
-        selectedTabIndex={getSelectedTab()}
-        onTabChange={setSelectedTab}
-        tabNames={Object.values(customTabs).map(tab => tab.name)}
-        tabItems={TabPanels ?? []}
-        customKeyPrefix={AnnouncementSystemInstance?.ID}
-      />
+        <Tabs
+          key={AnnouncementSystemInstance?.ID}
+          selectedTabIndex={getSelectedTab()}
+          onTabChange={setSelectedTab}
+          tabNames={Object.values(customTabs).map(tab => tab.name)}
+          tabItems={TabPanels ?? []}
+          customKeyPrefix={AnnouncementSystemInstance?.ID}
+        />
+      </div>
     </div>
   )
 }

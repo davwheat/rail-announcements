@@ -395,6 +395,15 @@ const changelog: IChangelogVersion[] = [
     additions: ['[Amey Phil & Celia] Add Platform 0', '[Amey Live Trains] Recognise and announce request stops'],
     fixes: ['[Amey Phil & Celia] Corrected audio files used for fast train announcements'],
   },
+  {
+    date: '2024-02-16',
+    additions: ['[Amey Phil & Celia] Platform alteration announcements', '[Amey Celia] WMT/WMR/LNR TOC announcements'],
+  },
+  {
+    date: '2024-02-18',
+    additions: ['[Bombardier XStar] Add new station audio snippets'],
+    otherChanges: ['Redesign system selection', 'Move systems to individual pages'],
+  },
 ]
 
 export default changelog

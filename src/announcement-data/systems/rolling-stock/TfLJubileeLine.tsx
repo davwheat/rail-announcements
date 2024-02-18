@@ -1,6 +1,6 @@
 import CustomAnnouncementPane, { ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
 import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
-import AnnouncementSystem, { AudioItem, AudioItemObject, CustomAnnouncementTab } from '../../AnnouncementSystem'
+import AnnouncementSystem, { AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
 
 interface IStationDataItem {
   name: string

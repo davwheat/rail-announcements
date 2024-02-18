@@ -19,8 +19,12 @@ interface IProps {
 }
 
 export default function SystemPageTemplate({ location, system }: IProps) {
+  console.log('SYSTEM', system)
+
+  const s = new system()
+
   return (
-    <Layout location={location}>
+    <Layout location={location} title={s.NAME}>
       <header>
         <h1
           css={{

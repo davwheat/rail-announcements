@@ -21,6 +21,12 @@ const Tabs = React.memo(({ tabNames, tabItems, customKeyPrefix = '', selectedTab
       onChange={(index: number) => {
         onTabChange?.(index)
       }}
+      css={{
+        // Fix SSR issue showing all tabs by default
+        '& [data-reach-tab-panel][tabindex="-1"]': {
+          display: 'none',
+        },
+      }}
     >
       <TabList
         css={{

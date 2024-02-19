@@ -11,7 +11,7 @@ module.exports = {
     author: 'David Wheatley',
   },
   flags: {
-    DEV_SSR: true
+    DEV_SSR: true,
   },
   plugins: [
     ...prodPlugins,

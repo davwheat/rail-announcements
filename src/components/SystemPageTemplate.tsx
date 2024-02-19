@@ -58,6 +58,18 @@ export default function SystemPageTemplate({ location, system }: IProps) {
           </span>
         </Link>
 
+        <noscript>
+          <div css={{ marginTop: 24, padding: '12px 16px', borderLeft: '8px solid #ca2d25', background: '#ca2d2511' }}>
+            <p>
+              <strong>JavaScript is disabled</strong>
+            </p>
+            <p css={{ marginBottom: 0 }}>
+              This website requires JavaScript to be enabled in order to work. Please enable JavaScript in your browser settings and refresh the
+              page.
+            </p>
+          </div>
+        </noscript>
+
         <AnnouncementPanel system={system} />
       </main>
 

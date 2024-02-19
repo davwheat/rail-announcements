@@ -389,7 +389,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             toc: '',
             terminatingStationCode: 'ABW',
             vias: ['CWX'].map(crsToStationItemMapper),
-            callingAt: ['BDS', 'TCR', 'ZFD', 'LST', 'ZLW', 'ZCW', 'CUS', 'WWC'].map(crsToStationItemMapper),
+            callingAt: ['BDS', 'TCR', 'ZFD', 'LST', 'ZLW', 'CWX', 'CUS', 'WWC'].map(crsToStationItemMapper),
             coaches: '9 coaches',
           },
         },

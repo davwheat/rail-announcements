@@ -19,8 +19,6 @@ interface IProps {
 }
 
 export default function SystemPageTemplate({ location, system }: IProps) {
-  console.log('SYSTEM', system)
-
   const s = new system()
 
   return (

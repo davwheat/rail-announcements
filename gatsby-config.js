@@ -10,6 +10,9 @@ module.exports = {
     description: 'Generate various station and on-train announcements for the UK rail network using raw audio recordings.',
     author: 'David Wheatley',
   },
+  flags: {
+    DEV_SSR: true
+  },
   plugins: [
     ...prodPlugins,
     `gatsby-plugin-image`,

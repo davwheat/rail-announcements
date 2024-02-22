@@ -63,7 +63,7 @@ export interface LiveTrainAnnouncementsProps<SystemKeys extends string> {
   standingTrainHandler: Record<SystemKeys, (options: IStandingTrainAnnouncementOptions) => Promise<void>>
 }
 
-type DisplayType = 'gtr-new' | 'tfwm-lcd'
+type DisplayType = 'infotec-landscape-dmi' | 'blackbox-landscape-lcd'
 
 const MindTheGapStations: Record<string, string[]> = {
   WVF: ['1', '2'],
@@ -71,8 +71,8 @@ const MindTheGapStations: Record<string, string[]> = {
 }
 
 const DisplayNames: Record<DisplayType, string> = {
-  'gtr-new': 'Infotec dot matrix (GTR-style)',
-  'tfwm-lcd': 'WMR/LNWR LCD',
+  'infotec-landscape-dmi': 'Infotec landscape DMI',
+  'blackbox-landscape-lcd': 'Blackbox landscape LCD',
 }
 
 export function LiveTrainAnnouncements<SystemKeys extends string>({
@@ -157,7 +157,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
     },
   )
 
-  const [displayType, setDisplayType] = useState<DisplayType>('gtr-new')
+  const [displayType, setDisplayType] = useState<DisplayType>('infotec-landscape-dmi')
   const [isFullscreen, setFullscreen] = useState(false)
   const [selectedCrs, setSelectedCrs] = useState('ECR')
   const [hasEnabledFeature, setHasEnabledFeature] = useState(false)
@@ -1051,7 +1051,6 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
   ])
 
   const iframeQueryParams = new URLSearchParams({
-    type: displayType,
     station: selectedCrs,
     noBg: '1',
     hideSettings: '1',
@@ -1466,7 +1465,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
                   height: '100%',
                 },
               }}
-              src={`https://raildotmatrix.co.uk/board/?${iframeQueryParams}`}
+              src={`https://raildotmatrix.co.uk/board/${displayType}?${iframeQueryParams}`}
             />
           </FullScreen>
 

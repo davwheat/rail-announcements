@@ -1054,6 +1054,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
     station: selectedCrs,
     noBg: '1',
     hideSettings: '1',
+    'from-railannouncements.co.uk': '1',
   })
 
   if (useLegacyTocNames) {

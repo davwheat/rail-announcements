@@ -1632,16 +1632,16 @@
     "m": "disruption-reason.m.additional safety duties being carried out on board this train"
   },
   "827": {
-    "e": "disruption-reason.e.additional safety duties being carried out on board this train",
-    "m": "disruption-reason.m.additional safety duties being carried out on board this train"
+    "e": "disruption-reason.e.an incident on the line",
+    "m": "disruption-reason.m.an incident on the line"
   },
   "828": {
-    "e": "disruption-reason.e.additional safety duties being carried out on board this train",
-    "m": "disruption-reason.m.additional safety duties being carried out on board this train"
+    "e": "disruption-reason.e.an incident on the line",
+    "m": "disruption-reason.m.an incident on the line"
   },
   "829": {
-    "e": "disruption-reason.e.additional safety duties being carried out on board this train",
-    "m": "disruption-reason.m.additional safety duties being carried out on board this train"
+    "e": "disruption-reason.e.an incident on the line",
+    "m": "disruption-reason.m.an incident on the line"
   },
   "830": {
     "e": "disruption-reason.e.a technical fault on the service",

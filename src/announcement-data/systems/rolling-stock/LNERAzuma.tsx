@@ -89,6 +89,7 @@ export default class LnerAzuma extends TrainAnnouncementSystem {
     GRA: ['station.SKG'],
     DON: ['station.CLE', 'station.RMC', 'station.SHF', 'and', 'station.GMB'],
     YRK: ['station.HGT', 'station.MLT', 'and', 'station.SCA'],
+    DAR: ['station.BIA', 'station.MBR', 'station.RCC', 'and', 'station.SLB'],
   }
 
   readonly ALL_STATIONS = [

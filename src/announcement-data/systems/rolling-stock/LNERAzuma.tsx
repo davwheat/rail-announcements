@@ -87,6 +87,8 @@ export default class LnerAzuma extends TrainAnnouncementSystem {
   readonly STATION_INFO: Record<string, AudioItem[]> = {
     NCL: ['station.CAR', 'station.HEX', 'and', 'tyne and wear metro'],
     GRA: ['station.SKG'],
+    DON: ['station.CLE', 'station.RMC', 'station.SHF', 'and', 'station.GMB'],
+    YRK: ['station.HGT', 'station.MLT', 'and', 'station.SCA'],
   }
 
   readonly ALL_STATIONS = [

@@ -135,6 +135,10 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
     },
     Object.fromEntries(Object.entries(supportedPlatforms).map(([platform, systemKeys]) => [platform, systemKeys[0]] as [string, SystemKeys])),
     init => {
+      if (typeof window === 'undefined') {
+        return init
+      }
+
       try {
         const stored = localStorage.getItem('amey.live-trains.system-per-platform')
 

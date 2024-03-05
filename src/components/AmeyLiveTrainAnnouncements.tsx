@@ -1294,7 +1294,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
               [Breakpoints.downTo.desktopLarge]: {
                 gridTemplateColumns: '1fr 1fr',
 
-                '& fieldset:nth-child(4n - 1), & fieldset:nth-child(4n)': {
+                '& fieldset:nth-of-type(4n - 1), & fieldset:nth-of-type(4n)': {
                   background: '#eee',
                 },
               },
@@ -1302,7 +1302,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
               [Breakpoints.upTo.desktopLarge]: {
                 gridTemplateColumns: 'minmax(0, 1fr)',
 
-                '& fieldset:nth-child(even)': {
+                '& fieldset:nth-of-type(even)': {
                   background: '#eee',
                 },
               },

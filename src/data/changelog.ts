@@ -404,6 +404,14 @@ const changelog: IChangelogVersion[] = [
     additions: ['[Bombardier XStar] Add new station audio snippets'],
     otherChanges: ['Redesign system selection', 'Move systems to individual pages'],
   },
+  {
+    date: '2024-03-04',
+    additions: ['[LNER Azuma] Additional connecting services announcements'],
+  },
+  {
+    date: '2024-03-05',
+    fixes: ['Saved announcements broken since the website redesign'],
+  },
 ]
 
 export default changelog

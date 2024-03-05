@@ -2,6 +2,7 @@ import Layout from '@components/Layout'
 import AnnouncementPanel from '@components/AnnouncementPanel'
 import NavBar from '@components/NavBar'
 import Disclaimers from '@components/Disclaimers'
+import SavedAnnouncementLoader from '@components/SavedAnnouncementLoader'
 
 import RailSymbol from '@assets/rail-symbol-2/white-on-red-inset.svg'
 
@@ -23,6 +24,8 @@ export default function SystemPageTemplate({ location, system }: IProps) {
 
   return (
     <Layout location={location} title={s.NAME}>
+      <SavedAnnouncementLoader />
+
       <header>
         <h1
           css={{

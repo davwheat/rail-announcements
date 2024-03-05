@@ -1,6 +1,8 @@
 import Layout from '@components/Layout'
 import NavBar from '@components/NavBar'
 import Disclaimers from '@components/Disclaimers'
+import CardLink from '@components/CardLink'
+import SavedAnnouncementLoader from '@components/SavedAnnouncementLoader'
 
 import RailSymbol from '@assets/rail-symbol-2/white-on-red-inset.svg'
 import MegaphoneIcon from 'mdi-react/MegaphoneOutlineIcon'
@@ -8,8 +10,8 @@ import MegaphoneIcon from 'mdi-react/MegaphoneOutlineIcon'
 import { Link, PageProps } from 'gatsby'
 import Breakpoints from '@data/breakpoints'
 import { Fragment } from 'react'
-import CardLink from '@components/CardLink'
 
+// Remember to set up in `useSavedAnnouncementApiLoader`!
 const Systems = [
   {
     groupTitle: 'Rolling stock',
@@ -36,6 +38,8 @@ const Systems = [
 function IndexPage({ location }: PageProps) {
   return (
     <Layout location={location}>
+      <SavedAnnouncementLoader />
+
       <header>
         <h1
           css={{

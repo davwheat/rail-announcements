@@ -1,15 +1,8 @@
-/**
- * Implement Gatsby's Node APIs in this file.
- *
- * See: https://www.gatsbyjs.org/docs/node-apis/
- */
+import path from 'path'
+import { AllAnnouncementSystems } from './src/announcement-data/AllSystems'
+import { GatsbyNode } from 'gatsby'
 
-const path = require('path')
-
-/**
- * Customise webpack config.
- */
-exports.onCreateWebpackConfig = ({ stage, rules, loaders, plugins, actions }) => {
+export const onCreateWebpackConfig: GatsbyNode['onCreateWebpackConfig'] = ({ stage, rules, loaders, plugins, actions }) => {
   if (stage === 'build-html' || stage === 'develop-html') {
     actions.setWebpackConfig({
       module: {

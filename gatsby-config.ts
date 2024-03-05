@@ -1,9 +1,11 @@
+import type { GatsbyConfig } from 'gatsby'
+
 const __IS_DEV__ = process.env.NODE_ENV !== 'production'
 
 // These plugins will only be used in production builds
 const prodPlugins = !__IS_DEV__ ? [] : []
 
-module.exports = {
+const config: GatsbyConfig = {
   siteMetadata: {
     siteUrl: 'https://rail-announcements.davwheat.dev',
     title: 'UK Rail Announcement Generator',
@@ -56,3 +58,5 @@ module.exports = {
     },
   ],
 }
+
+export default config

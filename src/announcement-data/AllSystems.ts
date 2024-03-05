@@ -17,9 +17,9 @@ import TrainAnnouncementSystem from './TrainAnnouncementSystem'
 import StationAnnouncementSystem from './StationAnnouncementSystem'
 import AnnouncementSystem from './AnnouncementSystem'
 
-export const AllTrainAnnouncementSystems: { new (): TrainAnnouncementSystem }[] = [ThameslinkClass700, BombardierXstar, TfWTrainFx, LnerAzuma]
+export const AllTrainAnnouncementSystems: (typeof TrainAnnouncementSystem)[] = [ThameslinkClass700, BombardierXstar, TfWTrainFx, LnerAzuma]
 
-export const AllStationAnnouncementSystems: { new (): StationAnnouncementSystem }[] = [
+export const AllStationAnnouncementSystems: (typeof StationAnnouncementSystem)[] = [
   // AtosMatt,
   // AtosAnne,
   AmeyPhil,
@@ -27,9 +27,9 @@ export const AllStationAnnouncementSystems: { new (): StationAnnouncementSystem 
   ScotRail,
 ]
 
-export const AllOtherAnnouncementSystems: { new (): AnnouncementSystem }[] = [TfLJubileeLine, TfLNorthernLine, TfLElizabethLine]
+export const AllOtherAnnouncementSystems: (typeof AnnouncementSystem)[] = [TfLJubileeLine, TfLNorthernLine, TfLElizabethLine]
 
-export const AllAnnouncementSystems: { new (): TrainAnnouncementSystem | StationAnnouncementSystem | AnnouncementSystem }[] = [
+export const AllAnnouncementSystems: (typeof AnnouncementSystem)[] = [
   ...AllStationAnnouncementSystems,
   ...AllTrainAnnouncementSystems,
   ...AllOtherAnnouncementSystems,

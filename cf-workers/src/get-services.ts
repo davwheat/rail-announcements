@@ -269,8 +269,11 @@ async function processService(service: TrainService): Promise<void> {
     for (const a in location.associations) {
       const association: Association = location.associations[a as any]
 
-      // Joins/Divides only
       if (association.category === AssociationCategory.Divide) {
+        // Divides only
+        association.service = await getServiceByRid(association.rid)
+      } else if (association.category === AssociationCategory.LinkedTo && association.trainid === '0B00') {
+        // Fine. Or continuation bus services
         association.service = await getServiceByRid(association.rid)
       }
     }

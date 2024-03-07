@@ -14,6 +14,10 @@ export interface CallingAtPoint {
   splitType?: 'none' | 'splits' | 'splitTerminates'
   splitForm?: string
   splitCallingPoints?: CallingAtPoint[]
+  /**
+   * Only used for live announcements at the moment
+   */
+  continuesAsRrbAfterHere?: boolean
 }
 
 export interface ICallingAtSelectorProps {

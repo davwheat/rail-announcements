@@ -13,6 +13,7 @@ import {
   type StaffServicesResponse,
   type TimingLocation,
   type EndPointLocation,
+  AssociatedServiceDetail,
 } from '../../cf-workers/src/get-services'
 
 import './AmeyLiveTrainAnnouncements.css'
@@ -45,6 +46,160 @@ function pluraliseStrings(...strings: string[]): string {
   const last = strings.pop()!!
 
   return `${strings.join(', ')} and ${last}`
+}
+
+function getCallingPoints(
+  train: TrainService,
+  stations: string[],
+  getStation: (location: TimingLocation | EndPointLocation) => string,
+): CallingAtPoint[] {
+  const callingPoints = train.subsequentLocations.filter(s => {
+    if (!s.crs) return false
+    if (s.isCancelled || s.isOperational || s.isPass) return false
+    if (!stations.includes(s.crs)) return false
+    return true
+  })
+
+  if (train.destination[0].tiploc !== callingPoints[callingPoints.length - 1]?.tiploc) {
+    // False destination -- need to trim calling points
+    const lastRealCallingPoint = callingPoints.findIndex(s => s.tiploc === train.destination[0].tiploc)
+
+    console.log(`Fake destination detected. Last real calling point index is ${lastRealCallingPoint}`)
+
+    if (lastRealCallingPoint === -1) {
+      console.log("-1 doesn't seem right, so we'll ignore it.")
+    } else {
+      for (let i = lastRealCallingPoint; i < callingPoints.length; i++) delete callingPoints[i]
+    }
+  }
+
+  let busContinuationService: AssociatedServiceDetail | null = null
+
+  const callingAt = callingPoints
+    .map((p, i, arr): CallingAtPoint | null => {
+      console.log(`[${i} of ${arr.length - 1}]: ${p.crs} - ${p.tiploc}`)
+
+      // Hide last station if it's the train destination
+      if (i === arr.length - 1 && p.crs === train.destination[0].crs) return null
+
+      const stop: CallingAtPoint = {
+        crsCode: getStation(p),
+        name: '',
+        randomId: '',
+        requestStop: p.activities === 'R',
+      }
+
+      p.associations
+        ?.filter(a => a.category === AssociationCategory.Divide)
+        .forEach(a => {
+          // We have a dividing service
+          stop.splitType = 'splits'
+          const len = a.service!!.locations[0].length
+          stop.splitForm = `rear.${len}`
+          stop.splitCallingPoints = a
+            .service!!.locations.filter(s => {
+              if (!s.crs) return false
+              if (s.isCancelled || s.isOperational || s.isPass) return false
+              if (!stations.includes(s.crs)) return false
+              return true
+            })
+            .map(l => ({ crsCode: l.crs!!, name: l.locationName, randomId: '', requestStop: p.activities === 'R' }))
+        })
+
+      if (i === callingPoints.length - 1 && p.associations?.some(a => a.category === AssociationCategory.LinkedTo && a.trainid === '0B00')) {
+        // Bus continuation. These are used by some TOCs for engineering work.
+        const assoc = p.associations.find(a => a.category === AssociationCategory.LinkedTo && a.trainid === '0B00')
+
+        if (assoc?.service) {
+          stop.continuesAsRrbAfterHere = true
+          busContinuationService = assoc.service
+        }
+      }
+
+      return stop
+    })
+    .filter(Boolean) as CallingAtPoint[]
+
+  if (busContinuationService) {
+    const busCalls = (busContinuationService as AssociatedServiceDetail).locations
+      .filter(p => !p.isCancelled && !p.isPass && !p.isOperational)
+      .map((p, i, arr) => {
+        // Hide last station if it's the train destination
+        if (i === arr.length - 1 && p.crs === train.destination[0].crs) return null
+
+        const stop: CallingAtPoint = {
+          crsCode: getStation(p),
+          name: '',
+          randomId: '',
+          requestStop: p.activities === 'R',
+        }
+
+        return stop
+      })
+      .filter(Boolean) as CallingAtPoint[]
+
+    if (busCalls[0]?.crsCode === callingAt[callingAt.length - 1]?.crsCode) {
+      busCalls.shift()
+    }
+
+    callingAt.push(...busCalls)
+  }
+
+  return callingAt
+}
+
+function guessViaPoint(via: string, stops: (TimingLocation | EndPointLocation)[], stationNameToCrsMap: Record<string, string>): string | null {
+  if (stationNameToCrsMap[via]) return stationNameToCrsMap[via]
+
+  // Manual entries
+  switch (via) {
+    case 'cobham':
+      return 'CSD'
+
+    case 'worcester':
+      const stopCrs = stops.find(s => s.crs === 'WOF' || s.crs === 'WOS' || s.crs === 'WOP')
+      return stopCrs?.crs ?? null
+
+    case 'university':
+      return 'UNI'
+  }
+
+  return null
+}
+
+function getViaPoints(
+  train: TrainService,
+  stations: string[],
+  stationNameToCrsMap: Record<string, string>,
+  getStation: (location: TimingLocation | EndPointLocation) => string,
+): CallingAtPoint[][] {
+  const vias: CallingAtPoint[][] = []
+
+  ;(train.currentDestinations ?? train.destination).forEach((d, i) => {
+    vias[i] ||= []
+
+    if (d.via) {
+      const v: string = d.via.startsWith('via ') ? d.via.slice(4) : d.via
+
+      v.split(/(&|and)/).forEach(via => {
+        const guessViaCrs = guessViaPoint(via.trim().toLowerCase(), train.subsequentLocations, stationNameToCrsMap)
+
+        console.log(`[Live Trains] Guessed via ${guessViaCrs} for ${via.trim()}`)
+
+        if (guessViaCrs && stations.includes(guessViaCrs)) {
+          const point = train.subsequentLocations.find(p => p.crs === guessViaCrs)
+
+          vias[i].push({
+            crsCode: point ? getStation(point) : guessViaCrs,
+            name: '',
+            randomId: '',
+          })
+        }
+      })
+    }
+  })
+
+  return vias
 }
 
 enum AnnouncementType {
@@ -307,25 +462,6 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
     [systems],
   )
 
-  const guessViaPoint = useCallback(function guessViaPoint(via: string, stops: (TimingLocation | EndPointLocation)[]): string | null {
-    if (stationNameToCrsMap[via]) return stationNameToCrsMap[via]
-
-    // Manual entries
-    switch (via) {
-      case 'cobham':
-        return 'CSD'
-
-      case 'worcester':
-        const stopCrs = stops.find(s => s.crs === 'WOF' || s.crs === 'WOS' || s.crs === 'WOP')
-        return stopCrs?.crs ?? null
-
-      case 'university':
-        return 'UNI'
-    }
-
-    return null
-  }, [])
-
   const announceStandingTrain = useCallback(
     async function announceStandingTrain(train: TrainService, abortController: AbortController, systemKey: SystemKeys) {
       console.log(train)
@@ -349,79 +485,8 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         useLegacyTocNames,
       )
 
-      const callingPoints = train.subsequentLocations.filter(s => {
-        if (!s.crs) return false
-        if (s.isCancelled || s.isOperational || s.isPass) return false
-        if (!systems[systemKey].STATIONS.includes(s.crs)) return false
-        return true
-      })
-
-      if (train.destination[0].tiploc !== callingPoints[callingPoints.length - 1]?.tiploc) {
-        // False destination -- need to trim calling points
-        const lastRealCallingPoint = callingPoints.findIndex(s => s.tiploc === train.destination[0].tiploc)
-
-        console.log(`Fake destination detected. Last real calling point index is ${lastRealCallingPoint}`)
-
-        for (let i = lastRealCallingPoint; i < callingPoints.length; i++) delete callingPoints[i]
-      }
-
-      const callingAt = callingPoints
-        .map((p, i, arr): CallingAtPoint | null => {
-          console.log(`[${i} of ${arr.length - 1}]: ${p.crs} - ${p.tiploc}`)
-
-          // Hide last station if it's the train destination
-          if (i === arr.length - 1 && p.crs === train.destination[0].crs) return null
-
-          const stop: CallingAtPoint = {
-            crsCode: getStation(p, systemKey),
-            name: '',
-            randomId: '',
-            requestStop: p.activities === 'R',
-          }
-
-          p.associations
-            ?.filter(a => a.category === AssociationCategory.Divide)
-            .forEach(a => {
-              // We have a dividing service
-              stop.splitType = 'splits'
-              const len = a.service!!.locations[0].length
-              stop.splitForm = `rear.${len}`
-              stop.splitCallingPoints = a
-                .service!!.locations.filter(s => {
-                  if (!s.crs) return false
-                  if (s.isCancelled || s.isOperational || s.isPass) return false
-                  if (!systems[systemKey].STATIONS.includes(s.crs)) return false
-                  return true
-                })
-                .map(l => ({ crsCode: l.crs!!, name: l.locationName, randomId: '', requestStop: p.activities === 'R' }))
-            })
-
-          return stop
-        })
-        .filter(x => !!x) as CallingAtPoint[]
-
-      const vias: CallingAtPoint[] = []
-
-      if (train.destination[0].via) {
-        const v: string = train.destination[0].via.startsWith('via ') ? train.destination[0].via.slice(4) : train.destination[0].via
-
-        v.split(/(&|and)/).forEach(via => {
-          const guessViaCrs = guessViaPoint(via.trim().toLowerCase(), train.subsequentLocations)
-
-          addLog(`Guessed via ${guessViaCrs} for ${via}`)
-          console.log(`[Live Trains] Guessed via ${guessViaCrs} for ${via.trim()}`)
-
-          if (guessViaCrs && systems[systemKey].STATIONS.includes(guessViaCrs)) {
-            const point = train.subsequentLocations.find(p => p.crs === guessViaCrs)
-
-            vias.push({
-              crsCode: point ? getStation(point, systemKey) : guessViaCrs,
-              name: '',
-              randomId: '',
-            })
-          }
-        })
-      }
+      const callingAt = getCallingPoints(train, systems[systemKey].STATIONS, loc => getStation(loc, systemKey))
+      const [vias] = getViaPoints(train, systems[systemKey].STATIONS, stationNameToCrsMap, loc => getStation(loc, systemKey))
 
       const mindTheGap = !!MindTheGapStations[selectedCrs]?.includes(train.platform)
 
@@ -488,32 +553,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         useLegacyTocNames,
       )
 
-      const vias: CallingAtPoint[][] = []
-
-      ;(train.currentDestinations ?? train.destination).forEach((d, i) => {
-        vias[i] ||= []
-
-        if (d.via) {
-          const v: string = d.via.startsWith('via ') ? d.via.slice(4) : d.via
-
-          v.split(/(&|and)/).forEach(via => {
-            const guessViaCrs = guessViaPoint(via.trim().toLowerCase(), train.subsequentLocations)
-
-            addLog(`Guessed via ${guessViaCrs} for ${via}`)
-            console.log(`[Live Trains] Guessed via ${guessViaCrs} for ${via.trim()}`)
-
-            if (guessViaCrs && systems[systemKey].STATIONS.includes(guessViaCrs)) {
-              const point = train.subsequentLocations.find(p => p.crs === guessViaCrs)
-
-              vias[i].push({
-                crsCode: point ? getStation(point, systemKey) : guessViaCrs,
-                name: '',
-                randomId: '',
-              })
-            }
-          })
-        }
-      })
+      const vias = getViaPoints(train, systems[systemKey].STATIONS, stationNameToCrsMap, loc => getStation(loc, systemKey))
 
       const options: ILiveTrainApproachingAnnouncementOptions = {
         chime: systems[systemKey].DEFAULT_CHIME,
@@ -575,79 +615,8 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         useLegacyTocNames,
       )
 
-      const callingPoints = train.subsequentLocations.filter(s => {
-        if (!s.crs) return false
-        if (s.isCancelled || s.isOperational || s.isPass) return false
-        if (!systems[systemKey].STATIONS.includes(s.crs)) return false
-        return true
-      })
-
-      if (train.destination[0].tiploc !== callingPoints[callingPoints.length - 1]?.tiploc) {
-        // False destination -- need to trim calling points
-        const lastRealCallingPoint = callingPoints.findIndex(s => s.tiploc === train.destination[0].tiploc)
-
-        console.log(`Fake destination detected. Last real calling point index is ${lastRealCallingPoint}`)
-
-        for (let i = lastRealCallingPoint; i < callingPoints.length; i++) delete callingPoints[i]
-      }
-
-      const callingAt = callingPoints
-        .map((p, i, arr): CallingAtPoint | null => {
-          console.log(`[${i} of ${arr.length - 1}]: ${p.crs} - ${p.tiploc}`)
-
-          // Hide last station if it's the train destination
-          if (i === arr.length - 1 && p.crs === train.destination[0].crs) return null
-
-          const stop: CallingAtPoint = {
-            crsCode: getStation(p, systemKey),
-            name: '',
-            randomId: '',
-            requestStop: p.activities === 'R',
-          }
-
-          p.associations
-            ?.filter(a => a.category === AssociationCategory.Divide)
-            .forEach(a => {
-              // We have a dividing service
-              stop.splitType = 'splits'
-              const len = a.service!!.locations[0].length || 0
-              stop.splitForm = `rear.${len}`
-              stop.splitCallingPoints = a
-                .service!!.locations.filter(s => {
-                  if (!s.crs) return false
-                  if (s.isCancelled || s.isOperational || s.isPass) return false
-                  if (!systems[systemKey].STATIONS.includes(s.crs)) return false
-                  return true
-                })
-                .map(l => ({ crsCode: l.crs!!, name: l.locationName, randomId: '', requestStop: p.activities === 'R' }))
-            })
-
-          return stop
-        })
-        .filter(x => !!x) as CallingAtPoint[]
-
-      const vias: CallingAtPoint[] = []
-
-      if (train.destination[0].via) {
-        const v: string = train.destination[0].via.startsWith('via ') ? train.destination[0].via.slice(4) : train.destination[0].via
-
-        v.split(/(&|and)/).forEach(via => {
-          const guessViaCrs = guessViaPoint(via.trim().toLowerCase(), train.subsequentLocations)
-
-          addLog(`Guessed via ${guessViaCrs} for ${via}`)
-          console.log(`[Live Trains] Guessed via ${guessViaCrs} for ${via.trim()}`)
-
-          if (guessViaCrs && systems[systemKey].STATIONS.includes(guessViaCrs)) {
-            const point = train.subsequentLocations.find(p => p.crs === guessViaCrs)
-
-            vias.push({
-              crsCode: point ? getStation(point, systemKey) : guessViaCrs,
-              name: '',
-              randomId: '',
-            })
-          }
-        })
-      }
+      const callingAt = getCallingPoints(train, systems[systemKey].STATIONS, loc => getStation(loc, systemKey))
+      const [vias] = getViaPoints(train, systems[systemKey].STATIONS, stationNameToCrsMap, loc => getStation(loc, systemKey))
 
       const options: INextTrainAnnouncementOptions = {
         chime: systems[systemKey].DEFAULT_CHIME,
@@ -707,25 +676,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         useLegacyTocNames,
       )
 
-      const vias: CallingAtPoint[] = []
-
-      if (train.destination[0].via) {
-        const v: string = train.destination[0].via.startsWith('via ') ? train.destination[0].via.slice(4) : train.destination[0].via
-
-        v.split(/(&|and)/).forEach(via => {
-          const guessViaCrs = stationNameToCrsMap[via.trim().toLowerCase()]
-
-          console.log(`[Live Trains] Guessed via ${guessViaCrs} for ${via}`)
-
-          if (guessViaCrs) {
-            vias.push({
-              crsCode: guessViaCrs,
-              name: '',
-              randomId: '',
-            })
-          }
-        })
-      }
+      const [vias] = getViaPoints(train, systems[systemKey].STATIONS, stationNameToCrsMap, loc => getStation(loc, systemKey))
 
       let delayReason: string[] | null = null
 

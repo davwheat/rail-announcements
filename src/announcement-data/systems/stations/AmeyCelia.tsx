@@ -26,6 +26,7 @@ export default class AmeyCelia extends AmeyPhil {
     afterCallingAtDelay: 0,
     betweenStopsDelay: 220,
     aroundAndDelay: 0,
+    rrbTerminateAudio: 'e.where the train will terminate due to engineering work-2',
   }
 
   protected readonly standingOptions = {

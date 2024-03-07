@@ -125,6 +125,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     afterCallingAtDelay: 0,
     betweenStopsDelay: 320,
     aroundAndDelay: 100,
+    rrbTerminateAudio: 'e.where the train will then terminate due to engineering work',
   }
 
   protected readonly requestStopOptions = {
@@ -4123,6 +4124,49 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     travelInAnyPartIds: ['e.may travel in any part of the train'],
   }
 
+  private async getCallingPointsWithBusContinuance(callingPoints: CallingAtPoint[], terminatingStation: string): Promise<AudioItem[]> {
+    const files: AudioItem[] = []
+
+    const rrbAfterIndex = callingPoints.findIndex(p => p.continuesAsRrbAfterHere)
+
+    const upToRrb = callingPoints.slice(0, rrbAfterIndex + 1)
+    const rrbCalls = callingPoints.slice(rrbAfterIndex + 1)
+
+    if (upToRrb.length >= 1) {
+      files.push({ id: 'm.calling at', opts: { delayStart: this.callingPointsOptions.beforeCallingAtDelay } })
+
+      files.push(
+        ...this.pluraliseAudio(
+          upToRrb.map(s => `station.m.${s.crsCode}`),
+          {
+            andId: 'm.and',
+            firstItemDelay: this.callingPointsOptions.afterCallingAtDelay,
+            beforeItemDelay: this.callingPointsOptions.betweenStopsDelay,
+            beforeAndDelay: this.callingPointsOptions.aroundAndDelay,
+            afterAndDelay: this.callingPointsOptions.aroundAndDelay,
+          },
+        ),
+      )
+    }
+
+    files.push(this.callingPointsOptions.rrbTerminateAudio, {
+      id: 's.a replacement bus service will then continue to',
+      opts: { delayStart: this.SHORT_DELAY },
+    })
+
+    files.push(
+      ...this.pluraliseAudio(rrbCalls.map(s => `station.m.${s.crsCode}`).concat([`station.e.${terminatingStation}`]), {
+        andId: 'm.and',
+        firstItemDelay: this.callingPointsOptions.afterCallingAtDelay,
+        beforeItemDelay: this.callingPointsOptions.betweenStopsDelay,
+        beforeAndDelay: this.callingPointsOptions.aroundAndDelay,
+        afterAndDelay: this.callingPointsOptions.aroundAndDelay,
+      }),
+    )
+
+    return files
+  }
+
   private async getCallingPointsWithSplits(
     callingPoints: CallingAtPoint[],
     terminatingStation: string,
@@ -4294,6 +4338,10 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     arriving: boolean,
   ): Promise<AudioItem[]> {
     const files: AudioItem[] = []
+
+    if (callingPoints.some(p => p.continuesAsRrbAfterHere)) {
+      return await this.getCallingPointsWithBusContinuance(callingPoints, terminatingStation)
+    }
 
     const callingPointsWithSplits = await this.getCallingPointsWithSplits(callingPoints, terminatingStation, overallLength, arriving)
 

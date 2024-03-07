@@ -414,8 +414,8 @@ const changelog: IChangelogVersion[] = [
   },
   {
     date: '2024-03-07',
-    additions: ['[Live Announcements] Announce replacement bus continuations where needed']
-  }
+    additions: ['[Live Announcements] Announce replacement bus continuations where needed'],
+  },
 ]
 
 export default changelog

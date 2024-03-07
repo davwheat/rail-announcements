@@ -23,11 +23,11 @@
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org davw-network --project rail-announcements-web ./public && sentry-cli --url https://sentry.service.davw.network sourcemaps upload --org davw-network --project rail-announcements-web ./public"
   },
   "dependencies": {
-    "@emotion/react": "^11.11.3",
+    "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.0",
     "@reach/tabs": "^0.18.0",
-    "@sentry/gatsby": "^7.101.1",
-    "@sentry/tracing": "^7.101.1",
+    "@sentry/gatsby": "^7.105.0",
+    "@sentry/tracing": "^7.105.0",
     "clsx": "^2.1.0",
     "copy-to-clipboard": "^3.3.3",
     "crunker": "^2.4.0",
@@ -59,17 +59,17 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "@sentry/cli": "^2.28.6",
+    "@sentry/cli": "^2.30.0",
     "@types/gatsbyjs__reach-router": "^2.0.4",
-    "@types/node": "^20.11.19",
-    "@types/react": "^18.2.56",
+    "@types/node": "^20.11.25",
+    "@types/react": "^18.2.64",
     "@types/react-beautiful-dnd": "^13.1.8",
-    "@types/react-dom": "^18.2.19",
+    "@types/react-dom": "^18.2.21",
     "@types/uuid": "^9.0.8",
     "cross-env": "^7.0.3",
     "gatsby-plugin-webpack-bundle-analyser-v2": "^1.1.32",
     "prettier": "^3.2.5",
-    "typescript": "^5.3.3"
+    "typescript": "^5.4.2"
   },
-  "packageManager": "yarn@4.1.0"
+  "packageManager": "yarn@4.1.1"
 }

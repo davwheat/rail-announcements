@@ -17,8 +17,8 @@ export interface Option<Value extends string = string> {
   readonly value: Value
 }
 
-export default function createOptionField(optionData: OptionsExplanation, options: OptionFieldOptions): JSX.Element {
-  if (optionData.onlyShowWhen?.(options.activeState) === false) {
+export default function createOptionField(optionData: OptionsExplanation, options: OptionFieldOptions) {
+  if (optionData.onlyShowWhen?.(options?.activeState!!) === false) {
     return null
   }
 
@@ -26,7 +26,13 @@ export default function createOptionField(optionData: OptionsExplanation, option
     case 'boolean':
       return (
         <label key={options.key}>
-          <input type="checkbox" checked={options.value} onChange={e => options.onChange(e.currentTarget.checked)} /> {optionData.name}
+          <input
+            type="checkbox"
+            checked={options.value}
+            onChange={e => options.onChange(e.currentTarget.checked)}
+            disabled={optionData?.disabled || false}
+          />{' '}
+          {optionData.name}
         </label>
       )
 

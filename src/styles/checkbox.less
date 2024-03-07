@@ -44,4 +44,19 @@ input[type='checkbox'] {
   &:checked::after {
     opacity: 1;
   }
+
+  &:disabled {
+    cursor: not-allowed;
+
+    &::after,
+    &::before {
+      border-color: #999;
+      cursor: not-allowed;
+    }
+
+    label:has(&) {
+      cursor: not-allowed;
+      color: #999;
+    }
+  }
 }

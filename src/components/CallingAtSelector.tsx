@@ -41,6 +41,10 @@ export interface ICallingAtSelectorProps {
    * If false, splits and joins will be disabled. If an array, only the specified coach counts (for detachments) will be enabled.
    */
   enableSplits?: false | { title: string; value: string }[]
+  /**
+   * If true, rail replacement continuations will be enabled.
+   */
+  enableRrbContinuations?: boolean
 }
 
 function CallingAtSelector({
@@ -54,6 +58,7 @@ function CallingAtSelector({
   enableShortPlatforms = false,
   enableRequestStops = false,
   enableSplits = false,
+  enableRrbContinuations = false,
   className,
 }: ICallingAtSelectorProps): JSX.Element {
   const AvailableStations = React.useMemo(() => {
@@ -192,6 +197,24 @@ function CallingAtSelector({
                                     key: 'requestStop',
                                     onChange(v) {
                                       onChange(value.map(s => (s.randomId === stop.randomId ? { ...s, requestStop: v } : s)))
+                                    },
+                                  },
+                                )}
+
+                              {enableRrbContinuations &&
+                                createOptionField(
+                                  {
+                                    default: false,
+                                    name: 'Train ends; continues as replacement bus',
+                                    type: 'boolean',
+                                    // This can only happen once
+                                    disabled: value.some(s => s.continuesAsRrbAfterHere && s.randomId !== stop.randomId),
+                                  },
+                                  {
+                                    value: stop.continuesAsRrbAfterHere || false,
+                                    key: 'continuesAsRrbAfterHere',
+                                    onChange(v) {
+                                      onChange(value.map(s => (s.randomId === stop.randomId ? { ...s, continuesAsRrbAfterHere: v } : s)))
                                     },
                                   },
                                 )}

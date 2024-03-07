@@ -37,6 +37,7 @@ interface IBooleanOptions {
   type: 'boolean'
   default: boolean
   onlyShowWhen?: (activeState: Record<string, unknown>) => boolean
+  disabled?: boolean
 }
 interface ITimeOptions {
   name: string

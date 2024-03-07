@@ -412,6 +412,10 @@ const changelog: IChangelogVersion[] = [
     date: '2024-03-05',
     fixes: ['Saved announcements broken since the website redesign'],
   },
+  {
+    date: '2024-03-07',
+    additions: ['[Live Announcements] Announce replacement bus continuations where needed']
+  }
 ]
 
 export default changelog

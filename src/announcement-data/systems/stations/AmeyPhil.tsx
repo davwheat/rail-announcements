@@ -455,6 +455,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         'CrossCountry',
         'diverted',
         'East Midlands',
+        'East Midlands Railway',
         'East Midlands Trains',
         'Eurostar',
         'express',
@@ -895,6 +896,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       'ACN',
       'ACR',
       'ACT',
+      'ACY',
       'ADC',
       'ADD',
       'ADK',
@@ -3566,7 +3568,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         case 'CS':
           return 'caledonian sleeper'
         case 'EM':
-          return 'east midlands trains'
+          return 'east midlands railway'
         case 'ES':
           return 'eurostar'
         case 'GC':

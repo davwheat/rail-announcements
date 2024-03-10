@@ -416,6 +416,10 @@ const changelog: IChangelogVersion[] = [
     date: '2024-03-07',
     additions: ['[Live Announcements] Announce replacement bus continuations where needed'],
   },
+  {
+    date: '2024-03-10',
+    additions: ['[Amey Phil/Celia] Add bodged EMR recordings', '[Amey Phil/Celia] Use Abercynon South for Abercynon station'],
+  },
 ]
 
 export default changelog

@@ -488,12 +488,12 @@ export default class TfWTrainFx extends TrainAnnouncementSystem {
     }
 
     return {
-      title: getStationByCrs(item.label).stationName,
+      title: getStationByCrs(item.label)!!.stationName,
       value: item.label,
     }
   })
 
-  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab> = {
+  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab<string>> = {
     startOfJourney: {
       name: 'Start of journey',
       component: CustomAnnouncementPane,
@@ -505,13 +505,16 @@ export default class TfWTrainFx extends TrainAnnouncementSystem {
             type: 'custom',
             component: CallingAtSelector,
             props: {
+              selectLabel: 'Principal stations',
+              placeholder: 'Add a station…',
+              heading: 'Calling at… (incl. terminus)',
               availableStations: this.AvailableStationNames.high,
             },
             default: [],
           },
         },
       },
-    },
+    } as CustomAnnouncementTab<keyof IStartOfJourneyAnnouncementOptions>,
     stoppedAtStation: {
       name: 'At station',
       component: CustomAnnouncementPane,
@@ -532,7 +535,7 @@ export default class TfWTrainFx extends TrainAnnouncementSystem {
           },
         },
       },
-    },
+    } as CustomAnnouncementTab<keyof IStoppedAtStationAnnouncementOptions>,
     departingStop: {
       name: 'Departing stop',
       component: CustomAnnouncementPane,

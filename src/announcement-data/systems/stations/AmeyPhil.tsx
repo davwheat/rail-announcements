@@ -4889,7 +4889,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     }
 
     if ('fromLive' in options) {
-      files.push(      ...getNewPlatFiles(this.BEFORE_SECTION_DELAY),
+      files.push(
+        ...getNewPlatFiles(this.BEFORE_SECTION_DELAY),
         ...(await this.getFilesForBasicTrainInfoLive(
           options.hour,
           options.min,
@@ -4901,7 +4902,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         )),
       )
     } else {
-      files.push(      ...getNewPlatFiles(this.BEFORE_SECTION_DELAY),
+      files.push(
+        ...getNewPlatFiles(this.BEFORE_SECTION_DELAY),
         ...(await this.getFilesForBasicTrainInfo(
           options.hour,
           options.min,

@@ -9,12 +9,10 @@ import { deletePersonalPreset, getPersonalPresets, initPersonalPresetsDb, savePe
 
 import * as Sentry from '@sentry/gatsby'
 
-import type TrainAnnouncementSystem from '@announcement-data/TrainAnnouncementSystem'
-import type StationAnnouncementSystem from '@announcement-data/StationAnnouncementSystem'
 import type AnnouncementSystem from '@announcement-data/AnnouncementSystem'
 
 interface IProps {
-  system: new () => TrainAnnouncementSystem | StationAnnouncementSystem | AnnouncementSystem
+  system: typeof AnnouncementSystem
 }
 
 function AnnouncementPanel({ system }: IProps) {
@@ -26,7 +24,7 @@ function AnnouncementPanel({ system }: IProps) {
     window.__system = AnnouncementSystem
   }
 
-  const AnnouncementSystemInstance = AnnouncementSystem ? new AnnouncementSystem() : null
+  const AnnouncementSystemInstance: AnnouncementSystem = AnnouncementSystem ? new (AnnouncementSystem as any)() : null
   const customTabs = AnnouncementSystemInstance?.customAnnouncementTabs ?? {}
 
   const TabPanelMap = React.useMemo(

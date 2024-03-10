@@ -9,13 +9,13 @@ export interface IPlayOptions {
   customPrefix: string
 }
 
-export type OptionsExplanation =
+export type OptionsExplanation<P extends {}, C extends React.ComponentType<P>> =
   | IMultiselectOptions
   | ISelectOptions
   | IBooleanOptions
   | INumberOptions
   | ITimeOptions
-  | ICustomOptions
+  | ICustomOptions<P, C>
   | ICustomNoStateOptions
 
 interface IMultiselectOptions {
@@ -52,11 +52,11 @@ interface INumberOptions {
   onlyShowWhen?: (activeState: Record<string, unknown>) => boolean
 }
 
-interface ICustomOptions {
+interface ICustomOptions<Props extends {}, Component extends React.ComponentType<Props>> {
   name: string
   type: 'custom'
-  component: (props: { activeState?: Record<string, unknown>; onChange: (newVal: any) => void; value: any; [key: string]: any }) => JSX.Element
-  props?: Record<string, unknown>
+  component: Component
+  props?: Props
   default: any
   onlyShowWhen?: (activeState: Record<string, unknown>) => boolean
 }
@@ -78,7 +78,19 @@ export interface AudioItemObject {
 export interface CustomAnnouncementTab<OptionIds extends string> {
   name: string
   component: React.ComponentType<ICustomAnnouncementPaneProps<OptionIds> | ICustomButtonPaneProps>
-  props: Omit<ICustomAnnouncementPaneProps<OptionIds>, 'name' | 'systemId' | 'tabId'> | ICustomButtonPaneProps
+  props:
+    | Omit<
+        ICustomAnnouncementPaneProps<OptionIds>,
+        | 'name'
+        | 'systemId'
+        | 'tabId'
+        | 'isPersonalPresetsReady'
+        | 'savePersonalPreset'
+        | 'getPersonalPresets'
+        | 'deletePersonalPreset'
+        | 'system'
+      >
+    | ICustomButtonPaneProps
 }
 
 export type CustomAnnouncementButton = {

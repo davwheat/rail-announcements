@@ -59,7 +59,6 @@ export interface ITrainApproachingAnnouncementOptions {
   terminatingStationCode: string
   vias: CallingAtPoint[]
   originStationCode: string
-  callingAt?: CallingAtPoint[]
 }
 
 export interface IPlatformAlterationAnnouncementOptions {
@@ -74,7 +73,22 @@ export interface IPlatformAlterationAnnouncementOptions {
   terminatingStationCode: string
   vias: CallingAtPoint[]
   callingAt?: CallingAtPoint[]
+}
+
+export interface ILivePlatformAlterationAnnouncementOptions {
+  chime: ChimeType
+  announceOldPlatform: boolean
+  oldPlatform: string
+  newPlatform: string
+  hour: string
+  min: string
+  isDelayed: boolean
+  toc: string
+  terminatingStationCode: string[]
+  vias: CallingAtPoint[][]
+  callingAt?: CallingAtPoint[]
   coaches: string | null
+  fromLive: true
 }
 
 export interface ILiveTrainApproachingAnnouncementOptions {
@@ -142,7 +156,9 @@ export default class AmeyPhil extends StationAnnouncementSystem {
   }
 
   private get announcementPresets(): Readonly<{
-    nextTrain: ICustomAnnouncementPreset<INextTrainAnnouncementOptions | (INextTrainAnnouncementOptions & IStandingTrainAnnouncementOptions)>[]
+    nextTrain: ICustomAnnouncementPreset<
+      INextTrainAnnouncementOptions & IStandingTrainAnnouncementOptions & IPlatformAlterationAnnouncementOptions
+    >[]
     disruptedTrain: ICustomAnnouncementPreset<IDisruptedTrainAnnouncementOptions>[]
   }> {
     return {
@@ -153,6 +169,9 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             chime: this.DEFAULT_CHIME,
             isDelayed: false,
             platform: '2',
+            newPlatform: '3',
+            oldPlatform: '2',
+            announceOldPlatform: true,
             hour: '12',
             min: '28',
             toc: 'southern',
@@ -160,6 +179,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             vias: [],
             callingAt: ['ANG', 'GBS', 'DUR', 'WWO', 'WRH', 'SWK', 'PLD', 'HOV'].map(crsToStationItemMapper),
             coaches: '8 coaches',
+            mindTheGap: true,
+            thisStationCode: 'LIT',
           },
         },
         {
@@ -168,6 +189,9 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             chime: this.DEFAULT_CHIME,
             isDelayed: false,
             platform: '12',
+            newPlatform: '13',
+            oldPlatform: '12',
+            announceOldPlatform: true,
             hour: '16',
             min: '05',
             toc: 'southern',
@@ -195,6 +219,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
               'FTN',
             ].map(stationItemCompleter),
             coaches: '8 coaches',
+            mindTheGap: false,
+            thisStationCode: 'VIC',
           },
         },
         {
@@ -203,6 +229,9 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             chime: this.DEFAULT_CHIME,
             isDelayed: false,
             platform: '5',
+            newPlatform: '4',
+            oldPlatform: '5',
+            announceOldPlatform: true,
             hour: '17',
             min: '15',
             toc: 'gatwick express',
@@ -210,6 +239,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             vias: ['GTW'].map(crsToStationItemMapper),
             callingAt: ['PRP', 'HSK', 'BUG', 'HHE', 'GTW'].map(crsToStationItemMapper),
             coaches: '8 coaches',
+            mindTheGap: false,
+            thisStationCode: 'BTN',
           },
         },
         {
@@ -219,6 +250,9 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             thisStationCode: 'WFJ',
             isDelayed: false,
             platform: '6',
+            newPlatform: '5',
+            oldPlatform: '6',
+            announceOldPlatform: true,
             hour: '11',
             min: '18',
             toc: 'virgin pendolino',
@@ -243,6 +277,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
               { crsCode: 'HYM', shortPlatform: 'front.9' },
             ].map(stationItemCompleter),
             coaches: '11 coaches',
+            mindTheGap: false,
           },
         },
         {
@@ -251,6 +286,9 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             chime: this.DEFAULT_CHIME,
             isDelayed: false,
             platform: '6',
+            newPlatform: '5',
+            oldPlatform: '6',
+            announceOldPlatform: true,
             hour: '13',
             min: '15',
             toc: 'virgin pendolino',
@@ -258,6 +296,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             vias: [],
             callingAt: ['SPT', 'MAC', 'SOT', 'RUG', 'MKC'].map(stationItemCompleter),
             coaches: '9 coaches',
+            mindTheGap: false,
+            thisStationCode: 'MAN',
           },
         },
         {
@@ -266,6 +306,9 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             chime: this.DEFAULT_CHIME,
             isDelayed: false,
             platform: '3',
+            newPlatform: '2',
+            oldPlatform: '3',
+            announceOldPlatform: true,
             hour: '08',
             min: '20',
             toc: 'crosscountry',
@@ -313,6 +356,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
               'SER',
             ].map(crsToStationItemMapper),
             coaches: '5 coaches',
+            mindTheGap: false,
+            thisStationCode: 'ABD',
           },
         },
         {
@@ -322,6 +367,9 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             chime: this.DEFAULT_CHIME,
             isDelayed: false,
             platform: '3',
+            newPlatform: '2',
+            oldPlatform: '3',
+            announceOldPlatform: false,
             hour: '08',
             min: '20',
             toc: 'crosscountry',
@@ -331,6 +379,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
               crsToStationItemMapper,
             ),
             coaches: '5 coaches',
+            mindTheGap: false,
+            thisStationCode: 'MAN',
           },
         },
         {
@@ -339,6 +389,9 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             chime: this.DEFAULT_CHIME,
             isDelayed: false,
             platform: '2',
+            newPlatform: '4',
+            oldPlatform: '2',
+            announceOldPlatform: false,
             hour: '18',
             min: '07',
             toc: 'chiltern railways',
@@ -346,6 +399,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             vias: [],
             callingAt: ['HDM', 'BCS', 'BAN', 'LMS', 'WRW', 'WRP', 'DDG', 'SOL', 'BMO', 'BSW', 'ROW'].map(crsToStationItemMapper),
             coaches: '5 coaches',
+            mindTheGap: false,
+            thisStationCode: 'MYB',
           },
         },
         {
@@ -355,6 +410,9 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             thisStationCode: 'EBN',
             isDelayed: false,
             platform: '2',
+            newPlatform: '3',
+            oldPlatform: '2',
+            announceOldPlatform: false,
             hour: '12',
             min: '50',
             toc: 'southern',
@@ -376,6 +434,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
               'HMT',
             ].map(stationItemCompleter),
             coaches: '3 coaches',
+            mindTheGap: false,
           },
         },
         {
@@ -383,6 +442,9 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           state: {
             chime: 'four',
             platform: 'a',
+            newPlatform: 'b',
+            oldPlatform: 'a',
+            announceOldPlatform: true,
             hour: '12',
             min: '04',
             thisStationCode: 'PAD',
@@ -392,6 +454,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             vias: ['CWX'].map(crsToStationItemMapper),
             callingAt: ['BDS', 'TCR', 'ZFD', 'LST', 'ZLW', 'CWX', 'CUS', 'WWC'].map(crsToStationItemMapper),
             coaches: '9 coaches',
+            mindTheGap: false,
           },
         },
       ],
@@ -4729,7 +4792,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           options.toc,
           options.vias.map(s => s.crsCode),
           options.terminatingStationCode,
-          options.callingAt || [],
+          [],
         )),
       )
     }
@@ -4739,7 +4802,10 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     await this.playAudioFiles(files, download)
   }
 
-  async playPlatformAlterationAnnouncement(options: IPlatformAlterationAnnouncementOptions, download: boolean = false): Promise<void> {
+  async playPlatformAlterationAnnouncement(
+    options: IPlatformAlterationAnnouncementOptions | ILivePlatformAlterationAnnouncementOptions,
+    download: boolean = false,
+  ): Promise<void> {
     const files: AudioItem[] = []
 
     const chime = this.getChime(options.chime)
@@ -4776,29 +4842,30 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       return platFiles
     }
 
-    // if ('fromLive' in options) {
-    //   files.push(
-    //     ...(await this.getFilesForBasicTrainInfoLive(
-    //       options.hour,
-    //       options.min,
-    //       options.toc,
-    //       options.vias.map(l => l.map(v => v.crsCode)),
-    //       options.terminatingStationCode,
-    //     )),
-    //   )
-    // } else {
-    files.push(
-      ...(await this.getFilesForBasicTrainInfo(
-        options.hour,
-        options.min,
-        options.toc,
-        options.vias.map(s => s.crsCode),
-        options.terminatingStationCode,
-        options.callingAt || [],
-        true,
-      )),
-    )
-    // }
+    if ('fromLive' in options) {
+      files.push(
+        ...(await this.getFilesForBasicTrainInfoLive(
+          options.hour,
+          options.min,
+          options.toc,
+          options.vias.map(l => l.map(v => v.crsCode)),
+          options.terminatingStationCode,
+          true,
+        )),
+      )
+    } else {
+      files.push(
+        ...(await this.getFilesForBasicTrainInfo(
+          options.hour,
+          options.min,
+          options.toc,
+          options.vias.map(s => s.crsCode),
+          options.terminatingStationCode,
+          options.callingAt || [],
+          true,
+        )),
+      )
+    }
 
     if (options.announceOldPlatform) {
       files.push('m.originally due to depart from platform')
@@ -4821,19 +4888,32 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       files.push(`platform.e.${options.newPlatform}`)
     }
 
-    files.push(
-      ...getNewPlatFiles(this.BEFORE_SECTION_DELAY),
-      ...(await this.getFilesForBasicTrainInfo(
-        options.hour,
-        options.min,
-        options.toc,
-        options.vias.map(s => s.crsCode),
-        options.terminatingStationCode,
-        options.callingAt || [],
-        false,
-        undefined,
-      )),
-    )
+    if ('fromLive' in options) {
+      files.push(      ...getNewPlatFiles(this.BEFORE_SECTION_DELAY),
+        ...(await this.getFilesForBasicTrainInfoLive(
+          options.hour,
+          options.min,
+          options.toc,
+          options.vias.map(l => l.map(v => v.crsCode)),
+          options.terminatingStationCode,
+          false,
+          undefined,
+        )),
+      )
+    } else {
+      files.push(      ...getNewPlatFiles(this.BEFORE_SECTION_DELAY),
+        ...(await this.getFilesForBasicTrainInfo(
+          options.hour,
+          options.min,
+          options.toc,
+          options.vias.map(s => s.crsCode),
+          options.terminatingStationCode,
+          options.callingAt || [],
+          false,
+          undefined,
+        )),
+      )
+    }
 
     await this.playAudioFiles(files, download)
   }
@@ -5202,7 +5282,6 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       name: 'Approaching train',
       component: CustomAnnouncementPane,
       props: {
-        presets: this.announcementPresets.approachingTrain,
         playHandler: this.playTrainApproachingAnnouncement.bind(this),
         options: {
           chime: {
@@ -5673,22 +5752,14 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             } as ICallingAtSelectorProps,
             default: [],
           },
+          callingAt: {
+            name: '',
+            type: 'customNoState',
+            component: () => <></>,
+          },
         },
       },
     } as CustomAnnouncementTab<keyof IPlatformAlterationAnnouncementOptions>,
-    liveTrains: {
-      name: 'Live trains',
-      component: () => {
-        return (
-          <div>
-            <p>
-              This functionality has moved to a <Link to="/amey-live-train-announcements">new dedicated page</Link>.
-            </p>
-          </div>
-        )
-      },
-      props: {},
-    },
     announcementButtons: {
       name: 'Announcement buttons',
       component: CustomButtonPane,

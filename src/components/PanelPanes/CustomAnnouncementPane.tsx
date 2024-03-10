@@ -28,8 +28,6 @@ import clsx from 'clsx'
 
 import type { OptionsExplanation } from '@announcement-data/AnnouncementSystem'
 import type { IPersonalPresetObject } from '@data/db'
-import type TrainAnnouncementSystem from '@announcement-data/TrainAnnouncementSystem'
-import type StationAnnouncementSystem from '@announcement-data/StationAnnouncementSystem'
 import type AnnouncementSystem from '@announcement-data/AnnouncementSystem'
 
 export interface ICustomAnnouncementPreset<State = Record<string, unknown>> {
@@ -38,17 +36,17 @@ export interface ICustomAnnouncementPreset<State = Record<string, unknown>> {
 }
 
 export interface ICustomAnnouncementPaneProps<OptionIds extends string> {
-  options: Record<OptionIds, OptionsExplanation>
-  playHandler: (options: { [key: string]: any }, download?: boolean) => Promise<void>
+  options: Record<OptionIds, OptionsExplanation<any, any>>
+  playHandler: (options: Record<OptionIds, unknown>, download?: boolean) => Promise<void>
   name: string
-  presets?: ICustomAnnouncementPreset[]
+  presets?: ICustomAnnouncementPreset<Record<OptionIds, unknown>>[]
   systemId: string
   tabId: string
   isPersonalPresetsReady: boolean
   savePersonalPreset: (preset: IPersonalPresetObject) => Promise<void>
   getPersonalPresets: (systemId: string, tabId: string) => Promise<IPersonalPresetObject[]>
   deletePersonalPreset: (systemId: string, tabId: string, presetId: string) => Promise<void>
-  system: new () => TrainAnnouncementSystem | StationAnnouncementSystem | AnnouncementSystem
+  system: typeof AnnouncementSystem
 }
 
 function CustomAnnouncementPane({
@@ -93,7 +91,7 @@ function CustomAnnouncementPane({
     }
   }, [optionsState])
 
-  const AnnouncementSystemInstance = new system()
+  const AnnouncementSystemInstance: AnnouncementSystem = new (system as any)()
 
   function createFieldUpdater(field: string): (value: any) => void {
     return (value): void => {

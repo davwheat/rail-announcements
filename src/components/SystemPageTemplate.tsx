@@ -11,16 +11,14 @@ import { Link, PageProps } from 'gatsby'
 import BackIcon from 'mdi-react/ArrowLeftIcon'
 
 import type AnnouncementSystem from '@announcement-data/AnnouncementSystem'
-import type StationAnnouncementSystem from '@announcement-data/StationAnnouncementSystem'
-import type TrainAnnouncementSystem from '@announcement-data/TrainAnnouncementSystem'
 
 interface IProps {
   location: PageProps['location']
-  system: new () => TrainAnnouncementSystem | StationAnnouncementSystem | AnnouncementSystem
+  system: typeof AnnouncementSystem
 }
 
 export default function SystemPageTemplate({ location, system }: IProps) {
-  const s = new system()
+  const s: AnnouncementSystem = new (system as any)()
 
   return (
     <Layout location={location} title={s.NAME}>

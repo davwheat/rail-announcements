@@ -7,19 +7,17 @@ import PlayIcon from 'mdi-react/PlayIcon'
 import { addBreadcrumb } from '@sentry/react'
 
 import type { CustomAnnouncementButton } from '@announcement-data/AnnouncementSystem'
-import type TrainAnnouncementSystem from '@announcement-data/TrainAnnouncementSystem'
-import type StationAnnouncementSystem from '@announcement-data/StationAnnouncementSystem'
 import type AnnouncementSystem from '@announcement-data/AnnouncementSystem'
 export interface ICustomButtonPaneProps {
   buttons?: CustomAnnouncementButton[]
   buttonSections?: Record<string, CustomAnnouncementButton[]>
-  system: new () => TrainAnnouncementSystem | StationAnnouncementSystem | AnnouncementSystem
+  system: typeof AnnouncementSystem
 }
 
 function CustomButtonPane({ system, buttons, buttonSections }: ICustomButtonPaneProps) {
   const [playError, setPlayError] = useState<Error | null>(null)
 
-  const AnnouncementSystemInstance = new system()
+  const AnnouncementSystemInstance: AnnouncementSystem = new (system as any)()
 
   const [isDisabled, setIsDisabled] = useIsPlayingAnnouncement()
 

@@ -54,7 +54,7 @@ function CallingAtSelector({
   additionalOptions,
   selectLabel = 'Intermediary stops',
   placeholder = 'Add a calling point…',
-  heading = 'Calling at... (excluding terminating station)',
+  heading = 'Calling at… (excluding terminus)',
   enableShortPlatforms = false,
   enableRequestStops = false,
   enableSplits = false,

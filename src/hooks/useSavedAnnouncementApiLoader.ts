@@ -10,6 +10,7 @@ const idToPath: Record<string, string> = {
   TL_CLASS_700_V1: '/rolling-stock/class-700-707-717',
   SN_CLASS_377_V1: '/rolling-stock/bombardier-xstar',
   TFW_TRAINFX_V1: '/rolling-stock/tfw-trainfx',
+  TFW_TELEVIC_V1: '/rolling-stock/tfw-televic',
   LNER_AZUMA_V1: '/rolling-stock/lner-azuma',
 
   TFL_ELIZ_LINE_V1: '/rolling-stock/tfl/elizabeth-line',

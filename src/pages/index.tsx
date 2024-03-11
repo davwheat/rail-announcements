@@ -20,6 +20,7 @@ const Systems = [
       { title: 'Class 700/707/717', url: '/rolling-stock/class-700-707-717' },
       { title: 'LNER Azuma', url: '/rolling-stock/lner-azuma' },
       { title: 'Transport for Wales TrainFX', url: '/rolling-stock/tfw-trainfx' },
+      { title: 'Transport for Wales Televic', url: '/rolling-stock/tfw-televic', new: true },
       { title: 'TfL Jubilee Line', url: '/rolling-stock/tfl/jubilee-line' },
       { title: 'TfL Northern Line', url: '/rolling-stock/tfl/northern-line' },
       { title: 'TfL Elizabeth Line', url: '/rolling-stock/tfl/elizabeth-line' },
@@ -103,7 +104,34 @@ function IndexPage({ location }: PageProps) {
               <ul css={{ padding: 0, margin: 0, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
                 {group.systems.map(system => (
                   <li key={system.url}>
-                    <CardLink to={system.url} title={system.title} />
+                    <CardLink
+                      to={system.url}
+                      title={
+                        <>
+                          {system.new && (
+                            <>
+                              <span
+                                css={{
+                                  textTransform: 'uppercase',
+                                  display: 'inline-block',
+                                  padding: '3px 6px',
+                                  paddingTop: 5,
+                                  borderRadius: 4,
+                                  background: 'hsl(204 50% 85% / 1)',
+                                  fontSize: '0.75em',
+                                  lineHeight: 1,
+                                  transform: 'translateY(-2px)',
+                                  marginRight: 8,
+                                }}
+                              >
+                                New!
+                              </span>
+                            </>
+                          )}
+                          {system.title}
+                        </>
+                      }
+                    />
                   </li>
                 ))}
               </ul>

@@ -11,6 +11,12 @@ interface IStartOfJourneyAnnouncementOptions {
   callingAtCodes: { crsCode: string; name: string; randomId: string }[]
 }
 
+interface IStoppedAtStationAnnouncementOptions {
+  thisStation: string
+  terminus: string
+  isTerminusNext: boolean
+}
+
 export default class TfWTelevic extends TrainAnnouncementSystem {
   readonly NAME = 'Transport for Wales - Televic (Elin Llwyd & Eryl Jones)'
   readonly ID = 'TFW_TELEVIC_V1'
@@ -366,6 +372,13 @@ export default class TfWTelevic extends TrainAnnouncementSystem {
     'Winwick Junction',
   ].map(n => ({ title: n, value: n }))
 
+  readonly StationsAsItems = this.AvailableStations.map(crsToStationItemMapper)
+    .map(s => ({
+      title: s.name,
+      value: s.crsCode,
+    }))
+    .concat(this.AdditionalOptions)
+
   private multiLingual(audio: AudioItem[]): AudioItem[] {
     const cy = audio.map(a => {
       if (typeof a === 'string') return `cy.${a}`
@@ -402,11 +415,34 @@ export default class TfWTelevic extends TrainAnnouncementSystem {
 
     const files: AudioItem[] = []
 
-    files.push('intro.welcome on board', 'intro.we will be ready to depart for')
+    files.push('intro.start.welcome on board', 'intro.start.we will be ready to depart for')
     files.push(`station.e.${callingAtCodes[callingAtCodes.length - 1].crsCode}`)
 
-    files.push({ id: 'intro.calling at', opts: { delayStart: 300 } })
+    files.push({ id: 'intro.start.calling at', opts: { delayStart: 300 } })
     files.push(...this.pluraliseStations(callingAtCodes.map(stn => stn.crsCode)))
+
+    await this.playAudioFiles(this.multiLingual(files), download)
+  }
+
+  private async playStoppedAtAnnouncement(options: IStoppedAtStationAnnouncementOptions, download: boolean = false): Promise<void> {
+    const { terminus, isTerminusNext, thisStation } = options
+
+    const files: AudioItem[] = []
+
+    files.push('intro.arrived.welcome to', `station.e.${thisStation}`, 'intro.arrived.thank you for travelling with transport for wales')
+
+    if (terminus !== thisStation) {
+      if (isTerminusNext) {
+        files.push(
+          'intro.final.we will be travelling to',
+          `station.m.${terminus}`,
+          'intro.final.only',
+          'intro.final.the next station will be our final stop',
+        )
+      } else {
+        files.push('intro.final.we will be travelling to', `station.e.${terminus}`)
+      }
+    }
 
     await this.playAudioFiles(this.multiLingual(files), download)
   }
@@ -449,6 +485,32 @@ export default class TfWTelevic extends TrainAnnouncementSystem {
         },
       },
     } as CustomAnnouncementTab<keyof IStartOfJourneyAnnouncementOptions>,
+    stoppedAtStation: {
+      name: 'Stopped at station',
+      component: CustomAnnouncementPane,
+      props: {
+        playHandler: this.playStoppedAtAnnouncement.bind(this),
+        options: {
+          thisStation: {
+            name: 'This station',
+            default: this.StationsAsItems[0].value,
+            options: this.StationsAsItems,
+            type: 'select',
+          },
+          terminus: {
+            name: 'Terminus',
+            default: this.StationsAsItems[0].value,
+            options: this.StationsAsItems,
+            type: 'select',
+          },
+          isTerminusNext: {
+            name: 'Is terminus next?',
+            default: false,
+            type: 'boolean',
+          },
+        },
+      },
+    } as CustomAnnouncementTab<keyof IStoppedAtStationAnnouncementOptions>,
     announcementButtons: {
       name: 'Announcement buttons',
       component: CustomButtonPane,

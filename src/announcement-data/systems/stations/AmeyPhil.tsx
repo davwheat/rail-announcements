@@ -4196,8 +4196,11 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     const restartAsTrainAfterIndex = callingPoints.findIndex(p => p.continuesAsTrainAfterHere)
 
     const upToRrb = callingPoints.slice(0, rrbAfterIndex + 1)
-    const rrbCalls = callingPoints.slice(rrbAfterIndex + 1, restartAsTrainAfterIndex === -1 ? Number.MAX_SAFE_INTEGER : restartAsTrainAfterIndex)
-    const restartedTrainCalls = restartAsTrainAfterIndex === -1 ? [] : callingPoints.slice(restartAsTrainAfterIndex)
+    const rrbCalls = callingPoints.slice(
+      rrbAfterIndex + 1,
+      restartAsTrainAfterIndex === -1 ? Number.MAX_SAFE_INTEGER : restartAsTrainAfterIndex + 1,
+    )
+    const restartedTrainCalls = restartAsTrainAfterIndex === -1 ? [] : callingPoints.slice(restartAsTrainAfterIndex + 1)
 
     if (upToRrb.length >= 1) {
       files.push({ id: 'm.calling at', opts: { delayStart: this.callingPointsOptions.beforeCallingAtDelay } })

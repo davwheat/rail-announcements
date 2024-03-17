@@ -223,6 +223,26 @@ function CallingAtSelector({
                                   },
                                 )}
 
+                              {enableRrbContinuations &&
+                                createOptionField(
+                                  {
+                                    default: false,
+                                    name: 'RRB ends; train restarts',
+                                    type: 'boolean',
+                                    // This can only happen once
+                                    disabled:
+                                      !value.some((s, _i) => s.continuesAsRrbAfterHere && i > _i) ||
+                                      value.some(s => s.continuesAsTrainAfterHere && s.randomId !== stop.randomId),
+                                  },
+                                  {
+                                    value: stop.continuesAsTrainAfterHere || false,
+                                    key: 'continuesAsTrainAfterHere',
+                                    onChange(v) {
+                                      onChange(value.map(s => (s.randomId === stop.randomId ? { ...s, continuesAsTrainAfterHere: v } : s)))
+                                    },
+                                  },
+                                )}
+
                               {enableSplits && (
                                 <>
                                   {createOptionField(

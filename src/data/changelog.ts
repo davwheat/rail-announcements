@@ -422,7 +422,7 @@ const changelog: IChangelogVersion[] = [
   },
   {
     date: '2024-03-17',
-    additions: ['[TfW Televic] Add system for new Transport for Wales rolling stock'],
+    additions: ['[TfW Televic] Add system for new Transport for Wales rolling stock', '[Live Announcements] Announce train restart after RRB'],
   },
 ]
 

@@ -121,6 +121,8 @@ function getCallingPoints(
     .filter(Boolean) as CallingAtPoint[]
 
   if (busContinuationService) {
+    let trainContinuationService: AssociatedServiceDetail | null = null
+
     const busCalls = (busContinuationService as AssociatedServiceDetail).locations
       .filter(p => !p.isCancelled && !p.isPass && !p.isOperational)
       .map((p, i, arr) => {
@@ -134,6 +136,15 @@ function getCallingPoints(
           requestStop: p.activities === 'R',
         }
 
+        if (p.associations?.some(a => a.category === AssociationCategory.LinkedTo && a.trainid !== '0B00')) {
+          const assoc = p.associations?.find(a => a.category === AssociationCategory.LinkedTo && a.trainid !== '0B00')
+
+          if (assoc?.service) {
+            stop.continuesAsTrainAfterHere = true
+            trainContinuationService = assoc.service
+          }
+        }
+
         return stop
       })
       .filter(Boolean) as CallingAtPoint[]
@@ -143,6 +154,29 @@ function getCallingPoints(
     }
 
     callingAt.push(...busCalls)
+
+    if (trainContinuationService) {
+      const trainCalls = (trainContinuationService as AssociatedServiceDetail).locations
+        .filter(p => !p.isCancelled && !p.isPass && !p.isOperational)
+        .map((p, i, arr) => {
+          // Hide last station if it's the train destination
+          if (i === arr.length - 1 && p.crs === train.destination[0].crs) return null
+
+          return {
+            crsCode: getStation(p),
+            name: '',
+            randomId: '',
+            requestStop: p.activities === 'R',
+          }
+        })
+        .filter(Boolean) as CallingAtPoint[]
+
+      if (trainCalls[0]?.crsCode === callingAt[callingAt.length - 1]?.crsCode) {
+        trainCalls.shift()
+      }
+
+      callingAt.push(...trainCalls)
+    }
   }
 
   return callingAt

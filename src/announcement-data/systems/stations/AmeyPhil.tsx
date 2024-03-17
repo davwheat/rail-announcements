@@ -4193,9 +4193,11 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     const files: AudioItem[] = []
 
     const rrbAfterIndex = callingPoints.findIndex(p => p.continuesAsRrbAfterHere)
+    const restartAsTrainAfterIndex = callingPoints.findIndex(p => p.continuesAsTrainAfterHere)
 
     const upToRrb = callingPoints.slice(0, rrbAfterIndex + 1)
-    const rrbCalls = callingPoints.slice(rrbAfterIndex + 1)
+    const rrbCalls = callingPoints.slice(rrbAfterIndex + 1, restartAsTrainAfterIndex === -1 ? Number.MAX_SAFE_INTEGER : restartAsTrainAfterIndex)
+    const restartedTrainCalls = restartAsTrainAfterIndex === -1 ? [] : callingPoints.slice(restartAsTrainAfterIndex)
 
     if (upToRrb.length >= 1) {
       files.push({ id: 'm.calling at', opts: { delayStart: this.callingPointsOptions.beforeCallingAtDelay } })
@@ -4220,14 +4222,32 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     })
 
     files.push(
-      ...this.pluraliseAudio(rrbCalls.map(s => `station.m.${s.crsCode}`).concat([`station.e.${terminatingStation}`]), {
-        andId: 'm.and',
-        firstItemDelay: this.callingPointsOptions.afterCallingAtDelay,
-        beforeItemDelay: this.callingPointsOptions.betweenStopsDelay,
-        beforeAndDelay: this.callingPointsOptions.aroundAndDelay,
-        afterAndDelay: this.callingPointsOptions.aroundAndDelay,
-      }),
+      ...this.pluraliseAudio(
+        rrbCalls.map(s => `station.m.${s.crsCode}`).concat(restartedTrainCalls.length > 0 ? [] : [`station.m.${terminatingStation}`]),
+        {
+          andId: 'm.and',
+          firstItemDelay: this.callingPointsOptions.afterCallingAtDelay,
+          beforeItemDelay: this.callingPointsOptions.betweenStopsDelay,
+          beforeAndDelay: this.callingPointsOptions.aroundAndDelay,
+          afterAndDelay: this.callingPointsOptions.aroundAndDelay,
+        },
+      ),
     )
+
+    if (restartedTrainCalls.length > 0) {
+      files.push(
+        'm.where the train will restart for-2',
+        ...this.pluraliseAudio(restartedTrainCalls.map(s => `station.m.${s.crsCode}`).concat([`station.e.${terminatingStation}`]), {
+          andId: 'm.and',
+          firstItemDelay: this.callingPointsOptions.afterCallingAtDelay,
+          beforeItemDelay: this.callingPointsOptions.betweenStopsDelay,
+          beforeAndDelay: this.callingPointsOptions.aroundAndDelay,
+          afterAndDelay: this.callingPointsOptions.aroundAndDelay,
+        }),
+      )
+    } else {
+      files.push('e.where the train was originally due to terminate')
+    }
 
     return files
   }

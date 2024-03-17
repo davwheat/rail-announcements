@@ -21,6 +21,7 @@ export interface AssociatedServiceDetail {
   rid: string
   uid: string
   locations: AssociatedServiceLocation[]
+  trainid: string
 }
 
 export interface StaffServicesResponse {
@@ -224,7 +225,7 @@ async function getServiceByRidForActivityData(rid: string): Promise<AssociatedSe
   return json
 }
 
-async function getServiceByRid(rid: string): Promise<AssociatedServiceDetail | undefined> {
+async function getServiceByRid(rid: string, followAssociations: boolean = false): Promise<AssociatedServiceDetail | undefined> {
   const cache = await caches.open('associated-service')
   const url = `https://national-rail-api.davwheat.dev/service/${rid}`
 
@@ -237,7 +238,11 @@ async function getServiceByRid(rid: string): Promise<AssociatedServiceDetail | u
   const response = await fetch(url)
   if (!response.ok) return undefined
 
-  const json: AssociatedServiceDetail = await response.json()
+  let json: AssociatedServiceDetail = await response.json()
+
+  if (followAssociations) {
+    await processAssociatedService(json)
+  }
 
   await cache.put(
     url,
@@ -272,15 +277,39 @@ async function processService(service: TrainService): Promise<void> {
       if (association.category === AssociationCategory.Divide) {
         // Divides only
         association.service = await getServiceByRid(association.rid)
-      } else if (association.category === AssociationCategory.LinkedTo && association.trainid === '0B00') {
-        // Fine. Or continuation bus services
-        association.service = await getServiceByRid(association.rid)
+      } else if (
+        association.category === AssociationCategory.LinkedTo &&
+        (association.trainid === '0B00' || (service.trainid === '0B00' && association.trainid !== '0B00'))
+      ) {
+        // Fine. Or continuation bus services, and include future changes to trains again
+        association.service = await getServiceByRid(association.rid, true)
       }
     }
 
     location.activities = serviceData?.locations.find(l => {
       return l.tiploc === location.tiploc && (l.sta === location.sta || l.std === location.std)
     })?.activities
+  }
+}
+
+async function processAssociatedService(service: AssociatedServiceDetail): Promise<void> {
+  for (const l in service.locations) {
+    const location: TimingLocation = service.locations[l]
+
+    for (const a in location.associations) {
+      const association: Association = location.associations[a as any]
+
+      if (association.category === AssociationCategory.Divide) {
+        // Divides only
+        association.service = await getServiceByRid(association.rid)
+      } else if (
+        association.category === AssociationCategory.LinkedTo &&
+        (association.trainid === '0B00' || (service.trainid === '0B00' && association.trainid !== '0B00'))
+      ) {
+        // Fine. Or continuation bus services, and include future changes to trains again
+        association.service = await getServiceByRid(association.rid, true)
+      }
+    }
   }
 }
 

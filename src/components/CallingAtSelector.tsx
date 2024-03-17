@@ -15,9 +15,13 @@ export interface CallingAtPoint {
   splitForm?: string
   splitCallingPoints?: CallingAtPoint[]
   /**
-   * Only used for live announcements at the moment
+   * Train terminates and RRB starts from here
    */
   continuesAsRrbAfterHere?: boolean
+  /**
+   * RRB ends and train service restarts here
+   */
+  continuesAsTrainAfterHere?: boolean
 }
 
 export interface ICallingAtSelectorProps {

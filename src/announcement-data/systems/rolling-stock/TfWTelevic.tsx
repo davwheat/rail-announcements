@@ -1,5 +1,5 @@
 import React from 'react'
-import CustomAnnouncementPane from '@components/PanelPanes/CustomAnnouncementPane'
+import CustomAnnouncementPane, { ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
 import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
 import { getStationByCrs } from '@data/StationManipulators'
 import { AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
@@ -22,6 +22,29 @@ export default class TfWTelevic extends TrainAnnouncementSystem {
   readonly ID = 'TFW_TELEVIC_V1'
   readonly FILE_PREFIX = 'TfW/Televic'
   readonly SYSTEM_TYPE = 'train'
+
+  private readonly announcementPresets: Readonly<
+    Record<string, ICustomAnnouncementPreset<IStartOfJourneyAnnouncementOptions | IStoppedAtStationAnnouncementOptions>[]>
+  > = {
+    startOfJourney: [
+      {
+        name: 'CDF to BYI',
+        state: {
+          callingAtCodes: ['GTN', 'CGN', 'EBK', 'DNS', 'CAD', 'BYD', 'BRY', 'BYI'].map(crsToStationItemMapper),
+        },
+      },
+    ],
+    stoppedAtStation: [
+      {
+        name: 'BRY, next BYI',
+        state: {
+          thisStation: 'BRY',
+          terminus: 'BYI',
+          isTerminusNext: true,
+        },
+      },
+    ],
+  }
 
   readonly AvailableStations: string[] = [
     'ABA',
@@ -440,7 +463,7 @@ export default class TfWTelevic extends TrainAnnouncementSystem {
           'intro.final.the next station will be our final stop',
         )
       } else {
-        files.push('intro.final.we will be travelling to', `station.e.${terminus}`)
+        files.push('intro.mid.we will be travelling to', `station.e.${terminus}`)
       }
     }
 
@@ -468,6 +491,7 @@ export default class TfWTelevic extends TrainAnnouncementSystem {
       component: CustomAnnouncementPane,
       props: {
         playHandler: this.playStartOfJourneyAnnouncement.bind(this),
+        presets: this.announcementPresets.startOfJourney,
         options: {
           callingAtCodes: {
             name: '',
@@ -490,6 +514,7 @@ export default class TfWTelevic extends TrainAnnouncementSystem {
       component: CustomAnnouncementPane,
       props: {
         playHandler: this.playStoppedAtAnnouncement.bind(this),
+        presets: this.announcementPresets.stoppedAtStation,
         options: {
           thisStation: {
             name: 'This station',

@@ -420,6 +420,10 @@ const changelog: IChangelogVersion[] = [
     date: '2024-03-10',
     additions: ['[Amey Phil/Celia] Add bodged EMR recordings', '[Amey Phil/Celia] Use Abercynon South for Abercynon station'],
   },
+  {
+    date: '2024-03-17',
+    additions: ['[TfW Televic] Add system for new Transport for Wales rolling stock'],
+  },
 ]
 
 export default changelog

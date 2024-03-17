@@ -518,22 +518,74 @@ export default class TfWTelevic extends TrainAnnouncementSystem {
         buttonSections: {
           Safety: [
             {
-              label: 'Security message',
-              files: ['safety.security tell staff'],
+              label: 'BTP 61016',
+              files: this.multiLingual(['generic.btp 61016']),
             },
             {
-              label: 'Familiarise yourself with safety information',
-              files: ['safety.safety information'],
+              label: 'BTP 61016 (Critical)',
+              files: this.multiLingual(['generic.btp 61016 critical']),
+            },
+            {
+              label: 'CCTV is in use',
+              files: this.multiLingual(['generic.cctv is in use']),
+            },
+            {
+              label: 'Dangers of high voltage',
+              files: this.multiLingual(['generic.dangers of high voltage']),
+            },
+            {
+              label: 'Take care due to weather',
+              files: this.multiLingual(['generic.take care when leaving due to weather']),
             },
           ],
           General: [
             {
-              label: 'Bing Bong',
-              files: ['fx.bing bong'],
+              label: 'Buy tickets from TfW',
+              files: this.multiLingual(['generic.buy tickets from tfw']),
             },
             {
-              label: 'Jingle',
-              files: ['fx.jingle'],
+              label: 'Delay repay',
+              files: this.multiLingual(['generic.delay repay']),
+            },
+            {
+              label: 'Feet on seats',
+              files: this.multiLingual(['generic.feet on seats']),
+            },
+            {
+              label: 'Ticket inspection',
+              files: this.multiLingual(['generic.have tickets ready for inspection']),
+            },
+            {
+              label: 'Keep luggage off seats',
+              files: this.multiLingual(['generic.make sure luggage is removed from seats']),
+            },
+            {
+              label: 'Clear aisle for catering',
+              files: this.multiLingual(['generic.make sure the aisles are free for catering']),
+            },
+            {
+              label: 'Clear wheelchair space',
+              files: this.multiLingual(['generic.make sure wheelchair space is kept clear']),
+            },
+            {
+              label: 'Penalty fares',
+              files: this.multiLingual(['generic.penalty fares']),
+            },
+            {
+              label: 'Keep belongings with you',
+              files: this.multiLingual(['generic.please keep your belongings with you']),
+            },
+            {
+              label: 'Mind the gap',
+              files: this.multiLingual(['generic.please mind the gap between the train at the platform']),
+            },
+            {
+              label: 'No smoking or vaping',
+              files: this.multiLingual(['generic.smoking or vaping is not allowed on trains or at station']),
+            },
+            {
+              label: 'Busy trains due to event',
+              files: this.multiLingual(['generic.trains may be busier due to an event']),
             },
           ],
         },

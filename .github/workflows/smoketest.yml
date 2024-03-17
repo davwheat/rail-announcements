@@ -80,6 +80,7 @@ jobs:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: davw-network
           SENTRY_PROJECT: rail-announcements-web
+        continue-on-error: true
         run: |
           VERSION=`yarn sentry-cli --url https://sentry.service.davw.network releases propose-version`
 

@@ -120,7 +120,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
   readonly SYSTEM_TYPE = 'station'
 
   protected readonly BEFORE_TOC_DELAY: number = 150
-  protected readonly BEFORE_SECTION_DELAY: number = 870
+  protected readonly BEFORE_SECTION_DELAY: number = 550
   protected readonly SHORT_DELAY: number = 500
 
   readonly DelayCodeMapping: Record<string, { e: string; m: string }> = DelayCodeMapping
@@ -133,7 +133,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
   }
 
   protected readonly callingPointsOptions = {
-    beforeCallingAtDelay: this.BEFORE_SECTION_DELAY,
+    beforeCallingAtDelay: 870,
     afterCallingAtDelay: 0,
     betweenStopsDelay: 320,
     aroundAndDelay: 100,
@@ -4528,13 +4528,6 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         options.coaches ? parseInt(options.coaches.split(' ')[0]) : null,
       )),
     )
-    files.push(
-      ...(await this.getRequestStops(
-        options.callingAt,
-        options.terminatingStationCode,
-        options.coaches ? parseInt(options.coaches.split(' ')[0]) : null,
-      )),
-    )
 
     if (options.coaches) {
       const coaches = options.coaches.split(' ')[0]
@@ -4546,6 +4539,14 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         `e.${coaches === '1' ? 'coach' : 'coaches'}`,
       )
     }
+    
+    files.push(
+      ...(await this.getRequestStops(
+        options.callingAt,
+        options.terminatingStationCode,
+        options.coaches ? parseInt(options.coaches.split(' ')[0]) : null,
+      )),
+    )
 
     files.push(
       ...getPlatFiles(this.BEFORE_SECTION_DELAY),

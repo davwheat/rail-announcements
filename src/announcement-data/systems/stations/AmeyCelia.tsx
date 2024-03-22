@@ -10,7 +10,7 @@ export default class AmeyCelia extends AmeyPhil {
   readonly SYSTEM_TYPE = 'station'
 
   protected readonly BEFORE_TOC_DELAY: number = 30
-  protected readonly BEFORE_SECTION_DELAY: number = 520
+  protected readonly BEFORE_SECTION_DELAY: number = 550
   protected readonly SHORT_DELAY: number = 500
 
   readonly DelayCodeMapping = DelayCodeMapping
@@ -22,7 +22,7 @@ export default class AmeyCelia extends AmeyPhil {
   }
 
   protected readonly callingPointsOptions = {
-    beforeCallingAtDelay: this.BEFORE_SECTION_DELAY,
+    beforeCallingAtDelay: 650,
     afterCallingAtDelay: 0,
     betweenStopsDelay: 220,
     aroundAndDelay: 0,

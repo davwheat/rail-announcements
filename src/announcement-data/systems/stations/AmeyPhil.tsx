@@ -9,8 +9,6 @@ import crsToStationItemMapper, { stationItemCompleter } from '@helpers/crsToStat
 import { AudioItem, CustomAnnouncementButton, CustomAnnouncementTab } from '../../AnnouncementSystem'
 import DelayCodeMapping from './DarwinDelayCodes_Male1.json'
 
-import { Link } from 'gatsby'
-
 export type ChimeType = 'three' | 'four' | 'none'
 
 export interface INextTrainAnnouncementOptions {
@@ -1498,6 +1496,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       'CPH',
       'CPK',
       'CPM',
+      'CPN',
       'CPT',
       'CPW',
       'CPY',

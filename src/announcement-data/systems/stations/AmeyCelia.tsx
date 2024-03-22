@@ -1016,6 +1016,7 @@ export default class AmeyCelia extends AmeyPhil {
       'CPH',
       'CPK',
       'CPM',
+      'CPN',
       'CPT',
       'CPU',
       'CPW',

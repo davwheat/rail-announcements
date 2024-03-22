@@ -424,6 +424,10 @@ const changelog: IChangelogVersion[] = [
     date: '2024-03-17',
     additions: ['[TfW Televic] Add system for new Transport for Wales rolling stock', '[Live Announcements] Announce train restart after RRB'],
   },
+  {
+    date: '2024-03-22',
+    fixes: ['[Amey Phil/Celia] Support for Chapelton (CPN) station', '[Amey Phil/Celia] Fix wrong inflection for Haymarket (HYM)'],
+  },
 ]
 
 export default changelog

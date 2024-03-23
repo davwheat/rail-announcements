@@ -427,6 +427,7 @@ const changelog: IChangelogVersion[] = [
   {
     date: '2024-03-22',
     fixes: ['[Amey Phil/Celia] Support for Chapelton (CPN) station', '[Amey Phil/Celia] Fix wrong inflection for Haymarket (HYM)'],
+    otherChanges: ['[Live Announcements] Improved consistency between departure board and announcements, and reduced networking traffic'],
   },
 ]
 

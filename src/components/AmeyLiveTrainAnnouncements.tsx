@@ -39,6 +39,9 @@ dayjs.extend(dayjsTz)
 dayjs.tz.setDefault('Europe/London')
 
 const MIN_TIME_TO_ANNOUNCE = 4
+const RDM_BASE_URL = 'https://raildotmatrix.co.uk/board'
+// const RDM_BASE_URL = 'http://localhost:8788/board'
+const RDM_BASE_URL_ORIGIN = new URL(RDM_BASE_URL).origin
 
 function pluraliseStrings(...strings: string[]): string {
   if (strings.length === 1) return strings[0]
@@ -272,6 +275,8 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
   systems,
   supportedPlatforms,
 }: LiveTrainAnnouncementsProps<SystemKeys>) {
+  const iframeRef = useRef<HTMLIFrameElement>(null)
+  const [iframeReady, setIframeReady] = useState(false)
   const systemKeys = Object.keys(systems) as SystemKeys[]
 
   const perSystemSupportedStations: Record<string, Option[]> = useMemo(
@@ -790,6 +795,12 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         return
       }
 
+      if (!iframeReady) {
+        addLog('Departure board iframe not ready; waiting...')
+        console.log('[Live Trains] Departure board iframe not ready; waiting...')
+        return
+      }
+
       addLog('Checking for new services')
       console.log('[Live Trains] Checking for new services')
 
@@ -817,6 +828,12 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         try {
           const data: StaffServicesResponse = await resp.json()
           services = data.trainServices
+
+          // Send data to iframe
+          if (iframeReady && iframeRef.current) {
+            console.log('Sending service information to iframe')
+            iframeRef.current.contentWindow?.postMessage(data, RDM_BASE_URL_ORIGIN)
+          }
         } catch {
           addLog("Couldn't parse JSON from API")
           console.warn("[Live Trains] Couldn't parse JSON from API")
@@ -1017,7 +1034,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       addLog('--------------------------------------')
     }
 
-    const refreshInterval = setInterval(checkAndPlay, 10000)
+    const refreshInterval = setInterval(checkAndPlay, iframeReady ? 10000 : 1000)
     checkAndPlay()
 
     return () => {
@@ -1037,6 +1054,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
     announceNextTrain,
     addLog,
     enabledAnnouncements,
+    iframeReady,
   ])
 
   const iframeQueryParams = new URLSearchParams({
@@ -1446,6 +1464,11 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
 
           <FullScreen enabled={isFullscreen} onChange={setFullscreen}>
             <iframe
+              ref={iframeRef}
+              onLoad={() => {
+                console.log('Marking iframe ready for data')
+                setIframeReady(true)
+              }}
               css={{
                 border: 'none',
                 width: '100%',
@@ -1455,7 +1478,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
                   height: '100%',
                 },
               }}
-              src={`https://raildotmatrix.co.uk/board/${displayType}?${iframeQueryParams}`}
+              src={`${RDM_BASE_URL}/${displayType}?${iframeQueryParams}`}
             />
           </FullScreen>
 

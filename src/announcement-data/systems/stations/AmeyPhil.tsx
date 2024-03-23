@@ -4539,7 +4539,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         `e.${coaches === '1' ? 'coach' : 'coaches'}`,
       )
     }
-    
+
     files.push(
       ...(await this.getRequestStops(
         options.callingAt,

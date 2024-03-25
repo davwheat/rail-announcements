@@ -43,6 +43,7 @@ export interface IDisruptedTrainAnnouncementOptions {
 
 interface IFastTrainAnnouncementOptions {
   chime: ChimeType
+  daktronicsFanfare: boolean
   platform: string
   fastTrainApproaching: boolean
 }
@@ -3719,13 +3720,13 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     return null
   }
 
-  protected getChime(chime: ChimeType): AudioItem | null {
+  protected getChime(chime: ChimeType, addFanfare: boolean = false): AudioItem | null {
     switch (chime) {
       case 'none':
         return null
 
       default:
-        return { id: `sfx - ${chime} chimes`, opts: { customPrefix: 'station/ketech' } }
+        return { id: `sfx - ${addFanfare ? 'fanfare and ' : ''}${chime} chimes`, opts: { customPrefix: 'station/ketech' } }
     }
   }
 
@@ -4743,7 +4744,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
   async playFastTrainAnnouncement(options: IFastTrainAnnouncementOptions, download: boolean = false): Promise<void> {
     const files: AudioItem[] = []
 
-    const chime = this.getChime(options.chime)
+    const chime = this.getChime(options.chime, options.daktronicsFanfare)
     if (chime) files.push(chime)
 
     let plat = parseInt(options.platform)
@@ -5665,6 +5666,11 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           },
           fastTrainApproaching: {
             name: '"Fast train approaching"',
+            type: 'boolean',
+            default: false,
+          },
+          daktronicsFanfare: {
+            name: 'Play Daktronics fanfare',
             type: 'boolean',
             default: false,
           },

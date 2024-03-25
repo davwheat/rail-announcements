@@ -429,6 +429,10 @@ const changelog: IChangelogVersion[] = [
     fixes: ['[Amey Phil/Celia] Support for Chapelton (CPN) station', '[Amey Phil/Celia] Fix wrong inflection for Haymarket (HYM)'],
     otherChanges: ['[Live Announcements] Improved consistency between departure board and announcements, and reduced networking traffic'],
   },
+  {
+    date: '2024-03-25',
+    additions: ['[Amey Phil/Celia] Add option to play Daktronics fanfare for fast trains'],
+  },
 ]
 
 export default changelog

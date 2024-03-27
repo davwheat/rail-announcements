@@ -1,7 +1,10 @@
-import AmeyPhil, { ChimeType } from './AmeyPhil'
+import { ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
+import AmeyPhil, { ChimeType, INextTrainAnnouncementOptions } from './AmeyPhil'
 import DelayCodeMapping from './DarwinDelayCodes_Female1.json'
 
 import type { CustomAnnouncementButton } from '@announcement-data/AnnouncementSystem'
+
+type Writeable<T> = { -readonly [P in keyof T]: T[P] }
 
 export default class AmeyCelia extends AmeyPhil {
   readonly NAME = 'Amey/Ditra - Celia Drummond'
@@ -3075,6 +3078,26 @@ export default class AmeyCelia extends AmeyPhil {
       { value: 'rear.11', title: 'Rear 11 coaches' },
       { value: 'rear.12', title: 'Rear 12 coaches' },
     ]
+  }
+
+  protected get announcementPresets() {
+    const base = super.announcementPresets
+    const newPresets = {} as Writeable<typeof base>
+
+    // Ensure none exist with platforms not in the list
+    newPresets.nextTrain = base.nextTrain
+      .map(preset => {
+        const platforms = [preset.state.platform, preset.state.oldPlatform, preset.state.newPlatform]
+
+        if (platforms.some(p => p && !this.PLATFORMS.includes(p))) {
+          return null
+        }
+
+        return preset
+      })
+      .filter(Boolean) as typeof base.nextTrain
+
+    return newPresets
   }
 
   protected readonly requestStopOptions = {

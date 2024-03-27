@@ -154,7 +154,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     return 'four'
   }
 
-  private get announcementPresets(): Readonly<{
+  protected get announcementPresets(): Readonly<{
     nextTrain: ICustomAnnouncementPreset<
       INextTrainAnnouncementOptions & IStandingTrainAnnouncementOptions & IPlatformAlterationAnnouncementOptions
     >[]

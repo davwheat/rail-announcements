@@ -1419,7 +1419,8 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       </fieldset>
 
       <p style={{ margin: '16px 0' }}>
-        This is a beta feature, and isn't complete or fully functional. Please report any issues you face on GitHub.
+        This is a beta feature, and isn't complete or fully functional. Please report any issues you face{' '}
+        <a href="https://github.com/davwheat/rail-announcements/issues">on GitHub</a>.
       </p>
       <p style={{ margin: '16px 0' }}>
         This page will auto-announce all departures in the next {MIN_TIME_TO_ANNOUNCE} minutes from the selected station. Departures outside this

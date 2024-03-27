@@ -3723,7 +3723,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
   protected getChime(chime: ChimeType, addFanfare: boolean = false): AudioItem | null {
     switch (chime) {
       case 'none':
-        return null
+        if (addFanfare) return { id: 'sfx - fanfare', opts: { customPrefix: 'station/ketech' } }
+        else return null
 
       default:
         return { id: `sfx - ${addFanfare ? 'fanfare and ' : ''}${chime} chimes`, opts: { customPrefix: 'station/ketech' } }

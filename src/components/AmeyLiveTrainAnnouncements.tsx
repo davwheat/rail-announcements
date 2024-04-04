@@ -360,6 +360,10 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
   const [selectedCrs, setSelectedCrs] = useState('ECR')
   const [hasEnabledFeature, setHasEnabledFeature] = useState(false)
   const [useLegacyTocNames, setUseLegacyTocNames] = useStateWithLocalStorage<boolean>('amey.live-trains.use-legacy-toc-names', false)
+  const [showUnconfirmedPlatforms, setShowUnconfirmedPlatforms] = useStateWithLocalStorage<boolean>(
+    'amey.live-trains.show-unconfirmed-platforms',
+    false,
+  )
   const [isPlaying, setIsPlaying] = useState(false)
   const [enabledAnnouncements, setEnabledAnnouncements] = useStateWithLocalStorage<AnnouncementType[]>('amey.live-trains.announcement-types', [
     AnnouncementType.Next,
@@ -815,7 +819,8 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       try {
         const resp = await fetch(
           process.env.NODE_ENV === 'development'
-            ? `http://localhost:8787/get-services?${params}`
+            ? // ? `http://localhost:8787/get-services?${params}`
+              `http://localhost:34143/get-services?${params}`
             : `https://api.railannouncements.co.uk/get-services?${params}`,
         )
 
@@ -1066,6 +1071,10 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
 
   if (useLegacyTocNames) {
     iframeQueryParams.append('useLegacyTocNames', '1')
+  }
+
+  if (showUnconfirmedPlatforms) {
+    iframeQueryParams.append('showUnconfirmedPlatforms', '1')
   }
 
   Object.entries(systemKeyForPlatform)
@@ -1417,6 +1426,21 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
           </div>
         </details>
       </fieldset>
+
+      <label htmlFor="show-unconfirmed-platforms">
+        <input
+          type="checkbox"
+          name="show-unconfirmed-platforms"
+          id="show-unconfirmed-platforms"
+          aria-describedby="help-show-unconfirmed-platforms"
+          checked={showUnconfirmedPlatforms}
+          onChange={e => setShowUnconfirmedPlatforms(e.target.checked)}
+        />
+        Show trains with unconfirmed platforms
+      </label>
+      <p id="help-show-unconfirmed-platforms" style={{ fontSize: '0.8em', marginLeft: 40, marginTop: -8 }}>
+        Useful for stations where platforms are suppressed from live data feeds, such as King's Cross.
+      </p>
 
       <p style={{ margin: '16px 0' }}>
         This is a beta feature, and isn't complete or fully functional. Please report any issues you face{' '}

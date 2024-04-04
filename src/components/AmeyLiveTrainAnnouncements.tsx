@@ -512,10 +512,10 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
 
       markStandingTrainAnnounced(train.rid)
 
-      const h = dayjs(train.std).format('HH')
-      const m = dayjs(train.std).format('mm')
+      const h = dayjs.tz(train.std).format('HH')
+      const m = dayjs.tz(train.std).format('mm')
 
-      const delayMins = dayjs(train.etd).diff(dayjs(train.std), 'minutes')
+      const delayMins = dayjs.tz(train.etd).diff(dayjs.tz(train.std), 'minutes')
 
       addLog(`Train is delayed by ${delayMins} mins`)
       console.log(`[Live Trains] Train is delayed by ${delayMins} mins`)
@@ -580,10 +580,10 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
 
       markApproachingTrainAnnounced(train.rid)
 
-      const h = dayjs(train.std).format('HH')
-      const m = dayjs(train.std).format('mm')
+      const h = dayjs.tz(train.std).format('HH')
+      const m = dayjs.tz(train.std).format('mm')
 
-      const delayMins = dayjs(train.etd).diff(dayjs(train.std), 'minutes')
+      const delayMins = dayjs.tz(train.etd).diff(dayjs.tz(train.std), 'minutes')
 
       addLog(`Train is delayed by ${delayMins} mins`)
       console.log(`[Live Trains] Train is delayed by ${delayMins} mins`)
@@ -642,10 +642,10 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
 
       markNextTrainAnnounced(train.rid)
 
-      const h = dayjs(train.std).format('HH')
-      const m = dayjs(train.std).format('mm')
+      const h = dayjs.tz(train.std).format('HH')
+      const m = dayjs.tz(train.std).format('mm')
 
-      const delayMins = dayjs(train.etd).diff(dayjs(train.std), 'minutes')
+      const delayMins = dayjs.tz(train.etd).diff(dayjs.tz(train.std), 'minutes')
 
       addLog(`Train is delayed by ${delayMins} mins`)
       console.log(`[Live Trains] Train is delayed by ${delayMins} mins`)
@@ -704,12 +704,12 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
 
       markDisruptedTrainAnnounced(train.rid)
 
-      const h = dayjs(train.std).format('HH')
-      const m = dayjs(train.std).format('mm')
+      const h = dayjs.tz(train.std).format('HH')
+      const m = dayjs.tz(train.std).format('mm')
 
       const cancelled = train.isCancelled
       const unknownDelay = !train.etdSpecified
-      const delayMins = dayjs(train.etd).diff(dayjs(train.std), 'minutes')
+      const delayMins = dayjs.tz(train.etd).diff(dayjs.tz(train.std), 'minutes')
 
       const toc = systems[systemKey].processTocForLiveTrains(
         train.operator,
@@ -894,7 +894,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
               return false
             }
 
-            if (!s.ataSpecified || dayjs.tz(s.ata, 'Europe/London').add(15, 'seconds').isAfter(dayjs())) {
+            if (!s.ataSpecified || dayjs.tz(s.ata, 'Europe/London').add(15, 'seconds').isAfter(dayjs.tz())) {
               addLog(`Skipping ${s.trainid} ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has not stopped yet (${s.ata} +15s)`)
               console.log(
                 `[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has not stopped yet (${s.ata} +15s)`,
@@ -985,7 +985,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
               return false
             }
 
-            if (dayjs.tz(s.etd, 'Europe/London').diff(dayjs(), 'minutes') > MIN_TIME_TO_ANNOUNCE) {
+            if (dayjs.tz(s.etd, 'Europe/London').diff(dayjs.tz(), 'minutes') > MIN_TIME_TO_ANNOUNCE) {
               addLog(
                 `Skipping ${s.trainid} ${s.rid} (${std} to ${s.destination[0].locationName}) as it is more than ${MIN_TIME_TO_ANNOUNCE} mins away`,
               )
@@ -1020,7 +1020,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
               console.log(`[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has already departed`)
               return false
             }
-            if (!s.isCancelled && dayjs.tz(s.etd, 'Europe/London').diff(dayjs(s.std), 'minutes') < 5 && s.etdSpecified && s.stdSpecified) {
+            if (!s.isCancelled && dayjs.tz(s.etd, 'Europe/London').diff(dayjs.tz(s.std), 'minutes') < 5 && s.etdSpecified && s.stdSpecified) {
               addLog(`Skipping ${s.trainid} ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it is not delayed`)
               console.log(`[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it is not delayed`)
               return false

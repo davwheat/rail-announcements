@@ -433,6 +433,15 @@ const changelog: IChangelogVersion[] = [
     date: '2024-03-25',
     additions: ['[Amey Phil/Celia] Add option to play Daktronics fanfare for fast trains'],
   },
+  {
+    date: '2024-04-04',
+    additions: [
+      '[Amey Phil] Add bodged HRE station files',
+      '[Amey Celia] Add bodged TPE TOC snippets',
+      '[Live Announcements] Fix announcements playing too early in non-UK timezones',
+      '[Live Announcements] Add toggle to include services with unconfirmed platforms on departure board',
+    ],
+  },
 ]
 
 export default changelog

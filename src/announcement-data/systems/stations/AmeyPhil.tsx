@@ -2084,6 +2084,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       'HPQ',
       'HPT',
       'HRD',
+      'HRE',
       'HRH',
       'HRL',
       'HRM',

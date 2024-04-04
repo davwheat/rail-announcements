@@ -894,7 +894,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
               return false
             }
 
-            if (!s.ataSpecified || dayjs(s.ata).add(15, 'seconds').isAfter(dayjs())) {
+            if (!s.ataSpecified || dayjs.tz(s.ata, 'Europe/London').add(15, 'seconds').isAfter(dayjs())) {
               addLog(`Skipping ${s.trainid} ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has not stopped yet (${s.ata} +15s)`)
               console.log(
                 `[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has not stopped yet (${s.ata} +15s)`,
@@ -984,7 +984,8 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
               console.log(`[Live Trains] Skipping ${s.rid} (${std} to ${s.destination[0].locationName}) as it has no confirmed platform`)
               return false
             }
-            if (dayjs(s.etd).diff(dayjs(), 'minutes') > MIN_TIME_TO_ANNOUNCE) {
+
+            if (dayjs.tz(s.etd, 'Europe/London').diff(dayjs(), 'minutes') > MIN_TIME_TO_ANNOUNCE) {
               addLog(
                 `Skipping ${s.trainid} ${s.rid} (${std} to ${s.destination[0].locationName}) as it is more than ${MIN_TIME_TO_ANNOUNCE} mins away`,
               )
@@ -1019,7 +1020,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
               console.log(`[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has already departed`)
               return false
             }
-            if (!s.isCancelled && dayjs(s.etd).diff(dayjs(s.std), 'minutes') < 5 && s.etdSpecified && s.stdSpecified) {
+            if (!s.isCancelled && dayjs.tz(s.etd, 'Europe/London').diff(dayjs(s.std), 'minutes') < 5 && s.etdSpecified && s.stdSpecified) {
               addLog(`Skipping ${s.trainid} ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it is not delayed`)
               console.log(`[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it is not delayed`)
               return false

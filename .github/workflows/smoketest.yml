@@ -91,6 +91,13 @@ jobs:
           yarn sentry-cli --url https://sentry.service.davw.network releases set-commits "$VERSION" --auto
           yarn sentry-cli --url https://sentry.service.davw.network releases finalize "$VERSION"
 
+      - name: Run D1 migrations
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          workingDirectory: 'cf-workers'
+          command: d1 migrations apply rail-announcements
+
       - name: Setup Rclone
         uses: AnimMouse/setup-rclone@v1
         with:

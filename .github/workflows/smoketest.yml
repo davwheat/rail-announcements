@@ -104,7 +104,7 @@ jobs:
 
       - name: Upload audio files to Cloudflare R2
         run: |
-          rclone --fast-list -v --transfers=128 --checkers=256 --progress sync "./audio" "Cloudflare R2:/rail-announcements-audio"
+          rclone --fast-list -v --transfers=128 --checkers=256 --progress copy "./audio" "Cloudflare R2:/rail-announcements-audio"
         env:
           RCLONE_CONFIG_PASS: ${{ secrets.RCLONE_CONFIG_PASSWORD }}
 

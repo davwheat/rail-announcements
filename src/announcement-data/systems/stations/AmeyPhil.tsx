@@ -21,6 +21,7 @@ export interface INextTrainAnnouncementOptions {
   terminatingStationCode: string
   vias: CallingAtPoint[]
   callingAt: CallingAtPoint[]
+  firstClassLocation: string
   coaches: string | null
 }
 
@@ -4537,6 +4538,13 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       )),
     )
 
+    if (options.firstClassLocation !== 'none') {
+      files.push(
+        { id: `m.first class accommodation is situated at the`, opts: { delayStart: 500 } },
+        `e.${options.firstClassLocation} of the train`,
+      )
+    }
+
     if (options.coaches) {
       const coaches = options.coaches.split(' ')[0]
 
@@ -4644,6 +4652,13 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         options.coaches ? parseInt(options.coaches.split(' ')[0]) : null,
       )),
     )
+
+    if (options.firstClassLocation !== 'none') {
+      files.push(
+        { id: `m.first class accommodation is situated at the`, opts: { delayStart: 500 } },
+        `e.${options.firstClassLocation} of the train`,
+      )
+    }
 
     await this.playAudioFiles(files, download)
   }
@@ -5289,6 +5304,17 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             } as ICallingAtSelectorProps,
             default: [],
           },
+          firstClassLocation: {
+            name: 'First Class Location',
+            type: 'select',
+            default: 'none',
+            options: [
+              { title: 'None', value: 'none' },
+              { title: 'Front of Train', value: 'front' },
+              { title: 'Middle of Train', value: 'middle' },
+              { title: 'Rear of Train', value: 'rear' },
+            ],
+          },
           coaches: {
             name: 'Coach count',
             default: '8 coaches',
@@ -5517,6 +5543,17 @@ export default class AmeyPhil extends StationAnnouncementSystem {
               enableRrbContinuations: true,
             } as ICallingAtSelectorProps,
             default: [],
+          },
+          firstClassLocation: {
+            name: 'First Class Location',
+            type: 'select',
+            default: 'none',
+            options: [
+              { title: 'None', value: 'none' },
+              { title: 'Front of Train', value: 'front' },
+              { title: 'Middle of Train', value: 'middle' },
+              { title: 'Rear of Train', value: 'rear' },
+            ],
           },
           coaches: {
             name: 'Coach count',

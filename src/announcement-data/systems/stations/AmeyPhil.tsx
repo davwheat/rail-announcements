@@ -10,6 +10,7 @@ import { AudioItem, CustomAnnouncementButton, CustomAnnouncementTab } from '../.
 import DelayCodeMapping from './DarwinDelayCodes_Male1.json'
 
 export type ChimeType = 'three' | 'four' | 'none'
+export type FirstClassLocation = 'none' | 'front' | 'middle' | 'rear'
 
 export interface INextTrainAnnouncementOptions {
   chime: ChimeType
@@ -21,6 +22,7 @@ export interface INextTrainAnnouncementOptions {
   terminatingStationCode: string
   vias: CallingAtPoint[]
   callingAt: CallingAtPoint[]
+  firstClassLocation: FirstClassLocation
   coaches: string | null
 }
 
@@ -180,6 +182,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             coaches: '8 coaches',
             mindTheGap: true,
             thisStationCode: 'LIT',
+            firstClassLocation: 'none',
           },
         },
         {
@@ -220,6 +223,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             coaches: '8 coaches',
             mindTheGap: false,
             thisStationCode: 'VIC',
+            firstClassLocation: 'none',
           },
         },
         {
@@ -240,6 +244,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             coaches: '8 coaches',
             mindTheGap: false,
             thisStationCode: 'BTN',
+            firstClassLocation: 'none',
           },
         },
         {
@@ -277,6 +282,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             ].map(stationItemCompleter),
             coaches: '11 coaches',
             mindTheGap: false,
+            firstClassLocation: 'rear',
           },
         },
         {
@@ -297,6 +303,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             coaches: '9 coaches',
             mindTheGap: false,
             thisStationCode: 'MAN',
+            firstClassLocation: 'front',
           },
         },
         {
@@ -357,6 +364,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             coaches: '5 coaches',
             mindTheGap: false,
             thisStationCode: 'ABD',
+            firstClassLocation: 'front',
           },
         },
         {
@@ -380,6 +388,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             coaches: '5 coaches',
             mindTheGap: false,
             thisStationCode: 'MAN',
+            firstClassLocation: 'front',
           },
         },
         {
@@ -400,6 +409,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             coaches: '5 coaches',
             mindTheGap: false,
             thisStationCode: 'MYB',
+            firstClassLocation: 'none',
           },
         },
         {
@@ -434,6 +444,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             ].map(stationItemCompleter),
             coaches: '3 coaches',
             mindTheGap: false,
+            firstClassLocation: 'none',
           },
         },
         {
@@ -454,6 +465,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             callingAt: ['BDS', 'TCR', 'ZFD', 'LST', 'ZLW', 'CWX', 'CUS', 'WWC'].map(crsToStationItemMapper),
             coaches: '9 coaches',
             mindTheGap: false,
+            firstClassLocation: 'none',
           },
         },
       ],
@@ -4537,6 +4549,13 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       )),
     )
 
+    if (options.firstClassLocation !== 'none') {
+      files.push(
+        { id: `m.first class accommodation is situated at the`, opts: { delayStart: 500 } },
+        `e.${options.firstClassLocation} of the train`,
+      )
+    }
+
     if (options.coaches) {
       const coaches = options.coaches.split(' ')[0]
 
@@ -4644,6 +4663,13 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         options.coaches ? parseInt(options.coaches.split(' ')[0]) : null,
       )),
     )
+
+    if (options.firstClassLocation !== 'none') {
+      files.push(
+        { id: `m.first class accommodation is situated at the`, opts: { delayStart: 500 } },
+        `e.${options.firstClassLocation} of the train`,
+      )
+    }
 
     await this.playAudioFiles(files, download)
   }
@@ -5289,6 +5315,17 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             } as ICallingAtSelectorProps,
             default: [],
           },
+          firstClassLocation: {
+            name: 'First Class Location',
+            type: 'select',
+            default: 'none',
+            options: [
+              { title: 'None', value: 'none' },
+              { title: 'Front of Train', value: 'front' },
+              { title: 'Middle of Train', value: 'middle' },
+              { title: 'Rear of Train', value: 'rear' },
+            ],
+          },
           coaches: {
             name: 'Coach count',
             default: '8 coaches',
@@ -5517,6 +5554,17 @@ export default class AmeyPhil extends StationAnnouncementSystem {
               enableRrbContinuations: true,
             } as ICallingAtSelectorProps,
             default: [],
+          },
+          firstClassLocation: {
+            name: 'First Class Location',
+            type: 'select',
+            default: 'none',
+            options: [
+              { title: 'None', value: 'none' },
+              { title: 'Front of Train', value: 'front' },
+              { title: 'Middle of Train', value: 'middle' },
+              { title: 'Rear of Train', value: 'rear' },
+            ],
           },
           coaches: {
             name: 'Coach count',

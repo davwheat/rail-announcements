@@ -1,6 +1,5 @@
-import type { Env } from '.'
-
-export async function getAnnouncementHandler(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+export const onRequest: PagesFunction<Env> = async context => {
+  const { request, env } = context
   const { searchParams } = new URL(request.url)
 
   // Validate request body structure
@@ -16,7 +15,7 @@ export async function getAnnouncementHandler(request: Request, env: Env, ctx: Ex
 
   const id = searchParams.get('id')
 
-  const result = await db.prepare('SELECT * FROM saved_announcements WHERE id = ? LIMIT 1').bind(id).run()
+  const result = await db.prepare('SELECT * FROM saved_announcements WHERE id = ? LIMIT 1').bind(id).all()
 
   if (!result.success) {
     return new Response(JSON.stringify({ error: true, message: 'Failed to get announcement' }), {

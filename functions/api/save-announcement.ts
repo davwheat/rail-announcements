@@ -1,5 +1,3 @@
-import type { Env } from '.'
-
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 
@@ -25,7 +23,9 @@ const validator = new Validator({
   additionalProperties: false,
 })
 
-export async function saveAnnouncementHandler(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+export const onRequest: PagesFunction<Env> = async context => {
+  const { request, env } = context
+
   const body = await request.json()
 
   const validationResult = validator.validate(body)
@@ -60,7 +60,7 @@ export async function saveAnnouncementHandler(request: Request, env: Env, ctx: E
   let id = uuid()
 
   // Ensure the ID is unique
-  while ((await db.prepare('SELECT id FROM saved_announcements WHERE id = ? LIMIT 1').bind(id).run()).results.length > 0) {
+  while ((await db.prepare('SELECT id FROM saved_announcements WHERE id = ? LIMIT 1').bind(id).all()).results.length > 0) {
     id = uuid()
   }
 

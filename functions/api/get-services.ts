@@ -1,5 +1,3 @@
-import type { Env } from '.'
-
 export interface AssociatedServiceDetail {
   cancelReason: CancelLatenessReason | null
   delayReason: CancelLatenessReason | null
@@ -313,7 +311,8 @@ async function processAssociatedService(service: AssociatedServiceDetail): Promi
   }
 }
 
-export async function getServicesHandler(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+export const onRequest: PagesFunction<Env> = async context => {
+  const { request } = context
   const { searchParams } = new URL(request.url)
 
   try {

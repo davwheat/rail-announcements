@@ -14,7 +14,7 @@ import {
   type TimingLocation,
   type EndPointLocation,
   AssociatedServiceDetail,
-} from '../../cf-workers/src/get-services'
+} from '../../functions/api/get-services'
 
 import './AmeyLiveTrainAnnouncements.css'
 
@@ -820,10 +820,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
 
       try {
         const resp = await fetch(
-          process.env.NODE_ENV === 'development'
-            ? `http://localhost:8787/get-services?${params}`
-            : //`http://localhost:34143/get-services?${params}`
-              `https://api.railannouncements.co.uk/get-services?${params}`,
+          process.env.NODE_ENV === 'development' ? `http://localhost:8787/get-services?${params}` : `/api/get-services?${params}`,
         )
 
         if (!resp.ok) {

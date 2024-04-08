@@ -86,8 +86,8 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
   private readonly StationsWithAttractions = {
     BFR: 'riverboat services from blackfriars pier the southbank and the tate modern',
     CTK: 'st pauls cathedral',
-    DYP: 'the emirates stadium',
-    // HHE: 'the bluebell railway',
+    FPK: 'the emirates stadium',
+    EGR: 'the bluebell railway',
     GNH: 'a bus to the bluewater shopping centre',
     GNW: 'the national maritime museum and the royal observatory',
     HAT: 'hatfield house',

@@ -126,7 +126,9 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
-      - run: rclone copy  dest:destpath
+      - name: Copy audio files to Cloudflare R2
+        run: |
+          rclone --fast-list -v --transfers=128 --checkers=256 --progress sync "./audio" "Cloudflare R2:/rail-announcements-audio"
         env:
           RCLONE_CONFIG_PASS: ${{ secrets.RCLONE_CONFIG_PASSWORD }}
 

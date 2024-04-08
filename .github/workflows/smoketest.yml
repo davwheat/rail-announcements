@@ -9,8 +9,8 @@ on:
   workflow_dispatch:
 
 env:
-  NODE_VERSION: 18.x
-  CF_PAGES_PROJECT_NAME: raildotmatrix
+  NODE_VERSION: 20.x
+  CF_PAGES_PROJECT_NAME: rail-announcements
 
 jobs:
   smoketest:

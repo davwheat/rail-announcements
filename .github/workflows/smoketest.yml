@@ -92,6 +92,7 @@ jobs:
           yarn sentry-cli --url https://sentry.service.davw.network releases finalize "$VERSION"
 
       - name: Run D1 migrations
+        if: github.ref == 'refs/heads/deploy' && github.event_name == 'push'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}

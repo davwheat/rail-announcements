@@ -5,8 +5,26 @@ on:
     branches:
       - main
       - deploy
+  # Triggers the workflow on pull request event, but only for pull request from not forked repo
   pull_request:
+    types:
+      - opened
+      - synchronize
+  # Triggers the workflow on pull request event, but only for pull request opened or pull request labeled with "🚀request-deploy" (from forked repo)
+  # pull_request is not allowed to use secrets, so we use pull_request_target instead (in forked repos)
+  pull_request_target:
+    types:
+      # When a labeled '🚀request-deploy' pull request from forked repo, it will be deploy to Cloudflare Pages
+      - labeled
   workflow_dispatch:
+
+permissions:
+  # default contents: read & write (in forked repos, only read)
+  contents: write
+  # default deployments: read & write (in forked repos, only read)
+  deployments: write
+  # default pull-requests: read & write (in forked repos, only read)
+  pull-requests: write
 
 env:
   NODE_VERSION: 20.x
@@ -17,6 +35,10 @@ jobs:
     runs-on: ubuntu-latest
     name: Test, build and deploy
 
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.pull_request.head.ref || github.ref }}
+      cancel-in-progress: true
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -24,7 +46,9 @@ jobs:
       - name: Find existing build status comment
         continue-on-error: true
         uses: peter-evans/find-comment@v3
-        if: github.event_name == 'pull_request'
+        if:
+          ${{ github.event_name == 'pull_request' || github.event_name == 'pull_request_target' && contains(github.event.label.name, '🚀 request
+          deploy') }}
         id: find_status_comment
         with:
           issue-number: ${{ github.event.pull_request.number }}
@@ -34,7 +58,9 @@ jobs:
       - name: Create or update comment
         continue-on-error: true
         uses: peter-evans/create-or-update-comment@v4
-        if: github.event_name == 'pull_request'
+        if:
+          ${{ github.event_name == 'pull_request' || github.event_name == 'pull_request_target' && contains(github.event.label.name, '🚀 request
+          deploy') }}
         with:
           issue-number: ${{ github.event.pull_request.number }}
           comment-id: ${{ steps.find_status_comment.outputs.comment-id }}
@@ -113,6 +139,7 @@ jobs:
 
       - name: Publish to Cloudflare Pages
         uses: cloudflare/pages-action@1
+        if: ${{ github.event_name != 'pull_request_target' || contains(github.event.label.name, '🚀 request deploy') }}
         id: cf-pages-upload
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -124,10 +151,25 @@ jobs:
           # Use PR head branch if available, otherwise use the current branch
           branch: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name }}
 
+      - name: Remove deploy label
+        if: ${{ github.event_name == 'pull_request_target' && contains(github.event.label.name, '🚀 request deploy') }}
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.issues.removeLabel({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: ['🚀request-deploy']
+            })
+
       - name: Find existing build status comment
         continue-on-error: true
         uses: peter-evans/find-comment@v3
-        if: github.event_name == 'pull_request'
+        if:
+          ${{ github.event_name == 'pull_request' || github.event_name == 'pull_request_target' && contains(github.event.label.name, '🚀 request
+          deploy') }}
         id: find_current_status_comment
         with:
           issue-number: ${{ github.event.pull_request.number }}
@@ -136,7 +178,9 @@ jobs:
 
       - name: Update comment
         continue-on-error: true
-        if: github.event_name == 'pull_request' && steps.find_current_status_comment.outputs.comment-id != ''
+        if:
+          ${{ (github.event_name == 'pull_request' || github.event_name == 'pull_request_target' && contains(github.event.label.name, '🚀 request
+          deploy')) && steps.find_current_status_comment.outputs.comment-id != '' }}
         uses: peter-evans/create-or-update-comment@v4
         with:
           comment-id: ${{ steps.find_current_status_comment.outputs.comment-id }}

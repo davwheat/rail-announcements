@@ -442,6 +442,12 @@ const changelog: IChangelogVersion[] = [
       '[Live Announcements] Add toggle to include services with unconfirmed platforms on departure board',
     ],
   },
+  {
+    date: '2024-04-04',
+    additions: ['[Amey Phil & Celia] Add bodged LNER TOC files', '[Amey Phil & Celia] Add 1st class location option'],
+    fixes: ['[Live Announcements] Don\'t announce pick-up only stops within "calling at"'],
+    otherChanges: ['Migrated from GitHub Pages to Cloudflare R2 (for audio storage) and Pages (for the website)'],
+  },
 ]
 
 export default changelog

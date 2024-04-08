@@ -821,9 +821,9 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       try {
         const resp = await fetch(
           process.env.NODE_ENV === 'development'
-            ? // ? `http://localhost:8787/get-services?${params}`
-              `http://localhost:34143/get-services?${params}`
-            : `https://api.railannouncements.co.uk/get-services?${params}`,
+            ? `http://localhost:8787/get-services?${params}`
+            : //`http://localhost:34143/get-services?${params}`
+              `https://api.railannouncements.co.uk/get-services?${params}`,
         )
 
         if (!resp.ok) {

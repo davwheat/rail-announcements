@@ -572,6 +572,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         'London Midland',
         'London Midland City',
         'London Midland Express',
+        'London North Eastern Railway',
         'London Overground',
         'London Transport Buses',
         'London Underground',
@@ -3696,6 +3697,10 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     switch (tocCode.toUpperCase()) {
       default:
         return this.ALL_AVAILABLE_TOCS.find(t => t?.toLowerCase() === tocName?.toLowerCase()) ?? ''
+
+      // LNER has different filename compared to TOC name
+      case 'GR':
+        return 'london north eastern railway'
 
       // West Midlands Trains
       case 'LM':

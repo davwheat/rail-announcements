@@ -115,6 +115,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Setup Rclone
+        uses: AnimMouse/setup-rclone@v1
+        with:
+          rclone_config: ${{ secrets.RCLONE_CONFIG }}
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - run: rclone copy  dest:destpath
+        env:
+          RCLONE_CONFIG_PASS: ${{ secrets.RCLONE_CONFIG_PASSWORD }}
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v3

@@ -121,6 +121,7 @@ export default class AmeyCelia extends AmeyPhil {
         'London Midland',
         'London Midland City',
         'London Midland Express',
+        'London North Eastern Railway',
         'London Northwestern Railway',
         'London Overground',
         'London Transport Buses',
@@ -3191,6 +3192,10 @@ export default class AmeyCelia extends AmeyPhil {
     switch (tocCode.toUpperCase()) {
       default:
         return this.ALL_AVAILABLE_TOCS.find(t => t?.toLowerCase() === tocName?.toLowerCase()) ?? ''
+
+      // LNER has different filename compared to TOC name
+      case 'GR':
+        return 'london north eastern railway'
 
       // West Midlands Trains
       case 'LM':

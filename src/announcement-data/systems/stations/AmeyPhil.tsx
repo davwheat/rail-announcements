@@ -10,6 +10,7 @@ import { AudioItem, CustomAnnouncementButton, CustomAnnouncementTab } from '../.
 import DelayCodeMapping from './DarwinDelayCodes_Male1.json'
 
 export type ChimeType = 'three' | 'four' | 'none'
+export type FirstClassLocation = 'none' | 'front' | 'middle' | 'rear'
 
 export interface INextTrainAnnouncementOptions {
   chime: ChimeType
@@ -21,7 +22,7 @@ export interface INextTrainAnnouncementOptions {
   terminatingStationCode: string
   vias: CallingAtPoint[]
   callingAt: CallingAtPoint[]
-  firstClassLocation: string
+  firstClassLocation: FirstClassLocation
   coaches: string | null
 }
 

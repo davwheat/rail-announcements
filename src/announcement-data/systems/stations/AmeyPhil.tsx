@@ -182,6 +182,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             coaches: '8 coaches',
             mindTheGap: true,
             thisStationCode: 'LIT',
+            firstClassLocation: 'none',
           },
         },
         {
@@ -222,6 +223,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             coaches: '8 coaches',
             mindTheGap: false,
             thisStationCode: 'VIC',
+            firstClassLocation: 'none',
           },
         },
         {
@@ -242,6 +244,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             coaches: '8 coaches',
             mindTheGap: false,
             thisStationCode: 'BTN',
+            firstClassLocation: 'none',
           },
         },
         {
@@ -279,6 +282,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             ].map(stationItemCompleter),
             coaches: '11 coaches',
             mindTheGap: false,
+            firstClassLocation: 'rear',
           },
         },
         {
@@ -299,6 +303,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             coaches: '9 coaches',
             mindTheGap: false,
             thisStationCode: 'MAN',
+            firstClassLocation: 'front',
           },
         },
         {
@@ -359,6 +364,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             coaches: '5 coaches',
             mindTheGap: false,
             thisStationCode: 'ABD',
+            firstClassLocation: 'front',
           },
         },
         {
@@ -382,6 +388,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             coaches: '5 coaches',
             mindTheGap: false,
             thisStationCode: 'MAN',
+            firstClassLocation: 'front',
           },
         },
         {
@@ -402,6 +409,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             coaches: '5 coaches',
             mindTheGap: false,
             thisStationCode: 'MYB',
+            firstClassLocation: 'none',
           },
         },
         {
@@ -436,6 +444,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             ].map(stationItemCompleter),
             coaches: '3 coaches',
             mindTheGap: false,
+            firstClassLocation: 'none',
           },
         },
         {
@@ -456,6 +465,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             callingAt: ['BDS', 'TCR', 'ZFD', 'LST', 'ZLW', 'CWX', 'CUS', 'WWC'].map(crsToStationItemMapper),
             coaches: '9 coaches',
             mindTheGap: false,
+            firstClassLocation: 'none',
           },
         },
       ],

@@ -1,6 +1,6 @@
 # UK Railway Announcements
 
-[View the website!](https://rail-announcements.davwheat.dev/)
+[View the website!](https://railannouncements.co.uk/)
 
 A website to generate and play UK railway announcements.
 
@@ -8,7 +8,7 @@ A website to generate and play UK railway announcements.
 >
 > Due to a legal notice by Worldline IT Services UK Limited, Atos Anne's audio recordings are no longer available.
 >
-> For more information, please visit https://rail-announcements.davwheat.dev/atos-worldline
+> For more information, please visit https://railannouncements.co.uk/atos-worldline
 
 ## Introduction
 
@@ -21,7 +21,7 @@ I decided I'll do it proactively this time!
 
 ### Audio contributions
 
-The folder for audio files can be found at `static/audio/`.
+The folder for audio files can be found at `audio/`.
 
 - Open a separate pull request for each announcement system you're modifying.
 - Audio files should be split wherever possible, but don't overdo it.

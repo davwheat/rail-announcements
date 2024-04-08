@@ -14,7 +14,7 @@ import {
   type TimingLocation,
   type EndPointLocation,
   AssociatedServiceDetail,
-} from '../../cf-workers/src/get-services'
+} from '../../functions/api/get-services'
 
 import './AmeyLiveTrainAnnouncements.css'
 

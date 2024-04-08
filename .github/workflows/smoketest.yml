@@ -10,11 +10,11 @@ on:
     types:
       - opened
       - synchronize
-  # Triggers the workflow on pull request event, but only for pull request opened or pull request labeled with "🚀request-deploy" (from forked repo)
+  # Triggers the workflow on pull request event, but only for pull request opened or pull request labeled with "🚀 request deploy" (from forked repo)
   # pull_request is not allowed to use secrets, so we use pull_request_target instead (in forked repos)
   pull_request_target:
     types:
-      # When a labeled '🚀request-deploy' pull request from forked repo, it will be deploy to Cloudflare Pages
+      # When a labeled '🚀 request deploy' pull request from forked repo, it will be deploy to Cloudflare Pages
       - labeled
   workflow_dispatch:
 
@@ -36,8 +36,9 @@ jobs:
     name: Test, build and deploy
 
     if:
-      ${{ !contains(github.event_name, 'pull_request') || ((github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork) || (github.event_name == 'pull_request_target' &&
-      github.event.pull_request.head.repo.fork && contains(github.event.label.name, '🚀 request deploy'))) }}
+      ${{ !contains(github.event_name, 'pull_request') || ((github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork) ||
+      (github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.fork && contains(github.event.label.name, '🚀 request
+      deploy'))) }}
 
     concurrency:
       group: ${{ github.workflow }}-${{ github.event.pull_request.head.ref || github.ref }}
@@ -167,7 +168,7 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              name: ['🚀request-deploy']
+              name: ['🚀 request deploy']
             })
 
       - name: Find existing build status comment

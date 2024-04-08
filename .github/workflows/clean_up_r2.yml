@@ -1,0 +1,27 @@
+name: Clean-up
+
+on:
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: 20.x
+
+jobs:
+  r2:
+    runs-on: ubuntu-latest
+    name: R2 storage
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Rclone
+        uses: AnimMouse/setup-rclone@v1
+        with:
+          rclone_config: ${{ secrets.RCLONE_CONFIG }}
+
+      - name: Sync audio files from repo to Cloudflare R2
+        run: |
+          rclone --fast-list -v --transfers=128 --checkers=256 --progress sync "./audio" "Cloudflare R2:/rail-announcements-audio"
+        env:
+          RCLONE_CONFIG_PASS: ${{ secrets.RCLONE_CONFIG_PASSWORD }}

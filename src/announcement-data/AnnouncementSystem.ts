@@ -151,7 +151,7 @@ export default abstract class AnnouncementSystem {
    * Generates a URL for the provided audio file ID.
    */
   generateAudioFileUrl(fileId: string, customPrefix?: string): string {
-    return `/audio/${customPrefix || this.FILE_PREFIX}/${this.processAudioFileId(fileId).replace(/\./g, '/')}.mp3`
+    return `https://cdn.railannouncements.co.uk/${customPrefix || this.FILE_PREFIX}/${this.processAudioFileId(fileId).replace(/\./g, '/')}.mp3`
   }
 
   /**

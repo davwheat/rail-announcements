@@ -823,7 +823,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
           process.env.NODE_ENV === 'development'
             ? `http://localhost:8787/get-services?${params}`
             : //`http://localhost:34143/get-services?${params}`
-              `https://api.railannouncements.co.uk/get-services?${params}`,
+              `https://railannouncements.co.uk/api/get-services?${params}`,
         )
 
         if (!resp.ok) {

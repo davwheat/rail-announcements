@@ -1,5 +1,4 @@
 import path from 'path'
-import { AllAnnouncementSystems } from './src/announcement-data/AllSystems'
 import { GatsbyNode } from 'gatsby'
 
 export const onCreateWebpackConfig: GatsbyNode['onCreateWebpackConfig'] = ({ stage, rules, loaders, plugins, actions }) => {

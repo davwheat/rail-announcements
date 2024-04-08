@@ -56,7 +56,7 @@ export class SystemTabState {
       state: this.state,
     }
 
-    const response = await fetch('https://api.railannouncements.co.uk/save-announcement', {
+    const response = await fetch('https://railannouncements.co.uk/api/save-announcement', {
       method: 'POST',
       body: JSON.stringify(body),
       headers: {
@@ -95,7 +95,7 @@ export class SystemTabState {
     const params = new URLSearchParams()
     params.set('id', id)
 
-    const response = await fetch(`https://api.railannouncements.co.uk/get-announcement?${params}`)
+    const response = await fetch(`https://railannouncements.co.uk/api/get-announcement?${params}`)
 
     if (!response.ok) {
       throw new Error(response.statusText)

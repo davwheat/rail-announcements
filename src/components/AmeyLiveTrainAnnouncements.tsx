@@ -549,6 +549,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         terminatingStationCode: getStation(train.destination[0], systemKey),
         vias,
         callingAt,
+        firstClassLocation: 'none',
       }
 
       console.log(options)
@@ -674,6 +675,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         terminatingStationCode: getStation(train.destination[0], systemKey),
         vias,
         callingAt,
+        firstClassLocation: 'none',
       }
 
       console.log(options)

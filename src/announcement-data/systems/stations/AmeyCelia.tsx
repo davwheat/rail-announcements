@@ -163,7 +163,7 @@ export default class AmeyCelia extends AmeyPhil {
         'special charter',
         'Stansted Express',
         'steam charter train',
-        'steam hauled special service',
+        'steam hauled special',
         'stopping',
         'Tarka Line',
         'Thames Trains',

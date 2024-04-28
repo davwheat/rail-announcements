@@ -23,7 +23,7 @@ export interface INextTrainAnnouncementOptions {
   vias: CallingAtPoint[]
   callingAt: CallingAtPoint[]
   firstClassLocation: FirstClassLocation
-  coaches: string | null
+  coaches: string
 }
 
 export interface IStandingTrainAnnouncementOptions extends Omit<INextTrainAnnouncementOptions, 'chime'> {
@@ -88,7 +88,7 @@ export interface ILivePlatformAlterationAnnouncementOptions {
   terminatingStationCode: string[]
   vias: CallingAtPoint[][]
   callingAt?: CallingAtPoint[]
-  coaches: string | null
+  coaches: string
   fromLive: true
 }
 
@@ -4529,7 +4529,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         ...(await this.getCallingPoints(
           options.callingAt,
           options.terminatingStationCode,
-          options.coaches ? parseInt(options.coaches.split(' ')[0]) : null,
+          options.coaches !== 'None' ? parseInt(options.coaches.split(' ')[0]) : null,
           false,
         )),
       )
@@ -4545,7 +4545,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       ...(await this.getShortPlatforms(
         options.callingAt,
         options.terminatingStationCode,
-        options.coaches ? parseInt(options.coaches.split(' ')[0]) : null,
+        options.coaches !== 'None' ? parseInt(options.coaches.split(' ')[0]) : null,
       )),
     )
 
@@ -4556,7 +4556,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       )
     }
 
-    if (options.coaches) {
+    if (options.coaches !== 'None') {
       const coaches = options.coaches.split(' ')[0]
 
       // Platforms share the same audio as coach numbers
@@ -4571,7 +4571,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       ...(await this.getRequestStops(
         options.callingAt,
         options.terminatingStationCode,
-        options.coaches ? parseInt(options.coaches.split(' ')[0]) : null,
+        options.coaches !== 'None' ? parseInt(options.coaches.split(' ')[0]) : null,
       )),
     )
 
@@ -4636,7 +4636,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         ...(await this.getCallingPoints(
           options.callingAt,
           options.terminatingStationCode,
-          options.coaches ? parseInt(options.coaches.split(' ')[0]) : null,
+          options.coaches !== 'None' ? parseInt(options.coaches.split(' ')[0]) : null,
           true,
         )),
       )
@@ -4652,7 +4652,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       ...(await this.getShortPlatforms(
         options.callingAt,
         options.terminatingStationCode,
-        options.coaches ? parseInt(options.coaches.split(' ')[0]) : null,
+        options.coaches !== 'None' ? parseInt(options.coaches.split(' ')[0]) : null,
       )),
     )
 
@@ -4660,7 +4660,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       ...(await this.getRequestStops(
         options.callingAt,
         options.terminatingStationCode,
-        options.coaches ? parseInt(options.coaches.split(' ')[0]) : null,
+        options.coaches !== 'None' ? parseInt(options.coaches.split(' ')[0]) : null,
       )),
     )
 
@@ -5330,6 +5330,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             name: 'Coach count',
             default: '8 coaches',
             options: [
+              'None',
               '1 coach',
               '2 coaches',
               '3 coaches',
@@ -5342,6 +5343,14 @@ export default class AmeyPhil extends StationAnnouncementSystem {
               '10 coaches',
               '11 coaches',
               '12 coaches',
+              '13 coaches',
+              '14 coaches',
+              '15 coaches',
+              '16 coaches',
+              '17 coaches',
+              '18 coaches',
+              '19 coaches',
+              '20 coaches',
             ].map(c => ({ title: c, value: c })),
             type: 'select',
           },
@@ -5570,6 +5579,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             name: 'Coach count',
             default: '8 coaches',
             options: [
+              'None',
               '1 coach',
               '2 coaches',
               '3 coaches',
@@ -5582,6 +5592,14 @@ export default class AmeyPhil extends StationAnnouncementSystem {
               '10 coaches',
               '11 coaches',
               '12 coaches',
+              '13 coaches',
+              '14 coaches',
+              '15 coaches',
+              '16 coaches',
+              '17 coaches',
+              '18 coaches',
+              '19 coaches',
+              '20 coaches',
             ].map(c => ({ title: c, value: c })),
             type: 'select',
           },

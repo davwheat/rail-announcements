@@ -225,6 +225,7 @@ export default class AmeyCelia extends AmeyPhil {
         'North London Railways',
         'South Central Trains',
         'steam special',
+        'Transport for Wales',
         'Wessex',
         'Virgin Trains the Sussex Scot',
         'West Anglia Great Northern Railway',

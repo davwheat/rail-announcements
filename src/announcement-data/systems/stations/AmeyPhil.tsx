@@ -3311,6 +3311,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       'WAR',
       'WAS',
       'WAT',
+      'WAW',
       'WBC',
       'WBD',
       'WBL',

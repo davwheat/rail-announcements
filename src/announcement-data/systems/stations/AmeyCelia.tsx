@@ -2786,6 +2786,7 @@ export default class AmeyCelia extends AmeyPhil {
       'WAR',
       'WAS',
       'WAT',
+      'WAW',
       'WBC',
       'WBD',
       'WBL',

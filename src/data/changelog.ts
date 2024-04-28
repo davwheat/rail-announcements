@@ -448,6 +448,15 @@ const changelog: IChangelogVersion[] = [
     fixes: ['[Live Announcements] Don\'t announce pick-up only stops within "calling at"'],
     otherChanges: ['Migrated from GitHub Pages to Cloudflare R2 (for audio storage) and Pages (for the website)'],
   },
+  {
+    date: '2024-04-29',
+    additions: [
+      '[Amey Phil & Celia] Add Warrington West and Kirkby stations',
+      '[Amey Phil & Celia] Add up to 20 coaches to a train',
+      '[Amey Celia] Add Transport for Wales',
+    ],
+    fixes: ['[Class 700] Fix wrong St Pancras audio'],
+  },
 ]
 
 export default changelog

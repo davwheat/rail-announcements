@@ -1708,6 +1708,7 @@ export default class AmeyCelia extends AmeyPhil {
       'KGX',
       'KID',
       'KIL',
+      'KIR',
       'KIT',
       'KIV',
       'KKB',

@@ -58,6 +58,8 @@ function getCallingPoints(
 ): CallingAtPoint[] {
   const callingPoints = train.subsequentLocations.filter(s => {
     if (!s.crs) return false
+    // Force the calling point if the train divides here
+    if (s.associations?.filter(a => a.category === AssociationCategory.Divide).length) return true
     if (s.isCancelled || s.isOperational || s.isPass) return false
     if (!stations.includes(s.crs)) return false
     // Ignore pick-up only

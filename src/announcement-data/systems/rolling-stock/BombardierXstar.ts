@@ -535,8 +535,8 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
           },
           {
             label: 'BTP 61016',
-            play: this.playAudioFiles.bind(this, ['61016']),
-            download: this.playAudioFiles.bind(this, ['61016'], true),
+            play: this.playAudioFiles.bind(this, ['please keep your bags and personal belongings with you', '61016']),
+            download: this.playAudioFiles.bind(this, ['please keep your bags and personal belongings with you', '61016'], true),
           },
         ],
       },

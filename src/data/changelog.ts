@@ -457,6 +457,10 @@ const changelog: IChangelogVersion[] = [
     ],
     fixes: ['[Class 700] Fix wrong St Pancras audio'],
   },
+  {
+    date: '2024-06-01',
+    additions: ['[Live Trains] Customise/disable chimes'],
+  },
 ]
 
 export default changelog

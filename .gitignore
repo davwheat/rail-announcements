@@ -84,3 +84,5 @@ static/temp/
 
 # Sentry Config File
 .sentryclirc
+
+.wrangler/

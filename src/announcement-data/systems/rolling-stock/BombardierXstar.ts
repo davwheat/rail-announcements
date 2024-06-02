@@ -9,6 +9,8 @@ import TrainAnnouncementSystem from '../../TrainAnnouncementSystem'
 interface IApproachingStationAnnouncementOptions {
   stationCode: string
   mindTheGap: boolean
+  keepBelongings: boolean
+  cannotUseOyster: boolean
 }
 
 interface IStoppedAtStationAnnouncementOptions {
@@ -65,8 +67,6 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
   readonly FILE_PREFIX = 'SN/377'
   readonly SYSTEM_TYPE = 'train'
 
-  private readonly stationsWithUnattendedBaggageAnnouncement = ['GTW']
-
   private async playApproachingStationAnnouncement(options: IApproachingStationAnnouncementOptions, download: boolean = false): Promise<void> {
     const files: AudioItem[] = []
 
@@ -77,8 +77,14 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
       files.push('please mind the gap between the train and the platform')
     }
 
-    if (this.stationsWithUnattendedBaggageAnnouncement.includes(options.stationCode)) {
-      files.push('please do not leave unattended items of luggage in the train or on the station', '61016')
+    if (options.keepBelongings) {
+      if (options.mindTheGap) files.push('and')
+
+      files.push('please do not leave unattended items of luggage in the train or on the station')
+    }
+
+    if (options.cannotUseOyster) {
+      files.push('you cannot use oyster')
     }
 
     await this.playAudioFiles(files, download)
@@ -166,6 +172,7 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
     'BKS',
     'BMG',
     'BMN',
+    'BMO',
     'BMS',
     'BNH',
     'BOG',
@@ -211,6 +218,7 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
     'CTN',
     'CUX',
     'CWU',
+    'DDG',
     'DEA',
     'DEP',
     'DFD',
@@ -324,6 +332,7 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
     'NGT',
     'NHD',
     'NHE',
+    'NLT',
     'NSB',
     'NUF',
     'NVH',
@@ -365,6 +374,7 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
     'SCY',
     'SDA',
     'SDG',
+    'SDH',
     'SDW',
     'SEE',
     'SEF',
@@ -385,10 +395,13 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
     'SOU',
     'SPH',
     'SPU',
+    'SRS',
     'SRT',
+    'SRU',
     'SSE',
     'SSS',
     'STU',
+    'SUD',
     'SUO',
     'SUP',
     'SVO',
@@ -409,6 +422,7 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
     'WAM',
     'WAT',
     'WCB',
+    'WCX',
     'WDU',
     'WGA',
     'WHA',
@@ -418,6 +432,8 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
     'WMA',
     'WRH',
     'WRP',
+    'WRU',
+    'WRW',
     'WSE',
     'WTR',
     'WVF',
@@ -452,6 +468,16 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
             name: 'Mind the gap?',
             type: 'boolean',
             default: true,
+          },
+          keepBelongings: {
+            name: 'Keep belongings with you?',
+            type: 'boolean',
+            default: false,
+          },
+          cannotUseOyster: {
+            name: 'Cannot use Oyster/Contactless beyond here?',
+            type: 'boolean',
+            default: false,
           },
         },
       },
@@ -525,8 +551,8 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
           },
           {
             label: 'BTP 61016',
-            play: this.playAudioFiles.bind(this, ['61016']),
-            download: this.playAudioFiles.bind(this, ['61016'], true),
+            play: this.playAudioFiles.bind(this, ['please keep your bags and personal belongings with you', '61016']),
+            download: this.playAudioFiles.bind(this, ['please keep your bags and personal belongings with you', '61016'], true),
           },
         ],
       },

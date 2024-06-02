@@ -26,6 +26,7 @@ import type {
   default as AmeyPhil,
   ILiveTrainApproachingAnnouncementOptions,
   IStandingTrainAnnouncementOptions,
+  ChimeType,
 } from '../announcement-data/systems/stations/AmeyPhil'
 
 import dayjs from 'dayjs'
@@ -58,6 +59,8 @@ function getCallingPoints(
 ): CallingAtPoint[] {
   const callingPoints = train.subsequentLocations.filter(s => {
     if (!s.crs) return false
+    // Force the calling point if the train divides here
+    if (s.associations?.filter(a => a.category === AssociationCategory.Divide).length) return true
     if (s.isCancelled || s.isOperational || s.isPass) return false
     if (!stations.includes(s.crs)) return false
     // Ignore pick-up only
@@ -269,6 +272,13 @@ const DisplayNames: Record<DisplayType, string> = {
   'blackbox-landscape-lcd': 'Blackbox landscape LCD',
 }
 
+const ChimeTypeNames: Record<ChimeType | '', string> = {
+  '': 'Per-voice default',
+  none: 'No chime',
+  three: '3 chimes',
+  four: '4 chimes',
+}
+
 export function LiveTrainAnnouncements<SystemKeys extends string>({
   nextTrainHandler,
   disruptedTrainHandler,
@@ -360,6 +370,9 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
   const [displayType, setDisplayType] = useState<DisplayType>('infotec-landscape-dmi')
   const [isFullscreen, setFullscreen] = useState(false)
   const [selectedCrs, setSelectedCrs] = useState('ECR')
+  const [chimeType, setChimeType] = useStateWithLocalStorage<ChimeType | ''>('amey.live-trains.chime-type', '', val =>
+    ['', 'none', 'three', 'four'].includes(val),
+  )
   const [hasEnabledFeature, setHasEnabledFeature] = useState(false)
   const [useLegacyTocNames, setUseLegacyTocNames] = useStateWithLocalStorage<boolean>('amey.live-trains.use-legacy-toc-names', false)
   const [showUnconfirmedPlatforms, setShowUnconfirmedPlatforms] = useStateWithLocalStorage<boolean>(
@@ -602,7 +615,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       const vias = getViaPoints(train, systems[systemKey].STATIONS, stationNameToCrsMap, loc => getStation(loc, systemKey))
 
       const options: ILiveTrainApproachingAnnouncementOptions = {
-        chime: systems[systemKey].DEFAULT_CHIME,
+        chime: chimeType || systems[systemKey].DEFAULT_CHIME,
         hour: h === '00' ? '00 - midnight' : h,
         min: m === '00' ? '00 - hundred-hours' : m,
         isDelayed: delayMins > 5,
@@ -635,7 +648,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       console.log(`[Live Trains] Announcement for ${train.rid} complete: waiting 5s until next`)
       setTimeout(() => setIsPlaying(false), 5000)
     },
-    [markNextTrainAnnounced, systems, setIsPlaying, approachingTrainHandler, getStation, addLog, useLegacyTocNames],
+    [markNextTrainAnnounced, systems, setIsPlaying, approachingTrainHandler, getStation, addLog, useLegacyTocNames, chimeType],
   )
 
   const announceNextTrain = useCallback(
@@ -665,7 +678,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       const [vias] = getViaPoints(train, systems[systemKey].STATIONS, stationNameToCrsMap, loc => getStation(loc, systemKey))
 
       const options: INextTrainAnnouncementOptions = {
-        chime: systems[systemKey].DEFAULT_CHIME,
+        chime: chimeType || systems[systemKey].DEFAULT_CHIME,
         hour: h === '00' ? '00 - midnight' : h,
         min: m === '00' ? '00 - hundred-hours' : m,
         isDelayed: delayMins > 5,
@@ -699,7 +712,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       console.log(`[Live Trains] Announcement for ${train.rid} complete: waiting 5s until next`)
       setTimeout(() => setIsPlaying(false), 5000)
     },
-    [markNextTrainAnnounced, systems, setIsPlaying, nextTrainHandler, getStation, addLog, useLegacyTocNames],
+    [markNextTrainAnnounced, systems, setIsPlaying, nextTrainHandler, getStation, addLog, useLegacyTocNames, chimeType],
   )
 
   const announceDisruptedTrain = useCallback(
@@ -738,7 +751,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       }
 
       const options: IDisruptedTrainAnnouncementOptions = {
-        chime: systems[systemKey].DEFAULT_CHIME,
+        chime: chimeType || systems[systemKey].DEFAULT_CHIME,
         hour: h === '00' ? '00 - midnight' : h,
         min: m === '00' ? '00 - hundred-hours' : m,
         toc,
@@ -788,7 +801,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       console.log(`[Live Trains] Announcement for ${train.rid} complete: waiting 5s until next`)
       setTimeout(() => setIsPlaying(false), 5000)
     },
-    [markDisruptedTrainAnnounced, systems, setIsPlaying, disruptedTrainHandler, addLog, useLegacyTocNames],
+    [markDisruptedTrainAnnounced, systems, setIsPlaying, disruptedTrainHandler, addLog, useLegacyTocNames, chimeType],
   )
 
   useEffect(() => {
@@ -822,7 +835,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
 
       try {
         const resp = await fetch(
-          process.env.NODE_ENV === 'development' ? `http://localhost:8787/get-services?${params}` : `/api/get-services?${params}`,
+          process.env.NODE_ENV === 'development' ? `http://localhost:8787/api/get-services?${params}` : `/api/get-services?${params}`,
         )
 
         if (!resp.ok) {
@@ -1121,6 +1134,16 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
           onChange={e => setUseLegacyTocNames(e.target.checked)}
         />
         Use legacy TOC names
+      </label>
+
+      <label htmlFor="chime-type-select" className="option-select">
+        Chime
+        <Select<Option<ChimeType | ''>, false>
+          id="chime-type-select"
+          value={{ value: chimeType, label: ChimeTypeNames[chimeType] }}
+          onChange={val => setChimeType(val!.value!!)}
+          options={Object.entries(ChimeTypeNames).map(([k, v]) => ({ value: k as ChimeType | '', label: v }))}
+        />
       </label>
 
       <fieldset>

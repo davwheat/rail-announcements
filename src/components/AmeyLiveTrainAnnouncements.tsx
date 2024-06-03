@@ -33,6 +33,8 @@ import dayjs from 'dayjs'
 import dayjsUtc from 'dayjs/plugin/utc'
 import dayjsTz from 'dayjs/plugin/timezone'
 import Breakpoints from '@data/breakpoints'
+import { isMindTheGapStation } from '@data/liveTrains/mindTheGap'
+import { isShortPlatform } from '@data/liveTrains/shortPlatforms'
 
 dayjs.extend(dayjsUtc)
 dayjs.extend(dayjsTz)
@@ -95,6 +97,7 @@ function getCallingPoints(
         name: '',
         randomId: '',
         requestStop: p.activities === 'R',
+        shortPlatform: p.crs ? isShortPlatform(p.crs, p.platform ?? null, train) || undefined : undefined,
       }
 
       p.associations
@@ -175,6 +178,7 @@ function getCallingPoints(
             name: '',
             randomId: '',
             requestStop: p.activities === 'R',
+            shortPlatform: p.crs ? isShortPlatform(p.crs, p.platform ?? null, train) || undefined : undefined,
           }
         })
         .filter(Boolean) as CallingAtPoint[]
@@ -261,11 +265,6 @@ export interface LiveTrainAnnouncementsProps<SystemKeys extends string> {
 }
 
 type DisplayType = 'infotec-landscape-dmi' | 'blackbox-landscape-lcd'
-
-const MindTheGapStations: Record<string, string[]> = {
-  WVF: ['1', '2'],
-  LWS: ['1', '2', '3', '4', '5'],
-}
 
 const DisplayNames: Record<DisplayType, string> = {
   'infotec-landscape-dmi': 'Infotec landscape DMI',
@@ -546,7 +545,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       const callingAt = getCallingPoints(train, systems[systemKey].STATIONS, loc => getStation(loc, systemKey))
       const [vias] = getViaPoints(train, systems[systemKey].STATIONS, stationNameToCrsMap, loc => getStation(loc, systemKey))
 
-      const mindTheGap = !!MindTheGapStations[selectedCrs]?.includes(train.platform)
+      const mindTheGap = isMindTheGapStation(selectedCrs, train.platform)
 
       console.log(`Mind the gap: ${mindTheGap}`)
 
@@ -1482,7 +1481,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         <li>are terminating at the selected station</li>
       </ul>
       <p>
-        We also can't handle short platforms and some other features as this information isn't contained within the open data provided by
+        We also can't handle some short platforms and various other features as this information isn't contained within the open data provided by
         National Rail.
       </p>
 

@@ -128,7 +128,7 @@ export interface TimingLocation {
   lateness: any
   associations: Association[] | null
   adhocAlerts: any
-  activities?: string
+  activities?: string[]
 }
 
 export enum AssociationCategory {
@@ -284,9 +284,14 @@ async function processService(service: TrainService): Promise<void> {
       }
     }
 
-    location.activities = serviceData?.locations.find(l => {
+    const activities = serviceData?.locations.find(l => {
       return l.tiploc === location.tiploc && (l.sta === location.sta || l.std === location.std)
-    })?.activities
+    })?.activities as string | undefined
+
+    // Split into array with groups of two chars
+    if (activities) {
+      location.activities = (activities?.match(/.{2}/g) || []).map(a => a.trim())
+    }
   }
 }
 

@@ -1481,9 +1481,35 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         <li>are terminating at the selected station</li>
       </ul>
       <p>
-        We also can't handle some short platforms and various other features as this information isn't contained within the open data provided by
+        We also can't handle most short platforms and various other features as this information isn't contained within the open data provided by
         National Rail.
       </p>
+
+      <div
+        style={{
+          padding: 12,
+          paddingLeft: 16,
+          borderLeft: '4px solid var(--primary-blue)',
+          background: `color-mix(in srgb, var(--primary-blue), transparent 92%)`,
+          marginBottom: 24,
+        }}
+      >
+        <p>
+          We're currently trialling <strong>automated short platform announcements</strong> for stations served by GTR (Southern, Thameslink,
+          Gatwick Express, and Great Northern) and Southeastern.
+        </p>
+        <p>
+          Please let us know if you know any short platforms that aren't correctly announced by the website for these TOCs. We'll seek
+          information and feedback about other TOCs in the near future
+        </p>
+        <p style={{ marginBottom: 0 }}>
+          Have feedback? Please post it on{' '}
+          <a target="_blank" href="https://github.com/davwheat/rail-announcements/issues/226">
+            this GitHub tracking issue
+          </a>
+          !
+        </p>
+      </div>
 
       {!hasEnabledFeature ? (
         <>

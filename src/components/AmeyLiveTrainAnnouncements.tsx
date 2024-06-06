@@ -64,7 +64,7 @@ function getCallingPoints(
     if (s.isCancelled || s.isOperational || s.isPass) return false
     if (!stations.includes(s.crs)) return false
     // Ignore pick-up only
-    if (s.activities === 'U') return false
+    if (s.activities?.includes('U')) return false
     return true
   })
 
@@ -94,7 +94,7 @@ function getCallingPoints(
         crsCode: getStation(p),
         name: '',
         randomId: '',
-        requestStop: p.activities === 'R',
+        requestStop: p.activities?.includes('R'),
       }
 
       p.associations
@@ -111,7 +111,7 @@ function getCallingPoints(
               if (!stations.includes(s.crs)) return false
               return true
             })
-            .map(l => ({ crsCode: l.crs!!, name: l.locationName, randomId: '', requestStop: p.activities === 'R' }))
+            .map(l => ({ crsCode: l.crs!!, name: l.locationName, randomId: '', requestStop: p.activities?.includes('R') }))
         })
 
       if (i === callingPoints.length - 1 && p.associations?.some(a => a.category === AssociationCategory.LinkedTo && a.trainid === '0B00')) {
@@ -141,7 +141,7 @@ function getCallingPoints(
           crsCode: getStation(p),
           name: '',
           randomId: '',
-          requestStop: p.activities === 'R',
+          requestStop: p.activities?.includes('R'),
         }
 
         if (p.associations?.some(a => a.category === AssociationCategory.LinkedTo && a.trainid !== '0B00')) {
@@ -174,7 +174,7 @@ function getCallingPoints(
             crsCode: getStation(p),
             name: '',
             randomId: '',
-            requestStop: p.activities === 'R',
+            requestStop: p.activities?.includes('R'),
           }
         })
         .filter(Boolean) as CallingAtPoint[]

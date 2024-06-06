@@ -12,9 +12,9 @@ export function isShortPlatform(crs: string, platformNumber: string | null, trai
     if (platformNumber === null) return null
 
     const toc = train.operatorCode
-    const val = data[crs][platformNumber.toLowerCase()][toc]
+    const val = data?.[crs]?.[platformNumber.toLowerCase()]?.[toc] || data?.[crs]?.['*']?.[toc]
 
-    var out: string | null = null
+    let out: string | null = null
 
     if (typeof val === 'function') {
       out = val(train)
@@ -47,6 +47,8 @@ export function isShortPlatform(crs: string, platformNumber: string | null, trai
  *
  * Final value must match this format, where `n` is a number between 1 and 12:
  * `<front|middle|rear>.<n>`
+ *
+ * A platform named of `*` will be used as a default for all platforms.
  */
 const data: Record<
   string,
@@ -59,67 +61,27 @@ const data: Record<
   >
 > = {
   AGT: {
-    '1': {
+    '*': {
       SN: 'front.4',
       TL: 'front.4',
-      GN: 'front.4',
-      GX: 'front.4',
-      SE: 'front.4',
-    },
-    '2': {
-      SN: 'front.4',
-      TL: 'front.4',
-      GN: 'front.4',
-      GX: 'front.4',
-      SE: 'front.4',
     },
   },
   AMY: {
-    '1': {
+    '*': {
       SN: 'front.5',
       TL: 'front.5',
-      GN: 'front.5',
-      GX: 'front.5',
-      SE: 'front.5',
-    },
-    '2': {
-      SN: 'front.5',
-      TL: 'front.5',
-      GN: 'front.5',
-      GX: 'front.5',
-      SE: 'front.5',
     },
   },
   ANZ: {
-    '1': {
-      SN: 'front.9',
-      TL: 'front.9',
-      GN: 'front.9',
-      GX: 'front.9',
-      SE: 'front.9',
-    },
-    '2': {
+    '*': {
       SN: 'front.8',
       TL: 'front.8',
-      GN: 'front.8',
-      GX: 'front.8',
-      SE: 'front.8',
     },
   },
   ANG: {
-    '1': {
+    '*': {
       SN: 'front.7',
       TL: 'front.7',
-      GN: 'front.7',
-      GX: 'front.7',
-      SE: 'front.7',
-    },
-    '2': {
-      SN: 'front.7',
-      TL: 'front.7',
-      GN: 'front.7',
-      GX: 'front.7',
-      SE: 'front.7',
     },
   },
   APD: {
@@ -232,94 +194,57 @@ const data: Record<
       TL: 'front.8',
       GN: 'front.8',
       GX: 'front.8',
-      SE: 'front.8',
     },
     '2': {
       SN: 'front.8',
       TL: 'front.8',
       GN: 'front.8',
       GX: 'front.8',
-      SE: 'front.8',
     },
     '3': {
       SN: 'front.8',
       TL: 'front.8',
       GN: 'front.8',
       GX: 'front.8',
-      SE: 'front.8',
     },
     '4': {
       SN: 'front.8',
       TL: 'front.8',
       GN: 'front.8',
       GX: 'front.8',
+    },
+    '*': {
       SE: 'front.8',
     },
   },
   BDH: {
-    '1': {
+    '*': {
       SN: 'front.6',
       TL: 'front.6',
-      GN: 'front.6',
-      GX: 'front.6',
-      SE: 'front.6',
-    },
-    '2': {
-      SN: 'front.6',
-      TL: 'front.6',
-      GN: 'front.6',
-      GX: 'front.6',
-      SE: 'front.6',
     },
   },
   BLM: {
     '1': {
       SN: 'front.8',
       TL: 'front.8',
-      GN: 'front.8',
-      GX: 'front.8',
-      SE: 'front.8',
     },
   },
   BRK: {
-    '1': {
+    '*': {
       SN: 'front.7',
       TL: 'front.7',
-      GN: 'front.7',
-      GX: 'front.7',
-      SE: 'front.7',
-    },
-    '2': {
-      SN: 'front.7',
-      TL: 'front.7',
-      GN: 'front.7',
-      GX: 'front.7',
-      SE: 'front.7',
     },
   },
   BIG: {
-    '1': {
+    '*': {
       SN: 'front.8',
       TL: 'front.8',
-      GN: 'front.8',
-      GX: 'front.8',
-      SE: 'front.8',
-    },
-    '2': {
-      SN: 'front.8',
-      TL: 'front.8',
-      GN: 'front.8',
-      GX: 'front.8',
-      SE: 'front.8',
     },
   },
   BIK: {
     '1': {
       SN: 'front.8',
       TL: 'front.8',
-      GN: 'front.8',
-      GX: 'front.8',
-      SE: 'front.8',
     },
   },
   BIP: {
@@ -328,10 +253,7 @@ const data: Record<
     },
   },
   BTE: {
-    '1': {
-      SN: 'front.7',
-    },
-    '2': {
+    '*': {
       SN: 'front.7',
     },
   },
@@ -346,42 +268,27 @@ const data: Record<
     },
   },
   BKA: {
-    '1': {
-      SN: 'front.10',
-    },
-    '2': {
+    '*': {
       SN: 'front.10',
     },
   },
   BOH: {
-    '1': {
-      SN: 'front.7',
-    },
-    '2': {
+    '*': {
       SN: 'front.7',
     },
   },
   BOE: {
-    '1': {
-      SN: 'front.6',
-    },
-    '2': {
+    '*': {
       SN: 'front.6',
     },
   },
   BXW: {
-    '1': {
-      SN: 'front.10',
-    },
-    '2': {
+    '*': {
       SN: 'front.10',
     },
   },
   BCY: {
-    '1': {
-      SN: 'front.10',
-    },
-    '2': {
+    '*': {
       SN: 'front.10',
     },
   },
@@ -394,59 +301,38 @@ const data: Record<
     },
   },
   BUO: {
-    '1': {
-      SN: 'front.8',
-    },
-    '2': {
+    '*': {
       SN: 'front.8',
     },
   },
   CSH: {
-    '1': {
-      SN: 'front.10',
-    },
-    '2': {
+    '*': {
       SN: 'front.10',
     },
   },
   CSB: {
-    '1': {
-      SN: 'front.8',
-    },
-    '2': {
+    '*': {
       SN: 'front.8',
     },
   },
   CHP: {
-    '1': {
-      SN: 'front.6',
-    },
-    '2': {
+    '*': {
       SN: 'front.6',
     },
   },
   CHH: {
-    '1': {
-      SN: 'front.7',
-    },
-    '2': {
+    '*': {
       SN: 'front.7',
     },
   },
   CLA: {
-    '1': {
-      SN: 'front.10',
-    },
-    '2': {
+    '*': {
       SN: 'front.10',
     },
   },
   CLP: {
-    '1': {
-      SN: 'front.5',
-      TL: 'front.5',
-    },
-    '2': {
+    '*': {
+      SE: 'front.5',
       SN: 'front.5',
       TL: 'front.5',
     },
@@ -474,10 +360,7 @@ const data: Record<
     },
   },
   CBB: {
-    '1': {
-      SN: 'front.4',
-    },
-    '2': {
+    '*': {
       SN: 'front.4',
     },
   },
@@ -493,24 +376,17 @@ const data: Record<
     '1': {
       SN: 'front.8',
     },
-    '2': {
+    '*': {
       SN: 'front.6',
     },
   },
   CSA: {
-    '1': {
-      SN: 'front.8',
-    },
-    '2': {
+    '*': {
       SN: 'front.8',
     },
   },
   CDN: {
-    '1': {
-      SN: 'front.8',
-      TL: 'front.8',
-    },
-    '2': {
+    '*': {
       SN: 'front.8',
       TL: 'front.8',
     },
@@ -529,37 +405,22 @@ const data: Record<
       SN: 'front.10',
       TL: 'front.10',
     },
-    '3': {
-      SN: 'front.8',
-      TL: 'front.8',
-    },
     '4': {
       SN: 'front.10',
       TL: 'front.10',
-    },
-    '5': {
-      SN: 'front.8',
-      TL: 'front.8',
     },
     '6': {
       SN: 'front.10',
       TL: 'front.10',
     },
+    '*': {
+      SN: 'front.8',
+      TL: 'front.8',
+    },
   },
   DMK: {
-    '1': {
-      SN: 'front.8',
-      TL: 'front.8',
-    },
-    '2': {
-      SN: 'front.8',
-      TL: 'front.8',
-    },
-    '3': {
-      SN: 'front.8',
-      TL: 'front.8',
-    },
-    '4': {
+    '*': {
+      SE: 'front.8',
       SN: 'front.8',
       TL: 'front.8',
     },
@@ -570,85 +431,48 @@ const data: Record<
     },
   },
   DMS: {
-    '1': {
-      SN: 'front.8',
-    },
-    '2': {
-      SN: 'front.8',
-    },
-    '3': {
+    '*': {
       SN: 'front.8',
     },
   },
   DUR: {
-    '1': {
-      SN: 'front.6',
-    },
-    '2': {
+    '*': {
       SN: 'front.6',
     },
   },
   ELD: {
-    '1': {
-      SN: 'front.10',
-      TL: 'front.10',
-    },
-    '2': {
+    '*': {
       SN: 'front.10',
       TL: 'front.10',
     },
   },
   EDW: {
-    '1': {
-      SN: 'front.7',
-    },
-    '2': {
+    '*': {
       SN: 'front.7',
     },
   },
   EWR: {
-    '1': {
-      SN: 'front.4',
-    },
-    '2': {
+    '*': {
       SN: 'front.4',
     },
   },
   EBR: {
-    '1': {
-      SN: 'front.5',
-    },
-    '2': {
+    '*': {
       SN: 'front.5',
     },
   },
   EFF: {
-    '1': {
-      SN: 'front.10',
-    },
-    '2': {
+    '*': {
       SN: 'front.10',
     },
   },
   EMS: {
-    '1': {
-      SN: 'front.7',
-    },
-    '2': {
+    '*': {
       SN: 'front.7',
     },
   },
   EPS: {
-    '1': {
-      SN: 'front.10',
-    },
-    '2': {
-      SN: 'front.10',
-    },
-    '3': {
-      SN: 'front.10',
-    },
-    '4': {
+    '*': {
       SN: 'front.10',
     },
   },
@@ -658,52 +482,33 @@ const data: Record<
     },
   },
   EWE: {
-    '1': {
-      SN: 'front.8',
-    },
-    '2': {
+    '*': {
       SN: 'front.8',
     },
   },
   FMR: {
-    '1': {
-      SN: 'front.8',
-    },
-    '2': {
+    '*': {
       SN: 'front.8',
     },
   },
   FRM: {
-    '1': {
-      SN: 'front.8',
-    },
-    '2': {
+    '*': {
       SN: 'front.8',
     },
   },
   FGT: {
-    '1': {
-      SN: 'front.4',
-      TL: 'front.4',
-    },
-    '2': {
+    '*': {
       SN: 'front.4',
       TL: 'front.4',
     },
   },
   FSB: {
-    '1': {
-      SN: 'front.6',
-    },
-    '2': {
+    '*': {
       SN: 'front.6',
     },
   },
   FSG: {
-    '1': {
-      SN: 'front.4',
-    },
-    '2': {
+    '*': {
       SN: 'front.4',
     },
   },
@@ -716,32 +521,18 @@ const data: Record<
     },
   },
   FOH: {
-    '1': {
-      SN: 'front.10',
-      TL: 'front.10',
-    },
-    '2': {
+    '*': {
       SN: 'front.10',
       TL: 'front.10',
     },
   },
   FTN: {
-    '1': {
-      SN: 'front.8',
-    },
-    '2': {
-      SN: 'front.8',
-    },
-    '3': {
+    '*': {
       SN: 'front.8',
     },
   },
   GIP: {
-    '1': {
-      SN: 'front.10',
-      TL: 'front.10',
-    },
-    '2': {
+    '*': {
       SN: 'front.10',
       TL: 'front.10',
     },
@@ -771,11 +562,7 @@ const data: Record<
     },
   },
   HCB: {
-    '1': {
-      SN: 'front.7',
-      TL: 'front.7',
-    },
-    '2': {
+    '*': {
       SN: 'front.7',
       TL: 'front.7',
     },
@@ -797,10 +584,7 @@ const data: Record<
     },
   },
   HMD: {
-    '1': {
-      SN: southernTurboElectro('front.7', 'front.8'),
-    },
-    '2': {
+    '*': {
       SN: southernTurboElectro('front.7', 'front.8'),
     },
   },
@@ -810,61 +594,38 @@ const data: Record<
     },
   },
   HYR: {
-    '1': {
-      SN: 'front.8',
-      TL: 'front.8',
-    },
-    '2': {
+    '*': {
       SN: 'front.8',
       TL: 'front.8',
     },
   },
   HDE: {
-    '1': {
-      SN: 'front.8',
-    },
-    '2': {
+    '*': {
       SN: 'front.8',
     },
   },
   HLS: {
-    '1': {
-      SN: 'front.8',
-    },
-    '2': {
+    '*': {
       SN: 'front.8',
     },
   },
   HLM: {
-    '1': {
-      SN: 'front.6',
-    },
-    '2': {
+    '*': {
       SN: 'front.6',
     },
   },
   HPA: {
-    '1': {
-      SN: 'front.10',
-    },
-    '2': {
+    '*': {
       SN: 'front.10',
     },
   },
   HSY: {
-    '1': {
-      SN: 'front.10',
-    },
-    '2': {
+    '*': {
       SN: 'front.10',
     },
   },
   IFI: {
-    '1': {
-      SN: 'front.5',
-      TL: 'front.5',
-    },
-    '2': {
+    '*': {
       SN: 'front.5',
       TL: 'front.5',
     },
@@ -878,11 +639,7 @@ const data: Record<
     },
   },
   KLY: {
-    '1': {
-      SN: 'front.5',
-      TL: 'front.5',
-    },
-    '2': {
+    '*': {
       SN: 'front.5',
       TL: 'front.5',
     },
@@ -893,18 +650,12 @@ const data: Record<
     },
   },
   KGL: {
-    '1': {
-      SN: 'front.10',
-    },
-    '2': {
+    '*': {
       SN: 'front.10',
     },
   },
   KND: {
-    '1': {
-      SN: 'front.6',
-    },
-    '2': {
+    '*': {
       SN: 'front.6',
     },
   },
@@ -970,15 +721,15 @@ const data: Record<
   VIC: {
     '3': {
       SN: 'front.9',
-      SE: 'front.9',
     },
     '4': {
       SN: 'front.9',
-      SE: 'front.9',
     },
     '8': {
       SN: 'front.10',
-      SE: 'front.10',
+    },
+    '*': {
+      SE: 'front.9',
     },
   },
   MKC: {
@@ -1123,6 +874,9 @@ const data: Record<
     '6': {
       SN: southernTurboElectro('front.7', 'front.9'),
     },
+    '*': {
+      SE: 'front.8',
+    },
   },
   NUT: {
     '1': {
@@ -1146,6 +900,9 @@ const data: Record<
     },
     '2': {
       SN: southernTurboElectro('front.4', 'front.5'),
+    },
+    '*': {
+      SE: 'front.5',
     },
   },
   OXT: {
@@ -1175,6 +932,9 @@ const data: Record<
     '4': {
       SN: 'front.8',
       TL: 'front.8',
+    },
+    '*': {
+      SE: 'front.8',
     },
   },
   PNW: {
@@ -1474,6 +1234,9 @@ const data: Record<
     '2': {
       SN: southernTurboElectro('front.7', 'front.8'),
     },
+    '*': {
+      SE: 'front.8',
+    },
   },
   STE: {
     '1': {
@@ -1683,6 +1446,9 @@ const data: Record<
       SN: 'front.5',
       TL: 'front.5',
     },
+    '*': {
+      SE: 'front.4',
+    },
   },
   WBL: {
     '1': {
@@ -1838,6 +1604,534 @@ const data: Record<
     '2': {
       SN: 'front.7',
       TL: 'front.7',
+    },
+  },
+
+  // ---- SE DATA -----
+
+  BEG: {
+    '*': {
+      SE: 'front.3',
+    },
+  },
+  WTR: {
+    '*': {
+      SE: 'front.3',
+    },
+  },
+  AYL: {
+    '*': {
+      SE: 'front.4',
+    },
+  },
+  CRT: {
+    '*': {
+      SE: 'front.4',
+    },
+  },
+  CIL: {
+    '*': {
+      SE: 'front.4',
+    },
+  },
+  CUX: {
+    '*': {
+      SE: 'front.4',
+    },
+  },
+  EFL: {
+    '*': {
+      SE: 'front.4',
+    },
+  },
+  HAI: {
+    '*': {
+      SE: 'front.4',
+    },
+  },
+  MDB: {
+    '*': {
+      SE: 'front.4',
+    },
+  },
+  NHE: {
+    '*': {
+      SE: 'front.4',
+    },
+  },
+  SDA: {
+    '*': {
+      SE: 'front.4',
+    },
+  },
+  STU: {
+    '*': {
+      SE: 'front.4',
+    },
+  },
+  WYE: {
+    '*': {
+      SE: 'front.4',
+    },
+  },
+  YAL: {
+    '*': {
+      SE: 'front.4',
+    },
+  },
+  WHA: {
+    '*': {
+      SE: 'front.5',
+    },
+  },
+  BMG: {
+    '*': {
+      SE: 'front.6',
+    },
+  },
+  CHG: {
+    '*': {
+      SE: 'front.6',
+    },
+  },
+  HRM: {
+    '*': {
+      SE: 'front.6',
+    },
+  },
+  HBN: {
+    '*': {
+      SE: 'front.6',
+    },
+  },
+  KMS: {
+    '*': {
+      SE: 'front.6',
+    },
+  },
+  EPH: {
+    '*': {
+      SE: 'front.7',
+    },
+  },
+  MDW: {
+    '*': {
+      SE: 'front.7',
+    },
+  },
+  ADM: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  AYH: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  BBL: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  BAT: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  BSD: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  BKJ: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  BKS: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  BGM: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  BKL: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  BRG: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  BRX: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  CBE: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  CBW: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  CFT: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  CFB: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  CWU: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  DEA: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  DVP: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  EML: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  ETC: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  EYN: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  FNR: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  FRT: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  HNH: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  KSN: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  KML: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  KTH: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  LEN: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  LGJ: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  MDE: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  MTM: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  MSR: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  NHD: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  OTF: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  PNE: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  PLC: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  QBR: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  RVB: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  RDH: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  RBR: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  SDG: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  SEG: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  SSS: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  SPH: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  SEH: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  SRT: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  SWO: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  SOR: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  SOG: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  SWL: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  SYH: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  WAD: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  WAM: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  WDU: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  WMA: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  WLD: {
+    '*': {
+      SE: 'front.8',
+    },
+  },
+  ABW: {
+    '*': {
+      SE: 'front.10',
+    },
+  },
+  BNH: {
+    '*': {
+      SE: 'front.10',
+    },
+  },
+  BMN: {
+    '*': {
+      SE: 'front.10',
+    },
+  },
+  CTN: {
+    '*': {
+      SE: 'front.10',
+    },
+  },
+  DFD: {
+    '*': {
+      SE: 'front.10',
+    },
+  },
+  DEP: {
+    '*': {
+      SE: 'front.10',
+    },
+  },
+  ELW: {
+    '*': {
+      SE: 'front.10',
+    },
+  },
+  ERH: {
+    '*': {
+      SE: 'front.10',
+    },
+  },
+  GRV: {
+    '*': {
+      SE: 'front.10',
+    },
+  },
+  GNH: {
+    '*': {
+      SE: 'front.10',
+    },
+  },
+  HGM: {
+    '*': {
+      SE: 'front.10',
+    },
+  },
+  HGR: {
+    '*': {
+      SE: 'front.10',
+    },
+  },
+  MZH: {
+    '*': {
+      SE: 'front.10',
+    },
+  },
+  MTG: {
+    '*': {
+      SE: 'front.10',
+    },
+  },
+  NWX: {
+    '*': {
+      SE: 'front.10',
+    },
+  },
+  NEH: {
+    '*': {
+      SE: 'front.10',
+    },
+  },
+  NFL: {
+    '*': {
+      SE: 'front.10',
+    },
+  },
+  PLU: {
+    '*': {
+      SE: 'front.10',
+    },
+  },
+  SGR: {
+    '*': {
+      SE: 'front.10',
+    },
+  },
+  SAJ: {
+    '*': {
+      SE: 'front.10',
+    },
+  },
+  SCG: {
+    '*': {
+      SE: 'front.10',
+    },
+  },
+  SUP: {
+    '*': {
+      SE: 'front.10',
+    },
+  },
+  SWM: {
+    '*': {
+      SE: 'front.10',
+    },
+  },
+  TBW: {
+    '*': {
+      SE: 'front.10',
+    },
+  },
+  WCB: {
+    '*': {
+      SE: 'front.10',
+    },
+  },
+  WWD: {
+    '*': {
+      SE: 'front.10',
+    },
+  },
+  CHX: {
+    '*': {
+      SE: 'front.11',
     },
   },
 }

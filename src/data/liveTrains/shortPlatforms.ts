@@ -1245,6 +1245,601 @@ const data: Record<
       SN: 'front.9',
     },
   },
+  PUR: {
+    '5': {
+      SN: 'front.10',
+      TL: 'front.12',
+    },
+    '6': {
+      SN: 'front.10',
+      TL: 'front.12',
+    },
+  },
+  PUO: {
+    '1': {
+      SN: 'front.8',
+      TL: 'front.8',
+    },
+    '2': {
+      SN: 'front.8',
+      TL: 'front.8',
+    },
+    '3': {
+      SN: 'front.8',
+      TL: 'front.8',
+    },
+    '4': {
+      SN: 'front.8',
+      TL: 'front.8',
+    },
+  },
+  QRP: {
+    '1': {
+      SN: 'front.8',
+      TL: 'front.8',
+    },
+    '2': {
+      SN: 'front.8',
+      TL: 'front.8',
+    },
+  },
+  RHM: {
+    '1': {
+      SN: 'front.8',
+      TL: 'front.8',
+    },
+    '2': {
+      SN: 'front.8',
+      TL: 'front.8',
+    },
+  },
+  REI: {
+    '1': {
+      SN: 'front.8',
+      TL: 'front.8',
+    },
+    '2': {
+      SN: 'front.4',
+      TL: 'front.4',
+    },
+  },
+  RDD: {
+    '1': {
+      SN: southernTurboElectro('front.7', 'front.9'),
+      TL: 'front.9',
+    },
+    '2': {
+      SN: southernTurboElectro('front.7', 'front.9'),
+      TL: 'front.9',
+    },
+  },
+  RYE: {
+    '1': {
+      SN: 'front.3',
+    },
+    '2': {
+      SN: 'front.3',
+    },
+  },
+  SAF: {
+    '1': {
+      SN: 'front.8',
+      TL: 'front.8',
+    },
+    '2': {
+      SN: 'front.8',
+      TL: 'front.8',
+    },
+  },
+  SEF: {
+    '2': {
+      SN: 'front.8',
+      TL: 'front.8',
+    },
+  },
+  SRS: {
+    '1': {
+      SN: 'front.10',
+      GX: 'front.10',
+      TL: 'front.10',
+    },
+    '2': {
+      SN: 'front.10',
+      GX: 'front.10',
+      TL: 'front.10',
+    },
+    '3': {
+      SN: 'front.8',
+      GX: 'front.8',
+      TL: 'front.8',
+    },
+    '4': {
+      SN: 'front.8',
+      GX: 'front.8',
+      TL: 'front.8',
+    },
+  },
+  SPB: {
+    '1': {
+      SN: 'front.8',
+      TL: 'front.8',
+    },
+    '2': {
+      SN: 'front.8',
+      TL: 'front.8',
+    },
+  },
+  SHO: {
+    '1': {
+      SN: 'front.8',
+    },
+    '2': {
+      SN: 'front.8',
+    },
+  },
+  SBM: {
+    '1': {
+      SN: 'front.8',
+      TL: 'front.8',
+    },
+    '2': {
+      SN: 'front.8',
+      TL: 'front.8',
+    },
+  },
+  SCY: {
+    '1': {
+      SN: southernTurboElectro('front.6', 'front.8'),
+      TL: 'front.8',
+    },
+    '2': {
+      SN: southernTurboElectro('front.6', 'front.8'),
+      TL: 'front.8',
+    },
+    '3': {
+      SN: southernTurboElectro('front.6', 'front.8'),
+      TL: 'front.8',
+    },
+    '4': {
+      SN: southernTurboElectro('front.6', 'front.8'),
+      TL: 'front.8',
+    },
+    '5': {
+      SN: southernTurboElectro('front.6', 'front.8'),
+      TL: 'front.8',
+    },
+  },
+  SMO: {
+    '1': {
+      SN: 'front.8',
+      TL: 'front.8',
+    },
+    '2': {
+      SN: 'front.8',
+      TL: 'front.8',
+    },
+  },
+  SOB: {
+    '1': {
+      SN: 'front.5',
+    },
+    '2': {
+      SN: 'front.5',
+    },
+  },
+  SEE: {
+    '1': {
+      SN: 'front.4',
+    },
+    '2': {
+      SN: 'front.4',
+    },
+  },
+  SWK: {
+    '1': {
+      SN: 'front.9',
+    },
+    '2': {
+      SN: 'front.9',
+    },
+  },
+  SDN: {
+    '1': {
+      SN: 'front.7',
+    },
+    '2': {
+      SN: 'front.7',
+    },
+    '3': {
+      SN: 'front.7',
+    },
+    '4': {
+      SN: 'front.7',
+    },
+  },
+  SIH: {
+    '1': {
+      SN: 'front.7',
+      TL: 'front.7',
+    },
+    '2': {
+      SN: 'front.7',
+      TL: 'front.7',
+    },
+  },
+  SLQ: {
+    '1': {
+      SN: southernTurboElectro('front.7', 'front.8'),
+    },
+    '2': {
+      SN: southernTurboElectro('front.7', 'front.8'),
+    },
+  },
+  STE: {
+    '1': {
+      SN: 'front.9',
+      TL: 'front.9',
+    },
+    '2': {
+      SN: 'front.9',
+      TL: 'front.9',
+    },
+  },
+  SRC: {
+    '1': {
+      SN: 'front.10',
+      TL: 'front.10',
+    },
+    '2': {
+      SN: 'front.10',
+      TL: 'front.10',
+    },
+    '3': {
+      SN: 'front.8',
+      TL: 'front.8',
+    },
+    '4': {
+      SN: 'front.8',
+      TL: 'front.8',
+    },
+  },
+  SRH: {
+    '1': {
+      SN: 'front.9',
+      TL: 'front.9',
+    },
+    '2': {
+      SN: 'front.9',
+      TL: 'front.9',
+    },
+  },
+  SUO: {
+    '3': {
+      SN: 'front.10',
+      TL: 'front.10',
+    },
+    '4': {
+      SN: 'front.10',
+      TL: 'front.10',
+    },
+  },
+  SUC: {
+    '3': {
+      SN: 'front.8',
+      TL: 'front.8',
+    },
+    '4': {
+      SN: 'front.8',
+      TL: 'front.8',
+    },
+  },
+  SNW: {
+    '1': {
+      SN: 'front.8',
+    },
+    '2': {
+      SN: 'front.8',
+    },
+  },
+  SWG: {
+    '1': {
+      SN: 'front.4',
+    },
+    '2': {
+      SN: 'front.4',
+    },
+  },
+  SYD: {
+    '1': {
+      SN: 'front.8',
+      TL: 'front.8',
+    },
+    '2': {
+      SN: 'front.10',
+      TL: 'front.10',
+    },
+  },
+  TAD: {
+    '1': {
+      SN: 'front.6',
+      TL: 'front.6',
+    },
+    '2': {
+      SN: 'front.6',
+      TL: 'front.6',
+    },
+  },
+  TAT: {
+    '1': {
+      SN: 'front.10',
+      TL: 'front.10',
+    },
+    '2': {
+      SN: 'front.10',
+      TL: 'front.10',
+    },
+    '3': {
+      SN: 'front.10',
+      TL: 'front.10',
+    },
+  },
+  TTH: {
+    '1': {
+      SN: 'front.10',
+    },
+    '2': {
+      SN: 'front.10',
+    },
+    '3': {
+      SN: 'front.8',
+    },
+    '4': {
+      SN: 'front.8',
+    },
+  },
+  TOK: {
+    '1': {
+      SN: 'front.1',
+    },
+  },
+  TON: {
+    '4': {
+      SN: 'front.8',
+      TL: 'front.8',
+    },
+  },
+  TOO: {
+    '1': {
+      SN: 'front.8',
+      TL: 'front.8',
+    },
+    '2': {
+      SN: 'front.8',
+      TL: 'front.8',
+    },
+  },
+  TUH: {
+    '1': {
+      SN: 'front.8',
+      TL: 'front.7',
+    },
+    '2': {
+      SN: 'front.8',
+      TL: 'front.7',
+    },
+    '3': {
+      SN: 'front.8',
+      TL: 'front.7',
+    },
+    '4': {
+      SN: 'front.8',
+      TL: 'front.7',
+    },
+  },
+  WDO: {
+    '1': {
+      SN: 'front.10',
+      TL: 'front.10',
+    },
+    '2': {
+      SN: 'front.10',
+      TL: 'front.10',
+    },
+  },
+  WLT: {
+    '1': {
+      SN: 'front.10',
+      TL: 'front.10',
+    },
+    '2': {
+      SN: 'front.10',
+      TL: 'front.10',
+    },
+  },
+  WSW: {
+    '1': {
+      SN: 'front.10',
+      TL: 'front.10',
+    },
+    '2': {
+      SN: 'front.10',
+      TL: 'front.10',
+    },
+    '3': {
+      SN: 'front.8',
+      TL: 'front.8',
+    },
+    '4': {
+      SN: 'front.8',
+      TL: 'front.8',
+    },
+  },
+  WWR: {
+    '1': {
+      SN: 'front.5',
+      TL: 'front.5',
+    },
+    '2': {
+      SN: 'front.5',
+      TL: 'front.5',
+    },
+  },
+  WBL: {
+    '1': {
+      SN: 'front.5',
+    },
+    '2': {
+      SN: 'front.5',
+    },
+  },
+  WNH: {
+    '1': {
+      SN: 'front.5',
+    },
+    '2': {
+      SN: 'front.5',
+    },
+  },
+  WFJ: {
+    '11': {
+      SN: 'front.4',
+    },
+  },
+  WMB: {
+    '3': {
+      SN: 'front.7',
+    },
+    '4': {
+      SN: 'front.7',
+    },
+    '5': {
+      SN: 'front.7',
+    },
+    '6': {
+      SN: 'front.7',
+    },
+  },
+  WBP: {
+    '1': {
+      SN: 'front.8',
+      TL: 'front.8',
+    },
+    '2': {
+      SN: 'front.8',
+      TL: 'front.8',
+    },
+  },
+  WCY: {
+    '1': {
+      SN: 'front.8',
+      TL: 'front.8',
+    },
+    '3': {
+      SN: 'front.8',
+      TL: 'front.8',
+    },
+    '4': {
+      SN: 'front.8',
+      TL: 'front.8',
+    },
+  },
+  WNW: {
+    '1': {
+      SN: 'front.7',
+      TL: 'front.7',
+    },
+    '2': {
+      SN: 'front.7',
+      TL: 'front.7',
+    },
+  },
+  WSU: {
+    '1': {
+      SN: 'front.8',
+      TL: 'front.8',
+    },
+    '2': {
+      SN: 'front.8',
+      TL: 'front.8',
+    },
+  },
+  WWO: {
+    '1': {
+      SN: 'front.6',
+      TL: 'front.6',
+    },
+    '2': {
+      SN: 'front.6',
+      TL: 'front.6',
+    },
+  },
+  WHY: {
+    '1': {
+      SN: 'front.7',
+    },
+    '2': {
+      SN: 'front.7',
+    },
+  },
+  WHS: {
+    '1': {
+      SN: 'front.6',
+    },
+    '2': {
+      SN: 'front.5',
+    },
+  },
+  WIM: {
+    '9': {
+      SN: 'front.8',
+      TL: 'front.8',
+    },
+  },
+  WBO: {
+    '1': {
+      SN: 'front.8',
+      TL: 'front.8',
+    },
+    '2': {
+      SN: 'front.8',
+      TL: 'front.8',
+    },
+  },
+  WSE: {
+    '1': {
+      SN: 'front.3',
+    },
+  },
+  WOH: {
+    '1': {
+      SN: southernTurboElectro('front.7', 'front.9'),
+      TL: 'front.9',
+    },
+    '2': {
+      SN: southernTurboElectro('front.7', 'front.9'),
+      TL: 'front.9',
+    },
+  },
+  WME: {
+    '1': {
+      SN: 'front.6',
+      TL: 'front.6',
+    },
+    '2': {
+      SN: 'front.6',
+      TL: 'front.6',
+    },
+  },
+  WLS: {
+    '1': {
+      SN: 'front.7',
+      TL: 'front.7',
+    },
+    '2': {
+      SN: 'front.7',
+      TL: 'front.7',
+    },
+  },
 }
 
 function southernTurboElectro(turboLen: `${'front' | 'middle' | 'rear'}.${number}`, electroLen: `${'front' | 'middle' | 'rear'}.${number}`) {

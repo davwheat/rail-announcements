@@ -2134,6 +2134,11 @@ const data: Record<
       SE: 'front.11',
     },
   },
+  HYM: {
+    '*': {
+      VT: 'front.9',
+    },
+  },
 }
 
 function southernTurboElectro(turboLen: `${'front' | 'middle' | 'rear'}.${number}`, electroLen: `${'front' | 'middle' | 'rear'}.${number}`) {

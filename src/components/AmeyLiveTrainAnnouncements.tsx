@@ -593,9 +593,10 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       } catch (e) {
         console.warn(`[Live Trains] Error playing announcement for ${train.rid}; see below`)
         console.error(e)
+      } finally {
+        console.log(`[Live Trains] Announcement for ${train.rid} complete: waiting 5s until next`)
+        setTimeout(() => setIsPlaying(false), 5000)
       }
-      console.log(`[Live Trains] Announcement for ${train.rid} complete: waiting 5s until next`)
-      setTimeout(() => setIsPlaying(false), 5000)
     },
     [markNextTrainAnnounced, systems, setIsPlaying, standingTrainHandler, selectedCrs, getStation, addLog, useLegacyTocNames, announceViaPoints],
   )
@@ -657,9 +658,10 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       } catch (e) {
         console.warn(`[Live Trains] Error playing announcement for ${train.rid}; see below`)
         console.error(e)
+      } finally {
+        console.log(`[Live Trains] Announcement for ${train.rid} complete: waiting 5s until next`)
+        setTimeout(() => setIsPlaying(false), 5000)
       }
-      console.log(`[Live Trains] Announcement for ${train.rid} complete: waiting 5s until next`)
-      setTimeout(() => setIsPlaying(false), 5000)
     },
     [
       markNextTrainAnnounced,
@@ -733,9 +735,10 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       } catch (e) {
         console.warn(`[Live Trains] Error playing announcement for ${train.rid}; see below`)
         console.error(e)
+      } finally {
+        console.log(`[Live Trains] Announcement for ${train.rid} complete: waiting 5s until next`)
+        setTimeout(() => setIsPlaying(false), 5000)
       }
-      console.log(`[Live Trains] Announcement for ${train.rid} complete: waiting 5s until next`)
-      setTimeout(() => setIsPlaying(false), 5000)
     },
     [markNextTrainAnnounced, systems, setIsPlaying, nextTrainHandler, getStation, addLog, useLegacyTocNames, chimeType, announceViaPoints],
   )
@@ -824,9 +827,10 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         }
 
         console.error(e)
+      } finally {
+        console.log(`[Live Trains] Announcement for ${train.rid} complete: waiting 5s until next`)
+        setTimeout(() => setIsPlaying(false), 5000)
       }
-      console.log(`[Live Trains] Announcement for ${train.rid} complete: waiting 5s until next`)
-      setTimeout(() => setIsPlaying(false), 5000)
     },
     [markDisruptedTrainAnnounced, systems, setIsPlaying, disruptedTrainHandler, addLog, useLegacyTocNames, chimeType, announceViaPoints],
   )

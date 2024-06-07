@@ -27,7 +27,7 @@ export function isShortPlatform(crs: string, platformNumber: string | null, trai
       const count = parseInt(out.split('.')[1])
 
       if (count && !isNaN(count) && train.length !== null && train.length > 0) {
-        if (count <= train.length) {
+        if (count >= train.length) {
           out = null
         }
       }

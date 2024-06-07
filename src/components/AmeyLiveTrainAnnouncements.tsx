@@ -373,10 +373,20 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
     ['', 'none', 'three', 'four'].includes(val),
   )
   const [hasEnabledFeature, setHasEnabledFeature] = useState(false)
-  const [useLegacyTocNames, setUseLegacyTocNames] = useStateWithLocalStorage<boolean>('amey.live-trains.use-legacy-toc-names', false)
+  const [announceViaPoints, setAnnounceViaPoints] = useStateWithLocalStorage<boolean>(
+    'amey.live-trains.announce-vias',
+    true,
+    x => x === true || x === false,
+  )
+  const [useLegacyTocNames, setUseLegacyTocNames] = useStateWithLocalStorage<boolean>(
+    'amey.live-trains.use-legacy-toc-names',
+    false,
+    x => x === true || x === false,
+  )
   const [showUnconfirmedPlatforms, setShowUnconfirmedPlatforms] = useStateWithLocalStorage<boolean>(
     'amey.live-trains.show-unconfirmed-platforms',
     false,
+    x => x === true || x === false,
   )
   const [isPlaying, setIsPlaying] = useState(false)
   const [enabledAnnouncements, setEnabledAnnouncements] = useStateWithLocalStorage<AnnouncementType[]>('amey.live-trains.announcement-types', [
@@ -543,7 +553,9 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       )
 
       const callingAt = getCallingPoints(train, systems[systemKey].STATIONS, loc => getStation(loc, systemKey))
-      const [vias] = getViaPoints(train, systems[systemKey].STATIONS, stationNameToCrsMap, loc => getStation(loc, systemKey))
+      const [vias] = announceViaPoints
+        ? getViaPoints(train, systems[systemKey].STATIONS, stationNameToCrsMap, loc => getStation(loc, systemKey))
+        : [[]]
 
       const mindTheGap = isMindTheGapStation(selectedCrs, train.platform)
 
@@ -585,7 +597,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       console.log(`[Live Trains] Announcement for ${train.rid} complete: waiting 5s until next`)
       setTimeout(() => setIsPlaying(false), 5000)
     },
-    [markNextTrainAnnounced, systems, setIsPlaying, standingTrainHandler, selectedCrs, getStation, addLog, useLegacyTocNames],
+    [markNextTrainAnnounced, systems, setIsPlaying, standingTrainHandler, selectedCrs, getStation, addLog, useLegacyTocNames, announceViaPoints],
   )
 
   const announceApproachingTrain = useCallback(
@@ -611,7 +623,9 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         useLegacyTocNames,
       )
 
-      const vias = getViaPoints(train, systems[systemKey].STATIONS, stationNameToCrsMap, loc => getStation(loc, systemKey))
+      const vias = announceViaPoints
+        ? getViaPoints(train, systems[systemKey].STATIONS, stationNameToCrsMap, loc => getStation(loc, systemKey))
+        : [[]]
 
       const options: ILiveTrainApproachingAnnouncementOptions = {
         chime: chimeType || systems[systemKey].DEFAULT_CHIME,
@@ -647,7 +661,17 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       console.log(`[Live Trains] Announcement for ${train.rid} complete: waiting 5s until next`)
       setTimeout(() => setIsPlaying(false), 5000)
     },
-    [markNextTrainAnnounced, systems, setIsPlaying, approachingTrainHandler, getStation, addLog, useLegacyTocNames, chimeType],
+    [
+      markNextTrainAnnounced,
+      systems,
+      setIsPlaying,
+      approachingTrainHandler,
+      getStation,
+      addLog,
+      useLegacyTocNames,
+      chimeType,
+      announceViaPoints,
+    ],
   )
 
   const announceNextTrain = useCallback(
@@ -674,7 +698,9 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       )
 
       const callingAt = getCallingPoints(train, systems[systemKey].STATIONS, loc => getStation(loc, systemKey))
-      const [vias] = getViaPoints(train, systems[systemKey].STATIONS, stationNameToCrsMap, loc => getStation(loc, systemKey))
+      const [vias] = announceViaPoints
+        ? getViaPoints(train, systems[systemKey].STATIONS, stationNameToCrsMap, loc => getStation(loc, systemKey))
+        : [[]]
 
       const options: INextTrainAnnouncementOptions = {
         chime: chimeType || systems[systemKey].DEFAULT_CHIME,
@@ -711,7 +737,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       console.log(`[Live Trains] Announcement for ${train.rid} complete: waiting 5s until next`)
       setTimeout(() => setIsPlaying(false), 5000)
     },
-    [markNextTrainAnnounced, systems, setIsPlaying, nextTrainHandler, getStation, addLog, useLegacyTocNames, chimeType],
+    [markNextTrainAnnounced, systems, setIsPlaying, nextTrainHandler, getStation, addLog, useLegacyTocNames, chimeType, announceViaPoints],
   )
 
   const announceDisruptedTrain = useCallback(
@@ -735,7 +761,9 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         useLegacyTocNames,
       )
 
-      const [vias] = getViaPoints(train, systems[systemKey].STATIONS, stationNameToCrsMap, loc => getStation(loc, systemKey))
+      const [vias] = announceViaPoints
+        ? getViaPoints(train, systems[systemKey].STATIONS, stationNameToCrsMap, loc => getStation(loc, systemKey))
+        : [[]]
 
       let delayReason: string[] | null = null
 
@@ -800,7 +828,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       console.log(`[Live Trains] Announcement for ${train.rid} complete: waiting 5s until next`)
       setTimeout(() => setIsPlaying(false), 5000)
     },
-    [markDisruptedTrainAnnounced, systems, setIsPlaying, disruptedTrainHandler, addLog, useLegacyTocNames, chimeType],
+    [markDisruptedTrainAnnounced, systems, setIsPlaying, disruptedTrainHandler, addLog, useLegacyTocNames, chimeType, announceViaPoints],
   )
 
   useEffect(() => {
@@ -1133,6 +1161,17 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
           onChange={e => setUseLegacyTocNames(e.target.checked)}
         />
         Use legacy TOC names
+      </label>
+
+      <label htmlFor="announce-vias">
+        <input
+          type="checkbox"
+          name="announce-vias"
+          id="announce-vias"
+          checked={announceViaPoints}
+          onChange={e => setAnnounceViaPoints(e.target.checked)}
+        />
+        Announce via points
       </label>
 
       <label htmlFor="chime-type-select" className="option-select">

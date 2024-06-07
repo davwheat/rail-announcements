@@ -3926,22 +3926,22 @@ export default class AmeyPhil extends StationAnnouncementSystem {
 
       if (stopData.position === 'any' || stopData.position === pos) {
         if (len === 1) {
-          files.push(`e.should travel in the ${pos} coach of the train`)
+          files.push(`e.should join the ${pos} coach only`)
         } else {
-          files.push(`m.should travel in the ${pos}`, `platform.s.${len}`, 'e.coaches of the train')
+          files.push(`e.should join the ${pos} ${len} coaches`)
         }
       } else {
-        if (len === 1) {
-          files.push(`m.should travel in the ${pos}`, 'm.coach')
-        } else {
-          files.push(`m.should travel in the ${pos}`, `platform.s.${len}`, 'm.coaches')
-        }
-
-        if (stopData.length === 1) {
-          files.push('m.of', 'm.the', `m.${stopData.position}`, 'e.coach of this train')
-        } else {
-          files.push('m.of', 'm.the', `m.${stopData.position}`, `platform.s.${stopData.length}`, 'e.coaches of the train')
-        }
+        // No short platforms are announced post-split. All this code I've written going to waste!
+        // if (len === 1) {
+        //   files.push(`m.should join the ${pos} coach only`)
+        // } else {
+        //   files.push(`e.should join the ${pos} ${len} coaches`)
+        // }
+        // if (stopData.length === 1) {
+        //   files.push('m.of', 'm.the', `m.${stopData.position}`, 'e.coach')
+        // } else {
+        //   files.push('m.of', 'm.the', `m.${stopData.position}`, `platform.s.${stopData.length}`, 'e.coaches')
+        // }
       }
 
       return files

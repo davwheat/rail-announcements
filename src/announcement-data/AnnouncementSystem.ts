@@ -1,4 +1,4 @@
-import Crunker from 'crunker'
+import Crunker from '../helpers/crunker'
 
 import type { ICustomAnnouncementPaneProps } from '@components/PanelPanes/CustomAnnouncementPane'
 import type { ICustomButtonPaneProps } from '@components/PanelPanes/CustomButtonPane'
@@ -170,6 +170,12 @@ export default abstract class AnnouncementSystem {
       return
     }
 
+    window.Crunker = Crunker
+
+    if ('audioSession' in window.navigator) {
+      window.navigator.audioSession.type = 'playback'
+    }
+
     window.__audio = fileIds
     console.info('Playing audio files:', fileIds)
 
@@ -186,7 +192,6 @@ export default abstract class AnnouncementSystem {
 
     if (audio.numberOfChannels > 1) {
       // This is stereo. We need to mux it to mono.
-
       audio.copyToChannel(audio.getChannelData(0), 1, 0)
     }
 
@@ -194,12 +199,45 @@ export default abstract class AnnouncementSystem {
       crunker.download(crunker.export(audio, 'audio/wav').blob, 'announcement')
       window.__audio = undefined
     } else {
-      const source = crunker.play(audio)
-
       return new Promise<void>(resolve => {
-        source.addEventListener('ended', () => {
-          window.__audio = undefined
-          resolve()
+        crunker.play(audio, source => {
+          console.log('[Crunker] About to play audio...')
+          crunker._context.onstatechange = () => console.log('state changed to: ', audioContext.state)
+          console.log('Context state: ', crunker._context.state)
+
+          if (crunker._context.state === 'suspended') {
+            console.log('[Crunker] Resuming audio context')
+            crunker._context.resume()
+            console.log('Context state: ', crunker._context.state)
+
+            if (crunker._context.state === 'suspended') {
+              console.error('[Crunker] Failed to resume audio context')
+
+              document.getElementById('resume-audio-button')?.remove()
+
+              const button = document.createElement('button')
+              button.textContent = 'Resume audio'
+              button.id = 'resume-audio-button'
+              button.style.margin = '16px'
+              button.onclick = () => {
+                crunker._context.resume()
+                button.remove()
+              }
+              document.body.appendChild(button)
+
+              alert(
+                "Your device or web browser is refusing to let the website play audio.\n\nThis is especially common on iPhones and iPads. We'd recommend you try using a desktop computer or an alterantive device.\n\nTry scrolling to the bottom of the page and pressing the 'Resume audio' button. If this doesn't help, there's nothing else that we can do. Sorry!",
+              )
+
+              button.scrollIntoView()
+            }
+          }
+
+          source.addEventListener('ended', () => {
+            console.log('[Crunker] Finished playing audio')
+            window.__audio = undefined
+            resolve()
+          })
         })
       })
     }

@@ -388,7 +388,26 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
     false,
     x => x === true || x === false,
   )
-  const [isPlaying, setIsPlaying] = useState(false)
+  const [isPlaying, _setIsPlaying] = useState(false)
+  const setIsPlaying = useCallback(
+    function setIsPlaying(val: boolean) {
+      console.log(`Setting isPlaying to ${val}`)
+
+      _setIsPlaying(val)
+    },
+    [_setIsPlaying],
+  )
+  const setIsPlayingAfter = useCallback(
+    function setIsPlayingAfter(val: boolean, timeout: number) {
+      console.log(`Setting isPlaying to ${val} after ${timeout}ms`)
+
+      setTimeout(() => {
+        setIsPlaying(val)
+      }, timeout)
+    },
+    [setIsPlaying],
+  )
+
   const [enabledAnnouncements, setEnabledAnnouncements] = useStateWithLocalStorage<AnnouncementType[]>('amey.live-trains.announcement-types', [
     AnnouncementType.Next,
     AnnouncementType.Approaching,
@@ -598,7 +617,18 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         setIsPlaying(false)
       }
     },
-    [markNextTrainAnnounced, systems, setIsPlaying, standingTrainHandler, selectedCrs, getStation, addLog, useLegacyTocNames, announceViaPoints],
+    [
+      markNextTrainAnnounced,
+      systems,
+      setIsPlaying,
+      standingTrainHandler,
+      selectedCrs,
+      getStation,
+      addLog,
+      useLegacyTocNames,
+      announceViaPoints,
+      setIsPlayingAfter,
+    ],
   )
 
   const announceApproachingTrain = useCallback(
@@ -673,6 +703,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       useLegacyTocNames,
       chimeType,
       announceViaPoints,
+      setIsPlayingAfter,
     ],
   )
 
@@ -740,7 +771,18 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         setIsPlaying(false)
       }
     },
-    [markNextTrainAnnounced, systems, setIsPlaying, nextTrainHandler, getStation, addLog, useLegacyTocNames, chimeType, announceViaPoints],
+    [
+      markNextTrainAnnounced,
+      systems,
+      setIsPlaying,
+      nextTrainHandler,
+      getStation,
+      addLog,
+      useLegacyTocNames,
+      chimeType,
+      announceViaPoints,
+      setIsPlayingAfter,
+    ],
   )
 
   const announceDisruptedTrain = useCallback(
@@ -835,7 +877,17 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         }
       }
     },
-    [markDisruptedTrainAnnounced, systems, setIsPlaying, disruptedTrainHandler, addLog, useLegacyTocNames, chimeType, announceViaPoints],
+    [
+      markDisruptedTrainAnnounced,
+      systems,
+      setIsPlaying,
+      disruptedTrainHandler,
+      addLog,
+      useLegacyTocNames,
+      chimeType,
+      announceViaPoints,
+      setIsPlayingAfter,
+    ],
   )
 
   useEffect(() => {
@@ -869,7 +921,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
 
       try {
         const resp = await fetch(
-          process.env.NODE_ENV === 'development' ? `http://localhost:8787/api/get-services?${params}` : `/api/get-services?${params}`,
+          process.env.NODE_ENV === 'development' ? `http://local.davw.network:8787/api/get-services?${params}` : `/api/get-services?${params}`,
         )
 
         if (!resp.ok) {

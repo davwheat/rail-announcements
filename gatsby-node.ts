@@ -7,7 +7,7 @@ export const onCreateWebpackConfig: GatsbyNode['onCreateWebpackConfig'] = ({ sta
       module: {
         rules: [
           {
-            test: /crunker/,
+            test: /crunker/g,
             use: loaders.null(),
           },
         ],

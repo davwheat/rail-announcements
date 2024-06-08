@@ -1,0 +1,56 @@
+name: Smoketest
+
+on:
+  push:
+    branches:
+      - main
+      - deploy
+    paths:
+      - 'audio/**'
+  # Triggers the workflow on pull request event, but only for pull request from not forked repo
+  pull_request:
+    types:
+      - opened
+      - synchronize
+    paths:
+      - 'audio/**'
+
+permissions:
+  # default contents: read & write (in forked repos, only read)
+  contents: write
+  # default deployments: read & write (in forked repos, only read)
+  deployments: write
+  # default pull-requests: read & write (in forked repos, only read)
+  pull-requests: write
+
+env:
+  NODE_VERSION: 20.x
+  CF_PAGES_PROJECT_NAME: rail-announcements
+
+jobs:
+  smoketest:
+    runs-on: ubuntu-latest
+    name: Upload Audio to Cloudflare R2
+
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.pull_request.head.ref || github.ref }}
+      cancel-in-progress: true
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+
+      - name: Setup Rclone
+        uses: AnimMouse/setup-rclone@v1
+        with:
+          rclone_config: ${{ secrets.RCLONE_CONFIG }}
+
+      - name: Upload audio files to Cloudflare R2
+        # If it's a PR, only run if the PR head is not a fork
+        if: ${{ github.event_name != 'pull_request' || !github.event.pull_request.head.repo.fork }}
+        run: |
+          rclone --fast-list -v --transfers=128 --checkers=256 --progress copy "./audio" "Cloudflare R2:/rail-announcements-audio"
+        env:
+          RCLONE_CONFIG_PASS: ${{ secrets.RCLONE_CONFIG_PASSWORD }}

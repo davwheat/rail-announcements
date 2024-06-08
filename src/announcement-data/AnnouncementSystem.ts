@@ -223,10 +223,13 @@ export default abstract class AnnouncementSystem {
                 crunker._context.resume()
                 button.remove()
               }
-              document.body.appendChild(button)
+
+              const container = document.getElementById('resume-audio-container')
+              if (container) container.appendChild(button)
+              else document.body.appendChild(button)
 
               alert(
-                "Your device or web browser is refusing to let the website play audio.\n\nThis is especially common on iPhones and iPads. We'd recommend you try using a desktop computer or an alterantive device.\n\nTry scrolling to the bottom of the page and pressing the 'Resume audio' button. If this doesn't help, there's nothing else that we can do. Sorry!",
+                "Your device or web browser is refusing to let the website play audio.\n\nThis is especially common on iPhones and iPads. We'd recommend you try using a desktop computer or an alterantive device.\n\nTry scrolling to and pressing the 'Resume audio' button. If this doesn't help, there's nothing else that we can do. Sorry!",
               )
 
               button.scrollIntoView()

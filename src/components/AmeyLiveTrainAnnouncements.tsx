@@ -1666,6 +1666,8 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
             />
           </FullScreen>
 
+          <div id="resume-audio-container" />
+
           <Logs css={{ marginTop: 16 }} logs={logs} />
 
           <img

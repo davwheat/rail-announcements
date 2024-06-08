@@ -1577,7 +1577,14 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
             css={{
               marginBottom: 16,
             }}
-            onClick={() => setFullscreen(true)}
+            onClick={() => {
+              // Is iPhone
+              if (navigator.userAgent.match(/iPhone/i)) {
+                alert('iPhones do not support the Fullscreen API. Please use a different device to use this feature.')
+              } else {
+                setFullscreen(true)
+              }
+            }}
           >
             <span className="buttonLabel">
               <FullscreenIcon /> Fullscreen

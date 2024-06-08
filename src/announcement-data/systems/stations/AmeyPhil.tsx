@@ -162,7 +162,12 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     >[]
     disruptedTrain: ICustomAnnouncementPreset<IDisruptedTrainAnnouncementOptions>[]
   }> {
-    return {
+    const presets: {
+      nextTrain: ICustomAnnouncementPreset<
+        INextTrainAnnouncementOptions & IStandingTrainAnnouncementOptions & IPlatformAlterationAnnouncementOptions
+      >[]
+      disruptedTrain: ICustomAnnouncementPreset<IDisruptedTrainAnnouncementOptions>[]
+    } = {
       nextTrain: [
         {
           name: '12:28 | SN Littlehampton to Brighton',
@@ -487,6 +492,30 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         },
       ],
     }
+
+    presets.nextTrain.push({
+      name: '23:45 | Calling at every station (needs a powerful device)',
+      state: {
+        chime: this.DEFAULT_CHIME,
+        platform: '1',
+        newPlatform: '1',
+        oldPlatform: '18',
+        announceOldPlatform: true,
+        firstClassLocation: 'middle',
+        isDelayed: false,
+        mindTheGap: true,
+        thisStationCode: 'North Pole International',
+        hour: '23',
+        min: '45',
+        toc: '',
+        terminatingStationCode: 'North Pole International',
+        vias: ['SLO'].map(stationItemCompleter),
+        callingAt: this.STATIONS.map(stationItemCompleter),
+        coaches: '1 coach',
+      },
+    })
+
+    return presets
   }
 
   protected get AVAILABLE_TOCS() {

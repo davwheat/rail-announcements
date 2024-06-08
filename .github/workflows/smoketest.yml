@@ -131,19 +131,6 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           command: d1 migrations apply rail-announcements
 
-      - name: Setup Rclone
-        uses: AnimMouse/setup-rclone@v1
-        with:
-          rclone_config: ${{ secrets.RCLONE_CONFIG }}
-
-      - name: Upload audio files to Cloudflare R2
-        # If it's a PR, only run if the PR head is not a fork
-        if: ${{ github.event_name != 'pull_request' || !github.event.pull_request.head.repo.fork }}
-        run: |
-          rclone --fast-list -v --transfers=128 --checkers=256 --progress copy "./audio" "Cloudflare R2:/rail-announcements-audio"
-        env:
-          RCLONE_CONFIG_PASS: ${{ secrets.RCLONE_CONFIG_PASSWORD }}
-
       - name: Publish to Cloudflare Pages
         uses: cloudflare/pages-action@1
         if: ${{ github.event_name != 'pull_request_target' || contains(github.event.label.name, '🚀 request deploy') }}

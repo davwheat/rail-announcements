@@ -16,7 +16,7 @@ export default function AnnouncementTabErrorBoundary(props: IAnnouncementTabErro
           id: props.systemId,
           name: props.systemName,
         })
-        scope.setContext('audio ids', { ids: window.__audio })
+        scope.setContext('audio ids', { data: JSON.stringify(window.__audio, null, 2) })
       }}
       fallback={({ eventId, resetError, error, componentStack }) => (
         <div>

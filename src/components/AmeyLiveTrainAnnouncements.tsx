@@ -1340,6 +1340,10 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
               background: '#eee',
               cursor: 'pointer',
 
+              '&::-webkit-details-marker': {
+                display: 'none',
+              },
+
               '&::before': {
                 '--size': '6px',
                 content: '""',

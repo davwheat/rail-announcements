@@ -91,27 +91,17 @@ const data: Record<
     },
   },
   APD: {
-    '1': {
-      SN: 'front.2',
-    },
-    '2': {
+    '*': {
       SN: 'front.2',
     },
   },
   APS: {
-    '1': {
-      SN: 'front.10',
-    },
-    '2': {
+    '*': {
       SN: 'front.10',
     },
   },
   AHD: {
-    '1': {
-      SN: 'front.10',
-      TL: 'front.10',
-    },
-    '2': {
+    '*': {
       SN: 'front.10',
       TL: 'front.10',
     },

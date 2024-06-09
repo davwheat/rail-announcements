@@ -264,10 +264,11 @@ export interface LiveTrainAnnouncementsProps<SystemKeys extends string> {
   standingTrainHandler: Record<SystemKeys, (options: IStandingTrainAnnouncementOptions) => Promise<void>>
 }
 
-type DisplayType = 'infotec-landscape-dmi' | 'blackbox-landscape-lcd'
+type DisplayType = 'infotec-landscape-dmi' | 'daktronics-data-display-dmi' | 'blackbox-landscape-lcd'
 
 const DisplayNames: Record<DisplayType, string> = {
   'infotec-landscape-dmi': 'Infotec landscape DMI',
+  'daktronics-data-display-dmi': 'Daktronics/Data Display DMI',
   'blackbox-landscape-lcd': 'Blackbox landscape LCD',
 }
 

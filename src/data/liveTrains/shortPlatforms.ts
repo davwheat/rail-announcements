@@ -73,8 +73,14 @@ const data: Record<
     },
   },
   ANZ: {
-    '*': {
+    '1': {
+      SN: 'front.9',
+      GX: 'front.9',
+      TL: 'front.9',
+    },
+    '2': {
       SN: 'front.8',
+      GX: 'front.8',
       TL: 'front.8',
     },
   },

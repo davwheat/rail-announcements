@@ -202,7 +202,7 @@ export default abstract class AnnouncementSystem {
       return new Promise<void>(resolve => {
         crunker.play(audio, source => {
           console.log('[Crunker] About to play audio...')
-          crunker._context.onstatechange = () => console.log('state changed to: ', audioContext.state)
+          crunker._context.onstatechange = a => console.log('state changed:', a)
           console.log('Context state: ', crunker._context.state)
 
           if (crunker._context.state === 'suspended') {

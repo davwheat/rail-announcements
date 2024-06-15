@@ -700,6 +700,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         'Yorkshire Pullman',
       ],
       standaloneOnly: [
+        'Avanti West Coast',
         'Channel Tunnel Rail Link',
         'Chiltern Railway company',
         'Croydon Tramlink',

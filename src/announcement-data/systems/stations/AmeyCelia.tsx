@@ -211,6 +211,7 @@ export default class AmeyCelia extends AmeyPhil {
         'Arriva Trains Merseyside',
         'Arriva Trains',
         'Arriva Transpennine',
+        'Avanti West Coast',
         'c2c Rail',
         'Cardiff Railways',
         'Channel Tunnel Rail Link',

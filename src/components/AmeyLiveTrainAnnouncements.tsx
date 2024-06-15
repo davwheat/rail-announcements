@@ -831,7 +831,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         terminatingStationCode: train.destination[0].crs,
         vias,
         delayTime: delayMins.toString(),
-        disruptionType: cancelled ? 'cancel' : unknownDelay || delayMins > 59 || delayMins < 0 ? 'delay' : 'delayedBy',
+        disruptionType: cancelled ? 'cancel' : unknownDelay || delayMins < 0 ? 'delay' : 'delayedBy',
         disruptionReason: delayReason ?? '',
       }
 

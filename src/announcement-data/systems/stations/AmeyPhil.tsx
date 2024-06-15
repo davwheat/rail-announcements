@@ -4730,6 +4730,14 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       )),
     )
 
+    function getNumber(num: number): string {
+      if (num < 10) {
+        return `platform.s.${num}`
+      } else {
+        return `mins.m.${num}`
+      }
+    }
+
     const endInflection = options.disruptionReason ? 'm' : 'e'
 
     switch (options.disruptionType) {
@@ -4738,13 +4746,13 @@ export default class AmeyPhil extends StationAnnouncementSystem {
 
         const num = parseInt(options.delayTime)
 
-        if (num < 10) {
-          files.push(`platform.s.${num}`)
-        } else {
-          files.push(`mins.m.${num}`)
-        }
+        const hours = Math.floor(num / 60)
+        const mins = num % 60
 
-        files.push(`${endInflection}.${num !== 1 ? 'minutes' : 'minute'}`)
+        if (hours > 0) {
+          files.push(getNumber(hours), hours === 1 ? 'm.hour' : 'm.hours', 'm.and')
+        }
+        files.push(getNumber(mins), `${endInflection}.${mins !== 1 ? 'minutes' : 'minute'}`)
 
         if (Array.isArray(options.disruptionReason)) {
           files.push('m.due to', ...options.disruptionReason)
@@ -5732,8 +5740,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           delayTime: {
             name: 'Delay length',
             type: 'select',
-            options: new Array(59).fill(0).map((_, i) => ({ value: (i + 1).toString(), title: `${i + 1} minute${i === 0 ? '' : 's'}` })),
-            default: '10',
+            options: new Array(360).fill(0).map((_, i) => ({ value: (i + 1).toString(), title: `${i + 1} minute${i === 0 ? '' : 's'}` })),
+            default: '65',
             onlyShowWhen(activeState) {
               return activeState.disruptionType === 'delayedBy'
             },

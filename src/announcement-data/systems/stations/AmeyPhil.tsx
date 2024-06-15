@@ -4275,7 +4275,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
 
     files.push(
       ...this.pluraliseAudio(
-        rrbCalls.map(s => `station.m.${s.crsCode}`).concat(restartedTrainCalls.length > 0 ? [] : [`station.m.${terminatingStation}`]),
+        rrbCalls.map(s => `station.m.${s.crsCode}`).concat(restartAsTrainAfterIndex !== -1 ? [] : [`station.m.${terminatingStation}`]),
         {
           andId: 'm.and',
           firstItemDelay: this.callingPointsOptions.afterCallingAtDelay,
@@ -4286,16 +4286,18 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       ),
     )
 
-    if (restartedTrainCalls.length > 0) {
+    if (restartAsTrainAfterIndex !== -1) {
       files.push(
         'm.where the train will restart for-2',
-        ...this.pluraliseAudio(restartedTrainCalls.map(s => `station.m.${s.crsCode}`).concat([`station.e.${terminatingStation}`]), {
-          andId: 'm.and',
-          firstItemDelay: this.callingPointsOptions.afterCallingAtDelay,
-          beforeItemDelay: this.callingPointsOptions.betweenStopsDelay,
-          beforeAndDelay: this.callingPointsOptions.aroundAndDelay,
-          afterAndDelay: this.callingPointsOptions.aroundAndDelay,
-        }),
+        ...(restartedTrainCalls.length > 0
+          ? this.pluraliseAudio(restartedTrainCalls.map(s => `station.m.${s.crsCode}`).concat([`station.e.${terminatingStation}`]), {
+              andId: 'm.and',
+              firstItemDelay: this.callingPointsOptions.afterCallingAtDelay,
+              beforeItemDelay: this.callingPointsOptions.betweenStopsDelay,
+              beforeAndDelay: this.callingPointsOptions.aroundAndDelay,
+              afterAndDelay: this.callingPointsOptions.aroundAndDelay,
+            })
+          : [`station.m.${terminatingStation}`, 'e.only']),
       )
     } else {
       files.push('e.where the train was originally due to terminate')

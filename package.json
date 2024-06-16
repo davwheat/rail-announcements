@@ -28,7 +28,7 @@
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
     "@reach/tabs": "^0.18.0",
-    "@sentry/gatsby": "^7.116.0",
+    "@sentry/gatsby": "^7.117.0",
     "@sentry/tracing": "^7.114.0",
     "clsx": "^2.1.1",
     "copy-to-clipboard": "^3.3.3",
@@ -64,7 +64,7 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20240605.0",
+    "@cloudflare/workers-types": "^4.20240614.0",
     "@sentry/cli": "^2.32.1",
     "@types/gatsbyjs__reach-router": "^2.0.4",
     "@types/node": "^20.14.2",
@@ -74,9 +74,9 @@
     "@types/uuid": "^9.0.8",
     "cross-env": "^7.0.3",
     "gatsby-plugin-webpack-bundle-analyser-v2": "^1.1.32",
-    "prettier": "^3.3.1",
+    "prettier": "^3.3.2",
     "typescript": "^5.4.5",
-    "wrangler": "^3.60.1"
+    "wrangler": "^3.60.3"
   },
-  "packageManager": "yarn@4.2.2"
+  "packageManager": "yarn@4.3.0"
 }

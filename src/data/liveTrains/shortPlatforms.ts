@@ -429,6 +429,7 @@ const data: Record<
   DMS: {
     '*': {
       SN: 'front.8',
+      TL: 'front.8',
     },
   },
   DUR: {
@@ -903,13 +904,16 @@ const data: Record<
   },
   OXT: {
     '1': {
-      SN: southernTurboElectro('front.10', 'front.11'),
+      SN: southernTurboElectro('front.10', 'front.12'),
+      TL: 'front.11',
     },
     '2': {
-      SN: southernTurboElectro('front.10', 'front.11'),
+      SN: southernTurboElectro('front.10', 'front.12'),
+      TL: 'front.11',
     },
     '3': {
       SN: southernTurboElectro('front.3', 'front.4'),
+      TL: 'front.4',
     },
   },
   PMR: {
@@ -2133,6 +2137,42 @@ const data: Record<
   HYM: {
     '*': {
       VT: 'front.9',
+    },
+  },
+  HGY: {
+    '*': {
+      GN: 'front.5',
+      TL: 'front.5',
+    },
+  },
+  HRN: {
+    '*': {
+      GN: 'front.5',
+      TL: 'front.5',
+    },
+  },
+  BPK: {
+    '*': {
+      GN: 'front.5',
+      TL: 'front.5',
+    },
+  },
+  AWM: {
+    '*': {
+      GN: 'front.5',
+      TL: 'front.5',
+    },
+  },
+  BDK: {
+    '*': {
+      GN: 'front.8',
+      TL: 'front.8',
+    },
+  },
+  HEN: {
+    '*': {
+      GN: 'front.7',
+      TL: 'front.7',
     },
   },
 }

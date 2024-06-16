@@ -2159,8 +2159,8 @@ const data: Record<
   },
   AWM: {
     '*': {
-      GN: 'front.5',
-      TL: 'front.5',
+      GN: 'front.8',
+      TL: 'front.8',
     },
   },
   BDK: {

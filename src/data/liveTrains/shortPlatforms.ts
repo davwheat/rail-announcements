@@ -1772,6 +1772,15 @@ const data: Record<
     },
   },
   DVP: {
+    '1': {
+      SE: southeasternHs1('front.8', 'front.12'),
+    },
+    '2': {
+      SE: southeasternHs1('front.8', 'front.10'),
+    },
+    '3': {
+      SE: 'front.8',
+    },
     '*': {
       SE: 'front.8',
     },
@@ -2159,5 +2168,23 @@ function southernTurboElectro(turboLen: `${'front' | 'middle' | 'rear'}.${number
     }
 
     return electroLen
+  }
+}
+
+function southeasternHs1(nonHs1: `${'front' | 'middle' | 'rear'}.${number}`, hs1: `${'front' | 'middle' | 'rear'}.${number}`) {
+  return (trainService: TrainService): `${'front' | 'middle' | 'rear'}.${number}` | null => {
+    const hs1Stations = ['STP', 'EBD', 'SFA', 'ASI', 'AFK']
+
+    if (
+      trainService.origin.some(s => hs1Stations.includes(s.crs)) ||
+      trainService.destination.some(s => hs1Stations.includes(s.crs)) ||
+      trainService.origin.some(s => hs1Stations.includes(s.crs)) ||
+      trainService.destination.some(s => hs1Stations.includes(s.crs)) ||
+      trainService.subsequentLocations.some(s => hs1Stations.includes(s.crs || ''))
+    ) {
+      return hs1
+    }
+
+    return nonHs1
   }
 }

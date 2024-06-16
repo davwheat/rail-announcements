@@ -510,10 +510,7 @@ const data: Record<
     },
   },
   FOD: {
-    '1': {
-      SN: 'front.6',
-    },
-    '2': {
+    '*': {
       SN: 'front.6',
     },
   },
@@ -565,18 +562,12 @@ const data: Record<
     },
   },
   HMT: {
-    '1': {
-      SN: 'front.3',
-    },
-    '2': {
+    '*': {
       SN: 'front.3',
     },
   },
   HME: {
-    '1': {
-      SN: 'front.4',
-    },
-    '2': {
+    '*': {
       SN: 'front.4',
     },
   },
@@ -628,10 +619,7 @@ const data: Record<
     },
   },
   IMW: {
-    '1': {
-      SN: 'front.8',
-    },
-    '2': {
+    '*': {
       SN: 'front.8',
     },
   },
@@ -665,10 +653,7 @@ const data: Record<
     },
   },
   LIH: {
-    '1': {
-      SN: 'front.6',
-    },
-    '2': {
+    '*': {
       SN: 'front.6',
     },
   },
@@ -684,10 +669,7 @@ const data: Record<
     },
   },
   LFD: {
-    '1': {
-      SN: 'front.8',
-    },
-    '2': {
+    '*': {
       SN: 'front.8',
     },
   },
@@ -700,30 +682,27 @@ const data: Record<
     },
   },
   LRB: {
-    '1': {
-      SN: 'front.6',
-    },
-    '2': {
+    '*': {
       SN: 'front.6',
     },
   },
   LRG: {
-    '1': {
-      SN: 'front.10',
-    },
-    '2': {
+    '*': {
       SN: 'front.10',
     },
   },
   VIC: {
     '3': {
       SN: 'front.9',
+      TL: 'front.9',
     },
     '4': {
       SN: 'front.9',
+      TL: 'front.9',
     },
     '8': {
       SN: 'front.10',
+      TL: 'front.10',
     },
     '*': {
       SE: 'front.9',
@@ -735,48 +714,30 @@ const data: Record<
     },
   },
   MTC: {
-    '1': {
-      SN: 'front.9',
-      TL: 'front.9',
-    },
-    '2': {
+    '*': {
       SN: 'front.9',
       TL: 'front.9',
     },
   },
   MIJ: {
-    '1': {
-      SN: 'front.7',
-      TL: 'front.7',
-    },
-    '2': {
+    '*': {
       SN: 'front.7',
       TL: 'front.7',
     },
   },
   MDS: {
-    '1': {
-      SN: 'front.8',
-      TL: 'front.8',
-    },
-    '2': {
+    '*': {
       SN: 'front.8',
       TL: 'front.8',
     },
   },
   MCB: {
-    '1': {
-      SN: 'front.4',
-    },
-    '2': {
+    '*': {
       SN: 'front.4',
     },
   },
   NTL: {
-    '1': {
-      SN: 'front.8',
-    },
-    '2': {
+    '*': {
       SN: 'front.8',
     },
   },
@@ -855,21 +816,27 @@ const data: Record<
   NWD: {
     '1': {
       SN: southernTurboElectro('front.7', 'front.10'),
+      TL: 'front.10',
     },
     '2': {
       SN: southernTurboElectro('front.7', 'front.10'),
+      TL: 'front.10',
     },
     '3': {
       SN: southernTurboElectro('front.7', 'front.10'),
+      TL: 'front.10',
     },
     '4': {
       SN: southernTurboElectro('front.7', 'front.10'),
+      TL: 'front.10',
     },
     '5': {
       SN: southernTurboElectro('front.7', 'front.10'),
+      TL: 'front.10',
     },
     '6': {
       SN: southernTurboElectro('front.7', 'front.9'),
+      TL: 'front.9',
     },
     '*': {
       SE: 'front.8',

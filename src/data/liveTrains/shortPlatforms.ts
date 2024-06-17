@@ -1573,9 +1573,6 @@ const data: Record<
       TL: 'front.7',
     },
   },
-
-  // ---- SE DATA -----
-
   BEG: {
     '*': {
       SE: 'front.3',
@@ -2149,6 +2146,54 @@ const data: Record<
     '*': {
       GN: 'front.7',
       TL: 'front.7',
+    },
+  },
+  MEL: {
+    '*': {
+      TL: 'front.4',
+      GN: 'front.4',
+    },
+  },
+  STH: {
+    '1': {
+      TL: 'front.4',
+      GN: 'front.4',
+    },
+    '2': {
+      GN: 'front.8',
+      TL: 'front.8',
+    },
+  },
+  FXN: {
+    '1': {
+      TL: 'front.5',
+      GN: 'front.5',
+    },
+    '2': {
+      GN: 'front.8',
+      TL: 'front.8',
+    },
+  },
+  WTG: {
+    '*': {
+      TL: 'front.4',
+      GN: 'front.4',
+    },
+  },
+  LTP: {
+    '1': {
+      TL: 'front.4',
+      GN: 'front.4',
+    },
+  },
+  NBA: {
+    '1': {
+      TL: 'front.7',
+      GN: 'front.7',
+    },
+    '7': {
+      TL: 'front.7',
+      GN: 'front.7',
     },
   },
 }

@@ -4751,9 +4751,14 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         const mins = num % 60
 
         if (hours > 0) {
-          files.push(getNumber(hours), hours === 1 ? 'm.hour' : 'm.hours', 'm.and')
+          files.push(getNumber(hours), hours === 1 ? 'm.hour' : 'm.hours')
         }
-        files.push(getNumber(mins), `${endInflection}.${mins !== 1 ? 'minutes' : 'minute'}`)
+        if (hours > 0 && mins > 0) {
+          files.push('m.and')
+        }
+        if (mins > 0) {
+          files.push(getNumber(mins), `${endInflection}.${mins !== 1 ? 'minutes' : 'minute'}`)
+        }
 
         if (Array.isArray(options.disruptionReason)) {
           files.push('m.due to', ...options.disruptionReason)

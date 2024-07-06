@@ -8,6 +8,7 @@ import { getStationByCrs } from '@data/StationManipulators'
 import crsToStationItemMapper, { stationItemCompleter } from '@helpers/crsToStationItemMapper'
 import { AudioItem, CustomAnnouncementButton, CustomAnnouncementTab } from '../../AnnouncementSystem'
 import DelayCodeMapping from './DarwinDelayCodes_Male1.json'
+import NamedServices from './named-services.json'
 
 export type ChimeType = 'three' | 'four' | 'none'
 export type FirstClassLocation = 'none' | 'front' | 'middle' | 'rear'
@@ -3685,7 +3686,14 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     return [...this.AVAILABLE_TOCS.standaloneOnly, ...this.AVAILABLE_TOCS.withServiceToFrom].sort((a, b) => a.localeCompare(b))
   }
 
-  processTocForLiveTrains(tocName: string, tocCode: string, originCrs: string, destinationCrs: string, useLegacy: boolean): string {
+  processTocForLiveTrains(
+    tocName: string,
+    tocCode: string,
+    originCrs: string,
+    destinationCrs: string,
+    useLegacy: boolean,
+    trainUid: string,
+  ): string {
     if (useLegacy) {
       switch (tocCode.toUpperCase()) {
         case 'AW':
@@ -3707,6 +3715,15 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         case 'GR':
           return 'national express east coast'
         case 'GW':
+          const namedMatch = Object.entries(NamedServices.GW.services)
+            .find(([_, uids]) => uids.includes(trainUid))?.[0]
+            ?.toLowerCase()
+
+          console.log('GWR named service match: ', trainUid, namedMatch)
+
+          if (namedMatch && this.ALL_AVAILABLE_TOCS.map(s => s.toLowerCase()).includes(`first great western ${namedMatch}`))
+            return `first great western ${namedMatch}`
+
           return 'first great western'
         case 'GX':
           return 'gatwick express'
@@ -3765,6 +3782,19 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       // LNER has different filename compared to TOC name
       case 'GR':
         return 'london north eastern railway'
+
+      // Handle named GWR services
+      case 'GW':
+        const namedMatch = Object.entries(NamedServices.GW.services)
+          .find(([_, uids]) => uids.includes(trainUid))?.[0]
+          ?.toLowerCase()
+
+        console.log('GWR named service match:', trainUid, namedMatch)
+
+        if (namedMatch && this.ALL_AVAILABLE_TOCS.map(s => s.toLowerCase()).includes(`great western railway ${namedMatch}`))
+          return `great western railway ${namedMatch}`
+
+        return 'great western railway'
 
       // West Midlands Trains
       case 'LM':

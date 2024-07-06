@@ -570,6 +570,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         train.origin[0].crs,
         train.destination[0].crs,
         useLegacyTocNames,
+        train.uid,
       )
 
       const callingAt = getCallingPoints(train, systems[systemKey].STATIONS, loc => getStation(loc, systemKey))
@@ -653,6 +654,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         train.origin[0].crs,
         train.destination[0].crs,
         useLegacyTocNames,
+        train.uid,
       )
 
       const vias = announceViaPoints
@@ -729,6 +731,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         train.origin[0].crs,
         train.destination[0].crs,
         useLegacyTocNames,
+        train.uid,
       )
 
       const callingAt = getCallingPoints(train, systems[systemKey].STATIONS, loc => getStation(loc, systemKey))
@@ -805,6 +808,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         train.origin[0].crs,
         train.destination[0].crs,
         useLegacyTocNames,
+        train.uid,
       )
 
       const [vias] = announceViaPoints

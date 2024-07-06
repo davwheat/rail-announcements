@@ -1,6 +1,6 @@
-import { ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
-import AmeyPhil, { ChimeType, INextTrainAnnouncementOptions } from './AmeyPhil'
+import AmeyPhil, { ChimeType } from './AmeyPhil'
 import DelayCodeMapping from './DarwinDelayCodes_Female1.json'
+import NamedServices from './named-services.json'
 
 import type { CustomAnnouncementButton } from '@announcement-data/AnnouncementSystem'
 
@@ -3141,7 +3141,14 @@ export default class AmeyCelia extends AmeyPhil {
     thisStationAudio: 'e.this station',
   }
 
-  processTocForLiveTrains(tocName: string, tocCode: string, originCrs: string, destinationCrs: string, useLegacy: boolean): string {
+  processTocForLiveTrains(
+    tocName: string,
+    tocCode: string,
+    originCrs: string,
+    destinationCrs: string,
+    useLegacy: boolean,
+    trainUid: string,
+  ): string {
     if (useLegacy) {
       switch (tocCode.toUpperCase()) {
         case 'AW':
@@ -3163,6 +3170,12 @@ export default class AmeyCelia extends AmeyPhil {
         case 'GR':
           return 'national express east coast'
         case 'GW':
+          const namedMatch = Object.entries(NamedServices.GW.services)
+            .find(([_, uids]) => uids.includes(trainUid))?.[0]
+            ?.toLowerCase()
+
+          if (namedMatch && this.ALL_AVAILABLE_TOCS.includes(`first great western ${namedMatch}`)) return `first great western ${namedMatch}`
+
           return 'first great western'
         case 'GX':
           return 'gatwick express'
@@ -3215,12 +3228,19 @@ export default class AmeyCelia extends AmeyPhil {
     }
 
     switch (tocCode.toUpperCase()) {
-      default:
-        return this.ALL_AVAILABLE_TOCS.find(t => t?.toLowerCase() === tocName?.toLowerCase()) ?? ''
-
       // LNER has different filename compared to TOC name
       case 'GR':
         return 'london north eastern railway'
+
+      // Handle named GWR services
+      case 'GW':
+        const namedMatch = Object.entries(NamedServices.GW.services)
+          .find(([_, uids]) => uids.includes(trainUid))?.[0]
+          ?.toLowerCase()
+
+        if (namedMatch && this.ALL_AVAILABLE_TOCS.includes(`first great western ${namedMatch}`)) return `first great western ${namedMatch}`
+
+        return 'great western railway'
 
       // West Midlands Trains
       case 'LM':
@@ -3231,6 +3251,9 @@ export default class AmeyCelia extends AmeyPhil {
         } else {
           return 'west midlands railway'
         }
+
+      default:
+        return this.ALL_AVAILABLE_TOCS.find(t => t?.toLowerCase() === tocName?.toLowerCase()) ?? ''
     }
   }
 

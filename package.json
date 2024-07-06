@@ -21,7 +21,8 @@
     "clean": "gatsby clean",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md,less,mdx}\"",
     "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,md,less,mdx}\"",
-    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org davw-network --project rail-announcements-web ./public && sentry-cli --url https://sentry.service.davw.network sourcemaps upload --org davw-network --project rail-announcements-web ./public"
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org davw-network --project rail-announcements-web ./public && sentry-cli --url https://sentry.service.davw.network sourcemaps upload --org davw-network --project rail-announcements-web ./public",
+    "serve-audio": "http-server ./audio/ -c-1 --port 8088 --cors"
   },
   "dependencies": {
     "@cfworker/json-schema": "^1.12.8",
@@ -74,6 +75,7 @@
     "@types/uuid": "^9.0.8",
     "cross-env": "^7.0.3",
     "gatsby-plugin-webpack-bundle-analyser-v2": "^1.1.32",
+    "http-server": "^14.1.1",
     "prettier": "^3.3.2",
     "typescript": "^5.4.5",
     "wrangler": "^3.60.3"

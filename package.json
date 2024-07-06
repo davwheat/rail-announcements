@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "develop": "gatsby develop",
-    "develop:workers": "wrangler pages dev --proxy 8000",
+    "develop:workers": "wrangler pages dev --proxy 8000 --port 8087",
     "start": "gatsby develop",
     "build": "gatsby build",
     "build:ci": "cross-env NODE_ENV=production gatsby build --verbose && (yarn run sentry:sourcemaps || true)",

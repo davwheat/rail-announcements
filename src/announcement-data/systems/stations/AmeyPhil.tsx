@@ -26,6 +26,7 @@ export interface INextTrainAnnouncementOptions {
   firstClassLocation: FirstClassLocation
   coaches: string
   announceShortPlatformsAfterSplit: boolean
+  notCallingAtStations: { crsCode: string }[]
 }
 
 export interface IStandingTrainAnnouncementOptions extends Omit<INextTrainAnnouncementOptions, 'chime'> {
@@ -194,6 +195,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             mindTheGap: true,
             thisStationCode: 'LIT',
             firstClassLocation: 'none',
+            announceShortPlatformsAfterSplit: false,
+            notCallingAtStations: [],
           },
         },
         {
@@ -235,6 +238,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             mindTheGap: false,
             thisStationCode: 'VIC',
             firstClassLocation: 'none',
+            announceShortPlatformsAfterSplit: false,
+            notCallingAtStations: [],
           },
         },
         {
@@ -256,6 +261,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             mindTheGap: false,
             thisStationCode: 'BTN',
             firstClassLocation: 'none',
+            announceShortPlatformsAfterSplit: false,
+            notCallingAtStations: [],
           },
         },
         {
@@ -294,6 +301,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             coaches: '11 coaches',
             mindTheGap: false,
             firstClassLocation: 'rear',
+            announceShortPlatformsAfterSplit: false,
+            notCallingAtStations: [],
           },
         },
         {
@@ -315,6 +324,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             mindTheGap: false,
             thisStationCode: 'MAN',
             firstClassLocation: 'front',
+            announceShortPlatformsAfterSplit: false,
+            notCallingAtStations: [],
           },
         },
         {
@@ -376,6 +387,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             mindTheGap: false,
             thisStationCode: 'ABD',
             firstClassLocation: 'front',
+            announceShortPlatformsAfterSplit: false,
+            notCallingAtStations: [],
           },
         },
         {
@@ -400,6 +413,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             mindTheGap: false,
             thisStationCode: 'MAN',
             firstClassLocation: 'front',
+            announceShortPlatformsAfterSplit: false,
+            notCallingAtStations: [],
           },
         },
         {
@@ -421,6 +436,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             mindTheGap: false,
             thisStationCode: 'MYB',
             firstClassLocation: 'none',
+            announceShortPlatformsAfterSplit: false,
+            notCallingAtStations: [],
           },
         },
         {
@@ -456,6 +473,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             coaches: '3 coaches',
             mindTheGap: false,
             firstClassLocation: 'none',
+            announceShortPlatformsAfterSplit: false,
+            notCallingAtStations: [],
           },
         },
         {
@@ -477,6 +496,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             coaches: '9 coaches',
             mindTheGap: false,
             firstClassLocation: 'none',
+            announceShortPlatformsAfterSplit: false,
+            notCallingAtStations: [],
           },
         },
       ],
@@ -4045,7 +4066,6 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         }
       }
 
-      debugger
       return files
     }
 
@@ -4068,9 +4088,6 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     )
 
     const order = Object.keys(shortPlatforms).sort((a, b) => a.localeCompare(b))
-
-    debugger
-
     let firstAdded = false
 
     order.forEach(s => {
@@ -4719,6 +4736,25 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       )),
     )
 
+    if (options.notCallingAtStations.length > 0) {
+      files.push(
+        { id: 's.please note this train will not call at', opts: { delayStart: 250 } },
+        ...this.pluraliseAudio(
+          options.notCallingAtStations.map(s => s.crsCode),
+          {
+            prefix: 'station.m.',
+            finalPrefix: 'station.m.',
+            andId: 'm.and',
+            firstItemDelay: this.callingPointsOptions.afterCallingAtDelay,
+            beforeAndDelay: this.callingPointsOptions.aroundAndDelay,
+            beforeItemDelay: this.callingPointsOptions.betweenStopsDelay,
+            afterAndDelay: this.callingPointsOptions.aroundAndDelay,
+          },
+        ),
+        'e.today',
+      )
+    }
+
     files.push(
       ...getPlatFiles(this.BEFORE_SECTION_DELAY),
       ...(await this.getFilesForBasicTrainInfo(
@@ -4813,6 +4849,25 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       files.push(
         { id: `m.first class accommodation is situated at the`, opts: { delayStart: 500 } },
         `e.${options.firstClassLocation} of the train`,
+      )
+    }
+
+    if (options.notCallingAtStations.length > 0) {
+      files.push(
+        { id: 's.please note this train will not call at', opts: { delayStart: 250 } },
+        ...this.pluraliseAudio(
+          options.notCallingAtStations.map(s => s.crsCode),
+          {
+            prefix: 'station.m.',
+            finalPrefix: 'station.m.',
+            andId: 'm.and',
+            firstItemDelay: this.callingPointsOptions.afterCallingAtDelay,
+            beforeAndDelay: this.callingPointsOptions.aroundAndDelay,
+            beforeItemDelay: this.callingPointsOptions.betweenStopsDelay,
+            afterAndDelay: this.callingPointsOptions.aroundAndDelay,
+          },
+        ),
+        'e.today',
       )
     }
 
@@ -5370,6 +5425,21 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     nextTrain: {
       name: 'Next train',
       component: CustomAnnouncementPane,
+      defaultState: {
+        chime: 'three',
+        platform: this.PLATFORMS[1],
+        hour: '07',
+        min: '33',
+        isDelayed: false,
+        toc: '',
+        terminatingStationCode: this.STATIONS[0],
+        vias: [],
+        callingAt: [],
+        coaches: '8 coaches',
+        firstClassLocation: 'none',
+        announceShortPlatformsAfterSplit: false,
+        notCallingAtStations: [],
+      },
       props: {
         presets: this.announcementPresets.nextTrain,
         playHandler: this.playNextTrainAnnouncement.bind(this),
@@ -5517,12 +5587,36 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             type: 'boolean',
             default: false,
           },
+          notCallingAtStations: {
+            name: '',
+            type: 'custom',
+            component: CallingAtSelector,
+            props: {
+              availableStations: [] as string[],
+              additionalOptions: this.STATIONS_AS_ITEMS,
+              selectLabel: 'Train does not call at',
+              placeholder: 'Add a "not" calling point…',
+              heading: 'Not calling at… (optional)',
+            } as ICallingAtSelectorProps,
+            default: [],
+          },
         },
       },
     } as CustomAnnouncementTab<keyof INextTrainAnnouncementOptions>,
     approachingTrain: {
       name: 'Approaching train',
       component: CustomAnnouncementPane,
+      defaultState: {
+        chime: 'three',
+        platform: this.PLATFORMS[1],
+        hour: '07',
+        min: '33',
+        isDelayed: false,
+        toc: '',
+        terminatingStationCode: this.STATIONS[0],
+        vias: [],
+        originStationCode: this.STATIONS[0],
+      },
       props: {
         playHandler: this.playTrainApproachingAnnouncement.bind(this),
         options: {
@@ -5623,6 +5717,23 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     standingTrain: {
       name: 'Standing train',
       component: CustomAnnouncementPane,
+      defaultState: {
+        chime: 'three',
+        thisStationCode: this.STATIONS[0],
+        platform: this.PLATFORMS[1],
+        hour: '07',
+        min: '33',
+        isDelayed: false,
+        toc: '',
+        terminatingStationCode: this.STATIONS[0],
+        vias: [],
+        callingAt: [],
+        announceShortPlatformsAfterSplit: false,
+        coaches: '8 coaches',
+        firstClassLocation: 'none',
+        mindTheGap: false,
+        notCallingAtStations: [],
+      },
       props: {
         presets: this.announcementPresets.nextTrain.filter(x => 'thisStationCode' in x.state),
         playHandler: this.playStandingTrainAnnouncement.bind(this),
@@ -5709,7 +5820,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
               additionalOptions: this.STATIONS_AS_ITEMS,
               selectLabel: 'Via points (non-splitting services only)',
               placeholder: 'Add a via point…',
-              heading: 'Via... (optional)',
+              heading: 'Via… (optional)',
             } as ICallingAtSelectorProps,
             default: [],
           },
@@ -5771,12 +5882,36 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             type: 'boolean',
             default: false,
           },
+          notCallingAtStations: {
+            name: '',
+            type: 'custom',
+            component: CallingAtSelector,
+            props: {
+              availableStations: [] as string[],
+              additionalOptions: this.STATIONS_AS_ITEMS,
+              selectLabel: 'Train does not call at',
+              placeholder: 'Add a "not" calling point…',
+              heading: 'Not calling at… (optional)',
+            } as ICallingAtSelectorProps,
+            default: [],
+          },
         },
       },
     } as CustomAnnouncementTab<keyof IStandingTrainAnnouncementOptions>,
     disruptedTrain: {
       name: 'Disrupted train',
       component: CustomAnnouncementPane,
+      defaultState: {
+        chime: 'three',
+        hour: '07',
+        min: '33',
+        toc: '',
+        terminatingStationCode: this.STATIONS[0],
+        vias: [],
+        disruptionType: 'delayedBy',
+        delayTime: '65',
+        disruptionReason: '',
+      },
       props: {
         presets: this.announcementPresets.disruptedTrain,
         playHandler: this.playDisruptedTrainAnnouncement.bind(this),
@@ -5851,7 +5986,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
               additionalOptions: this.STATIONS_AS_ITEMS,
               selectLabel: 'Via points (non-splitting services only)',
               placeholder: 'Add a via point…',
-              heading: 'Via... (optional)',
+              heading: 'Via… (optional)',
             } as ICallingAtSelectorProps,
             default: [],
           },
@@ -5886,6 +6021,12 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     fastTrain: {
       name: 'Fast train',
       component: CustomAnnouncementPane,
+      defaultState: {
+        chime: 'three',
+        daktronicsFanfare: false,
+        fastTrainApproaching: false,
+        platform: this.PLATFORMS[1],
+      },
       props: {
         playHandler: this.playFastTrainAnnouncement.bind(this),
         options: {
@@ -5921,6 +6062,19 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     platformAlteration: {
       name: 'Platform alteration',
       component: CustomAnnouncementPane,
+      defaultState: {
+        chime: 'three',
+        announceOldPlatform: false,
+        oldPlatform: this.PLATFORMS[6],
+        newPlatform: this.PLATFORMS[1],
+        hour: '07',
+        min: '33',
+        isDelayed: false,
+        toc: '',
+        terminatingStationCode: this.STATIONS[0],
+        vias: [],
+        callingAt: [],
+      },
       props: {
         presets: this.announcementPresets.nextTrain,
         playHandler: this.playPlatformAlterationAnnouncement.bind(this),
@@ -6020,7 +6174,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
               additionalOptions: this.STATIONS_AS_ITEMS,
               selectLabel: 'Via points (non-splitting services only)',
               placeholder: 'Add a via point…',
-              heading: 'Via... (optional)',
+              heading: 'Via… (optional)',
             } as ICallingAtSelectorProps,
             default: [],
           },

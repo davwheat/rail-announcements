@@ -47,6 +47,7 @@ export interface ICustomAnnouncementPaneProps<OptionIds extends string> {
   getPersonalPresets: (systemId: string, tabId: string) => Promise<IPersonalPresetObject[]>
   deletePersonalPreset: (systemId: string, tabId: string, presetId: string) => Promise<void>
   system: typeof AnnouncementSystem
+  defaultState: string
 }
 
 function CustomAnnouncementPane({
@@ -61,8 +62,10 @@ function CustomAnnouncementPane({
   savePersonalPreset,
   getPersonalPresets,
   deletePersonalPreset,
+  defaultState: _defaultState,
 }: ICustomAnnouncementPaneProps<string>) {
   const { enqueueSnackbar } = useSnackbar()
+  const defaultState = JSON.parse(_defaultState)
 
   const [playError, setPlayError] = React.useState<Error | null>(null)
   const [isSharing, setIsSharing] = React.useState(false)
@@ -367,7 +370,7 @@ function CustomAnnouncementPane({
                 key={preset.presetId}
                 disabled={isPlayingAnnouncement}
                 presetData={preset}
-                onClick={() => setAllTabStates(prevState => ({ ...(prevState || {}), [tabId]: preset.state }))}
+                onClick={() => setAllTabStates(prevState => ({ ...(prevState || {}), [tabId]: { ...defaultState, ...preset.state } }))}
                 onDelete={() => deletePersonalPreset(systemId, tabId, preset.presetId).finally(loadPersonalPresetsForTab)}
               />
             ))}

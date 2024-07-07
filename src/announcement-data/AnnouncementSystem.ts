@@ -91,6 +91,7 @@ export interface CustomAnnouncementTab<OptionIds extends string> {
         | 'system'
       >
     | ICustomButtonPaneProps
+  defaultState: Record<OptionIds, any>
 }
 
 export type CustomAnnouncementButton = {

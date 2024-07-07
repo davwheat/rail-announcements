@@ -49,6 +49,7 @@ function AnnouncementPanel({ system }: IProps) {
                     savePersonalPreset={savePersonalPreset}
                     getPersonalPresets={getPersonalPresets}
                     deletePersonalPreset={deletePersonalPreset}
+                    defaultState={JSON.stringify(opts.defaultState)}
                   />
                 </AnnouncementTabErrorBoundary>
               )

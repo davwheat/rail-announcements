@@ -4092,7 +4092,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     const order = Object.keys(shortPlatforms).sort((a, b) => a.localeCompare(b))
     let firstAdded = false
 
-    order.forEach(s => {
+    order.forEach((s, i) => {
       const plats = shortPlatforms[s]
 
       if (!firstAdded) {
@@ -4121,7 +4121,9 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       } else {
         files.push(
           {
-            id: 's.customers for',
+            // If last set of short platforms, add 'and' before last item
+            // See: https://github.com/davwheat/rail-announcements/issues/226#issuecomment-2212472715
+            id: i === order.length - 1 ? 'm.and customers for' : 's.customers for',
             opts: { delayStart: 200 },
           },
           ...this.pluraliseAudio(plats, {

@@ -610,9 +610,9 @@ function createNormalStation(
     name: stn.name,
     crs: crsCode,
     audioName: {
-      b: AllStationFiles.b.includes(crsCode) ? `stations.b.${crsCode}` : null,
-      m: AllStationFiles.em.includes(crsCode) ? `stations.m.${crsCode}` : null,
-      e: AllStationFiles.em.includes(crsCode) ? `stations.e.${crsCode}` : null,
+      b: AllStationFiles.b.includes(crsCode) ? `stations.b.${crsCode}` : undefined,
+      m: AllStationFiles.em.includes(crsCode) ? `stations.m.${crsCode}` : undefined,
+      e: AllStationFiles.em.includes(crsCode) ? `stations.e.${crsCode}` : undefined,
     },
     changeFor,
     exitFor,
@@ -1173,7 +1173,7 @@ export default class TfLElizabethLine extends AnnouncementSystem {
       return
     }
 
-    files.push(thisStation.audioName.e)
+    files.push(thisStation.audioName.e!!)
 
     if (thisStation.crs === destinationStation.crs) {
       files.push({ id: 'conjoiners.this train terminates here all change please', opts: { delayStart: 1000 } })
@@ -1181,17 +1181,17 @@ export default class TfLElizabethLine extends AnnouncementSystem {
       files.push({ id: 'conjoiners.this is the train to', opts: { delayStart: 1000 } })
 
       if (viaStation) {
-        files.push(destinationStation.audioName.m, 'conjoiners.via', viaStation.audioName.e)
+        files.push(destinationStation.audioName.m!!, 'conjoiners.via', viaStation.audioName.e!!)
       } else {
-        files.push(destinationStation.audioName.e)
+        files.push(destinationStation.audioName.e!!)
       }
 
       files.push({ id: 'conjoiners.next station', opts: { delayStart: 1000 } })
 
       if (nextStation.crs === destinationStation.crs) {
-        files.push(nextStation.audioName.m, 'conjoiners.where this train terminates')
+        files.push(nextStation.audioName.m!!, 'conjoiners.where this train terminates')
       } else {
-        files.push(nextStation.audioName.e)
+        files.push(nextStation.audioName.e!!)
       }
     }
 
@@ -1204,16 +1204,16 @@ export default class TfLElizabethLine extends AnnouncementSystem {
     const nextStation = AllStations.find(stn => stn.crs === options.nextStationCrs)
 
     if (!nextStation) {
-      alert(`Invalid station.\n\n${nextStation?.crs}`)
+      alert(`Invalid station.\n\n${options.nextStationCrs}`)
       return
     }
 
     files.push({ id: 'conjoiners.next station', opts: { delayStart: 1000 } })
 
     if (options.terminating) {
-      files.push(nextStation.audioName.m, 'conjoiners.where this train terminates')
+      files.push(nextStation.audioName.m!!, 'conjoiners.where this train terminates')
     } else {
-      files.push(nextStation.audioName.e)
+      files.push(nextStation.audioName.e!!)
     }
 
     if (nextStation.changeFor.length) {
@@ -1237,6 +1237,12 @@ export default class TfLElizabethLine extends AnnouncementSystem {
     thisStation: {
       name: 'Stopped at station',
       component: CustomAnnouncementPane,
+      defaultState: {
+        thisStationCrs: AllStationFiles.em[0],
+        destinationCrs: AllStationFiles.em[0],
+        viaCrs: 'none',
+        nextStationCrs: AllStationFiles.em[0],
+      },
       props: {
         playHandler: this.playAtStationAnnouncement.bind(this),
         presets: announcementPresets.thisStation,
@@ -1270,10 +1276,14 @@ export default class TfLElizabethLine extends AnnouncementSystem {
           },
         },
       },
-    },
+    } as CustomAnnouncementTab<keyof IAtStationAnnouncementOptions>,
     approachingStation: {
       name: 'Approaching station',
       component: CustomAnnouncementPane,
+      defaultState: {
+        nextStationCrs: AllStationFiles.em[0],
+        terminating: false,
+      },
       props: {
         playHandler: this.playApproachingStationAnnouncement.bind(this),
         presets: announcementPresets.approachingStation,
@@ -1291,7 +1301,7 @@ export default class TfLElizabethLine extends AnnouncementSystem {
           },
         },
       },
-    },
+    } as CustomAnnouncementTab<keyof IApproachingStationAnnouncementOptions>,
 
     // announcementButtons: {
     //   name: 'Announcement buttons',

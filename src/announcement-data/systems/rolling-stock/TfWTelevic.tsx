@@ -489,6 +489,9 @@ export default class TfWTelevic extends TrainAnnouncementSystem {
     startOfJourney: {
       name: 'Start of journey',
       component: CustomAnnouncementPane,
+      defaultState: {
+        callingAtCodes: [],
+      },
       props: {
         playHandler: this.playStartOfJourneyAnnouncement.bind(this),
         presets: this.announcementPresets.startOfJourney,
@@ -512,6 +515,11 @@ export default class TfWTelevic extends TrainAnnouncementSystem {
     stoppedAtStation: {
       name: 'Stopped at station',
       component: CustomAnnouncementPane,
+      defaultState: {
+        thisStation: this.StationsAsItems[0].value,
+        terminus: this.StationsAsItems[0].value,
+        isTerminusNext: false,
+      },
       props: {
         playHandler: this.playStoppedAtAnnouncement.bind(this),
         presets: this.announcementPresets.stoppedAtStation,

@@ -816,7 +816,7 @@ export default class TfLNorthernLine extends AnnouncementSystem {
     }
 
     if ((options.terminating && nextStationData.terminatingAudio) || nextStationData.onlyTerminates) {
-      files.push(...nextStationData.terminatingAudio)
+      files.push(...(nextStationData.terminatingAudio ?? []))
       files.push(
         {
           id: 'please ensure you have all your belongings with you',
@@ -893,10 +893,13 @@ export default class TfLNorthernLine extends AnnouncementSystem {
     await this.playAudioFiles(files, download)
   }
 
-  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab> = {
+  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab<string>> = {
     destinationInfo: {
       name: 'Destination info',
       component: CustomAnnouncementPane,
+      defaultState: {
+        stationName: AvailableDestinations[0].station,
+      },
       props: {
         playHandler: this.playDestinationInfoAnnouncement.bind(this),
         presets: announcementPresets.destinationInfo,
@@ -924,10 +927,15 @@ export default class TfLNorthernLine extends AnnouncementSystem {
           },
         },
       },
-    },
+    } as CustomAnnouncementTab<keyof IDestinationInfoAnnouncementOptions>,
     nextStation: {
       name: 'Next station',
       component: CustomAnnouncementPane,
+      defaultState: {
+        stationLabel: NextStationData[0].label,
+        terminating: false,
+        mindTheGap: true,
+      },
       props: {
         playHandler: this.playNextStationAnnouncement.bind(this),
         options: {
@@ -957,10 +965,14 @@ export default class TfLNorthernLine extends AnnouncementSystem {
           },
         },
       },
-    },
+    } as CustomAnnouncementTab<keyof INextStationAnnouncementOptions>,
     thisStation: {
       name: 'Stopped at station',
       component: CustomAnnouncementPane,
+      defaultState: {
+        stationNameIndex: '0',
+        terminatingStationName: AvailableDestinations[0].station,
+      },
       props: {
         playHandler: this.playAtStationAnnouncement.bind(this),
         options: {
@@ -1005,7 +1017,7 @@ export default class TfLNorthernLine extends AnnouncementSystem {
           },
         },
       },
-    },
+    } as CustomAnnouncementTab<keyof IAtStationAnnouncementOptions>,
     announcementButtons: {
       name: 'Announcement buttons',
       component: CustomButtonPane,

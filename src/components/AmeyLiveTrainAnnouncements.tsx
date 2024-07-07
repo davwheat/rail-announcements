@@ -372,7 +372,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
     return DisplayTypes.includes(val)
   })
   const [isFullscreen, setFullscreen] = useState(false)
-  const [selectedCrs, setSelectedCrs] = useState('ECR')
+  const [selectedCrs, setSelectedCrs] = useStateWithLocalStorage('amey.live-trains.selected-crs', 'ECR')
   const [chimeType, setChimeType] = useStateWithLocalStorage<ChimeType | ''>('amey.live-trains.chime-type', '', val =>
     ['', 'none', 'three', 'four'].includes(val),
   )

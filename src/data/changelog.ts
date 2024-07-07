@@ -461,6 +461,22 @@ const changelog: IChangelogVersion[] = [
     date: '2024-06-01',
     additions: ['[Live Trains] Customise/disable chimes'],
   },
+  {
+    date: '2024-06-27',
+    fixes: ['Fix disruption announcement error when number of minutes is zero'],
+  },
+  {
+    date: '2024-07-06',
+    additions: [
+      '[Live Trains] Announce (some) GWR named services',
+      '[Amey/Live Trains] Add option to announce stations the train will not be calling at',
+    ],
+    fixes: [
+      '[Live Trains] Map new Darwin delay/cancellation reason to announcement files',
+      '[Live Trains] Fix wrong short platform announcements after a formation change',
+    ],
+    otherChanges: ['During local development, audio is no longer fetched from the production CDN'],
+  },
 ]
 
 export default changelog

@@ -264,7 +264,8 @@ export interface LiveTrainAnnouncementsProps<SystemKeys extends string> {
   standingTrainHandler: Record<SystemKeys, (options: IStandingTrainAnnouncementOptions) => Promise<void>>
 }
 
-type DisplayType = 'infotec-landscape-dmi' | 'daktronics-data-display-dmi' | 'blackbox-landscape-lcd'
+const DisplayTypes = ['infotec-landscape-dmi', 'daktronics-data-display-dmi', 'blackbox-landscape-lcd'] as const
+type DisplayType = (typeof DisplayTypes)[number]
 
 const DisplayNames: Record<DisplayType, string> = {
   'infotec-landscape-dmi': 'Infotec landscape DMI',
@@ -367,7 +368,9 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
     },
   )
 
-  const [displayType, setDisplayType] = useState<DisplayType>('infotec-landscape-dmi')
+  const [displayType, setDisplayType] = useStateWithLocalStorage<DisplayType>('amey.live-trains.board-type', 'infotec-landscape-dmi', val => {
+    return DisplayTypes.includes(val)
+  })
   const [isFullscreen, setFullscreen] = useState(false)
   const [selectedCrs, setSelectedCrs] = useState('ECR')
   const [chimeType, setChimeType] = useStateWithLocalStorage<ChimeType | ''>('amey.live-trains.chime-type', '', val =>

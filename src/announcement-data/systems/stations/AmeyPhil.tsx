@@ -25,6 +25,7 @@ export interface INextTrainAnnouncementOptions {
   callingAt: CallingAtPoint[]
   firstClassLocation: FirstClassLocation
   coaches: string
+  announceShortPlatformsAfterSplit: boolean
 }
 
 export interface IStandingTrainAnnouncementOptions extends Omit<INextTrainAnnouncementOptions, 'chime'> {
@@ -146,6 +147,10 @@ export default class AmeyPhil extends StationAnnouncementSystem {
 
   protected readonly requestStopOptions = {
     andId: 'm.or-2',
+  }
+
+  protected readonly shortPlatformOptions = {
+    unknownLocation: 'w.please listen for announcements on board the train',
   }
 
   protected readonly standingOptions = {
@@ -3994,8 +3999,10 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     callingPoints: CallingAtPoint[],
     terminatingStation: string,
     overallLength: number | null,
+    announceAfterSplit: boolean = false,
   ): Promise<AudioItem[]> {
     const files: AudioItem[] = []
+    const unknownPositionSnippet = this.shortPlatformOptions.unknownLocation
 
     const splitData = this.getSplitInfo(callingPoints, terminatingStation, overallLength)
     const allStops = splitData.stopsUpToSplit.concat(splitData.splitA?.stops ?? []).concat(splitData.splitB?.stops ?? [])
@@ -4005,26 +4012,40 @@ export default class AmeyPhil extends StationAnnouncementSystem {
 
       const [pos, len] = shortData.split('.').map((x, i) => (i === 1 ? parseInt(x) : x)) as [string, number]
 
-      if (stopData.position === 'any' || stopData.position === pos) {
-        if (len === 1) {
-          files.push(`e.should join the ${pos} coach only`)
+      if (stopData.position === 'any') {
+        if (pos === 'unknown') {
+          files.push(unknownPositionSnippet)
         } else {
-          files.push(`e.should join the ${pos} ${len} coaches`)
+          if (len === 1) {
+            files.push(`e.should join the ${pos} coach only`)
+          } else {
+            files.push(`e.should join the ${pos} ${len} coaches`)
+          }
         }
-      } else {
-        // No short platforms are announced post-split. All this code I've written going to waste!
-        // if (len === 1) {
-        //   files.push(`m.should join the ${pos} coach only`)
-        // } else {
-        //   files.push(`e.should join the ${pos} ${len} coaches`)
-        // }
-        // if (stopData.length === 1) {
-        //   files.push('m.of', 'm.the', `m.${stopData.position}`, 'e.coach')
-        // } else {
-        //   files.push('m.of', 'm.the', `m.${stopData.position}`, `platform.s.${stopData.length}`, 'e.coaches')
-        // }
+      } else if (announceAfterSplit) {
+        if (pos === 'unknown') {
+          files.push(unknownPositionSnippet)
+        } else if (stopData.position === pos) {
+          if (len === 1) {
+            files.push(`e.should join the ${pos} coach only`)
+          } else {
+            files.push(`e.should join the ${pos} ${len} coaches`)
+          }
+        } else {
+          if (len === 1) {
+            files.push(`m.should join the ${pos} coach only`)
+          } else {
+            files.push(`e.should join the ${pos} ${len} coaches`)
+          }
+          if (stopData.length === 1) {
+            files.push('m.of', 'm.the', `m.${stopData.position}`, 'e.coach')
+          } else {
+            files.push('m.of', 'm.the', `m.${stopData.position}`, `platform.s.${stopData.length}`, 'e.coaches')
+          }
+        }
       }
 
+      debugger
       return files
     }
 
@@ -4033,6 +4054,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         if (!curr.shortPlatform) return acc
 
         const data = shortDataToAudio(curr.shortPlatform, curr.portion).join(',')
+        if (!data) return acc
 
         if (acc[data]) {
           acc[data].push(curr.crsCode)
@@ -4046,6 +4068,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     )
 
     const order = Object.keys(shortPlatforms).sort((a, b) => a.localeCompare(b))
+
+    debugger
 
     let firstAdded = false
 
@@ -4220,6 +4244,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     console.log({ missingLengthData, overallLength, bPos, bCount, aPos, aCount })
 
     if (missingLengthData) {
+      console.log('Missing split formation length data :(')
+
       return {
         divideType: dividePoint!!.splitType,
         stopsUpToSplit: stopsUntilFormationChange.map(p => ({
@@ -4231,7 +4257,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         splitB: {
           stops: (dividePoint!!.splitCallingPoints ?? []).map(p => ({
             crsCode: p.crsCode,
-            shortPlatform: p.shortPlatform ?? '',
+            shortPlatform: p.shortPlatform ? 'unknown' : '',
             requestStop: p.requestStop ?? false,
             portion: { position: bPos, length: null },
           })),
@@ -4241,7 +4267,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         splitA: {
           stops: stopsAfterFormationChange.map(p => ({
             crsCode: p.crsCode,
-            shortPlatform: p.shortPlatform ?? '',
+            shortPlatform: p.shortPlatform ? 'unknown' : '',
             requestStop: p.requestStop ?? false,
             portion: { position: aPos, length: null },
           })),
@@ -4250,6 +4276,9 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         },
       }
     }
+
+    console.log('Got split formation length data :)')
+    console.log({ bPos, bCount, aPos, aCount })
 
     return {
       divideType: dividePoint!!.splitType,
@@ -4263,22 +4292,52 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         stops:
           dividePoint!!.splitType === 'splitTerminates'
             ? []
-            : (dividePoint!!.splitCallingPoints ?? []).map(p => ({
-                crsCode: p.crsCode,
-                shortPlatform: p.shortPlatform ?? '',
-                requestStop: p.requestStop ?? false,
-                portion: { position: bPos as 'front' | 'middle' | 'rear', length: bCount },
-              })),
+            : (dividePoint!!.splitCallingPoints ?? []).map(p => {
+                let [shortPortion, shortLength] = (p.shortPlatform || '.').split('.')
+
+                if (shortPortion && shortLength) {
+                  const shortLengthNum = parseInt(shortLength)
+                  // If the short length is greater than or equal to the length of the portion, it's not a short platform for this portion of the train
+                  if (shortLengthNum >= bCount) {
+                    shortPortion = ''
+                    shortLength = ''
+                  }
+                }
+
+                const shortPlatform = shortPortion && shortLength ? `${shortPortion}.${shortLength}` : ''
+
+                return {
+                  crsCode: p.crsCode,
+                  shortPlatform,
+                  requestStop: p.requestStop ?? false,
+                  portion: { position: bPos as 'front' | 'middle' | 'rear', length: bCount },
+                }
+              }),
         position: bPos as 'front' | 'middle' | 'rear',
         length: bCount,
       },
       splitA: {
-        stops: stopsAfterFormationChange.map(p => ({
-          crsCode: p.crsCode,
-          shortPlatform: p.shortPlatform ?? '',
-          requestStop: p.requestStop ?? false,
-          portion: { position: aPos, length: aCount },
-        })),
+        stops: stopsAfterFormationChange.map(p => {
+          let [shortPortion, shortLength] = (p.shortPlatform || '.').split('.')
+
+          if (shortPortion && shortLength) {
+            const shortLengthNum = parseInt(shortLength)
+            // If the short length is greater than or equal to the length of the portion, it's not a short platform for this portion of the train
+            if (shortLengthNum >= aCount) {
+              shortPortion = ''
+              shortLength = ''
+            }
+          }
+
+          const shortPlatform = shortPortion && shortLength ? `${shortPortion}.${shortLength}` : ''
+
+          return {
+            crsCode: p.crsCode,
+            shortPlatform,
+            requestStop: p.requestStop ?? false,
+            portion: { position: aPos, length: aCount },
+          }
+        }),
         position: aPos,
         length: aCount,
       },
@@ -4630,6 +4689,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         options.callingAt,
         options.terminatingStationCode,
         options.coaches !== 'None' ? parseInt(options.coaches.split(' ')[0]) : null,
+        options.announceShortPlatformsAfterSplit,
       )),
     )
 
@@ -4737,6 +4797,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         options.callingAt,
         options.terminatingStationCode,
         options.coaches !== 'None' ? parseInt(options.coaches.split(' ')[0]) : null,
+        options.announceShortPlatformsAfterSplit,
       )),
     )
 
@@ -5451,6 +5512,11 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             ].map(c => ({ title: c, value: c })),
             type: 'select',
           },
+          announceShortPlatformsAfterSplit: {
+            name: 'Announce short platforms after split?',
+            type: 'boolean',
+            default: false,
+          },
         },
       },
     } as CustomAnnouncementTab<keyof INextTrainAnnouncementOptions>,
@@ -5699,6 +5765,11 @@ export default class AmeyPhil extends StationAnnouncementSystem {
               '20 coaches',
             ].map(c => ({ title: c, value: c })),
             type: 'select',
+          },
+          announceShortPlatformsAfterSplit: {
+            name: 'Announce short platforms after split?',
+            type: 'boolean',
+            default: false,
           },
         },
       },

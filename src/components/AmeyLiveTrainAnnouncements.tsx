@@ -392,6 +392,11 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
     false,
     x => x === true || x === false,
   )
+  const [announceShortPlatformsAfterSplit, setAnnounceShortPlatformsAfterSplit] = useStateWithLocalStorage<boolean>(
+    'amey.live-trains.announce-short-platforms-after-split',
+    false,
+    x => x === true || x === false,
+  )
   const [isPlaying, _setIsPlaying] = useState(false)
   const setIsPlaying = useCallback(
     function setIsPlaying(val: boolean) {
@@ -598,6 +603,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         vias,
         callingAt,
         firstClassLocation: 'none',
+        announceShortPlatformsAfterSplit,
       }
 
       console.log(options)
@@ -633,6 +639,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       useLegacyTocNames,
       announceViaPoints,
       setIsPlayingAfter,
+      announceShortPlatformsAfterSplit,
     ],
   )
 
@@ -754,6 +761,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         vias,
         callingAt,
         firstClassLocation: 'none',
+        announceShortPlatformsAfterSplit,
       }
 
       console.log(options)
@@ -789,6 +797,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       chimeType,
       announceViaPoints,
       setIsPlayingAfter,
+      announceShortPlatformsAfterSplit,
     ],
   )
 
@@ -1227,7 +1236,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
           checked={useLegacyTocNames}
           onChange={e => setUseLegacyTocNames(e.target.checked)}
         />
-        Use legacy TOC names
+        Use old TOC names?
       </label>
 
       <label htmlFor="announce-vias">
@@ -1238,7 +1247,18 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
           checked={announceViaPoints}
           onChange={e => setAnnounceViaPoints(e.target.checked)}
         />
-        Announce via points
+        Announce via points?
+      </label>
+
+      <label htmlFor="announce-short-platforms-after-split">
+        <input
+          type="checkbox"
+          name="announce-short-platforms-after-split"
+          id="announce-short-platforms-after-split"
+          checked={announceShortPlatformsAfterSplit}
+          onChange={e => setAnnounceShortPlatformsAfterSplit(e.target.checked)}
+        />
+        Announce short platforms after split?
       </label>
 
       <label htmlFor="chime-type-select" className="option-select">

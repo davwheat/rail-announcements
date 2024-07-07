@@ -37,6 +37,10 @@ export default class AmeyCelia extends AmeyPhil {
     nowStandingAtId: 's.the train now standing at platform',
   }
 
+  protected readonly shortPlatformOptions = {
+    unknownLocation: 'w.please listen for further on train announcements',
+  }
+
   get DEFAULT_CHIME(): ChimeType {
     return 'three'
   }

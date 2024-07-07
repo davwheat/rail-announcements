@@ -194,6 +194,102 @@ function getCallingPoints(
   return callingAt
 }
 
+function getCancelledCallingPoints(
+  train: TrainService,
+  stations: string[],
+  getStation: (location: TimingLocation | EndPointLocation) => string,
+): CallingAtPoint[] {
+  const callingPoints = train.subsequentLocations.filter(s => {
+    if (!s.crs) return false
+    // Force the calling point if the train divides here
+    if (s.associations?.filter(a => a.category === AssociationCategory.Divide).length) return true
+    if (!s.isCancelled || s.isOperational || s.isPass) return false
+    if (!stations.includes(s.crs)) return false
+    // Ignore pick-up only
+    if (s.activities?.includes('U')) return false
+    return true
+  })
+
+  let busContinuationService: AssociatedServiceDetail | null = null
+
+  const callingAt = callingPoints
+    .flatMap((p, i, arr): { crsCode: string }[] | null => {
+      console.log(`[${i} of ${arr.length - 1}]: ${p.crs} - ${p.tiploc}`)
+
+      // Hide last station if it's the train destination
+      if (i === arr.length - 1 && p.crs === train.destination[0].crs) return null
+
+      const stops = [
+        {
+          crsCode: getStation(p),
+        },
+      ]
+
+      p.associations
+        ?.filter(a => a.category === AssociationCategory.Divide)
+        .forEach(a => {
+          // We have a dividing service
+          stops.push(
+            ...a
+              .service!!.locations.filter(s => {
+                if (!s.crs) return false
+                if (s.isCancelled || s.isOperational || s.isPass) return false
+                if (!stations.includes(s.crs)) return false
+                return true
+              })
+              .map(l => ({ crsCode: l.crs!! })),
+          )
+        })
+
+      return stops
+    })
+    .filter(Boolean) as CallingAtPoint[]
+
+  if (busContinuationService) {
+    let trainContinuationService: AssociatedServiceDetail | null = null
+
+    const busCalls = (busContinuationService as AssociatedServiceDetail).locations
+      .filter(p => p.isCancelled && !p.isPass && !p.isOperational)
+      .map((p, i, arr) => {
+        // Ignore last station if it's the train destination
+        if (i === arr.length - 1 && p.crs === train.destination[0].crs) return null
+
+        return {
+          crsCode: getStation(p),
+        }
+      })
+      .filter(Boolean) as CallingAtPoint[]
+
+    if (busCalls[0]?.crsCode === callingAt[callingAt.length - 1]?.crsCode) {
+      busCalls.shift()
+    }
+
+    callingAt.push(...busCalls)
+
+    if (trainContinuationService) {
+      const trainCalls = (trainContinuationService as AssociatedServiceDetail).locations
+        .filter(p => p.isCancelled && !p.isPass && !p.isOperational)
+        .map((p, i, arr) => {
+          // Hide last station if it's the train destination
+          if (i === arr.length - 1 && p.crs === train.destination[0].crs) return null
+
+          return {
+            crsCode: getStation(p),
+          }
+        })
+        .filter(Boolean) as CallingAtPoint[]
+
+      if (trainCalls[0]?.crsCode === callingAt[callingAt.length - 1]?.crsCode) {
+        trainCalls.shift()
+      }
+
+      callingAt.push(...trainCalls)
+    }
+  }
+
+  return callingAt
+}
+
 function guessViaPoint(via: string, stops: (TimingLocation | EndPointLocation)[], stationNameToCrsMap: Record<string, string>): string | null {
   if (stationNameToCrsMap[via]) return stationNameToCrsMap[via]
 
@@ -264,7 +360,8 @@ export interface LiveTrainAnnouncementsProps<SystemKeys extends string> {
   standingTrainHandler: Record<SystemKeys, (options: IStandingTrainAnnouncementOptions) => Promise<void>>
 }
 
-type DisplayType = 'infotec-landscape-dmi' | 'daktronics-data-display-dmi' | 'blackbox-landscape-lcd'
+const DisplayTypes = ['infotec-landscape-dmi', 'daktronics-data-display-dmi', 'blackbox-landscape-lcd'] as const
+type DisplayType = (typeof DisplayTypes)[number]
 
 const DisplayNames: Record<DisplayType, string> = {
   'infotec-landscape-dmi': 'Infotec landscape DMI',
@@ -367,9 +464,11 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
     },
   )
 
-  const [displayType, setDisplayType] = useState<DisplayType>('infotec-landscape-dmi')
+  const [displayType, setDisplayType] = useStateWithLocalStorage<DisplayType>('amey.live-trains.board-type', 'infotec-landscape-dmi', val => {
+    return DisplayTypes.includes(val)
+  })
   const [isFullscreen, setFullscreen] = useState(false)
-  const [selectedCrs, setSelectedCrs] = useState('ECR')
+  const [selectedCrs, setSelectedCrs] = useStateWithLocalStorage('amey.live-trains.selected-crs', 'ECR')
   const [chimeType, setChimeType] = useStateWithLocalStorage<ChimeType | ''>('amey.live-trains.chime-type', '', val =>
     ['', 'none', 'three', 'four'].includes(val),
   )
@@ -386,6 +485,11 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
   )
   const [showUnconfirmedPlatforms, setShowUnconfirmedPlatforms] = useStateWithLocalStorage<boolean>(
     'amey.live-trains.show-unconfirmed-platforms',
+    false,
+    x => x === true || x === false,
+  )
+  const [announceShortPlatformsAfterSplit, setAnnounceShortPlatformsAfterSplit] = useStateWithLocalStorage<boolean>(
+    'amey.live-trains.announce-short-platforms-after-split',
     false,
     x => x === true || x === false,
   )
@@ -570,6 +674,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         train.origin[0].crs,
         train.destination[0].crs,
         useLegacyTocNames,
+        train.uid,
       )
 
       const callingAt = getCallingPoints(train, systems[systemKey].STATIONS, loc => getStation(loc, systemKey))
@@ -594,6 +699,8 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         vias,
         callingAt,
         firstClassLocation: 'none',
+        announceShortPlatformsAfterSplit,
+        notCallingAtStations: getCancelledCallingPoints(train, systems[systemKey].STATIONS, loc => getStation(loc, systemKey)),
       }
 
       console.log(options)
@@ -629,6 +736,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       useLegacyTocNames,
       announceViaPoints,
       setIsPlayingAfter,
+      announceShortPlatformsAfterSplit,
     ],
   )
 
@@ -653,6 +761,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         train.origin[0].crs,
         train.destination[0].crs,
         useLegacyTocNames,
+        train.uid,
       )
 
       const vias = announceViaPoints
@@ -729,6 +838,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         train.origin[0].crs,
         train.destination[0].crs,
         useLegacyTocNames,
+        train.uid,
       )
 
       const callingAt = getCallingPoints(train, systems[systemKey].STATIONS, loc => getStation(loc, systemKey))
@@ -748,6 +858,8 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         vias,
         callingAt,
         firstClassLocation: 'none',
+        announceShortPlatformsAfterSplit,
+        notCallingAtStations: getCancelledCallingPoints(train, systems[systemKey].STATIONS, loc => getStation(loc, systemKey)),
       }
 
       console.log(options)
@@ -783,6 +895,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       chimeType,
       announceViaPoints,
       setIsPlayingAfter,
+      announceShortPlatformsAfterSplit,
     ],
   )
 
@@ -805,6 +918,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         train.origin[0].crs,
         train.destination[0].crs,
         useLegacyTocNames,
+        train.uid,
       )
 
       const [vias] = announceViaPoints
@@ -1220,7 +1334,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
           checked={useLegacyTocNames}
           onChange={e => setUseLegacyTocNames(e.target.checked)}
         />
-        Use legacy TOC names
+        Use old TOC names?
       </label>
 
       <label htmlFor="announce-vias">
@@ -1231,7 +1345,18 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
           checked={announceViaPoints}
           onChange={e => setAnnounceViaPoints(e.target.checked)}
         />
-        Announce via points
+        Announce via points?
+      </label>
+
+      <label htmlFor="announce-short-platforms-after-split">
+        <input
+          type="checkbox"
+          name="announce-short-platforms-after-split"
+          id="announce-short-platforms-after-split"
+          checked={announceShortPlatformsAfterSplit}
+          onChange={e => setAnnounceShortPlatformsAfterSplit(e.target.checked)}
+        />
+        Announce short platforms after split?
       </label>
 
       <label htmlFor="chime-type-select" className="option-select">

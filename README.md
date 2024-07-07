@@ -34,21 +34,41 @@ The folder for audio files can be found at `audio/`.
     the National Rail Journey Planner.
   - _For example, Brighton should be `BTN.mp3`._
 
+### Running the website locally
+
+You'll need to install [Node.js](https://nodejs.org/en) and the [Yarn package manager](https://yarnpkg.com/getting-started/install) as
+prerequisites.
+
+When you've cloned the repository, install the required dependencies with Yarn:
+
+```bash
+yarn install
+```
+
+Then you can start the three (yes, three) development services:
+
+```bash
+# In one terminal, run (for the website):
+yarn run develop
+
+# When this says "You can now view rail-announcements in the browser.", open a new terminal and run (for the live trains API):
+yarn run develop:workers
+
+# Finally, open a new terminal and run (to serve the audio files):
+yarn run serve-audio
+```
+
+You'll be able to access the website at [http://local.davw.network:8787](http://local.davw.network:8787). `local.davw.network` is a domain that
+will always resolve to your local machine, and is used to ensure that the website works correctly with the audio files and backend API during
+local development.
+
 ### Website contributions
 
 This site is created with the React Framework using Gatsby. If you're not familiar with React or Gatsby, you may want to research them before
 contributing.
 
-**Set up dev environment:**
-
-```
-git clone https://github.com/davwheat/rail-announcements
-yarn install
-yarn start
-```
-
 **Before committing your changes, format your code:**
 
-```
+```bash
 yarn run format
 ```

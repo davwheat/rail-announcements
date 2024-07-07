@@ -1,0 +1,26 @@
+{
+  "GW": {
+    "services": {
+      "Armada": ["G44964", "G44975"],
+      "Atlantic Coast Express": ["G45512", "C90631", "G45533", "C90554"],
+      "Bristolian": ["G44831"],
+      "Capitals United": ["G44798", "G44551"],
+      "Cathedrals Express": ["G44945", "G44763"],
+      "Cheltenham Spa Express": ["G44573"],
+      "Cornish Riviera": ["G44962", "C90560", "G44743", "C90601"],
+      "Cornishman": ["G44911", "C90562", "G44886", "C90626"],
+      "Cotswolds and Malvern Express": ["G44952", "G44851"],
+      "Devon Express": ["G44641", "G44966", "G44923"],
+      "Flying Carolean": ["V20588", "G44633"],
+      "Golden Hind": ["G44913", "G44876"],
+      "Mayflower": ["G44908", "G45518", "V21287", "V22012"],
+      "Pembroke Coast Express": ["C90550", "C90567"],
+      "Red Dragon": ["G45551", "G44625"],
+      "Royal Duchy": ["C90546", "G45554", "G45515", "G45516", "C89689"],
+      "Saint David": ["G44665", "G44622"],
+      "Torbay Express": ["G44511", "C90561"],
+      "Y Cymro - The Welshman": ["G44790", "G44846"],
+      "Night Riviera": ["G44729", "G44737", "C63052", "C63053", "C62989", "C62990", "C62989", "G44740", "G44719", "G44742"]
+    }
+  }
+}

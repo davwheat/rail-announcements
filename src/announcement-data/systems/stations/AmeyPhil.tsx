@@ -539,6 +539,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         vias: ['SLO'].map(stationItemCompleter),
         callingAt: this.STATIONS.map(stationItemCompleter),
         coaches: '1 coach',
+        announceShortPlatformsAfterSplit: false,
+        notCallingAtStations: [],
       },
     })
 

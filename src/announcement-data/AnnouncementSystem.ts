@@ -89,6 +89,7 @@ export interface CustomAnnouncementTab<OptionIds extends string> {
         | 'getPersonalPresets'
         | 'deletePersonalPreset'
         | 'system'
+        | 'defaultState'
       >
     | ICustomButtonPaneProps
   defaultState: Record<OptionIds, any>

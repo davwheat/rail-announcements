@@ -194,6 +194,102 @@ function getCallingPoints(
   return callingAt
 }
 
+function getCancelledCallingPoints(
+  train: TrainService,
+  stations: string[],
+  getStation: (location: TimingLocation | EndPointLocation) => string,
+): CallingAtPoint[] {
+  const callingPoints = train.subsequentLocations.filter(s => {
+    if (!s.crs) return false
+    // Force the calling point if the train divides here
+    if (s.associations?.filter(a => a.category === AssociationCategory.Divide).length) return true
+    if (!s.isCancelled || s.isOperational || s.isPass) return false
+    if (!stations.includes(s.crs)) return false
+    // Ignore pick-up only
+    if (s.activities?.includes('U')) return false
+    return true
+  })
+
+  let busContinuationService: AssociatedServiceDetail | null = null
+
+  const callingAt = callingPoints
+    .flatMap((p, i, arr): { crsCode: string }[] | null => {
+      console.log(`[${i} of ${arr.length - 1}]: ${p.crs} - ${p.tiploc}`)
+
+      // Hide last station if it's the train destination
+      if (i === arr.length - 1 && p.crs === train.destination[0].crs) return null
+
+      const stops = [
+        {
+          crsCode: getStation(p),
+        },
+      ]
+
+      p.associations
+        ?.filter(a => a.category === AssociationCategory.Divide)
+        .forEach(a => {
+          // We have a dividing service
+          stops.push(
+            ...a
+              .service!!.locations.filter(s => {
+                if (!s.crs) return false
+                if (s.isCancelled || s.isOperational || s.isPass) return false
+                if (!stations.includes(s.crs)) return false
+                return true
+              })
+              .map(l => ({ crsCode: l.crs!! })),
+          )
+        })
+
+      return stops
+    })
+    .filter(Boolean) as CallingAtPoint[]
+
+  if (busContinuationService) {
+    let trainContinuationService: AssociatedServiceDetail | null = null
+
+    const busCalls = (busContinuationService as AssociatedServiceDetail).locations
+      .filter(p => p.isCancelled && !p.isPass && !p.isOperational)
+      .map((p, i, arr) => {
+        // Ignore last station if it's the train destination
+        if (i === arr.length - 1 && p.crs === train.destination[0].crs) return null
+
+        return {
+          crsCode: getStation(p),
+        }
+      })
+      .filter(Boolean) as CallingAtPoint[]
+
+    if (busCalls[0]?.crsCode === callingAt[callingAt.length - 1]?.crsCode) {
+      busCalls.shift()
+    }
+
+    callingAt.push(...busCalls)
+
+    if (trainContinuationService) {
+      const trainCalls = (trainContinuationService as AssociatedServiceDetail).locations
+        .filter(p => p.isCancelled && !p.isPass && !p.isOperational)
+        .map((p, i, arr) => {
+          // Hide last station if it's the train destination
+          if (i === arr.length - 1 && p.crs === train.destination[0].crs) return null
+
+          return {
+            crsCode: getStation(p),
+          }
+        })
+        .filter(Boolean) as CallingAtPoint[]
+
+      if (trainCalls[0]?.crsCode === callingAt[callingAt.length - 1]?.crsCode) {
+        trainCalls.shift()
+      }
+
+      callingAt.push(...trainCalls)
+    }
+  }
+
+  return callingAt
+}
+
 function guessViaPoint(via: string, stops: (TimingLocation | EndPointLocation)[], stationNameToCrsMap: Record<string, string>): string | null {
   if (stationNameToCrsMap[via]) return stationNameToCrsMap[via]
 
@@ -604,6 +700,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         callingAt,
         firstClassLocation: 'none',
         announceShortPlatformsAfterSplit,
+        notCallingAtStations: getCancelledCallingPoints(train, systems[systemKey].STATIONS, loc => getStation(loc, systemKey)),
       }
 
       console.log(options)
@@ -762,6 +859,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         callingAt,
         firstClassLocation: 'none',
         announceShortPlatformsAfterSplit,
+        notCallingAtStations: getCancelledCallingPoints(train, systems[systemKey].STATIONS, loc => getStation(loc, systemKey)),
       }
 
       console.log(options)

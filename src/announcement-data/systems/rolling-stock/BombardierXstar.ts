@@ -455,6 +455,12 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
     approachingStation: {
       name: 'Approaching station',
       component: CustomAnnouncementPane,
+      defaultState: {
+        stationCode: this.RealAvailableStationNames[0],
+        mindTheGap: true,
+        keepBelongings: false,
+        cannotUseOyster: false,
+      },
       props: {
         playHandler: this.playApproachingStationAnnouncement.bind(this),
         options: {
@@ -485,6 +491,11 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
     stoppedAtStation: {
       name: 'Stopped at station',
       component: CustomAnnouncementPane,
+      defaultState: {
+        thisStationCode: this.RealAvailableStationNames[0],
+        terminatesAtCode: this.RealAvailableStationNames[0],
+        callingAtCodes: [],
+      },
       props: {
         playHandler: this.playStoppedAtStationAnnouncement.bind(this),
         presets: announcementPresets.stopped,
@@ -516,6 +527,10 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
     departingStation: {
       name: 'Departing station',
       component: CustomAnnouncementPane,
+      defaultState: {
+        terminatesAtCode: this.RealAvailableStationNames[0],
+        nextStationCode: this.RealAvailableStationNames[0],
+      },
       props: {
         playHandler: this.playDepartingStationAnnouncement.bind(this),
         options: {

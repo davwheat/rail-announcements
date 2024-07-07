@@ -391,6 +391,11 @@ export default class LnerAzuma extends TrainAnnouncementSystem {
     stoppedAtStation: {
       name: 'Stopped at station',
       component: CustomAnnouncementPane,
+      defaultState: {
+        thisStationCode: this.ALL_STATIONS[0],
+        terminatesAtCode: this.ALL_STATIONS[0],
+        callingAtCodes: [],
+      },
       props: {
         presets: announcementPresets.stopped,
         playHandler: this.playStoppedAtStationAnnouncement.bind(this),
@@ -422,6 +427,10 @@ export default class LnerAzuma extends TrainAnnouncementSystem {
     departingStation: {
       name: 'Route start & departing station',
       component: CustomAnnouncementPane,
+      defaultState: {
+        terminatesAtCode: this.ALL_STATIONS[0],
+        callingAtCodes: [],
+      },
       props: {
         presets: announcementPresets.departingStation,
         playHandler: this.playDepartingStationAnnouncement.bind(this),
@@ -447,6 +456,10 @@ export default class LnerAzuma extends TrainAnnouncementSystem {
     aproachingStation: {
       name: 'Approaching station',
       component: CustomAnnouncementPane,
+      defaultState: {
+        nextStationCode: this.ALL_STATIONS[0],
+        terminates: false,
+      },
       props: {
         playHandler: this.playApproachingStationAnnouncement.bind(this),
         options: {

@@ -497,6 +497,9 @@ export default class TfWTrainFx extends TrainAnnouncementSystem {
     startOfJourney: {
       name: 'Start of journey',
       component: CustomAnnouncementPane,
+      defaultState: {
+        callingAtCodes: [],
+      },
       props: {
         playHandler: this.playStartOfJourneyAnnouncement.bind(this),
         options: {
@@ -518,6 +521,10 @@ export default class TfWTrainFx extends TrainAnnouncementSystem {
     stoppedAtStation: {
       name: 'At station',
       component: CustomAnnouncementPane,
+      defaultState: {
+        thisStationCode: this.AvailableStationItemMaps.high[0].value,
+        terminatesAtCode: this.AvailableDestinationOptions[0].value,
+      },
       props: {
         playHandler: this.playStoppedAtStationAnnouncement.bind(this),
         options: {
@@ -539,6 +546,10 @@ export default class TfWTrainFx extends TrainAnnouncementSystem {
     departingStop: {
       name: 'Departing stop',
       component: CustomAnnouncementPane,
+      defaultState: {
+        nextStationCode: this.AvailableStationItemMaps.high[0].value,
+        terminatesHere: false,
+      },
       props: {
         playHandler: this.playDepartingStopAnnouncement.bind(this),
         options: {
@@ -555,10 +566,14 @@ export default class TfWTrainFx extends TrainAnnouncementSystem {
           },
         },
       },
-    },
+    } as CustomAnnouncementTab<keyof IDepartingStopAnnouncementOptions>,
     approachingStation: {
       name: 'Approaching stop',
       component: CustomAnnouncementPane,
+      defaultState: {
+        nextStationCode: this.AvailableStationItemMaps.high[0].value,
+        gapType: 'none',
+      },
       props: {
         playHandler: this.playApproachingStopAnnouncement.bind(this),
         options: {
@@ -593,7 +608,7 @@ export default class TfWTrainFx extends TrainAnnouncementSystem {
           },
         },
       },
-    },
+    } as CustomAnnouncementTab<keyof IApproachingStopAnnouncementOptions>,
     announcementButtons: {
       name: 'Announcement buttons',
       component: CustomButtonPane,

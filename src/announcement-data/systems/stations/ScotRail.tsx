@@ -6,6 +6,7 @@ import CustomAnnouncementPane, { ICustomAnnouncementPreset } from '@components/P
 import { AllStationsTitleValueMap } from '@data/StationManipulators'
 import { AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
 import type { IAlternativeServicesState } from '@components/AtosDisruptionAlternatives'
+import { platform } from 'os'
 
 interface INextTrainAnnouncementOptions {
   platform: string
@@ -16,8 +17,8 @@ interface INextTrainAnnouncementOptions {
   via: string | 'none'
   callingAt: { crsCode: string; name: string; randomId: string }[]
   coaches: string
-  seating: string
-  special: string[]
+  // seating: string
+  // special: string[]
 }
 
 interface IThroughTrainAnnouncementOptions {
@@ -1024,10 +1025,20 @@ export default class ScotRail extends StationAnnouncementSystem {
     await this.playAudioFiles(files, download)
   }
 
-  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab> = {
+  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab<string>> = {
     nextTrain: {
       name: 'Next train',
       component: CustomAnnouncementPane,
+      defaultState: {
+        platform: AVAILABLE_PLATFORMS[0],
+        hour: '07',
+        min: '22',
+        toc: AVAILABLE_TOCS[0].toLowerCase(),
+        terminatingStationCode: AVAILABLE_STATIONS.low[0],
+        via: 'none',
+        callingAt: [],
+        coaches: '6',
+      },
       props: {
         playHandler: this.playNextTrainAnnouncement.bind(this),
         presets: AnnouncementPresets.nextTrain,
@@ -1106,7 +1117,7 @@ export default class ScotRail extends StationAnnouncementSystem {
           // },
         },
       },
-    },
+    } as CustomAnnouncementTab<keyof INextTrainAnnouncementOptions>,
     // fastTrain: {
     //   name: 'Fast train',
     //   component: CustomAnnouncementPane,

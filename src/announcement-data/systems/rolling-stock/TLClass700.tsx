@@ -800,10 +800,15 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
     return arr
   }
 
-  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab> = {
+  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab<string>> = {
     initialDeparture: {
       name: 'Initial departure',
       component: CustomAnnouncementPane,
+      defaultState: {
+        terminatesAtCode: this.allAvailableStationsAndTestStations[0].value,
+        callingAtCodes: [],
+        isSoutheastern: false,
+      },
       props: {
         playHandler: this.playInitialDepartureAnnouncement.bind(this),
         options: {
@@ -830,10 +835,17 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
           },
         },
       },
-    },
+    } as CustomAnnouncementTab<keyof IInitialDepartureAnnouncementOptions>,
     approachingStation: {
       name: 'Approaching station',
       component: CustomAnnouncementPane,
+      defaultState: {
+        stationCode: this.allAvailableStationsAndTestStations[0].value,
+        isAto: false,
+        terminatesHere: false,
+        takeCareAsYouLeave: false,
+        changeFor: [],
+      },
       props: {
         playHandler: this.playApproachingStationAnnouncement.bind(this),
         options: {
@@ -890,10 +902,16 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
           },
         },
       },
-    },
+    } as CustomAnnouncementTab<keyof IApproachingStationAnnouncementOptions>,
     stoppedAtStation: {
       name: 'Stopped at station',
       component: CustomAnnouncementPane,
+      defaultState: {
+        thisStationCode: this.allAvailableStationsAndTestStations[0].value,
+        terminatesAtCode: this.allAvailableStationsAndTestStations[0].value,
+        callingAtCodes: [],
+        mindTheGap: false,
+      },
       props: {
         presets: announcementPresets.stopped,
         playHandler: this.playStoppedAtStationAnnouncement.bind(this),
@@ -927,7 +945,7 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
           },
         },
       },
-    },
+    } as CustomAnnouncementTab<keyof IStoppedAtStationAnnouncementOptions>,
     announcementButtons: {
       name: 'Announcement buttons',
       component: CustomButtonPane,

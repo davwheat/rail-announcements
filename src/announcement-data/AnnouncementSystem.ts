@@ -92,6 +92,9 @@ export interface CustomAnnouncementTab<OptionIds extends string> {
         | 'defaultState'
       >
     | ICustomButtonPaneProps
+  /**
+   * Merged with any personal preset to allow migration if new features are added.
+   */
   defaultState: Record<OptionIds, any>
 }
 

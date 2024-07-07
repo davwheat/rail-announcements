@@ -260,7 +260,7 @@ export default class TfLJubileeLine extends AnnouncementSystem {
 
     const stationData = StationData.find(s => s.name === options.stationName)
 
-    if (stationData.fullMessages) {
+    if (stationData?.fullMessages) {
       files.push(...stationData.approachingFiles)
 
       return await this.playAudioFiles(files, download)
@@ -271,9 +271,9 @@ export default class TfLJubileeLine extends AnnouncementSystem {
     const stnFiles: AudioItem[] = []
 
     if (elizAffectedStations.includes(options.stationName) && options.usePostEliz) {
-      stnFiles.push(...stationData.postEliz.approachingFiles)
+      stnFiles.push(...(stationData?.postEliz?.approachingFiles ?? []))
     } else {
-      stnFiles.push(...stationData.approachingFiles)
+      stnFiles.push(...(stationData?.approachingFiles ?? []))
     }
 
     stnFiles[0] = { id: stnFiles[0] as string, opts: { delayStart: 250 } }
@@ -291,7 +291,7 @@ export default class TfLJubileeLine extends AnnouncementSystem {
 
     const stationData = StationData.find(s => s.name === options.stationName)
 
-    if (stationData.fullMessages) {
+    if (stationData?.fullMessages) {
       files.push(...stationData.standingFiles)
 
       return await this.playAudioFiles(files, download)
@@ -302,9 +302,9 @@ export default class TfLJubileeLine extends AnnouncementSystem {
     const stnFiles: AudioItem[] = []
 
     if (elizAffectedStations.includes(options.stationName) && options.usePostEliz) {
-      stnFiles.push(...stationData.postEliz.standingFiles)
+      stnFiles.push(...(stationData?.postEliz?.standingFiles ?? []))
     } else {
-      stnFiles.push(...stationData.standingFiles)
+      stnFiles.push(...(stationData?.standingFiles ?? []))
     }
 
     stnFiles[0] = { id: stnFiles[0] as string, opts: { delayStart: 250 } }
@@ -318,6 +318,9 @@ export default class TfLJubileeLine extends AnnouncementSystem {
     destinationInfo: {
       name: 'Destination info',
       component: CustomAnnouncementPane,
+      defaultState: {
+        terminatingStationName: StationData.filter(s => s.canTerminate)[0].name,
+      },
       props: {
         playHandler: this.playDestinationInfoAnnouncement.bind(this),
         presets: announcementPresets.destinationInfo,
@@ -330,10 +333,15 @@ export default class TfLJubileeLine extends AnnouncementSystem {
           },
         },
       },
-    },
+    } as CustomAnnouncementTab<keyof IDestinationInfoAnnouncementOptions>,
     nextStation: {
       name: 'Next station',
       component: CustomAnnouncementPane,
+      defaultState: {
+        stationName: StationData[0].name,
+        doorDirection: 'right',
+        usePostEliz: true,
+      },
       props: {
         playHandler: this.playNextStationAnnouncement.bind(this),
         options: {
@@ -351,26 +359,30 @@ export default class TfLJubileeLine extends AnnouncementSystem {
               { title: 'Right', value: 'right' },
             ],
             type: 'select',
-            onlyShowWhen: ({ stationName }: { stationName: string }) => {
+            onlyShowWhen: ({ stationName }) => {
               const stationData = StationData.find(s => s.name === stationName)
 
-              return !stationData.fullMessages
+              return !stationData?.fullMessages
             },
           },
           usePostEliz: {
             name: 'Use Elizabeth line version',
             default: true,
             type: 'boolean',
-            onlyShowWhen: ({ stationName }: { stationName: string }) => {
-              return elizAffectedStations.includes(stationName)
+            onlyShowWhen: ({ stationName }) => {
+              return elizAffectedStations.includes(stationName as string)
             },
           },
         },
       },
-    },
+    } as CustomAnnouncementTab<keyof INextStationAnnouncementOptions>,
     thisStation: {
       name: 'Stopped at station',
       component: CustomAnnouncementPane,
+      defaultState: {
+        stationName: StationData[0].name,
+        usePostEliz: true,
+      },
       props: {
         playHandler: this.playAtStationAnnouncement.bind(this),
         options: {
@@ -384,13 +396,13 @@ export default class TfLJubileeLine extends AnnouncementSystem {
             name: 'Use Elizabeth line version',
             default: true,
             type: 'boolean',
-            onlyShowWhen: ({ stationName }: { stationName: string }) => {
-              return elizAffectedStations.includes(stationName)
+            onlyShowWhen: ({ stationName }) => {
+              return elizAffectedStations.includes(stationName as string)
             },
           },
         },
       },
-    },
+    } as CustomAnnouncementTab<keyof IAtStationAnnouncementOptions>,
     announcementButtons: {
       name: 'Announcement buttons',
       component: CustomButtonPane,

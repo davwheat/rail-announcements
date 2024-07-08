@@ -4755,7 +4755,6 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             afterAndDelay: this.callingPointsOptions.aroundAndDelay,
           },
         ),
-        'e.today',
       )
     }
 
@@ -4871,7 +4870,6 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             afterAndDelay: this.callingPointsOptions.aroundAndDelay,
           },
         ),
-        'e.today',
       )
     }
 

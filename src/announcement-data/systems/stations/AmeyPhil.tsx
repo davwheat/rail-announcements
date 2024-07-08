@@ -4747,7 +4747,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           options.notCallingAtStations.map(s => s.crsCode),
           {
             prefix: 'station.m.',
-            finalPrefix: 'station.m.',
+            finalPrefix: 'station.e.',
             andId: 'm.and',
             firstItemDelay: this.callingPointsOptions.afterCallingAtDelay,
             beforeAndDelay: this.callingPointsOptions.aroundAndDelay,
@@ -4862,7 +4862,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           options.notCallingAtStations.map(s => s.crsCode),
           {
             prefix: 'station.m.',
-            finalPrefix: 'station.m.',
+            finalPrefix: 'station.e.',
             andId: 'm.and',
             firstItemDelay: this.callingPointsOptions.afterCallingAtDelay,
             beforeAndDelay: this.callingPointsOptions.aroundAndDelay,

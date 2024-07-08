@@ -4124,7 +4124,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             // If last set of short platforms, add 'and' before last item
             // See: https://github.com/davwheat/rail-announcements/issues/226#issuecomment-2212472715
             id: i === order.length - 1 ? 'm.and customers for' : 's.customers for',
-            opts: { delayStart: 200 },
+            opts: { delayStart: i === order.length - 1 ? 0 : 200 },
           },
           ...this.pluraliseAudio(plats, {
             prefix: 'station.m.',

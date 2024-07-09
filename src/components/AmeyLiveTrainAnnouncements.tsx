@@ -235,6 +235,8 @@ function getCancelledCallingPoints(
                 if (!s.crs) return false
                 if (!s.isCancelled || s.isOperational || s.isPass) return false
                 if (!stations.includes(s.crs)) return false
+                // Ignore pick-up only
+                if (s.activities?.includes('U')) return false
                 return true
               })
               .map(l => ({ crsCode: l.crs!! })),

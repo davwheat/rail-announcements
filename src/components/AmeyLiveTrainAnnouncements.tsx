@@ -233,7 +233,7 @@ function getCancelledCallingPoints(
             ...a
               .service!!.locations.filter(s => {
                 if (!s.crs) return false
-                if (s.isCancelled || s.isOperational || s.isPass) return false
+                if (!s.isCancelled || s.isOperational || s.isPass) return false
                 if (!stations.includes(s.crs)) return false
                 return true
               })
@@ -241,7 +241,7 @@ function getCancelledCallingPoints(
           )
         })
 
-      return stops
+      return Array.from(new Set(stops))
     })
     .filter(Boolean) as CallingAtPoint[]
 

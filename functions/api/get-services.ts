@@ -46,7 +46,7 @@ export interface TrainService {
   cancelReason: CancelLatenessReason | null
   delayReason: CancelLatenessReason | null
   category: string
-  activities: string
+  activities?: string[]
   length: number | null
   isReverseFormation: boolean
   detachFront: boolean
@@ -251,6 +251,13 @@ async function getServiceByRid(rid: string, followAssociations: boolean = false)
       },
     }),
   )
+
+  // Split into array with groups of two chars
+  json.locations.forEach(l => {
+    if (l.activities) {
+      l.activities = ((l.activities as any as string | undefined)?.match(/.{2}/g) || []).map(a => a.trim())
+    }
+  })
 
   return json
 }

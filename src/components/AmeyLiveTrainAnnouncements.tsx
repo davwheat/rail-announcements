@@ -54,16 +54,39 @@ function pluraliseStrings(...strings: string[]): string {
   return `${strings.join(', ')} and ${last}`
 }
 
+function reverseShortPlatform(data: string | undefined | null): string | null {
+  if (!data) return null
+
+  if (data.includes('front')) {
+    return data.replace('front', 'rear')
+  } else if (data.includes('rear')) {
+    return data.replace('rear', 'front')
+  }
+
+  return data
+}
+
 function getCallingPoints(
   train: TrainService,
   stations: string[],
   getStation: (location: TimingLocation | EndPointLocation) => string,
 ): CallingAtPoint[] {
+  const mainReversalMap: Record<string, boolean[]> = {}
+  let rev = false
+  train.subsequentLocations.forEach((l, i, arr) => {
+    if (l.activities?.includes('RM')) rev = !rev
+    mainReversalMap[l.tiploc] ||= []
+    mainReversalMap[l.tiploc].push(rev)
+  })
+
   const callingPoints = train.subsequentLocations.filter(s => {
     if (!s.crs) return false
     // Force the calling point if the train divides here
     if (s.associations?.filter(a => a.category === AssociationCategory.Divide).length) return true
-    if (s.isCancelled || s.isOperational || s.isPass) return false
+    if (s.isCancelled || s.isOperational || s.isPass) {
+      mainReversalMap[s.tiploc].shift()
+      return false
+    }
     if (!stations.includes(s.crs)) return false
     // Ignore pick-up only
     if (s.activities?.includes('U')) return false
@@ -92,6 +115,10 @@ function getCallingPoints(
       // Hide last station if it's the train destination
       if (i === arr.length - 1 && p.crs === train.destination[0].crs) return null
 
+      let shortPlatform = p.crs ? isShortPlatform(p.crs, p.platform ?? null, train) || null : null
+      const reversedHere = mainReversalMap[p.tiploc].shift()
+      if (reversedHere) shortPlatform = reverseShortPlatform(shortPlatform)
+
       const stop: CallingAtPoint = {
         crsCode: getStation(p),
         name: '',
@@ -106,7 +133,7 @@ function getCallingPoints(
           // We have a dividing service
           stop.splitType = 'splits'
           const len = a.service!!.locations[0].length
-          stop.splitForm = `rear.${len}`
+          stop.splitForm = reversedHere ? `front.${len}` : `rear.${len}`
           stop.splitCallingPoints = a
             .service!!.locations.filter(s => {
               if (!s.crs) return false
@@ -167,18 +194,37 @@ function getCallingPoints(
     callingAt.push(...busCalls)
 
     if (trainContinuationService) {
+      let isReversed = false
+
+      const contReversalMap: Record<string, boolean[]> = {}
+      let rev = false
+      ;(trainContinuationService as AssociatedServiceDetail).locations.forEach((l, i, arr) => {
+        if (l.activities?.includes('RM')) rev = !rev
+        contReversalMap[l.tiploc] ||= []
+        contReversalMap[l.tiploc].push(rev)
+      })
+
       const trainCalls = (trainContinuationService as AssociatedServiceDetail).locations
-        .filter(p => !p.isCancelled && !p.isPass && !p.isOperational)
+        .filter(p => {
+          if (p.isCancelled || p.isPass || p.isOperational) {
+            contReversalMap[p.tiploc].shift()
+            return false
+          }
+          return true
+        })
         .map((p, i, arr) => {
           // Hide last station if it's the train destination
           if (i === arr.length - 1 && p.crs === train.destination[0].crs) return null
+
+          let shortPlatform = p.crs ? isShortPlatform(p.crs, p.platform ?? null, train) || null : null
+          if (contReversalMap[p.tiploc].shift()) shortPlatform = reverseShortPlatform(shortPlatform)
 
           return {
             crsCode: getStation(p),
             name: '',
             randomId: '',
             requestStop: p.activities?.includes('R'),
-            shortPlatform: p.crs ? isShortPlatform(p.crs, p.platform ?? null, train) || undefined : undefined,
+            shortPlatform: shortPlatform,
           }
         })
         .filter(Boolean) as CallingAtPoint[]

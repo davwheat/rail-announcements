@@ -35,6 +35,9 @@ import dayjsTz from 'dayjs/plugin/timezone'
 import Breakpoints from '@data/breakpoints'
 import { isMindTheGapStation } from '@data/liveTrains/mindTheGap'
 import { isShortPlatform } from '@data/liveTrains/shortPlatforms'
+import NoSSR from './NoSSR'
+import { LoadingIndicator } from 'react-select/dist/declarations/src/components/indicators'
+import LoadingSpinner from './LoadingSpinner'
 
 dayjs.extend(dayjsUtc)
 dayjs.extend(dayjsTz)
@@ -1355,410 +1358,420 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
     })
 
   return (
-    <div style={{ width: '100%' }}>
-      <label className="option-select" htmlFor="station-select">
-        Station
-        <Select<Option, false>
-          id="station-select"
-          value={{ value: selectedCrs, label: allSupportedStations.find(option => option.value === selectedCrs)?.label || '' }}
-          onChange={val => {
-            nextTrainAnnounced.current = {}
-            disruptedTrainAnnounced.current = {}
+    <div css={{ width: '100%' }}>
+      <NoSSR
+        fallback={
+          <div css={{ margin: 'auto', textAlign: 'center', paddingTop: 24, paddingBottom: 24 }}>
+            <LoadingSpinner />
 
-            setSelectedCrs(val!!.value)
-          }}
-          options={allSupportedStations}
-        />
-      </label>
-
-      <label htmlFor="display-type-select" className="option-select">
-        Display type
-        <Select<Option<DisplayType>, false>
-          id="display-type-select"
-          value={{ value: displayType, label: DisplayNames[displayType] }}
-          onChange={val => setDisplayType(val!!.value)}
-          options={Object.entries(DisplayNames).map(([value, label]) => ({ value: value as DisplayType, label }))}
-        />
-      </label>
-
-      <label htmlFor="use-legacy-tocs">
-        <input
-          type="checkbox"
-          name="use-legacy-tocs"
-          id="use-legacy-tocs"
-          checked={useLegacyTocNames}
-          onChange={e => setUseLegacyTocNames(e.target.checked)}
-        />
-        Use old TOC names?
-      </label>
-
-      <label htmlFor="announce-vias">
-        <input
-          type="checkbox"
-          name="announce-vias"
-          id="announce-vias"
-          checked={announceViaPoints}
-          onChange={e => setAnnounceViaPoints(e.target.checked)}
-        />
-        Announce via points?
-      </label>
-
-      <label htmlFor="announce-short-platforms-after-split">
-        <input
-          type="checkbox"
-          name="announce-short-platforms-after-split"
-          id="announce-short-platforms-after-split"
-          checked={announceShortPlatformsAfterSplit}
-          onChange={e => setAnnounceShortPlatformsAfterSplit(e.target.checked)}
-        />
-        Announce short platforms after split?
-      </label>
-
-      <label htmlFor="chime-type-select" className="option-select">
-        Chime
-        <Select<Option<ChimeType | ''>, false>
-          id="chime-type-select"
-          value={{ value: chimeType, label: ChimeTypeNames[chimeType] }}
-          onChange={val => setChimeType(val!.value!!)}
-          options={Object.entries(ChimeTypeNames).map(([k, v]) => ({ value: k as ChimeType | '', label: v }))}
-        />
-      </label>
-
-      <fieldset>
-        <legend>Toggle announcement types</legend>
-
-        <label htmlFor="announcement-types--next">
-          <input
-            type="checkbox"
-            name="announcement-types"
-            id="announcement-types--next"
-            checked={enabledAnnouncements.includes(AnnouncementType.Next)}
-            onChange={e => {
-              if (e.target.checked) {
-                setEnabledAnnouncements([...enabledAnnouncements, AnnouncementType.Next])
-              } else {
-                setEnabledAnnouncements(enabledAnnouncements.filter(x => x !== AnnouncementType.Next))
-              }
-            }}
-          />
-          Next train
-        </label>
-
-        <label htmlFor="announcement-types--approaching">
-          <input
-            type="checkbox"
-            name="announcement-types"
-            id="announcement-types--approaching"
-            checked={enabledAnnouncements.includes(AnnouncementType.Approaching)}
-            onChange={e => {
-              if (e.target.checked) {
-                setEnabledAnnouncements([...enabledAnnouncements, AnnouncementType.Approaching])
-              } else {
-                setEnabledAnnouncements(enabledAnnouncements.filter(x => x !== AnnouncementType.Approaching))
-              }
-            }}
-          />
-          Approaching train
-        </label>
-
-        <label htmlFor="announcement-types--standing">
-          <input
-            type="checkbox"
-            name="announcement-types"
-            id="announcement-types--standing"
-            checked={enabledAnnouncements.includes(AnnouncementType.Standing)}
-            onChange={e => {
-              if (e.target.checked) {
-                setEnabledAnnouncements([...enabledAnnouncements, AnnouncementType.Standing])
-              } else {
-                setEnabledAnnouncements(enabledAnnouncements.filter(x => x !== AnnouncementType.Standing))
-              }
-            }}
-          />
-          Standing train
-        </label>
-
-        <label htmlFor="announcement-types--disruption">
-          <input
-            type="checkbox"
-            name="announcement-types"
-            id="announcement-types--disruption"
-            checked={enabledAnnouncements.includes(AnnouncementType.Disrupted)}
-            onChange={e => {
-              if (e.target.checked) {
-                setEnabledAnnouncements([...enabledAnnouncements, AnnouncementType.Disrupted])
-              } else {
-                setEnabledAnnouncements(enabledAnnouncements.filter(x => x !== AnnouncementType.Disrupted))
-              }
-            }}
-          />
-          Delays and cancellations
-        </label>
-      </fieldset>
-
-      <fieldset
-        css={{
-          padding: 0,
-          width: '100%',
-        }}
+            <p css={{ marginTop: 24 }}>Loading live trains settings&hellip;</p>
+          </div>
+        }
       >
-        <div
-          css={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            alignItems: 'stretch',
-            gap: 8,
-            marginBottom: 16,
-          }}
-        >
-          {systemKeys.map(systemKey => {
-            return (
-              <button
-                key={systemKey}
-                onClick={() => {
-                  const platformsSupportedBySystem = Object.entries(supportedPlatforms)
-                    .filter(([_, keys]) => keys.includes(systemKey))
-                    .map(([key]) => key)
+        <label className="option-select" htmlFor="station-select">
+          Station
+          <Select<Option, false>
+            id="station-select"
+            value={{ value: selectedCrs, label: allSupportedStations.find(option => option.value === selectedCrs)?.label || '' }}
+            onChange={val => {
+              nextTrainAnnounced.current = {}
+              disruptedTrainAnnounced.current = {}
 
-                  dispatchSystemKeyForPlatform({ platforms: platformsSupportedBySystem, systemKey })
-                }}
-              >
-                Use {systemKey} on all platforms
-              </button>
-            )
-          })}
-
-          <button
-            key="__random"
-            className="danger"
-            onClick={() => {
-              const platforms: Record<string, SystemKeys> = {}
-
-              for (const [p, keys] of Object.entries(supportedPlatforms)) {
-                platforms[p] = keys[Math.floor(Math.random() * keys.length)]
-              }
-
-              Object.entries(platforms).forEach(([p, systemKey]) => {
-                dispatchSystemKeyForPlatform({ platforms: [p], systemKey })
-              })
+              setSelectedCrs(val!!.value)
             }}
-          >
-            <span className="buttonLabel">
-              <ShuffleIcon />
-              Randomise (on)
-            </span>
-          </button>
+            options={allSupportedStations}
+          />
+        </label>
 
-          <button
-            key="__off"
-            className="danger"
-            onClick={() => {
-              dispatchSystemKeyForPlatform({ platforms: Object.keys(supportedPlatforms), systemKey: null })
-            }}
-          >
-            <span className="buttonLabel">All off</span>
-          </button>
-        </div>
+        <label htmlFor="display-type-select" className="option-select">
+          Display type
+          <Select<Option<DisplayType>, false>
+            id="display-type-select"
+            value={{ value: displayType, label: DisplayNames[displayType] }}
+            onChange={val => setDisplayType(val!!.value)}
+            options={Object.entries(DisplayNames).map(([value, label]) => ({ value: value as DisplayType, label }))}
+          />
+        </label>
 
-        <details
-          css={{
-            '&:not([open]) summary::before': {
-              transform: 'rotate(-90deg)',
-            },
-          }}
-        >
-          <summary
-            css={{
-              userSelect: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              padding: '8px 16px',
-              background: '#eee',
-              cursor: 'pointer',
+        <label htmlFor="use-legacy-tocs">
+          <input
+            type="checkbox"
+            name="use-legacy-tocs"
+            id="use-legacy-tocs"
+            checked={useLegacyTocNames}
+            onChange={e => setUseLegacyTocNames(e.target.checked)}
+          />
+          Use old TOC names?
+        </label>
 
-              '&::-webkit-details-marker': {
-                display: 'none',
-              },
+        <label htmlFor="announce-vias">
+          <input
+            type="checkbox"
+            name="announce-vias"
+            id="announce-vias"
+            checked={announceViaPoints}
+            onChange={e => setAnnounceViaPoints(e.target.checked)}
+          />
+          Announce via points?
+        </label>
 
-              '&::before': {
-                '--size': '6px',
-                content: '""',
-                display: 'inline-block',
-                width: 0,
-                height: 0,
-                borderLeft: 'var(--size) solid transparent',
-                borderRight: 'var(--size) solid transparent',
-                borderTop: 'calc(2 * var(--size)) solid currentColor',
-                marginRight: 8,
-              },
-            }}
-          >
-            <legend
-              css={{
-                appearance: 'none',
-                display: 'inline-block',
-                padding: 0,
-                margin: 0,
-                float: 'left',
-                fontWeight: 'bold',
+        <label htmlFor="announce-short-platforms-after-split">
+          <input
+            type="checkbox"
+            name="announce-short-platforms-after-split"
+            id="announce-short-platforms-after-split"
+            checked={announceShortPlatformsAfterSplit}
+            onChange={e => setAnnounceShortPlatformsAfterSplit(e.target.checked)}
+          />
+          Announce short platforms after split?
+        </label>
+
+        <label htmlFor="chime-type-select" className="option-select">
+          Chime
+          <Select<Option<ChimeType | ''>, false>
+            id="chime-type-select"
+            value={{ value: chimeType, label: ChimeTypeNames[chimeType] }}
+            onChange={val => setChimeType(val!.value!!)}
+            options={Object.entries(ChimeTypeNames).map(([k, v]) => ({ value: k as ChimeType | '', label: v }))}
+          />
+        </label>
+
+        <fieldset>
+          <legend>Toggle announcement types</legend>
+
+          <label htmlFor="announcement-types--next">
+            <input
+              type="checkbox"
+              name="announcement-types"
+              id="announcement-types--next"
+              checked={enabledAnnouncements.includes(AnnouncementType.Next)}
+              onChange={e => {
+                if (e.target.checked) {
+                  setEnabledAnnouncements([...enabledAnnouncements, AnnouncementType.Next])
+                } else {
+                  setEnabledAnnouncements(enabledAnnouncements.filter(x => x !== AnnouncementType.Next))
+                }
               }}
-            >
-              Configure per-platform voices
-            </legend>
-          </summary>
+            />
+            Next train
+          </label>
 
-          <p style={{ marginTop: 16 }}>We'll remember these settings on your device.</p>
+          <label htmlFor="announcement-types--approaching">
+            <input
+              type="checkbox"
+              name="announcement-types"
+              id="announcement-types--approaching"
+              checked={enabledAnnouncements.includes(AnnouncementType.Approaching)}
+              onChange={e => {
+                if (e.target.checked) {
+                  setEnabledAnnouncements([...enabledAnnouncements, AnnouncementType.Approaching])
+                } else {
+                  setEnabledAnnouncements(enabledAnnouncements.filter(x => x !== AnnouncementType.Approaching))
+                }
+              }}
+            />
+            Approaching train
+          </label>
 
+          <label htmlFor="announcement-types--standing">
+            <input
+              type="checkbox"
+              name="announcement-types"
+              id="announcement-types--standing"
+              checked={enabledAnnouncements.includes(AnnouncementType.Standing)}
+              onChange={e => {
+                if (e.target.checked) {
+                  setEnabledAnnouncements([...enabledAnnouncements, AnnouncementType.Standing])
+                } else {
+                  setEnabledAnnouncements(enabledAnnouncements.filter(x => x !== AnnouncementType.Standing))
+                }
+              }}
+            />
+            Standing train
+          </label>
+
+          <label htmlFor="announcement-types--disruption">
+            <input
+              type="checkbox"
+              name="announcement-types"
+              id="announcement-types--disruption"
+              checked={enabledAnnouncements.includes(AnnouncementType.Disrupted)}
+              onChange={e => {
+                if (e.target.checked) {
+                  setEnabledAnnouncements([...enabledAnnouncements, AnnouncementType.Disrupted])
+                } else {
+                  setEnabledAnnouncements(enabledAnnouncements.filter(x => x !== AnnouncementType.Disrupted))
+                }
+              }}
+            />
+            Delays and cancellations
+          </label>
+        </fieldset>
+
+        <fieldset
+          css={{
+            padding: 0,
+            width: '100%',
+          }}
+        >
           <div
             css={{
-              display: 'grid',
-              overflowX: 'scroll',
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignItems: 'stretch',
+              gap: 8,
+              marginBottom: 16,
+            }}
+          >
+            {systemKeys.map(systemKey => {
+              return (
+                <button
+                  key={systemKey}
+                  onClick={() => {
+                    const platformsSupportedBySystem = Object.entries(supportedPlatforms)
+                      .filter(([_, keys]) => keys.includes(systemKey))
+                      .map(([key]) => key)
 
-              [Breakpoints.downTo.desktopLarge]: {
-                gridTemplateColumns: '1fr 1fr',
+                    dispatchSystemKeyForPlatform({ platforms: platformsSupportedBySystem, systemKey })
+                  }}
+                >
+                  Use {systemKey} on all platforms
+                </button>
+              )
+            })}
 
-                '& fieldset:nth-of-type(4n - 1), & fieldset:nth-of-type(4n)': {
-                  background: '#eee',
-                },
-              },
+            <button
+              key="__random"
+              className="danger"
+              onClick={() => {
+                const platforms: Record<string, SystemKeys> = {}
 
-              [Breakpoints.upTo.desktopLarge]: {
-                gridTemplateColumns: 'minmax(0, 1fr)',
+                for (const [p, keys] of Object.entries(supportedPlatforms)) {
+                  platforms[p] = keys[Math.floor(Math.random() * keys.length)]
+                }
 
-                '& fieldset:nth-of-type(even)': {
-                  background: '#eee',
-                },
+                Object.entries(platforms).forEach(([p, systemKey]) => {
+                  dispatchSystemKeyForPlatform({ platforms: [p], systemKey })
+                })
+              }}
+            >
+              <span className="buttonLabel">
+                <ShuffleIcon />
+                Randomise (on)
+              </span>
+            </button>
+
+            <button
+              key="__off"
+              className="danger"
+              onClick={() => {
+                dispatchSystemKeyForPlatform({ platforms: Object.keys(supportedPlatforms), systemKey: null })
+              }}
+            >
+              <span className="buttonLabel">All off</span>
+            </button>
+          </div>
+
+          <details
+            css={{
+              '&:not([open]) summary::before': {
+                transform: 'rotate(-90deg)',
               },
             }}
           >
-            {Object.entries(supportedPlatforms)
-              .sort(([a], [b]) => {
-                const aInt = parseInt(a)
-                const bInt = parseInt(b)
+            <summary
+              css={{
+                userSelect: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                padding: '8px 16px',
+                background: '#eee',
+                cursor: 'pointer',
 
-                if (!isNaN(aInt) && !isNaN(bInt)) {
-                  const diff = aInt - bInt
+                '&::-webkit-details-marker': {
+                  display: 'none',
+                },
 
-                  if (diff !== 0) return diff
-                }
+                '&::before': {
+                  '--size': '6px',
+                  content: '""',
+                  display: 'inline-block',
+                  width: 0,
+                  height: 0,
+                  borderLeft: 'var(--size) solid transparent',
+                  borderRight: 'var(--size) solid transparent',
+                  borderTop: 'calc(2 * var(--size)) solid currentColor',
+                  marginRight: 8,
+                },
+              }}
+            >
+              <legend
+                css={{
+                  appearance: 'none',
+                  display: 'inline-block',
+                  padding: 0,
+                  margin: 0,
+                  float: 'left',
+                  fontWeight: 'bold',
+                }}
+              >
+                Configure per-platform voices
+              </legend>
+            </summary>
 
-                return a.localeCompare(b)
-              })
-              .map(([platform, systems]) => {
-                return (
-                  <fieldset
-                    css={{
-                      appearance: 'none',
-                      padding: 0,
-                      margin: 0,
-                      border: 'none',
-                      minInlineSize: 'min-content',
+            <p css={{ marginTop: 16 }}>We'll remember these settings on your device.</p>
 
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 8,
-                      paddingLeft: 16,
-                      paddingRight: 16,
-                    }}
-                    key={platform}
-                  >
-                    <legend
+            <div
+              css={{
+                display: 'grid',
+                overflowX: 'scroll',
+
+                [Breakpoints.downTo.desktopLarge]: {
+                  gridTemplateColumns: '1fr 1fr',
+
+                  '& fieldset:nth-of-type(4n - 1), & fieldset:nth-of-type(4n)': {
+                    background: '#eee',
+                  },
+                },
+
+                [Breakpoints.upTo.desktopLarge]: {
+                  gridTemplateColumns: 'minmax(0, 1fr)',
+
+                  '& fieldset:nth-of-type(even)': {
+                    background: '#eee',
+                  },
+                },
+              }}
+            >
+              {Object.entries(supportedPlatforms)
+                .sort(([a], [b]) => {
+                  const aInt = parseInt(a)
+                  const bInt = parseInt(b)
+
+                  if (!isNaN(aInt) && !isNaN(bInt)) {
+                    const diff = aInt - bInt
+
+                    if (diff !== 0) return diff
+                  }
+
+                  return a.localeCompare(b)
+                })
+                .map(([platform, systems]) => {
+                  return (
+                    <fieldset
                       css={{
                         appearance: 'none',
-                        display: 'inline-block',
                         padding: 0,
                         margin: 0,
-                        float: 'left',
-                        width: '150px',
-                        fontWeight: 'bold',
-                      }}
-                    >
-                      Platform {platform}
-                    </legend>
+                        border: 'none',
+                        minInlineSize: 'min-content',
 
-                    <label
-                      key={`platform-system-select-${platform}-none`}
-                      htmlFor={`platform-system-select-${platform}-none`}
-                      css={{
                         display: 'flex',
-                        whiteSpace: 'nowrap',
                         alignItems: 'center',
-                        fontWeight: 'normal',
-
-                        '&:has([disabled])': {
-                          color: '#666',
-
-                          '&, & input': {
-                            cursor: 'not-allowed',
-                          },
-                        },
+                        gap: 8,
+                        paddingLeft: 16,
+                        paddingRight: 16,
                       }}
+                      key={platform}
                     >
-                      None
-                      <input
-                        type="radio"
-                        name={`platform-system-select-${platform}`}
-                        id={`platform-system-select-${platform}-none`}
-                        checked={systemKeyForPlatform[platform] === null}
-                        onChange={() => {
-                          dispatchSystemKeyForPlatform({ platforms: [platform], systemKey: null })
+                      <legend
+                        css={{
+                          appearance: 'none',
+                          display: 'inline-block',
+                          padding: 0,
+                          margin: 0,
+                          float: 'left',
+                          width: '150px',
+                          fontWeight: 'bold',
                         }}
-                      />
-                    </label>
+                      >
+                        Platform {platform}
+                      </legend>
 
-                    {systemKeys.map(systemKey => {
-                      return (
-                        <label
-                          key={`platform-system-select-${platform}-${systemKey}`}
-                          htmlFor={`platform-system-select-${platform}-${systemKey}`}
-                        >
-                          {systemKey}
+                      <label
+                        key={`platform-system-select-${platform}-none`}
+                        htmlFor={`platform-system-select-${platform}-none`}
+                        css={{
+                          display: 'flex',
+                          whiteSpace: 'nowrap',
+                          alignItems: 'center',
+                          fontWeight: 'normal',
 
-                          <input
-                            type="radio"
-                            name={`platform-system-select-${platform}`}
-                            id={`platform-system-select-${platform}-${systemKey}`}
-                            disabled={!systems.includes(systemKey as any)}
-                            checked={systemKeyForPlatform[platform] === systemKey}
-                            onChange={() => {
-                              dispatchSystemKeyForPlatform({ platforms: [platform], systemKey: systemKey })
-                            }}
-                          />
-                        </label>
-                      )
-                    })}
-                  </fieldset>
-                )
-              })}
-          </div>
-        </details>
-      </fieldset>
+                          '&:has([disabled])': {
+                            color: '#666',
 
-      <label htmlFor="show-unconfirmed-platforms">
-        <input
-          type="checkbox"
-          name="show-unconfirmed-platforms"
-          id="show-unconfirmed-platforms"
-          aria-describedby="help-show-unconfirmed-platforms"
-          checked={showUnconfirmedPlatforms}
-          onChange={e => setShowUnconfirmedPlatforms(e.target.checked)}
-        />
-        Show trains with unconfirmed platforms
-      </label>
-      <p id="help-show-unconfirmed-platforms" style={{ fontSize: '0.8em', marginLeft: 40, marginTop: -8 }}>
-        Useful for stations where platforms are suppressed from live data feeds, such as King's Cross.
-      </p>
+                            '&, & input': {
+                              cursor: 'not-allowed',
+                            },
+                          },
+                        }}
+                      >
+                        None
+                        <input
+                          type="radio"
+                          name={`platform-system-select-${platform}`}
+                          id={`platform-system-select-${platform}-none`}
+                          checked={systemKeyForPlatform[platform] === null}
+                          onChange={() => {
+                            dispatchSystemKeyForPlatform({ platforms: [platform], systemKey: null })
+                          }}
+                        />
+                      </label>
 
-      <p style={{ margin: '16px 0' }}>
+                      {systemKeys.map(systemKey => {
+                        return (
+                          <label
+                            key={`platform-system-select-${platform}-${systemKey}`}
+                            htmlFor={`platform-system-select-${platform}-${systemKey}`}
+                          >
+                            {systemKey}
+
+                            <input
+                              type="radio"
+                              name={`platform-system-select-${platform}`}
+                              id={`platform-system-select-${platform}-${systemKey}`}
+                              disabled={!systems.includes(systemKey as any)}
+                              checked={systemKeyForPlatform[platform] === systemKey}
+                              onChange={() => {
+                                dispatchSystemKeyForPlatform({ platforms: [platform], systemKey: systemKey })
+                              }}
+                            />
+                          </label>
+                        )
+                      })}
+                    </fieldset>
+                  )
+                })}
+            </div>
+          </details>
+        </fieldset>
+
+        <label htmlFor="show-unconfirmed-platforms">
+          <input
+            type="checkbox"
+            name="show-unconfirmed-platforms"
+            id="show-unconfirmed-platforms"
+            aria-describedby="help-show-unconfirmed-platforms"
+            checked={showUnconfirmedPlatforms}
+            onChange={e => setShowUnconfirmedPlatforms(e.target.checked)}
+          />
+          Show trains with unconfirmed platforms
+        </label>
+        <p id="help-show-unconfirmed-platforms" css={{ fontSize: '0.8em', marginLeft: 40, marginTop: -8 }}>
+          Useful for stations where platforms are suppressed from live data feeds, such as King's Cross.
+        </p>
+      </NoSSR>
+
+      <p css={{ margin: '16px 0' }}>
         This is a beta feature, and isn't complete or fully functional. Please report any issues you face{' '}
         <a href="https://github.com/davwheat/rail-announcements/issues">on GitHub</a>.
       </p>
-      <p style={{ margin: '16px 0' }}>
+      <p css={{ margin: '16px 0' }}>
         This page will auto-announce all departures in the next {MIN_TIME_TO_ANNOUNCE} minutes from the selected station. Departures outside this
         timeframe will appear on the board below, but won't be announced until closer to the time.
       </p>
-      <p style={{ margin: '16px 0' }}>At the moment, we also won't announce services which:</p>
-      <ul className="list" style={{ margin: '16px 16px' }}>
+      <p css={{ margin: '16px 0' }}>At the moment, we also won't announce services which:</p>
+      <ul className="list" css={{ margin: '16px 16px' }}>
         <li>have no platform allocated in data feeds (common at larger stations, even at the time of departure)</li>
         <li>have already been announced by the system in the last hour (only affects services which suddenly get delayed)</li>
         <li>are terminating at the selected station</li>
@@ -1769,7 +1782,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       </p>
 
       <div
-        style={{
+        css={{
           padding: 12,
           paddingLeft: 16,
           borderLeft: '4px solid var(--primary-blue)',
@@ -1785,7 +1798,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
           Please let us know if you know any short platforms that aren't correctly announced by the website for these TOCs. We'll seek
           information and feedback about other TOCs in the near future
         </p>
-        <p style={{ marginBottom: 0 }}>
+        <p css={{ marginBottom: 0 }}>
           Have feedback? Please post it on{' '}
           <a target="_blank" href="https://github.com/davwheat/rail-announcements/issues/226">
             this GitHub tracking issue
@@ -1795,7 +1808,20 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       </div>
 
       {!hasEnabledFeature ? (
-        <>
+        <NoSSR
+          fallback={
+            <button
+              css={{
+                display: 'flex',
+                alignItems: 'center',
+                marginBottom: 0,
+              }}
+              disabled
+            >
+              Start live trains
+            </button>
+          }
+        >
           <button
             css={{
               display: 'flex',
@@ -1804,9 +1830,9 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
             }}
             onClick={() => setHasEnabledFeature(true)}
           >
-            Enable live trains
+            Start live trains
           </button>
-        </>
+        </NoSSR>
       ) : (
         <>
           <button
@@ -1871,7 +1897,7 @@ export function Logs({ logs, className }: { logs: string[]; className?: string }
     <div className={className}>
       <h2>Logs</h2>
 
-      <textarea value={logs.join('\n')} style={{ width: '100%', minHeight: 250, maxHeight: '90vh', resize: 'vertical', padding: 8 }} />
+      <textarea value={logs.join('\n')} css={{ width: '100%', minHeight: 250, maxHeight: '90vh', resize: 'vertical', padding: 8 }} />
     </div>
   )
 }

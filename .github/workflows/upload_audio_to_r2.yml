@@ -1,4 +1,4 @@
-name: Smoketest
+name: Upload to R2
 
 on:
   push:

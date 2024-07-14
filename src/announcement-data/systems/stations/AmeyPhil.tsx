@@ -3479,6 +3479,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       'WLI',
       'WLM',
       'WLN',
+      'WLO',
       'WLP',
       'WLS',
       'WLT',

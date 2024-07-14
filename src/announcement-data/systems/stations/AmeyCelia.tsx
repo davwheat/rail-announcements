@@ -2901,6 +2901,7 @@ export default class AmeyCelia extends AmeyPhil {
       'WLI',
       'WLM',
       'WLN',
+      'WLO',
       'WLP',
       'WLS',
       'WLT',

@@ -80,16 +80,25 @@ function getCallingPoints(
   })
 
   const callingPoints = train.subsequentLocations.filter(s => {
-    if (!s.crs) return false
+    if (!s.crs) {
+      mainReversalMap[s.tiploc].shift()
+      return false
+    }
     // Force the calling point if the train divides here
     if (s.associations?.filter(a => a.category === AssociationCategory.Divide).length) return true
     if (s.isCancelled || s.isOperational || s.isPass) {
       mainReversalMap[s.tiploc].shift()
       return false
     }
-    if (!stations.includes(s.crs)) return false
+    if (!stations.includes(s.crs)) {
+      mainReversalMap[s.tiploc].shift()
+      return false
+    }
     // Ignore pick-up only
-    if (s.activities?.includes('U')) return false
+    if (s.activities?.includes('U')) {
+      mainReversalMap[s.tiploc].shift()
+      return false
+    }
     return true
   })
 
@@ -117,6 +126,8 @@ function getCallingPoints(
 
       let shortPlatform = p.crs ? isShortPlatform(p.crs, p.platform ?? null, train) || null : null
       const reversedHere = mainReversalMap[p.tiploc].shift()
+      console.log(p.crs, 'reversed?', reversedHere)
+
       if (reversedHere) shortPlatform = reverseShortPlatform(shortPlatform)
 
       const stop: CallingAtPoint = {
@@ -124,7 +135,7 @@ function getCallingPoints(
         name: '',
         randomId: '',
         requestStop: p.activities?.includes('R'),
-        shortPlatform: p.crs ? isShortPlatform(p.crs, p.platform ?? null, train) || undefined : undefined,
+        shortPlatform: shortPlatform || undefined,
       }
 
       p.associations
@@ -194,8 +205,6 @@ function getCallingPoints(
     callingAt.push(...busCalls)
 
     if (trainContinuationService) {
-      let isReversed = false
-
       const contReversalMap: Record<string, boolean[]> = {}
       let rev = false
       ;(trainContinuationService as AssociatedServiceDetail).locations.forEach((l, i, arr) => {
@@ -224,8 +233,8 @@ function getCallingPoints(
             name: '',
             randomId: '',
             requestStop: p.activities?.includes('R'),
-            shortPlatform: shortPlatform,
-          }
+            shortPlatform,
+          } as CallingAtPoint
         })
         .filter(Boolean) as CallingAtPoint[]
 

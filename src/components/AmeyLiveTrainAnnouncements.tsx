@@ -469,19 +469,16 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
   // Ignore duplicates
   const allSupportedStations = useMemo(
     () =>
-      Array.from(
-        new Set(
-          Object.values(perSystemSupportedStations)
-            .concat(
-              Object.values<AmeyPhil>(systems)
-                .map(s => s.ADDITIONAL_STATIONS)
-                .flat()
-                .filter(o => o.value.length === 3)
-                .map(o => ({ value: o.value, label: o.title })),
-            )
-            .flat(),
-        ),
-      ),
+      Object.values(perSystemSupportedStations)
+        .concat(
+          Object.values<AmeyPhil>(systems)
+            .map(s => s.ADDITIONAL_STATIONS)
+            .flat()
+            .filter(o => o.value.length === 3)
+            .map(o => ({ value: o.value, label: o.title })),
+        )
+        .flat()
+        .filter((s, i, arr) => arr.findIndex(s2 => s2.value === s.value) === i),
     [perSystemSupportedStations],
   )
 

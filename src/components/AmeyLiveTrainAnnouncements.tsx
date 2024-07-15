@@ -479,8 +479,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
                 .filter(o => o.value.length === 3)
                 .map(o => ({ value: o.value, label: o.title })),
             )
-            .flat()
-            .map(s => s.value),
+            .flat(),
         ),
       ),
     [perSystemSupportedStations],

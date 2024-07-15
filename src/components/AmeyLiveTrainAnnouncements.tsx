@@ -459,7 +459,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
                 value: r.crsCode,
                 label: r.name,
               }
-            }),
+            }).concat(system.ADDITIONAL_STATIONS.map(s => ({ value: s.value, label: s.title }))),
           ] as [string, Option[]]
         }),
       ),

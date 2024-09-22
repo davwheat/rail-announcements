@@ -5770,6 +5770,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     approachingTrain: {
       name: 'Approaching train',
       component: CustomAnnouncementPane,
+      importStateFromRttService: this.approachingTrainOptionsFromRtt.bind(this),
       defaultState: {
         chime: 'three',
         platform: this.PLATFORMS[1],
@@ -6409,6 +6410,55 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         false,
         rttService.serviceUid,
       ).toLowerCase(),
+    }
+  }
+
+  /**
+   * @param rttService RTT service data
+   * @param fromStation The station from which to interpret data from
+   * @param existingOptions The existing options to copy other settings from (e.g., chime)
+   * @returns The options to use for the next train announcement
+   */
+  private approachingTrainOptionsFromRtt(
+    rttService: RttResponse,
+    fromLocationIndex: number,
+    existingOptions: ITrainApproachingAnnouncementOptions,
+  ): ITrainApproachingAnnouncementOptions {
+    const originLocation = rttService.locations[fromLocationIndex]
+
+    const callingPoints = RttUtils.getCallingPoints(rttService, fromLocationIndex)
+    const destinationLocations = originLocation.destination.filter(d => {
+      if (!d.crs) {
+        console.warn('Destination location has no CRS', d)
+        return false
+      }
+      return true
+    })
+
+    const h = originLocation.gbttBookedDeparture!!.substring(0, 2)
+    const m = originLocation.gbttBookedDeparture!!.substring(2, 4)
+
+    let platform = originLocation.platform?.toLowerCase() ?? existingOptions.platform
+    if (!this.PLATFORMS.includes(platform)) platform = existingOptions.platform
+
+    return {
+      chime: existingOptions.chime,
+
+      hour: h === '00' ? '00 - midnight' : h,
+      min: m === '00' ? '00 - hundred-hours' : m,
+      isDelayed: RttUtils.getIsDelayedDeparture(rttService, fromLocationIndex),
+      platform,
+      vias: [],
+      terminatingStationCode: destinationLocations.map(d => d.crs!!)[0],
+      toc: this.processTocForLiveTrains(
+        rttService.atocName,
+        rttService.atocCode,
+        originLocation.crs!!,
+        destinationLocations.map(d => d.crs!!)[0],
+        false,
+        rttService.serviceUid,
+      ).toLowerCase(),
+      originStationCode: originLocation.origin[0].crs ?? existingOptions.originStationCode,
     }
   }
 }

@@ -292,7 +292,7 @@ export default function ImportStateFromRtt({ importStateFromRttService, disabled
                     }
 
                     return (
-                      <ul>
+                      <ul css={{ margin: 0 }}>
                         {locations.map((location, i) => {
                           console.log(location)
 
@@ -328,18 +328,55 @@ export default function ImportStateFromRtt({ importStateFromRttService, disabled
                             <li
                               key={location.randomId}
                               css={{
+                                '--track-color': 'var(--primary-blue)',
+                                '--track-gap': '24px',
+                                '--track-line-weight': '6px',
+                                '--circle-radius': 'calc(var(--track-line-weight) * 1.75)',
+
+                                '& label::before, & label::after': {
+                                  pointerEvents: 'none',
+                                },
+
                                 '& label::before': {
                                   content: '""',
-                                  width: 8,
-                                  background: 'var(--primary-blue)',
+                                  width: 'var(--track-line-weight)',
+                                  background: 'var(--track-color)',
                                   position: 'absolute',
-                                  left: -24,
+                                  left: 'calc(-1 * var(--track-gap))',
                                   top: 'calc(-1 * var(--item-spacing))',
                                   bottom: 'calc(-1 * var(--item-spacing))',
                                 },
 
                                 '&:first-of-type label::before': {
-                                  top: '50%',
+                                  top: 'calc(50% - var(--circle-radius))',
+                                },
+
+                                '&:last-of-type label::before': {
+                                  bottom: 'calc(50% - var(--circle-radius))',
+                                },
+
+                                '& label::after': {
+                                  content: '""',
+                                  height: 'var(--track-line-weight)',
+                                  width: 'calc(var(--track-gap) / 2)',
+                                  background: 'var(--track-color)',
+                                  position: 'absolute',
+                                  left: 'calc(-1 * var(--track-gap) + var(--track-line-weight))',
+                                  top: 'calc(50% - var(--track-line-weight) / 2)',
+                                },
+
+                                '&:first-of-type label::after, &:last-of-type label::after': {
+                                  left: 'calc(-1 * var(--track-gap) - var(--circle-radius) + var(--track-line-weight) / 2)',
+                                  height: 'calc(var(--circle-radius) * 2)',
+                                  width: 'calc(var(--circle-radius) * 2)',
+                                  borderRadius: '50%',
+                                },
+
+                                '&:first-of-type label::after': {
+                                  top: 'calc(50% - var(--circle-radius))',
+                                },
+                                '&:last-of-type label::after': {
+                                  top: 'calc(50% - var(--circle-radius))',
                                 },
                               }}
                             >
@@ -347,7 +384,7 @@ export default function ImportStateFromRtt({ importStateFromRttService, disabled
                                 htmlFor={`originLocation-${i}`}
                                 css={{
                                   '--item-spacing': '8px',
-                                  marginLeft: 24,
+                                  marginLeft: 'var(--track-gap)',
                                   display: 'grid',
                                   gridTemplateAreas: `
                                     "radio arr location"

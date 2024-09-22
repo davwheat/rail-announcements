@@ -293,7 +293,7 @@ export default function ImportStateFromRtt({ importStateFromRttService, disabled
 
                     return (
                       <ul css={{ margin: 0 }}>
-                        {locations.map((location, i) => {
+                        {locations.map((location, i, arr) => {
                           console.log(location)
 
                           let schedArr: Dayjs | null = null
@@ -323,6 +323,9 @@ export default function ImportStateFromRtt({ importStateFromRttService, disabled
                           } catch (e) {
                             console.warn(e)
                           }
+
+                          const isSetDownOnly = schedDep === null && i !== arr.length - 1
+                          const isPickUpOnly = schedArr === null && i !== 0
 
                           return (
                             <li
@@ -455,7 +458,10 @@ export default function ImportStateFromRtt({ importStateFromRttService, disabled
                                 <div css={{ gridArea: 'detail', color: '#888', fontWeight: 'normal', fontSize: '0.8em' }}>
                                   {[
                                     location.rttPlatform && `Platform ${location.rttPlatform}`,
-                                    location.depLateness && `Departed ${latenessString(location.depLateness)}`,
+                                    !isSetDownOnly && location.depLateness && `Departed ${latenessString(location.depLateness)}`,
+                                    isPickUpOnly && location.arrLateness && `Arrived ${latenessString(location.arrLateness)}`,
+                                    isSetDownOnly && 'Set down only',
+                                    isPickUpOnly && 'Pick up only',
                                   ]
                                     .filter(Boolean)
                                     .join(' • ')}

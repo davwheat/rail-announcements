@@ -23,12 +23,14 @@ export class RttUtils {
 
     return this.getEligibleLocationsInternal(rttService)
       .slice(fromLocationIndex + 1)
-      .filter(l => {
-        if (!l.isPublicCall || l.displayAs === 'CANCELLED_CALL') return false
+      .filter((l, i, arr) => {
+        if (!l.isPublicCall || l.displayAs === 'CANCELLED_CALL' || l.displayAs === 'DESTINATION' || l.displayAs === 'TERMINATES') return false
         if (!l.crs) {
           console.warn(`Location ${l.tiploc} has no CRS code`)
           return false
         }
+        // Ignore destination in calling points
+        if (i === arr.length - 1 && l.destination.some(d => d.tiploc === l.tiploc)) return false
         return true
       })
       .map(l => ({

@@ -62,7 +62,11 @@ export default function ImportStateFromRtt({ importStateFromRttService, disabled
       }
 
       if (uriPath[1] !== 'service') {
-        setErrors(['Invalid Realtime Trains URL (wrong path)'])
+        if (uriPath[1] === 'search') {
+          setErrors(['This looks like an RTT search link. You need to provide the URL for a particular service into this tool.'])
+        } else {
+          setErrors(['Invalid Realtime Trains URL (wrong path)'])
+        }
         setImporting(false)
         return
       }
@@ -242,7 +246,7 @@ export default function ImportStateFromRtt({ importStateFromRttService, disabled
 
                 {!serviceData && (
                   <label>
-                    Realtime Trains URL
+                    Realtime Trains service URL
                     <input
                       className="textInput"
                       disabled={importing}

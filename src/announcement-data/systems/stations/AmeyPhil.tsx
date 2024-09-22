@@ -6384,6 +6384,9 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     const h = originLocation.gbttBookedDeparture!!.substring(0, 2)
     const m = originLocation.gbttBookedDeparture!!.substring(2, 4)
 
+    let platform = originLocation.platform?.toLowerCase() ?? existingOptions.platform
+    if (!this.PLATFORMS.includes(platform)) platform = existingOptions.platform
+
     return {
       chime: existingOptions.chime,
       announceShortPlatformsAfterSplit: existingOptions.announceShortPlatformsAfterSplit,
@@ -6393,7 +6396,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       hour: h === '00' ? '00 - midnight' : h,
       min: m === '00' ? '00 - hundred-hours' : m,
       isDelayed: RttUtils.getIsDelayedDeparture(rttService, fromLocationIndex),
-      platform: originLocation.platform || existingOptions.platform,
+      platform,
       callingAt: callingPoints,
       vias: [],
       notCallingAtStations: RttUtils.getCancelledCallingPoints(rttService, fromLocationIndex),

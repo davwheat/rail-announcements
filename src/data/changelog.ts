@@ -477,6 +477,10 @@ const changelog: IChangelogVersion[] = [
     ],
     otherChanges: ['During local development, audio is no longer fetched from the production CDN'],
   },
+  {
+    date: '2024-09-22',
+    additions: ['For some systems and announcement types, you can now automatically load in announcement data from a Realtime Trains URL'],
+  },
 ]
 
 export default changelog

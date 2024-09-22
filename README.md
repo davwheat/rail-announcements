@@ -62,6 +62,19 @@ You'll be able to access the website at [http://local.davw.network:8787](http://
 will always resolve to your local machine, and is used to ensure that the website works correctly with the audio files and backend API during
 local development.
 
+#### Additional steps
+
+Some features require additional work in order to test locally.
+
+##### Realtime Trains importing
+
+You'll need to create a `.dev.vars` file at the root of the repository with your [RTT API](https://api.rtt.io/) username and password:
+
+```bash
+RTT_API_USERNAME=rttapi_username
+RTT_API_PASSWORD=your_password
+```
+
 ### Website contributions
 
 This site is created with the React Framework using Gatsby. If you're not familiar with React or Gatsby, you may want to research them before

@@ -3,6 +3,7 @@ import Crunker from '../helpers/crunker'
 import type { ICustomAnnouncementPaneProps } from '@components/PanelPanes/CustomAnnouncementPane'
 import type { ICustomButtonPaneProps } from '@components/PanelPanes/CustomButtonPane'
 import type React from 'react'
+import { RttResponse } from '../../functions/api/get-service-rtt'
 
 export interface IPlayOptions {
   delayStart: number
@@ -90,12 +91,18 @@ export interface CustomAnnouncementTab<OptionIds extends string> {
         | 'deletePersonalPreset'
         | 'system'
         | 'defaultState'
+        | 'importStateFromRttService'
       >
     | ICustomButtonPaneProps
   /**
    * Merged with any personal preset to allow migration if new features are added.
    */
   defaultState: Record<OptionIds, any>
+  importStateFromRttService?: (
+    rttService: RttResponse,
+    fromLocationIndex: number,
+    existingOptions: Record<OptionIds, any>,
+  ) => Record<OptionIds, any>
 }
 
 export type CustomAnnouncementButton = {

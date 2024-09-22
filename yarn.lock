@@ -13328,6 +13328,7 @@ __metadata:
     recoil-persistence: "npm:^0.3.0-beta.1"
     typescript: "npm:^5.5.3"
     uk-railway-stations: "npm:^1.6.0"
+    use-html-dialog: "npm:^0.2.1"
     uuid: "npm:^9.0.1"
     wrangler: "npm:^3.64.0"
   languageName: unknown
@@ -15822,6 +15823,15 @@ __metadata:
     file-loader:
       optional: true
   checksum: 10/f7e7258156f607bdd74469d22868a3522177bd895bb0eb1919363e32116ad7ed0c666b076d32dd700f1681c53d2edf046382bd9f6d9e77a19d4dd8ea36511da2
+  languageName: node
+  linkType: hard
+
+"use-html-dialog@npm:^0.2.1":
+  version: 0.2.1
+  resolution: "use-html-dialog@npm:0.2.1"
+  peerDependencies:
+    react: ">=16.8.0"
+  checksum: 10/ec6d33a74fdefb06e5e28d2d2d96906b1346b2f7505f46230238f511f8e669e068123b7fc84aa540fd3290c7ab8f70a5373aef6512bc835e619486b1a4395012
   languageName: node
   linkType: hard
 

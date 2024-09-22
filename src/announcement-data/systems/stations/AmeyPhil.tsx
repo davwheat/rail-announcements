@@ -10,6 +10,9 @@ import { AudioItem, CustomAnnouncementButton, CustomAnnouncementTab } from '../.
 import DelayCodeMapping from './DarwinDelayCodes_Male1.json'
 import NamedServices from './named-services.json'
 
+import type { RttResponse } from '../../../../functions/api/get-service-rtt'
+import { RttUtils } from '@data/RttUtils'
+
 export type ChimeType = 'three' | 'four' | 'none'
 export type FirstClassLocation = 'none' | 'front' | 'middle' | 'rear'
 
@@ -5585,6 +5588,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     nextTrain: {
       name: 'Next train',
       component: CustomAnnouncementPane,
+      importStateFromRttService: this.nextTrainOptionsFromRtt.bind(this),
       defaultState: {
         chime: 'three',
         platform: this.PLATFORMS[1],
@@ -6353,5 +6357,55 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         buttonSections: this.getAnnouncementButtons(),
       },
     } as CustomAnnouncementTab<string>,
+  }
+
+  /**
+   * @param rttService RTT service data
+   * @param fromStation The station from which to interpret data from
+   * @param existingOptions The existing options to copy other settings from (e.g., chime)
+   * @returns The options to use for the next train announcement
+   */
+  private nextTrainOptionsFromRtt(
+    rttService: RttResponse,
+    fromLocationIndex: number,
+    existingOptions: INextTrainAnnouncementOptions,
+  ): INextTrainAnnouncementOptions {
+    const originLocation = rttService.locations[fromLocationIndex]
+
+    const callingPoints = RttUtils.getCallingPoints(rttService, fromLocationIndex)
+    const destinationLocations = originLocation.destination.filter(d => {
+      if (!d.crs) {
+        console.warn('Destination location has no CRS', d)
+        return false
+      }
+      return true
+    })
+
+    const h = originLocation.gbttBookedDeparture!!.substring(0, 2)
+    const m = originLocation.gbttBookedDeparture!!.substring(2, 4)
+
+    return {
+      chime: existingOptions.chime,
+      announceShortPlatformsAfterSplit: existingOptions.announceShortPlatformsAfterSplit,
+      coaches: existingOptions.coaches,
+      firstClassLocation: existingOptions.firstClassLocation,
+
+      hour: h === '00' ? '00 - midnight' : h,
+      min: m === '00' ? '00 - hundred-hours' : m,
+      isDelayed: RttUtils.getIsDelayedDeparture(rttService, fromLocationIndex),
+      platform: originLocation.platform || existingOptions.platform,
+      callingAt: callingPoints,
+      vias: [],
+      notCallingAtStations: RttUtils.getCancelledCallingPoints(rttService, fromLocationIndex),
+      terminatingStationCode: destinationLocations.map(d => d.crs!!)[0],
+      toc: this.processTocForLiveTrains(
+        rttService.atocName,
+        rttService.atocCode,
+        originLocation.crs!!,
+        destinationLocations.map(d => d.crs!!)[0],
+        false,
+        rttService.serviceUid,
+      ).toLowerCase(),
+    }
   }
 }

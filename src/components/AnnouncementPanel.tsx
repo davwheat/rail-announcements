@@ -50,6 +50,7 @@ function AnnouncementPanel({ system }: IProps) {
                     getPersonalPresets={getPersonalPresets}
                     deletePersonalPreset={deletePersonalPreset}
                     defaultState={JSON.stringify(opts.defaultState)}
+                    importStateFromRttService={opts.importStateFromRttService}
                   />
                 </AnnouncementTabErrorBoundary>
               )

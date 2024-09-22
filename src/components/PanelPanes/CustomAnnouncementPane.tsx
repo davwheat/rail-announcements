@@ -29,6 +29,8 @@ import clsx from 'clsx'
 import type { OptionsExplanation } from '@announcement-data/AnnouncementSystem'
 import type { IPersonalPresetObject } from '@data/db'
 import type AnnouncementSystem from '@announcement-data/AnnouncementSystem'
+import { RttResponse } from '../../../functions/api/get-service-rtt'
+import ImportStateFromRtt from '@components/ImportStateFromRtt'
 
 export interface ICustomAnnouncementPreset<State = Record<string, unknown>> {
   name: string
@@ -48,6 +50,9 @@ export interface ICustomAnnouncementPaneProps<OptionIds extends string> {
   deletePersonalPreset: (systemId: string, tabId: string, presetId: string) => Promise<void>
   system: typeof AnnouncementSystem
   defaultState: string
+  importStateFromRttService:
+    | null
+    | ((rttService: RttResponse, fromLocationIndex: number, existingOptions: Record<OptionIds, any>) => Record<OptionIds, any>)
 }
 
 function CustomAnnouncementPane({
@@ -63,6 +68,7 @@ function CustomAnnouncementPane({
   getPersonalPresets,
   deletePersonalPreset,
   defaultState: _defaultState,
+  importStateFromRttService = null,
 }: ICustomAnnouncementPaneProps<string>) {
   const { enqueueSnackbar } = useSnackbar()
   const defaultState = JSON.parse(_defaultState)
@@ -422,6 +428,16 @@ function CustomAnnouncementPane({
         ]}
       >
         <h3>Options</h3>
+
+        {importStateFromRttService !== null && (
+          <ImportStateFromRtt
+            disabled={isPlayingAnnouncement}
+            importStateFromRttService={(...args) => {
+              const state = importStateFromRttService(...args, allTabStates[tabId] || {})
+              setAllTabStates(prevState => ({ ...(prevState || {}), [tabId]: { ...defaultState, ...state } }))
+            }}
+          />
+        )}
 
         {Object.keys(options).length === 0 && <p>No options available</p>}
 

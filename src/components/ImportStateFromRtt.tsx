@@ -255,6 +255,11 @@ export default function ImportStateFromRtt({ importStateFromRttService, disabled
                       required
                       value={rttUri}
                       onChange={e => setRttUri(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') {
+                          importService()
+                        }
+                      }}
                     />
                   </label>
                 )}

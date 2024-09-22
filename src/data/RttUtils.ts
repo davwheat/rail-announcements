@@ -33,12 +33,14 @@ export class RttUtils {
         if (i === arr.length - 1 && l.destination.some(d => d.tiploc === l.tiploc)) return false
         return true
       })
-      .map(l => ({
-        ...stationItemCompleter(l.crs!),
-        rttPlatform: l.platform ?? null,
-        arrLateness: l.realtimeGbttArrivalLateness ?? null,
-        depLateness: l.realtimeGbttDepartureLateness ?? null,
-      }))
+      .map(l => {
+        return {
+          ...stationItemCompleter(l.crs!),
+          rttPlatform: l.platform ?? null,
+          arrLateness: l.realtimeGbttArrivalLateness ?? null,
+          depLateness: l.realtimeGbttDepartureLateness ?? null,
+        }
+      })
   }
 
   static getEligibleLocations(rttService: RttResponse): CallingAtPointWithRttDetail[] {

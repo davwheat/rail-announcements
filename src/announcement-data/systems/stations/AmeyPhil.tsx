@@ -5882,6 +5882,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     standingTrain: {
       name: 'Standing train',
       component: CustomAnnouncementPane,
+      importStateFromRttService: this.standingTrainOptionsFromRtt.bind(this),
       defaultState: {
         chime: 'three',
         thisStationCode: this.STATIONS[0],
@@ -6426,7 +6427,6 @@ export default class AmeyPhil extends StationAnnouncementSystem {
   ): ITrainApproachingAnnouncementOptions {
     const originLocation = rttService.locations[fromLocationIndex]
 
-    const callingPoints = RttUtils.getCallingPoints(rttService, fromLocationIndex)
     const destinationLocations = originLocation.destination.filter(d => {
       if (!d.crs) {
         console.warn('Destination location has no CRS', d)
@@ -6459,6 +6459,60 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         rttService.serviceUid,
       ).toLowerCase(),
       originStationCode: originLocation.origin[0].crs ?? existingOptions.originStationCode,
+    }
+  }
+
+  /**
+   * @param rttService RTT service data
+   * @param fromStation The station from which to interpret data from
+   * @param existingOptions The existing options to copy other settings from (e.g., chime)
+   * @returns The options to use for the next train announcement
+   */
+  private standingTrainOptionsFromRtt(
+    rttService: RttResponse,
+    fromLocationIndex: number,
+    existingOptions: IStandingTrainAnnouncementOptions,
+  ): IStandingTrainAnnouncementOptions {
+    const originLocation = rttService.locations[fromLocationIndex]
+
+    const callingPoints = RttUtils.getCallingPoints(rttService, fromLocationIndex)
+    const destinationLocations = originLocation.destination.filter(d => {
+      if (!d.crs) {
+        console.warn('Destination location has no CRS', d)
+        return false
+      }
+      return true
+    })
+
+    const h = originLocation.gbttBookedDeparture!!.substring(0, 2)
+    const m = originLocation.gbttBookedDeparture!!.substring(2, 4)
+
+    let platform = originLocation.platform?.toLowerCase() ?? existingOptions.platform
+    if (!this.PLATFORMS.includes(platform)) platform = existingOptions.platform
+
+    return {
+      announceShortPlatformsAfterSplit: existingOptions.announceShortPlatformsAfterSplit,
+      coaches: existingOptions.coaches,
+      firstClassLocation: existingOptions.firstClassLocation,
+      mindTheGap: existingOptions.mindTheGap,
+
+      thisStationCode: originLocation.crs!,
+      hour: h === '00' ? '00 - midnight' : h,
+      min: m === '00' ? '00 - hundred-hours' : m,
+      isDelayed: RttUtils.getIsDelayedDeparture(rttService, fromLocationIndex),
+      platform,
+      callingAt: callingPoints,
+      vias: [],
+      notCallingAtStations: RttUtils.getCancelledCallingPoints(rttService, fromLocationIndex),
+      terminatingStationCode: destinationLocations.map(d => d.crs!!)[0],
+      toc: this.processTocForLiveTrains(
+        rttService.atocName,
+        rttService.atocCode,
+        originLocation.crs!!,
+        destinationLocations.map(d => d.crs!!)[0],
+        false,
+        rttService.serviceUid,
+      ).toLowerCase(),
     }
   }
 }

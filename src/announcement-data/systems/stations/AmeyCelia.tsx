@@ -2676,6 +2676,7 @@ export default class AmeyCelia extends AmeyPhil {
       'THI',
       'THL',
       'THO',
+      'THP',
       'THS',
       'THT',
       'THU',

@@ -3257,6 +3257,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       'THI',
       'THL',
       'THO',
+      'THP',
       'THS',
       'THT',
       'THU',

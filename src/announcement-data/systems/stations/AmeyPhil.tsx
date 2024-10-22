@@ -6389,6 +6389,22 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     let platform = originLocation.platform?.toLowerCase() ?? existingOptions.platform
     if (!this.PLATFORMS.includes(platform)) platform = existingOptions.platform
 
+    const invalidStationCrses = (
+      [...destinationLocations.map(l => l.crs), ...callingPoints.map(l => l.crsCode)].filter(Boolean) as string[]
+    ).filter(c => !this.STATIONS.includes(c))
+    const invalidStationNames = invalidStationCrses.map(c => `- ${crsToStationItemMapper(c).name}`)
+    alert(
+      "Some stations in this train's calling pattern are not available with this announcement system. The following locations have been removed:\n" +
+        invalidStationNames.join('\n'),
+    )
+
+    const invalidDestinationCrses = destinationLocations.filter(d => !d.crs || !this.STATIONS.includes(d.crs)).map(d => d.crs!!)
+    if (invalidDestinationCrses.length > 0) {
+      alert(
+        'The destination of this train is not available with this announcement system. The destination may have been reset to a default value.',
+      )
+    }
+
     return {
       chime: existingOptions.chime,
       announceShortPlatformsAfterSplit: existingOptions.announceShortPlatformsAfterSplit,
@@ -6399,10 +6415,11 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       min: m === '00' ? '00 - hundred-hours' : m,
       isDelayed: RttUtils.getIsDelayedDeparture(rttService, fromLocationIndex),
       platform,
-      callingAt: callingPoints,
+      callingAt: callingPoints.filter(c => !invalidStationCrses.includes(c.crsCode)),
       vias: [],
-      notCallingAtStations: RttUtils.getCancelledCallingPoints(rttService, fromLocationIndex),
-      terminatingStationCode: destinationLocations.map(d => d.crs!!)[0],
+      notCallingAtStations: RttUtils.getCancelledCallingPoints(rttService, fromLocationIndex).filter(l => this.STATIONS.includes(l.crsCode)),
+      terminatingStationCode:
+        destinationLocations.filter(d => !invalidDestinationCrses.includes(d.crs!!)).map(d => d.crs!!)[0] || this.STATIONS[0],
       toc: this.processTocForLiveTrains(
         rttService.atocName,
         rttService.atocCode,
@@ -6441,6 +6458,19 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     let platform = originLocation.platform?.toLowerCase() ?? existingOptions.platform
     if (!this.PLATFORMS.includes(platform)) platform = existingOptions.platform
 
+    const invalidDestinationCrses = destinationLocations.filter(d => !d.crs || !this.STATIONS.includes(d.crs)).map(d => d.crs!!)
+    if (invalidDestinationCrses.length > 0) {
+      alert(
+        'The destination of this train is not available with this announcement system. The destination may have been reset to a default value.',
+      )
+    }
+
+    const origin = originLocation.origin[0].crs ?? existingOptions.originStationCode
+    const invalidOriginCrs = !this.STATIONS.includes(origin!!)
+    if (invalidOriginCrs) {
+      alert('The origin of this train is not available with this announcement system. The origin has been reset to a default value.')
+    }
+
     return {
       chime: existingOptions.chime,
 
@@ -6449,7 +6479,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       isDelayed: RttUtils.getIsDelayedDeparture(rttService, fromLocationIndex),
       platform,
       vias: [],
-      terminatingStationCode: destinationLocations.map(d => d.crs!!)[0],
+      terminatingStationCode:
+        destinationLocations.filter(d => !invalidDestinationCrses.includes(d.crs!!)).map(d => d.crs!!)[0] || this.STATIONS[0],
       toc: this.processTocForLiveTrains(
         rttService.atocName,
         rttService.atocCode,
@@ -6458,7 +6489,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         false,
         rttService.serviceUid,
       ).toLowerCase(),
-      originStationCode: originLocation.origin[0].crs ?? existingOptions.originStationCode,
+      originStationCode: invalidOriginCrs ? this.STATIONS[0] : origin,
     }
   }
 
@@ -6490,21 +6521,41 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     let platform = originLocation.platform?.toLowerCase() ?? existingOptions.platform
     if (!this.PLATFORMS.includes(platform)) platform = existingOptions.platform
 
+    const invalidStationCrses = (callingPoints.map(l => l.crsCode).filter(Boolean) as string[]).filter(c => !this.STATIONS.includes(c))
+    const invalidStationNames = invalidStationCrses.map(c => `- ${crsToStationItemMapper(c).name}`)
+    alert(
+      "Some stations in this train's calling pattern are not available with this announcement system. The following locations have been removed:\n" +
+        invalidStationNames.join('\n'),
+    )
+
+    const invalidDestinationCrses = destinationLocations.filter(d => !d.crs || !this.STATIONS.includes(d.crs)).map(d => d.crs!!)
+    if (invalidDestinationCrses.length > 0) {
+      alert(
+        "The destination of this train's is not available with this announcement system. The destination may have been reset to a default value.",
+      )
+    }
+
+    const invalidOriginCrs = !this.STATIONS.includes(originLocation.crs!!)
+    if (invalidOriginCrs) {
+      alert('The station location being emulated is not available with this announcement system. The station has been reset to a default value.')
+    }
+
     return {
       announceShortPlatformsAfterSplit: existingOptions.announceShortPlatformsAfterSplit,
       coaches: existingOptions.coaches,
       firstClassLocation: existingOptions.firstClassLocation,
       mindTheGap: existingOptions.mindTheGap,
 
-      thisStationCode: originLocation.crs!,
+      thisStationCode: invalidOriginCrs ? this.STATIONS[0] : originLocation.crs!,
       hour: h === '00' ? '00 - midnight' : h,
       min: m === '00' ? '00 - hundred-hours' : m,
       isDelayed: RttUtils.getIsDelayedDeparture(rttService, fromLocationIndex),
       platform,
-      callingAt: callingPoints,
+      callingAt: callingPoints.filter(c => !invalidStationCrses.includes(c.crsCode)),
       vias: [],
-      notCallingAtStations: RttUtils.getCancelledCallingPoints(rttService, fromLocationIndex),
-      terminatingStationCode: destinationLocations.map(d => d.crs!!)[0],
+      notCallingAtStations: RttUtils.getCancelledCallingPoints(rttService, fromLocationIndex).filter(l => this.STATIONS.includes(l.crsCode)),
+      terminatingStationCode:
+        destinationLocations.filter(d => !invalidDestinationCrses.includes(d.crs!!)).map(d => d.crs!!)[0] || this.STATIONS[0],
       toc: this.processTocForLiveTrains(
         rttService.atocName,
         rttService.atocCode,

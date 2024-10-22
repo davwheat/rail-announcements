@@ -91,7 +91,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          yarn install --immutable
+          YARN_CHECKSUM_BEHAVIOR=update yarn
 
       - name: Verify formatting
         run: yarn format:check

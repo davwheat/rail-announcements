@@ -733,6 +733,9 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       ],
       standaloneOnly: [
         'Avanti West Coast',
+        'Avanti West Coast Pendolino',
+        'Avanti West Coast Voyager',
+        'Avanti West Coast Evero',
         'Channel Tunnel Rail Link',
         'Chiltern Railway company',
         'Croydon Tramlink',
@@ -1848,6 +1851,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       'EWW',
       'EXC',
       'EXD',
+      'EXG',
       'EXM',
       'EXN',
       'EXR',

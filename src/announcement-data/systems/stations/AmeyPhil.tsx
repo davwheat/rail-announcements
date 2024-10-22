@@ -6397,10 +6397,12 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       [...destinationLocations.map(l => l.crs), ...callingPoints.map(l => l.crsCode)].filter(Boolean) as string[]
     ).filter(c => !this.STATIONS.includes(c))
     const invalidStationNames = invalidStationCrses.map(c => `- ${crsToStationItemMapper(c).name}`)
-    alert(
-      "Some stations in this train's calling pattern are not available with this announcement system. The following locations have been removed:\n" +
-        invalidStationNames.join('\n'),
-    )
+    if (invalidStationNames.length > 0) {
+      alert(
+        "Some stations in this train's calling pattern are not available with this announcement system. The following locations have been removed:\n" +
+          invalidStationNames.join('\n'),
+      )
+    }
 
     const invalidDestinationCrses = destinationLocations.filter(d => !d.crs || !this.STATIONS.includes(d.crs)).map(d => d.crs!!)
     if (invalidDestinationCrses.length > 0) {
@@ -6527,10 +6529,12 @@ export default class AmeyPhil extends StationAnnouncementSystem {
 
     const invalidStationCrses = (callingPoints.map(l => l.crsCode).filter(Boolean) as string[]).filter(c => !this.STATIONS.includes(c))
     const invalidStationNames = invalidStationCrses.map(c => `- ${crsToStationItemMapper(c).name}`)
-    alert(
-      "Some stations in this train's calling pattern are not available with this announcement system. The following locations have been removed:\n" +
-        invalidStationNames.join('\n'),
-    )
+    if (invalidStationNames.length > 0) {
+      alert(
+        "Some stations in this train's calling pattern are not available with this announcement system. The following locations have been removed:\n" +
+          invalidStationNames.join('\n'),
+      )
+    }
 
     const invalidDestinationCrses = destinationLocations.filter(d => !d.crs || !this.STATIONS.includes(d.crs)).map(d => d.crs!!)
     if (invalidDestinationCrses.length > 0) {

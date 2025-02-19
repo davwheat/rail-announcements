@@ -1320,7 +1320,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       addLog('--------------------------------------')
     }
 
-    const refreshInterval = setInterval(checkAndPlay, iframeReady ? 10000 : 1000)
+    const refreshInterval = setInterval(checkAndPlay, iframeReady ? 40_000 : 1000)
     checkAndPlay()
 
     return () => {

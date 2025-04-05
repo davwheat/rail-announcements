@@ -182,8 +182,8 @@ export interface EndPointLocation {
   locationName: string
   crs: string
   tiploc: string
-  via: any
-  futureChangeTo: number
+  via?: string
+  futureChangeTo?: number
   futureChangeToSpecified: boolean
 }
 
@@ -329,7 +329,7 @@ export const onRequest: PagesFunction<Env> = async context => {
 
   try {
     const station = searchParams.get('station')
-    const maxServices = searchParams.get('maxServices') || '10'
+    const maxServices = searchParams.get('maxServices') || '20'
     const timeOffset = searchParams.get('timeOffset') || '0'
     const timeWindow = searchParams.get('timeWindow') || '120'
     const expand = 'true'
@@ -344,22 +344,27 @@ export const onRequest: PagesFunction<Env> = async context => {
       timeWindow,
     })
 
-    const response = await fetch(`https://national-rail-api.davwheat.dev/staffdepartures/${station}/${maxServices}?${params}`, {
-      cf: {
-        cacheTtl: 10,
-        cacheEverything: true,
-      },
-    })
+    // const response = await fetch(`https://national-rail-api.davwheat.dev/staffdepartures/${station}/${maxServices}?${params}`, {
+    //   cf: {
+    //     cacheTtl: 10,
+    //     cacheEverything: true,
+    //   },
+    // })
+    //
+    // if (!response.ok) {
+    //   return Response.json({ error: true, message: 'Upstream fetch error' })
+    // }
+    //
+    // if (response.headers.get('CF-Cache-Status') === 'HIT') {
+    //   console.log(`Departure board cache hit (${station})`)
+    // }
+    //
+    // const json: StaffServicesResponse = await response.json()
 
-    if (!response.ok) {
+    const json = await getBoardFromRdm(context.env.RDM_LDBSVWS_GetDepBoardWithDetails_API_KEY, station, maxServices, timeOffset, timeWindow)
+    if (!json) {
       return Response.json({ error: true, message: 'Upstream fetch error' })
     }
-
-    if (response.headers.get('CF-Cache-Status') === 'HIT') {
-      console.log(`Departure board cache hit (${station})`)
-    }
-
-    const json: StaffServicesResponse = await response.json()
 
     await Promise.all(json.trainServices?.map(service => processService(service)) ?? [])
 
@@ -374,5 +379,156 @@ export const onRequest: PagesFunction<Env> = async context => {
     } else {
       return Response.json({ error: true, message: 'Unknown error' })
     }
+  }
+}
+
+async function getBoardFromRdm(
+  apiKey: string,
+  crs: string,
+  maxServices: string,
+  timeOffset: string,
+  timeWindow: string,
+): Promise<StaffServicesResponse | undefined> {
+  try {
+    const offsetMs = parseInt(timeOffset) * 1000 * 60
+
+    // yyyyMMddTHHmmss in Europe/London local time
+    const now = new Date(Date.now() + (isNaN(offsetMs) ? 0 : offsetMs))
+    const londonTime = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Europe/London',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+    }).formatToParts(now)
+
+    const nowStr = `${londonTime.find(p => p.type === 'year')?.value}${londonTime.find(p => p.type === 'month')?.value}${londonTime.find(p => p.type === 'day')?.value}T${londonTime.find(p => p.type === 'hour')?.value}${londonTime.find(p => p.type === 'minute')?.value}${londonTime.find(p => p.type === 'second')?.value}`
+    const url = new URL(
+      `https://api1.raildata.org.uk/1010-live-departure-board---staff-version1_0/LDBSVWS/api/20220120/GetDepBoardWithDetails/${encodeURIComponent(crs)}/${encodeURIComponent(nowStr)}`,
+    )
+    url.searchParams.set('numRows', maxServices.toString())
+    url.searchParams.set('timeWindow', timeWindow.toString())
+    url.searchParams.set('services', 'PBS')
+    url.searchParams.set('getNonPassengerServices', 'false')
+
+    const resp = await fetch(url, {
+      cf: {
+        cacheTtl: 10,
+        cacheEverything: true,
+      },
+      headers: {
+        'x-apikey': apiKey,
+      },
+    })
+    if (!resp.ok) {
+      console.error(`RDM API error: ${resp.status} ${resp.statusText}`)
+      return undefined
+    }
+    const rdmData = (await resp.json()) as StaffServicesResponse
+
+    // Perform some transformations to the data to match Huxley's output
+    if (rdmData.trainServices) {
+      rdmData.trainServices = rdmData.trainServices.map((service: TrainService) => {
+        if (service.subsequentLocations) {
+          service.subsequentLocations = service.subsequentLocations.map((location: TimingLocation) => {
+            if (location.departureTypeSpecified) {
+              switch (location.departureType as any as string) {
+                case 'Forecast':
+                  location.departureType = 0
+                  break
+                case 'Actual':
+                  location.departureType = 1
+                  break
+                case 'NoLog':
+                  location.departureType = 2
+                  break
+                case 'Delayed':
+                  location.departureType = 3
+                  break
+              }
+            }
+            if (location.arrivalTypeSpecified) {
+              switch (location.arrivalType as any as string) {
+                case 'Forecast':
+                  location.arrivalType = 0
+                  break
+                case 'Actual':
+                  location.arrivalType = 1
+                  break
+                case 'NoLog':
+                  location.arrivalType = 2
+                  break
+                case 'Delayed':
+                  location.arrivalType = 3
+                  break
+              }
+            }
+
+            if (location.delayReason) {
+              location.delayReason.value = location.delayReason.Value
+              delete location.delayReason.Value
+            }
+
+            if (location.cancelReason) {
+              location.cancelReason.value = location.cancelReason.Value
+              delete location.cancelReason.Value
+            }
+
+            if (location.associations) {
+              location.associations = location.associations.map((association: Association) => {
+                switch (association.category as any as string) {
+                  case 'next':
+                  case 'LinkTo':
+                    association.category = AssociationCategory.LinkedTo
+                    break
+
+                  case 'previous':
+                  case 'LinkFrom':
+                    association.category = AssociationCategory.LinkedFrom
+                    break
+
+                  case 'join':
+                    association.category = AssociationCategory.Join
+                    break
+
+                  case 'divide':
+                    association.category = AssociationCategory.Divide
+                    break
+                }
+
+                return association
+              })
+            }
+
+            return location
+          })
+        }
+
+        if (service.delayReason) {
+          service.delayReason.value = service.delayReason.Value
+          delete service.delayReason.Value
+        }
+
+        if (service.cancelReason) {
+          service.cancelReason.value = service.cancelReason.Value
+          delete service.cancelReason.Value
+        }
+
+        if (service.activities) {
+          // Split into array with groups of two chars
+          service.activities = (service.activities as any as string | undefined)?.match(/.{2}/g) || []
+        }
+
+        return service
+      })
+    }
+
+    return rdmData
+  } catch (e) {
+    console.error(e)
+    return undefined
   }
 }

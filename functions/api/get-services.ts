@@ -223,9 +223,10 @@ async function getServiceByRidForActivityData(rid: string): Promise<AssociatedSe
   return json
 }
 
-async function getServiceByRid(rid: string, followAssociations: boolean = false): Promise<AssociatedServiceDetail | undefined> {
+async function getServiceByRid(apiKey: string, rid: string, followAssociations: boolean = false): Promise<AssociatedServiceDetail | undefined> {
   const cache = await caches.open('associated-service')
-  const url = `https://national-rail-api.davwheat.dev/service/${rid}`
+  // const url = `https://national-rail-api.davwheat.dev/service/${rid}`
+  const url = `https://api1.raildata.org.uk/1010-query-services-and-service-details1_0/LDBSVWS/api/20220120/GetServiceDetailsByRID/${encodeURIComponent(rid)}`
 
   const cachedResponse = await cache.match(url, { ignoreMethod: true })
   if (cachedResponse) {
@@ -233,13 +234,20 @@ async function getServiceByRid(rid: string, followAssociations: boolean = false)
     return cachedResponse.json()
   }
 
-  const response = await fetch(url)
-  if (!response.ok) return undefined
+  const response = await fetch(url, {
+    headers: {
+      'x-apikey': apiKey,
+    },
+  })
+  if (!response.ok) {
+    console.error(`RDM API error: ${response.status} ${response.statusText}`)
+    return undefined
+  }
 
   let json: AssociatedServiceDetail = await response.json()
 
   if (followAssociations) {
-    await processAssociatedService(json)
+    await processAssociatedService(apiKey, json)
   }
 
   await cache.put(
@@ -252,17 +260,100 @@ async function getServiceByRid(rid: string, followAssociations: boolean = false)
     }),
   )
 
-  // Split into array with groups of two chars
-  json.locations.forEach(l => {
-    if (l.activities) {
-      l.activities = ((l.activities as any as string | undefined)?.match(/.{2}/g) || []).map(a => a.trim())
+  // Perform some transformations to the data to match Huxley's output
+  if (json.locations) {
+    json.locations = json.locations.map((location: AssociatedServiceLocation) => {
+      if (location.departureTypeSpecified) {
+        switch (location.departureType as any as string) {
+          case 'Forecast':
+            location.departureType = 0
+            break
+          case 'Actual':
+            location.departureType = 1
+            break
+          case 'NoLog':
+            location.departureType = 2
+            break
+          case 'Delayed':
+            location.departureType = 3
+            break
+        }
+      }
+      if (location.arrivalTypeSpecified) {
+        switch (location.arrivalType as any as string) {
+          case 'Forecast':
+            location.arrivalType = 0
+            break
+          case 'Actual':
+            location.arrivalType = 1
+            break
+          case 'NoLog':
+            location.arrivalType = 2
+            break
+          case 'Delayed':
+            location.arrivalType = 3
+            break
+        }
+      }
+
+      if (location.delayReason) {
+        location.delayReason.value = location.delayReason.Value
+        delete location.delayReason.Value
+      }
+
+      if (location.cancelReason) {
+        location.cancelReason.value = location.cancelReason.Value
+        delete location.cancelReason.Value
+      }
+
+      if (location.associations) {
+        location.associations = location.associations.map((association: Association) => {
+          switch (association.category as any as string) {
+            case 'next':
+            case 'LinkTo':
+              association.category = AssociationCategory.LinkedTo
+              break
+
+            case 'previous':
+            case 'LinkFrom':
+              association.category = AssociationCategory.LinkedFrom
+              break
+
+            case 'join':
+              association.category = AssociationCategory.Join
+              break
+
+            case 'divide':
+              association.category = AssociationCategory.Divide
+              break
+          }
+
+          return association
+        })
+      }
+
+      // Split into array with groups of two chars
+      if (location.activities) {
+        location.activities = (location.activities as any as string | undefined)?.match(/.{2}/g) || []
+      }
+
+      return location
+    })
+
+    if (json.delayReason) {
+      json.delayReason.value = json.delayReason.Value
+      delete json.delayReason.Value
     }
-  })
+    if (json.cancelReason) {
+      json.cancelReason.value = json.cancelReason.Value
+      delete json.cancelReason.Value
+    }
+  }
 
   return json
 }
 
-async function processService(service: TrainService): Promise<void> {
+async function processService(env: Env, service: TrainService): Promise<void> {
   const serviceData = await getServiceByRidForActivityData(service.rid)
 
   if (service.cancelReason?.near) {
@@ -281,13 +372,13 @@ async function processService(service: TrainService): Promise<void> {
 
       if (association.category === AssociationCategory.Divide) {
         // Divides only
-        association.service = await getServiceByRid(association.rid)
+        association.service = await getServiceByRid(env.RDM_LDBSVWS_GetServiceDetailsByRID_API_KEY, association.rid)
       } else if (
         association.category === AssociationCategory.LinkedTo &&
         (association.trainid === '0B00' || (service.trainid === '0B00' && association.trainid !== '0B00'))
       ) {
         // Fine. Or continuation bus services, and include future changes to trains again
-        association.service = await getServiceByRid(association.rid, true)
+        association.service = await getServiceByRid(env.RDM_LDBSVWS_GetServiceDetailsByRID_API_KEY, association.rid, true)
       }
     }
 
@@ -302,7 +393,7 @@ async function processService(service: TrainService): Promise<void> {
   }
 }
 
-async function processAssociatedService(service: AssociatedServiceDetail): Promise<void> {
+async function processAssociatedService(apiKey: string, service: AssociatedServiceDetail): Promise<void> {
   for (const l in service.locations) {
     const location: TimingLocation = service.locations[l]
 
@@ -311,13 +402,13 @@ async function processAssociatedService(service: AssociatedServiceDetail): Promi
 
       if (association.category === AssociationCategory.Divide) {
         // Divides only
-        association.service = await getServiceByRid(association.rid)
+        association.service = await getServiceByRid(apiKey, association.rid)
       } else if (
         association.category === AssociationCategory.LinkedTo &&
         (association.trainid === '0B00' || (service.trainid === '0B00' && association.trainid !== '0B00'))
       ) {
         // Fine. Or continuation bus services, and include future changes to trains again
-        association.service = await getServiceByRid(association.rid, true)
+        association.service = await getServiceByRid(apiKey, association.rid, true)
       }
     }
   }
@@ -366,7 +457,7 @@ export const onRequest: PagesFunction<Env> = async context => {
       return Response.json({ error: true, message: 'Upstream fetch error' })
     }
 
-    await Promise.all(json.trainServices?.map(service => processService(service)) ?? [])
+    await Promise.all(json.trainServices?.map(service => processService(context.env, service)) ?? [])
 
     const resp = Response.json(json)
     resp.headers.set('Cache-Control', 'public, max-age=5, s-maxage=30')

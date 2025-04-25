@@ -78,10 +78,10 @@ export default class AvantiPendolino extends TrainAnnouncementSystem {
     if (options.finalStop) files.push('which is our final stop')
 
     if (options.play61016) {
-      files.push({ id: '61016', opts: { delayStart: 1500 } })
+      files.push({ id: '61016', opts: { delayStart: 750 } })
     }
 
-    files.push({ id: 'when leaving us here', opts: { delayStart: 750 } })
+    files.push({ id: 'when leaving us here', opts: { delayStart: 100 } })
 
     if (options.shortPlatform) {
       files.push('please move forward to leave the train')

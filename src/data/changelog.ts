@@ -481,6 +481,10 @@ const changelog: IChangelogVersion[] = [
     date: '2024-09-22',
     additions: ['For some systems and announcement types, you can now automatically load in announcement data from a Realtime Trains URL'],
   },
+  {
+    date: '2025-04-25',
+    additions: ['New Avanti West Coast Pendolino announcement system'],
+  },
 ]
 
 export default changelog

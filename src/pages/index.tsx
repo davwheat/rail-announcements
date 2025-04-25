@@ -20,10 +20,11 @@ const Systems = [
       { title: 'Class 700/707/717', url: '/rolling-stock/class-700-707-717' },
       { title: 'LNER Azuma', url: '/rolling-stock/lner-azuma' },
       { title: 'Transport for Wales TrainFX', url: '/rolling-stock/tfw-trainfx' },
-      { title: 'Transport for Wales Televic', url: '/rolling-stock/tfw-televic', new: true },
+      { title: 'Transport for Wales Televic', url: '/rolling-stock/tfw-televic' },
       { title: 'TfL Jubilee Line', url: '/rolling-stock/tfl/jubilee-line' },
       { title: 'TfL Northern Line', url: '/rolling-stock/tfl/northern-line' },
       { title: 'TfL Elizabeth Line', url: '/rolling-stock/tfl/elizabeth-line' },
+      { title: 'Avanti West Coast Pendolino', url: '/rolling-stock/avanti-west-coast-pendolino', new: true },
     ],
   },
   {

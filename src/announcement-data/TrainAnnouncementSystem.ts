@@ -11,7 +11,7 @@ export default abstract class TrainAnnouncementSystem extends AnnouncementSystem
    */
   protected validateStationExists(stationCrs: string, type: 'high' | 'low' = 'high'): boolean {
     if (!this.AvailableStationNames[type].includes(stationCrs)) {
-      const name = getStationByCrs(stationCrs).stationName
+      const name = getStationByCrs(stationCrs)?.stationName
       console.error(`No audio file could be found for ${stationCrs} (${name}) in the pitch required for this announcement (${type})!`)
 
       alert(

@@ -79,25 +79,23 @@ export interface AudioItemObject {
 export interface CustomAnnouncementTab<OptionIds extends string> {
   name: string
   component: React.ComponentType<ICustomAnnouncementPaneProps<OptionIds> | ICustomButtonPaneProps>
-  props:
-    | Omit<
-        ICustomAnnouncementPaneProps<OptionIds>,
-        | 'name'
-        | 'systemId'
-        | 'tabId'
-        | 'isPersonalPresetsReady'
-        | 'savePersonalPreset'
-        | 'getPersonalPresets'
-        | 'deletePersonalPreset'
-        | 'system'
-        | 'defaultState'
-        | 'importStateFromRttService'
-      >
-    | ICustomButtonPaneProps
+  props: Omit<
+    ICustomAnnouncementPaneProps<OptionIds> | ICustomButtonPaneProps,
+    | 'name'
+    | 'systemId'
+    | 'tabId'
+    | 'isPersonalPresetsReady'
+    | 'savePersonalPreset'
+    | 'getPersonalPresets'
+    | 'deletePersonalPreset'
+    | 'system'
+    | 'defaultState'
+    | 'importStateFromRttService'
+  >
   /**
    * Merged with any personal preset to allow migration if new features are added.
    */
-  defaultState: Record<OptionIds, any>
+  defaultState?: Record<OptionIds, any>
   importStateFromRttService?: (
     rttService: RttResponse,
     fromLocationIndex: number,
@@ -224,29 +222,36 @@ export default abstract class AnnouncementSystem {
             crunker._context.resume()
             console.log('Context state: ', crunker._context.state)
 
-            if (crunker._context.state === 'suspended') {
-              console.error('[Crunker] Failed to resume audio context')
+            const isFirefoxUser = navigator.userAgent.toLowerCase().includes('firefox')
 
-              document.getElementById('resume-audio-button')?.remove()
+            if (!isFirefoxUser) {
+              setTimeout(() => {
+                if (crunker._context.state === 'suspended') {
+                  console.error('[Crunker] Failed to resume audio context')
 
-              const button = document.createElement('button')
-              button.textContent = 'Resume audio'
-              button.id = 'resume-audio-button'
-              button.style.margin = '16px'
-              button.onclick = () => {
-                crunker._context.resume()
-                button.remove()
-              }
+                  document.getElementById('resume-audio-button')?.remove()
 
-              const container = document.getElementById('resume-audio-container')
-              if (container) container.appendChild(button)
-              else document.body.appendChild(button)
+                  const button = document.createElement('button')
+                  button.textContent = 'Resume audio'
+                  button.id = 'resume-audio-button'
+                  button.style.margin = '16px'
+                  button.onclick = () => {
+                    crunker._context.resume()
+                    button.remove()
+                  }
 
-              alert(
-                "Your device or web browser is refusing to let the website play audio.\n\nThis is especially common on iPhones and iPads. We'd recommend you try using a desktop computer or an alterantive device.\n\nTry scrolling to and pressing the 'Resume audio' button. If this doesn't help, there's nothing else that we can do. Sorry!",
-              )
+                  const container = document.getElementById('resume-audio-container')
+                  if (container) container.appendChild(button)
+                  else document.body.appendChild(button)
 
-              button.scrollIntoView()
+                  alert(
+                    "Your device or web browser is refusing to let the website play audio.\n\nThis is especially common on iPhones and iPads. We'd recommend you try using a desktop computer or an alterantive device.\n\nTry scrolling to and pressing the 'Resume audio' button. If this doesn't help, there's nothing else that we can do. Sorry!",
+                  )
+
+                  button.scrollIntoView()
+                  resolve()
+                }
+              }, 1000)
             }
           }
 

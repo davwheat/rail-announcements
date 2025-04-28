@@ -16,7 +16,7 @@ const Systems = [
   {
     groupTitle: 'Rolling stock',
     systems: [
-      { title: 'Bombardier Xstar', url: '/rolling-stock/bombardier-xstar' },
+      { title: 'SN/SE Bombardier Xstar', url: '/rolling-stock/bombardier-xstar' },
       { title: 'Class 700/707/717', url: '/rolling-stock/class-700-707-717' },
       { title: 'LNER Azuma', url: '/rolling-stock/lner-azuma' },
       { title: 'Transport for Wales TrainFX', url: '/rolling-stock/tfw-trainfx' },
@@ -25,6 +25,7 @@ const Systems = [
       { title: 'TfL Northern Line', url: '/rolling-stock/tfl/northern-line' },
       { title: 'TfL Elizabeth Line', url: '/rolling-stock/tfl/elizabeth-line' },
       { title: 'Avanti West Coast Pendolino', url: '/rolling-stock/avanti-west-coast-pendolino', new: true },
+      { title: 'West Midlands Trains Class 172', url: '/rolling-stock/wmt-class-172', new: true },
     ],
   },
   {

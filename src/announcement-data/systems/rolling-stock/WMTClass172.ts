@@ -19,9 +19,9 @@ interface IWelcomeAnnouncementOptions {
 const announcementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {
   welcome: [
     {
-      name: 'Reddich to Four Oaks',
+      name: 'Birmingham Snow Hill to Worcester Forgate Street',
       state: {
-        terminatesAtCode: 'FOK',
+        terminatesAtCode: 'WOF',
         readAllStations: true,
         callingAtCodes: ['JEQ', 'THW', 'SGB', 'ROW', 'CRA', 'SBJ', 'HAG', 'BKD', 'KID', 'HBY', 'DTW'].map(crsToStationItemMapper),
       },

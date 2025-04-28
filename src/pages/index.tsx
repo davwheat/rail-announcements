@@ -26,6 +26,7 @@ const Systems = [
       { title: 'TfL Elizabeth Line', url: '/rolling-stock/tfl/elizabeth-line' },
       { title: 'Avanti West Coast Pendolino', url: '/rolling-stock/avanti-west-coast-pendolino', new: true },
       { title: 'West Midlands Trains Class 172', url: '/rolling-stock/wmt-class-172', new: true },
+      { title: 'West Midlands Trains Class 323', url: '/rolling-stock/wmt-class-323', new: true },
     ],
   },
   {

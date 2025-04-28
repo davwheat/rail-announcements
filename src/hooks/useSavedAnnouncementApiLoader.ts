@@ -12,6 +12,9 @@ const idToPath: Record<string, string> = {
   TFW_TRAINFX_V1: '/rolling-stock/tfw-trainfx',
   TFW_TELEVIC_V1: '/rolling-stock/tfw-televic',
   LNER_AZUMA_V1: '/rolling-stock/lner-azuma',
+  AVANTI_WEST_COAST_PENDOLINO_V1: '/rolling-stock/avanti-west-coast-pendolino',
+  WMT_CLASS_172_V1: '/rolling-stock/wmt-class-172',
+  WMT_CLASS_323_V1: '/rolling-stock/wmt-class-323',
 
   TFL_ELIZ_LINE_V1: '/rolling-stock/tfl/elizabeth-line',
   TFL_JUBILEE_LINE_V1: '/rolling-stock/tfl/jubilee-line',

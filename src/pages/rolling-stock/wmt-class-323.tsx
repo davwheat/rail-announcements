@@ -4,6 +4,6 @@ import SystemPageTemplate from '@components/SystemPageTemplate'
 
 import type { PageProps } from 'gatsby'
 
-export default function WMTClass172Page({ location }: PageProps) {
+export default function WMTClass323Page({ location }: PageProps) {
   return <SystemPageTemplate system={WMTClass323} location={location} />
 }

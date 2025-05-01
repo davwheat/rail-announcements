@@ -485,6 +485,13 @@ const changelog: IChangelogVersion[] = [
     date: '2025-04-25',
     additions: ['New Avanti West Coast Pendolino announcement system'],
   },
+  {
+    date: '2025-04-28',
+    additions: [
+      'New West Midlands Railway Class 172 announcement system',
+      'New West Midlands Railway Class 323 announcement system',
+    ],
+  },
 ]
 
 export default changelog

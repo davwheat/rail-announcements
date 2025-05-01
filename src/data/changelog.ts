@@ -487,10 +487,7 @@ const changelog: IChangelogVersion[] = [
   },
   {
     date: '2025-04-28',
-    additions: [
-      'New West Midlands Railway Class 172 announcement system',
-      'New West Midlands Railway Class 323 announcement system',
-    ],
+    additions: ['New West Midlands Railway Class 172 announcement system', 'New West Midlands Railway Class 323 announcement system'],
   },
 ]
 

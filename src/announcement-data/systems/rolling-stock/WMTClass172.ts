@@ -6,8 +6,8 @@ import { AudioItem, AudioItemObject, CustomAnnouncementTab } from '../../Announc
 import TrainAnnouncementSystem from '../../TrainAnnouncementSystem'
 
 interface IApproachingStationAnnouncementOptions {
-  stationCode: string,
-  ticketsReady: boolean,
+  stationCode: string
+  ticketsReady: boolean
   mindTheGap: boolean
 }
 

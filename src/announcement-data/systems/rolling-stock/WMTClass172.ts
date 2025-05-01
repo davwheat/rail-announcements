@@ -6,7 +6,8 @@ import { AudioItem, AudioItemObject, CustomAnnouncementTab } from '../../Announc
 import TrainAnnouncementSystem from '../../TrainAnnouncementSystem'
 
 interface IApproachingStationAnnouncementOptions {
-  stationCode: string
+  stationCode: string,
+  ticketsReady: boolean,
   mindTheGap: boolean
 }
 
@@ -42,6 +43,10 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
     files.push('we are now approaching')
     files.push({ id: `stations.${options.stationCode}`, opts: { delayStart: 200 } })
 
+    if (options.ticketsReady) {
+      files.push({ id: 'please have your tickets ready', opts: { delayStart: 300 } })
+    }
+
     if (options.mindTheGap) {
       files.push({ id: 'please mind the gap when leaving the train and step', opts: { delayStart: 500 } })
     }
@@ -58,8 +63,7 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
 
     const files: AudioItem[] = []
     files.push('bing bong')
-    files.push('welcome to this service')
-    files.push({ id: 'for', opts: { delayStart: 200 } })
+    files.push('welcome to this service for')
     files.push({ id: `stations.${terminatesAtCode}`, opts: { delayStart: 200 } })
 
     const remainingStops = [
@@ -96,6 +100,9 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
     'HBY',
     'JEQ',
     'KID',
+    'LGG',
+    'LYE',
+    'OHL',
     'OLT',
     'ROW',
     'SBJ',
@@ -103,6 +110,7 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
     'SMA',
     'THW',
     'WOF',
+    'WOS',
   ]
 
   readonly AvailableStationNames = {
@@ -116,9 +124,8 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
       component: CustomAnnouncementPane,
       defaultState: {
         stationCode: this.RealAvailableStationNames[0],
+        ticketsReady: true,
         mindTheGap: true,
-        keepBelongings: false,
-        cannotUseOyster: false,
       },
       props: {
         playHandler: this.playApproachingStationAnnouncement.bind(this),
@@ -128,6 +135,11 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
             default: this.RealAvailableStationNames[0],
             options: AllStationsTitleValueMap.filter(s => this.RealAvailableStationNames.includes(s.value)),
             type: 'select',
+          },
+          ticketsReady: {
+            name: 'Have your tickets ready for the gates?',
+            type: 'boolean',
+            default: false,
           },
           mindTheGap: {
             name: 'Mind the gap?',

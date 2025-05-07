@@ -7,12 +7,14 @@ import TrainAnnouncementSystem from '../../TrainAnnouncementSystem'
 
 interface IApproachingStationAnnouncementOptions {
   stationCode: string
+  terminatesHere: boolean
   ticketsReady: boolean
   mindTheGap: boolean
 }
 
 interface IWelcomeAnnouncementOptions {
   terminatesAtCode: string
+  terminatesHere: boolean
   readAllStations: boolean
   callingAtCodes: { crsCode: string; name: string; randomId: string }[]
 }
@@ -20,11 +22,31 @@ interface IWelcomeAnnouncementOptions {
 const announcementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {
   welcome: [
     {
-      name: 'Birmingham Snow Hill to Worcester Forgate Street',
+      name: 'Dorridge to Worcester Forgate Street',
       state: {
         terminatesAtCode: 'WOF',
         readAllStations: true,
-        callingAtCodes: ['JEQ', 'THW', 'SGB', 'ROW', 'CRA', 'SBJ', 'HAG', 'BKD', 'KID', 'HBY', 'DTW'].map(crsToStationItemMapper),
+        callingAtCodes: [
+          'WMR',
+          'SOL',
+          'OLT',
+          'ACG',
+          'TYS',
+          'SMA',
+          'BMO',
+          'BSW',
+          'JEQ',
+          'THW',
+          'SGB',
+          'ROW',
+          'CRA',
+          'SBJ',
+          'HAG',
+          'BKD',
+          'KID',
+          'HBY',
+          'DTW',
+        ].map(crsToStationItemMapper),
       },
     },
   ],
@@ -42,6 +64,10 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
     files.push('bing bong')
     files.push('we are now approaching')
     files.push({ id: `stations.${options.stationCode}`, opts: { delayStart: 200 } })
+
+    if (options.terminatesHere) {
+      files.push({ id: 'our final destination', opts: { delayStart: 200 } })
+    }
 
     if (options.ticketsReady) {
       files.push({ id: 'please have your tickets ready', opts: { delayStart: 300 } })
@@ -63,6 +89,16 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
 
     const files: AudioItem[] = []
     files.push('bing bong')
+
+    if (options.terminatesHere) {
+      files.push('this is')
+      files.push({ id: `stations.${terminatesAtCode}`, opts: { delayStart: 200 } })
+      files.push({ id: 'our final destination', opts: { delayStart: 200 } })
+      files.push({ id: 'please mind the gap when leaving the train and step', opts: { delayStart: 500 } })
+      await this.playAudioFiles(files, download)
+      return
+    }
+
     files.push('welcome to this service for')
     files.push({ id: `stations.${terminatesAtCode}`, opts: { delayStart: 200 } })
 
@@ -73,10 +109,7 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
 
     if (callingAtCodes.some(code => !this.validateStationExists(code))) return
 
-    if (remainingStops.length === 0) {
-      // We are at the termination point.
-      // files.push('this train terminates here all change please ensure')
-    } else if (remainingStops.length === 1 || !readAllStations) {
+    if (remainingStops.length === 1 || !readAllStations) {
       // Next station is the termination point or we are not reading all stations.
       files.push({ id: `the next station is`, opts: { delayStart: 200 } })
       files.push(remainingStops[0])
@@ -108,7 +141,10 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
     'SBJ',
     'SGB',
     'SMA',
+    'SOL',
     'THW',
+    'TYS',
+    'WMR',
     'WOF',
     'WOS',
   ]
@@ -124,6 +160,7 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
       component: CustomAnnouncementPane,
       defaultState: {
         stationCode: this.RealAvailableStationNames[0],
+        terminatesHere: false,
         ticketsReady: true,
         mindTheGap: true,
       },
@@ -146,6 +183,11 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
             type: 'boolean',
             default: true,
           },
+          terminatesHere: {
+            name: 'Train terminates here?',
+            type: 'boolean',
+            default: false,
+          },
         },
       },
     } as CustomAnnouncementTab<keyof IApproachingStationAnnouncementOptions>,
@@ -154,6 +196,7 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
       component: CustomAnnouncementPane,
       defaultState: {
         terminatesAtCode: this.RealAvailableStationNames[0],
+        terminatesHere: false,
         readAllStations: true,
         callingAtCodes: [],
       },
@@ -171,6 +214,11 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
             name: 'Read all stations?',
             type: 'boolean',
             default: true,
+          },
+          terminatesHere: {
+            name: 'Train terminates here?',
+            type: 'boolean',
+            default: false,
           },
           callingAtCodes: {
             name: '',

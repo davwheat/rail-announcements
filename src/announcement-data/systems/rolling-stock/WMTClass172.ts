@@ -49,6 +49,14 @@ const announcementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>>
         ].map(crsToStationItemMapper),
       },
     },
+    {
+      name: 'Birmingham Snow Hill to Whitlocks End',
+      state: {
+        terminatesAtCode: 'WTE',
+        readAllStations: true,
+        callingAtCodes: ['BMO', 'SMA', 'TYS', 'SRI', 'HLG', 'YRD', 'SRL'].map(crsToStationItemMapper),
+      },
+    },
   ],
 }
 
@@ -131,6 +139,7 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
     'DTW',
     'HAG',
     'HBY',
+    'HLG',
     'JEQ',
     'KID',
     'LGG',
@@ -142,11 +151,15 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
     'SGB',
     'SMA',
     'SOL',
+    'SRI',
+    'SRL',
     'THW',
     'TYS',
     'WMR',
     'WOF',
     'WOS',
+    'WTE',
+    'YRD',
   ]
 
   readonly AvailableStationNames = {

@@ -66,6 +66,10 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
   readonly FILE_PREFIX = 'WMT/172'
   readonly SYSTEM_TYPE = 'train'
 
+  private readonly StationsWithForcedChangeHere = {
+    SBJ: 'stations.SBT',
+  }
+
   private async playApproachingStationAnnouncement(options: IApproachingStationAnnouncementOptions, download: boolean = false): Promise<void> {
     const files: AudioItem[] = []
 
@@ -75,6 +79,12 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
 
     if (options.terminatesHere) {
       files.push({ id: 'our final destination', opts: { delayStart: 200 } })
+    }
+
+    if (Object.keys(this.StationsWithForcedChangeHere).includes(options.stationCode)) {
+      const manualChangeFor = this.StationsWithForcedChangeHere[options.stationCode as keyof typeof this.StationsWithForcedChangeHere]
+      files.push({ id: 'change here for', opts: { delayStart: 200 } })
+      files.push({ id: manualChangeFor, opts: { delayStart: 200 } })
     }
 
     if (options.ticketsReady) {
@@ -148,6 +158,7 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
     'OLT',
     'ROW',
     'SBJ',
+    'SBT',
     'SGB',
     'SMA',
     'SOL',

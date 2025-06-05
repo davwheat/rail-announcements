@@ -67,7 +67,7 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
   readonly SYSTEM_TYPE = 'train'
 
   private readonly StationsWithForcedChangeHere = {
-    SBJ: 'stations.SBT',
+    SBJ: ['stations.SBT'],
   }
 
   private async playApproachingStationAnnouncement(options: IApproachingStationAnnouncementOptions, download: boolean = false): Promise<void> {
@@ -82,9 +82,11 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
     }
 
     if (Object.keys(this.StationsWithForcedChangeHere).includes(options.stationCode)) {
-      const manualChangeFor = this.StationsWithForcedChangeHere[options.stationCode as keyof typeof this.StationsWithForcedChangeHere]
+      const changeFor = this.StationsWithForcedChangeHere[options.stationCode as keyof typeof this.StationsWithForcedChangeHere]
       files.push({ id: 'change here for', opts: { delayStart: 200 } })
-      files.push({ id: manualChangeFor, opts: { delayStart: 200 } })
+      const changes = [...changeFor.map((line): AudioItemObject => ({ id: line }))]
+
+      files.push(...this.pluraliseAudio(changes, { beforeAndDelay: 200, beforeItemDelay: 200 }))
     }
 
     if (options.ticketsReady) {
@@ -146,6 +148,7 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
     'BMO',
     'BSW',
     'CRA',
+    'DDG',
     'DTW',
     'HAG',
     'HBY',

@@ -4,6 +4,7 @@ import { AllStationsTitleValueMap } from '@data/StationManipulators'
 import crsToStationItemMapper from '@helpers/crsToStationItemMapper'
 import { AudioItem, AudioItemObject, CustomAnnouncementTab } from '../../AnnouncementSystem'
 import TrainAnnouncementSystem from '../../TrainAnnouncementSystem'
+import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
 
 interface IApproachingStationAnnouncementOptions {
   stationCode: string
@@ -153,9 +154,12 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
     'HAG',
     'HBY',
     'HLG',
+    'HTN',
     'JEQ',
     'KID',
     'LGG',
+    'LMS',
+    'LPW',
     'LYE',
     'OHL',
     'OLT',
@@ -172,6 +176,8 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
     'WMR',
     'WOF',
     'WOS',
+    'WRP',
+    'WRW',
     'WTE',
     'YRD',
   ]
@@ -259,5 +265,29 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
         },
       },
     } as CustomAnnouncementTab<keyof IWelcomeAnnouncementOptions>,
+    announcementButtons: {
+      name: 'Announcement buttons',
+      component: CustomButtonPane,
+      props: {
+        buttons: [
+          {
+            label: 'Bing bong',
+            play: this.playAudioFiles.bind(this, ['bing bong']),
+            download: this.playAudioFiles.bind(this, ['bing bong'], true),
+          },
+          {
+            label: 'Short platform - move to front four coaches',
+            play: this.playAudioFiles.bind(this, [
+              'buttons.the next station has a short platform only the doors of the front four coaches will open',
+            ]),
+            download: this.playAudioFiles.bind(
+              this,
+              ['buttons.the next station has a short platform only the doors of the front four coaches will open'],
+              true,
+            ),
+          },
+        ],
+      },
+    },
   }
 }

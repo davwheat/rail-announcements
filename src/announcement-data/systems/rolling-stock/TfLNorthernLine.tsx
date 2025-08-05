@@ -173,13 +173,16 @@ const ThisStationData: ThisStationItem[] = [
   },
   {
     station: 'Finchley Central',
+    suffix: '(towards High Barnet)',
     branch: null,
-    extraInfo: ['conjoiner.change here for', 'station.low.mill hill east'],
+    extraInfo: ['conjoiner.change here for', 'conjoiner.trains to', 'station.low.mill hill east'],
   },
-  // {
-  //   label: 'Finchley Central (change for Mill Hill East)',
-  //   branch: null,
-  // },
+  {
+    station: 'Finchley Central',
+    suffix: '(towards Mill Hill East)',
+    branch: null,
+    extraInfo: ['conjoiner.change here for', 'conjoiner.all stations to', 'station.low.high barnet'],
+  },
   {
     station: 'Golders Green',
     branch: null,
@@ -611,12 +614,15 @@ const NextStationData: NextStationItem[] = [
   },
   {
     label: 'Finchley Central',
-    terminatingAudio: ['next station.terminating.finchley central'],
+    terminatingAudio: ['next station.terminating.finchley central change here mill hill east high barnet'],
   },
   {
     label: 'Finchley Central (change for Mill Hill East)',
     audio: ['next station.finchley central change here mill hill east'],
-    terminatingAudio: ['next station.terminating.finchley central change here mill hill east high barnet'],
+  },
+  {
+    label: 'Finchley Central (change for High Barnet)',
+    audio: ['next station.finchley central', 'change here for', 'conjoiner.all stations to', 'station.high.high barnet'],
   },
   {
     label: 'Golders Green',

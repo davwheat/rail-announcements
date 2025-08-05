@@ -622,7 +622,7 @@ const NextStationData: NextStationItem[] = [
   },
   {
     label: 'Finchley Central (change for High Barnet)',
-    audio: ['next station.finchley central', 'change here for', 'conjoiner.all stations to', 'station.high.high barnet'],
+    audio: ['next station.finchley central', 'conjoiner.change here for', 'conjoiner.all stations to', 'station.low.high barnet'],
   },
   {
     label: 'Golders Green',

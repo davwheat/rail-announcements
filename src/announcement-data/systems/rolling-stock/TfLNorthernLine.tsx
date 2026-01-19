@@ -766,7 +766,14 @@ const NextStationData: NextStationItem[] = [
     label: 'Waterloo',
     audio: ['conjoiner.the next station is', 'station.low.waterloo', ...(ThisStationData.find(s => s.station === 'Waterloo')?.extraInfo || [])],
   },
-  { label: 'West Finchley' },
+  {
+    label: 'West Finchley',
+    audio: [
+      'conjoiner.the next station is',
+      'station.low.west finchley',
+      ...(ThisStationData.find(s => s.station === 'West Finchley')?.extraInfo || []),
+    ],
+  },
   { label: 'Woodside Park' },
 ]
 

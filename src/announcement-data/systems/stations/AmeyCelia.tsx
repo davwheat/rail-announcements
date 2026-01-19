@@ -1037,6 +1037,7 @@ export default class AmeyCelia extends AmeyPhil {
       'CON',
       'COO',
       'COP',
+      'COR',
       'COS',
       'COT',
       'COV',

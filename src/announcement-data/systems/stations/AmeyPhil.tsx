@@ -1584,6 +1584,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       'CON',
       'COO',
       'COP',
+      'COR',
       'COS',
       'COT',
       'COV',

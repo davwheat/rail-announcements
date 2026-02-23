@@ -29,6 +29,7 @@ permissions:
 env:
   NODE_VERSION: 20.x
   CF_PAGES_PROJECT_NAME: rail-announcements
+  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
 jobs:
   smoketest:

@@ -5,6 +5,7 @@ on:
 
 env:
   NODE_VERSION: 20.x
+  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
 jobs:
   r2:

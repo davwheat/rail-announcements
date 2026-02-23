@@ -112,26 +112,26 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
 
     files.push('bing bong')
     files.push('we are now approaching')
-    files.push({ id: `stations.${options.stationCode}`, opts: { delayStart: 200 } })
+    files.push({ id: `stations.${options.stationCode}`, opts: { delayStart: 50 } })
 
     if (options.terminatesHere) {
-      files.push({ id: 'our final destination', opts: { delayStart: 200 } })
+      files.push({ id: 'our final destination', opts: { delayStart: 50 } })
     }
 
     if (Object.keys(this.StationsWithForcedChangeHere).includes(options.stationCode)) {
       const changeFor = this.StationsWithForcedChangeHere[options.stationCode as keyof typeof this.StationsWithForcedChangeHere]
-      files.push({ id: 'change here for', opts: { delayStart: 200 } })
+      files.push({ id: 'change here for', opts: { delayStart: 50 } })
       const changes = [...changeFor.map((line): AudioItemObject => ({ id: line }))]
 
-      files.push(...this.pluraliseAudio(changes, { beforeAndDelay: 200, beforeItemDelay: 200 }))
+      files.push(...this.pluraliseAudio(changes, { beforeAndDelay: 50, beforeItemDelay: 50 }))
     }
 
     if (options.ticketsReady) {
-      files.push({ id: 'please have your tickets ready', opts: { delayStart: 300 } })
+      files.push({ id: 'please have your tickets ready', opts: { delayStart: 100 } })
     }
 
     if (options.mindTheGap) {
-      files.push({ id: 'please mind the gap when leaving the train and step', opts: { delayStart: 500 } })
+      files.push({ id: 'please mind the gap when leaving the train and step', opts: { delayStart: 50 } })
     }
 
     await this.playAudioFiles(files, download)
@@ -149,31 +149,31 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
 
     if (options.terminatesHere) {
       files.push('this is')
-      files.push({ id: `stations.${terminatesAtCode}`, opts: { delayStart: 200 } })
-      files.push({ id: 'our final destination', opts: { delayStart: 200 } })
-      files.push({ id: 'please mind the gap when leaving the train and step', opts: { delayStart: 500 } })
+      files.push({ id: `stations.${terminatesAtCode}`, opts: { delayStart: 50 } })
+      files.push({ id: 'our final destination', opts: { delayStart: 50 } })
+      files.push({ id: 'please mind the gap when leaving the train and step', opts: { delayStart: 50 } })
       await this.playAudioFiles(files, download)
       return
     }
 
     files.push('welcome to this service for')
-    files.push({ id: `stations.${terminatesAtCode}`, opts: { delayStart: 200 } })
+    files.push({ id: `stations.${terminatesAtCode}`, opts: { delayStart: 50 } })
 
     const remainingStops = [
-      ...callingAtCodes.map((crsCode): AudioItemObject => ({ id: `stations.${crsCode}`, opts: { delayStart: 100 } })),
-      { id: `stations.${terminatesAtCode}`, opts: { delayStart: 100 } },
+      ...callingAtCodes.map((crsCode): AudioItemObject => ({ id: `stations.${crsCode}`, opts: { delayStart: 50 } })),
+      { id: `stations.${terminatesAtCode}`, opts: { delayStart: 50 } },
     ]
 
     if (callingAtCodes.some(code => !this.validateStationExists(code))) return
 
     if (remainingStops.length === 1 || !readAllStations) {
       // Next station is the termination point or we are not reading all stations.
-      files.push({ id: `the next station is`, opts: { delayStart: 200 } })
+      files.push({ id: `the next station is`, opts: { delayStart: 50 } })
       files.push(remainingStops[0])
     } else {
       // We are not at the termination point and reading all stations.
-      files.push({ id: `calling at`, opts: { delayStart: 200 } })
-      files.push(...this.pluraliseAudio(remainingStops, { beforeAndDelay: 200, beforeItemDelay: 200 }))
+      files.push({ id: `calling at`, opts: { delayStart: 50 } })
+      files.push(...this.pluraliseAudio(remainingStops, { beforeAndDelay: 50, beforeItemDelay: 50 }))
     }
 
     await this.playAudioFiles(files, download)
@@ -181,9 +181,13 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
 
   private RealAvailableStationNames = [
     'ACG',
+    'BBS',
+    'BER',
+    'BHM',
     'BKD',
     'BMO',
     'BSW',
+    'CLV',
     'CRA',
     'DDG',
     'DTW',
@@ -191,6 +195,7 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
     'EWD',
     'HAG',
     'HBY',
+    'HFD',
     'HLG',
     'HNL',
     'HTN',

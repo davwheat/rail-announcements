@@ -24,9 +24,9 @@ const Systems = [
       { title: 'TfL Jubilee Line', url: '/rolling-stock/tfl/jubilee-line' },
       { title: 'TfL Northern Line', url: '/rolling-stock/tfl/northern-line' },
       { title: 'TfL Elizabeth Line', url: '/rolling-stock/tfl/elizabeth-line' },
-      { title: 'Avanti West Coast Pendolino', url: '/rolling-stock/avanti-west-coast-pendolino', new: true },
-      { title: 'West Midlands Trains Class 172', url: '/rolling-stock/wmt-class-172', new: true },
-      { title: 'West Midlands Trains Class 323', url: '/rolling-stock/wmt-class-323', new: true },
+      { title: 'Avanti West Coast Pendolino', url: '/rolling-stock/avanti-west-coast-pendolino' },
+      { title: 'WMR & LNR Class 172', url: '/rolling-stock/wmt-class-172' },
+      { title: 'WMR Class 323', url: '/rolling-stock/wmt-class-323' },
     ],
   },
   {

@@ -8,6 +8,7 @@ import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
 
 interface IApproachingStationAnnouncementOptions {
   stationCode: string
+  toc: string
   terminatesHere: boolean
   ticketsReady: boolean
   mindTheGap: boolean
@@ -15,7 +16,7 @@ interface IApproachingStationAnnouncementOptions {
 
 interface IWelcomeAnnouncementOptions {
   terminatesAtCode: string
-  terminatesHere: boolean
+  toc: string
   readAllStations: boolean
   callingAtCodes: { crsCode: string; name: string; randomId: string }[]
 }
@@ -26,6 +27,7 @@ const announcementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>>
       name: 'Dorridge to Worcester Forgate Street',
       state: {
         terminatesAtCode: 'WOF',
+        toc: 'WMR',
         readAllStations: true,
         callingAtCodes: [
           'WMR',
@@ -54,6 +56,7 @@ const announcementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>>
       name: 'Birmingham Snow Hill to Whitlocks End',
       state: {
         terminatesAtCode: 'WTE',
+        toc: 'Generic',
         readAllStations: true,
         callingAtCodes: ['BMO', 'SMA', 'TYS', 'SRI', 'HLG', 'YRD', 'SRL'].map(crsToStationItemMapper),
       },
@@ -62,6 +65,7 @@ const announcementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>>
       name: 'Kidderminister to Stratford-upon-Avon',
       state: {
         terminatesAtCode: 'SAV',
+        toc: 'LM',
         readAllStations: true,
         callingAtCodes: [
           'SBJ',
@@ -112,26 +116,31 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
 
     files.push('bing bong')
     files.push('we are now approaching')
-    files.push({ id: `stations.${options.stationCode}`, opts: { delayStart: 50 } })
+    files.push({ id: `stations.${options.stationCode}` })
 
     if (options.terminatesHere) {
-      files.push({ id: 'our final destination', opts: { delayStart: 50 } })
+      files.push({ id: 'our final destination' })
     }
 
     if (Object.keys(this.StationsWithForcedChangeHere).includes(options.stationCode)) {
       const changeFor = this.StationsWithForcedChangeHere[options.stationCode as keyof typeof this.StationsWithForcedChangeHere]
-      files.push({ id: 'change here for', opts: { delayStart: 50 } })
+      files.push({ id: 'change here for' })
       const changes = [...changeFor.map((line): AudioItemObject => ({ id: line }))]
 
-      files.push(...this.pluraliseAudio(changes, { beforeAndDelay: 50, beforeItemDelay: 50 }))
+      files.push(...this.pluraliseAudio(changes))
+    }
+
+    if (options.toc == 'LM') {
+      files.push({ id: 'thank you for travelling with london midland' })
     }
 
     if (options.ticketsReady) {
-      files.push({ id: 'please have your tickets ready', opts: { delayStart: 100 } })
+      files.push({ id: 'please have your tickets ready' })
     }
 
     if (options.mindTheGap) {
-      files.push({ id: 'please mind the gap when leaving the train and step', opts: { delayStart: 50 } })
+      if (options.toc == 'LM' || options.toc == 'Generic') files.push({ id: 'please mind the gap between the platform and the train' })
+      else files.push({ id: 'please mind the gap when leaving the train and step' })
     }
 
     await this.playAudioFiles(files, download)
@@ -147,88 +156,211 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
     const files: AudioItem[] = []
     files.push('bing bong')
 
-    if (options.terminatesHere) {
+    if (options.callingAtCodes.length === 0) {
+      // terminates here
+
       files.push('this is')
-      files.push({ id: `stations.${terminatesAtCode}`, opts: { delayStart: 50 } })
-      files.push({ id: 'our final destination', opts: { delayStart: 50 } })
-      files.push({ id: 'please mind the gap when leaving the train and step', opts: { delayStart: 50 } })
-      await this.playAudioFiles(files, download)
-      return
-    }
+      files.push({ id: `stations.${terminatesAtCode}` })
+      files.push({ id: 'our final destination' })
 
-    files.push('welcome to this service for')
-    files.push({ id: `stations.${terminatesAtCode}`, opts: { delayStart: 50 } })
-
-    const remainingStops = [
-      ...callingAtCodes.map((crsCode): AudioItemObject => ({ id: `stations.${crsCode}`, opts: { delayStart: 50 } })),
-      { id: `stations.${terminatesAtCode}`, opts: { delayStart: 50 } },
-    ]
-
-    if (callingAtCodes.some(code => !this.validateStationExists(code))) return
-
-    if (remainingStops.length === 1 || !readAllStations) {
-      // Next station is the termination point or we are not reading all stations.
-      files.push({ id: `the next station is`, opts: { delayStart: 50 } })
-      files.push(remainingStops[0])
+      if (options.toc == 'LM') {
+        files.push({ id: 'thank you for travelling with london midland' })
+        files.push({ id: 'please mind the gap between the platform and the train' })
+      } else if (options.toc == 'Generic') {
+        files.push({ id: 'please mind the gap between the platform and the train' })
+      } else {
+        files.push({ id: 'please mind the gap when leaving the train and step' })
+      }
     } else {
-      // We are not at the termination point and reading all stations.
-      files.push({ id: `calling at`, opts: { delayStart: 50 } })
-      files.push(...this.pluraliseAudio(remainingStops, { beforeAndDelay: 50, beforeItemDelay: 50 }))
+      if (options.toc == 'Generic') files.push('this train is for')
+      else if (options.toc == 'LM') files.push('welcome aboard this london midland service to')
+      else files.push('welcome to this service for')
+
+      files.push({ id: `stations.${terminatesAtCode}` })
+
+      const remainingStops = [
+        ...callingAtCodes.map((crsCode): AudioItemObject => ({ id: `stations.${crsCode}` })),
+        { id: `stations.${terminatesAtCode}` },
+      ]
+
+      if (callingAtCodes.some(code => !this.validateStationExists(code))) return
+
+      if (remainingStops.length === 1 || !readAllStations) {
+        // Next station is the termination point or we are not reading all stations.
+        files.push({ id: `the next station is` })
+        files.push(remainingStops[0])
+      } else {
+        // We are not at the termination point and reading all stations.
+        files.push({ id: `calling at` })
+        files.push(...this.pluraliseAudio(remainingStops))
+      }
     }
 
     await this.playAudioFiles(files, download)
   }
 
   private RealAvailableStationNames = [
+    'ACB',
     'ACG',
+    'ADD',
+    'ALB',
+    'ALV',
+    'APG',
+    'ASC',
+    'ASG',
+    'AST',
+    'ATH',
+    'BBK',
     'BBS',
+    'BDM',
+    'BEH',
+    'BEP',
     'BER',
+    'BHI',
     'BHM',
     'BKD',
+    'BKT',
+    'BKW',
+    'BLX',
+    'BLY',
     'BMO',
+    'BMV',
+    'BRT',
+    'BRV',
+    'BSC',
+    'BSJ',
     'BSW',
+    'BTG',
+    'BUL',
+    'BWB',
+    'BWN',
+    'CAA',
+    'CAO',
     'CLV',
+    'CNL',
+    'CNM',
+    'COS',
+    'COV',
     'CRA',
+    'CRD',
+    'CRE',
+    'CSL',
+    'CSY',
+    'CWL',
     'DDG',
+    'DDP',
     'DTW',
+    'DUD',
     'DZY',
+    'ERD',
     'EWD',
+    'FEN',
+    'FOK',
+    'FWY',
+    'GCR',
+    'GMV',
+    'GVH',
     'HAG',
     'HBY',
     'HFD',
+    'HIA',
     'HLG',
+    'HNF',
     'HNL',
+    'HSD',
+    'HTF',
     'HTN',
     'JEQ',
+    'KDG',
     'KID',
+    'KMH',
+    'KNN',
+    'KNW',
+    'LAW',
+    'LBK',
+    'LED',
+    'LEH',
     'LGG',
+    'LIC',
+    'LID',
+    'LIV',
     'LMS',
+    'LOB',
+    'LPT',
     'LPW',
+    'LPY',
+    'LTV',
     'LYE',
+    'MGN',
+    'MLB',
+    'MSH',
+    'MVL',
+    'NFD',
+    'NMP',
+    'NTB',
+    'NUN',
     'OHL',
+    'OKN',
     'OLT',
+    'PKG',
+    'PRE',
+    'PRY',
+    'PSW',
+    'RDC',
+    'RGL',
+    'RGT',
+    'RID',
     'ROW',
+    'RUG',
+    'RUN',
+    'SAD',
     'SAV',
     'SBJ',
     'SBT',
+    'SCF',
+    'SEN',
+    'SFN',
     'SGB',
+    'SHR',
     'SMA',
+    'SMR',
+    'SNE',
     'SOL',
+    'SOT',
     'SRI',
     'SRL',
+    'STA',
     'STY',
+    'SUT',
+    'SWR',
+    'TAB',
+    'TAM',
+    'TFC',
+    'THL',
     'THW',
+    'TIP',
     'TLK',
     'TYS',
+    'UNI',
+    'WBQ',
     'WDE',
+    'WED',
+    'WGN',
+    'WLN',
     'WMC',
     'WMR',
+    'WOB',
     'WOF',
     'WOS',
     'WRP',
     'WRW',
+    'WSF',
+    'WSL',
     'WTE',
+    'WTT',
+    'WVH',
     'WWW',
+    'WYL',
     'WYT',
     'YRD',
   ]
@@ -238,12 +370,19 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
     low: this.RealAvailableStationNames,
   }
 
+  private AvailableTOCs: { title: string; value: string }[] = [
+    { title: 'West Midlands Railway', value: 'WMR' },
+    { title: 'London Midland', value: 'LM' },
+    { title: 'Generic', value: 'Generic' },
+  ]
+
   readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab<string>> = {
     approachingStation: {
       name: 'Approaching station',
       component: CustomAnnouncementPane,
       defaultState: {
         stationCode: this.RealAvailableStationNames[0],
+        toc: this.AvailableTOCs[0].value,
         terminatesHere: false,
         ticketsReady: true,
         mindTheGap: true,
@@ -255,6 +394,12 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
             name: 'Next station',
             default: this.RealAvailableStationNames[0],
             options: AllStationsTitleValueMap.filter(s => this.RealAvailableStationNames.includes(s.value)),
+            type: 'select',
+          },
+          toc: {
+            name: 'TOC',
+            default: this.AvailableTOCs[0].value,
+            options: this.AvailableTOCs,
             type: 'select',
           },
           ticketsReady: {
@@ -280,6 +425,7 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
       component: CustomAnnouncementPane,
       defaultState: {
         terminatesAtCode: this.RealAvailableStationNames[0],
+        toc: this.AvailableTOCs[0].value,
         terminatesHere: false,
         readAllStations: true,
         callingAtCodes: [],
@@ -294,15 +440,16 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
             options: AllStationsTitleValueMap.filter(s => this.RealAvailableStationNames.includes(s.value)),
             type: 'select',
           },
+          toc: {
+            name: 'TOC',
+            default: this.AvailableTOCs[0].value,
+            options: this.AvailableTOCs,
+            type: 'select',
+          },
           readAllStations: {
             name: 'Read all stations?',
             type: 'boolean',
             default: true,
-          },
-          terminatesHere: {
-            name: 'Train terminates here?',
-            type: 'boolean',
-            default: false,
           },
           callingAtCodes: {
             name: '',

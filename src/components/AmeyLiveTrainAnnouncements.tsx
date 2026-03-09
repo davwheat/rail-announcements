@@ -66,10 +66,7 @@ function reverseShortPlatform(data: string | undefined | null): string | null {
   return data
 }
 
-function getCallingPoints(
-  train: TrainService,
-  getStation: (location: TimingLocation | EndPointLocation) => string,
-): CallingAtPoint[] {
+function getCallingPoints(train: TrainService, getStation: (location: TimingLocation | EndPointLocation) => string): CallingAtPoint[] {
   const mainReversalMap: Record<string, boolean[]> = {}
   let rev = false
   train.subsequentLocations.forEach((l, i, arr) => {
@@ -243,10 +240,7 @@ function getCallingPoints(
   return callingAt
 }
 
-function getCancelledCallingPoints(
-  train: TrainService,
-  getStation: (location: TimingLocation | EndPointLocation) => string,
-): CallingAtPoint[] {
+function getCancelledCallingPoints(train: TrainService, getStation: (location: TimingLocation | EndPointLocation) => string): CallingAtPoint[] {
   const callingPoints = train.subsequentLocations.filter(s => {
     if (!s.crs) return false
     if (!s.isCancelled || s.isOperational || s.isPass) return false
@@ -1091,9 +1085,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       params.set('timeWindow', '40')
 
       try {
-        const resp = await fetch(
-          `/api/get-services?${params}`,
-        )
+        const resp = await fetch(`/api/get-services?${params}`)
 
         if (!resp.ok) {
           addLog("Couldn't fetch data from API")

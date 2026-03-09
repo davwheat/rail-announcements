@@ -104,9 +104,7 @@ export default function ImportStateFromRtt({ importStateFromRttService, disabled
       date,
     })
     try {
-      const resp = await fetch(
-        `/api/get-service-rtt?${params}`,
-      )
+      const resp = await fetch(`/api/get-service-rtt?${params}`)
 
       if (!resp.ok) {
         setErrors([`Failed to fetch Realtime Trains service (HTTP ${resp.status} ${resp.statusText})`])

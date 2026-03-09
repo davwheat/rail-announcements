@@ -3,9 +3,7 @@ import path from 'path'
 
 const nextConfig: NextConfig = {
   async rewrites() {
-    return process.env.NODE_ENV === 'development'
-      ? [{ source: '/api/:path*', destination: 'http://127.0.0.1:8787/api/:path*' }]
-      : []
+    return process.env.NODE_ENV === 'development' ? [{ source: '/api/:path*', destination: 'http://127.0.0.1:8787/api/:path*' }] : []
   },
   output: process.env.STATIC_EXPORT ? 'export' : undefined,
   images: {

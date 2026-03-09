@@ -671,6 +671,7 @@ const data: Record<
   LFD: {
     '*': {
       SN: 'front.8',
+      TL: 'front.8',
     },
   },
   LIT: {

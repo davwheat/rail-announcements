@@ -5,6 +5,16 @@ import type { ICustomButtonPaneProps } from '@components/PanelPanes/CustomButton
 import type React from 'react'
 import { RttResponse } from '../api-types/get-service-rtt-types'
 
+/**
+ * Controls how missing audio files are handled during live announcements.
+ *
+ * - `skip-service`: Fail the entire announcement so it is not played (default behaviour for non-live).
+ * - `play-silence`: Silently omit the missing clip and continue.
+ * - `repeat-last-station`: Substitute a missing station-name clip with the last successfully fetched station-name clip (identified by `station.` prefix); other missing clips are omitted.
+ * - `repeat-last`: Substitute any missing clip with the last successfully fetched clip of any type.
+ */
+export type MissingAudioMode = 'skip-service' | 'play-silence' | 'repeat-last-station' | 'repeat-last'
+
 export interface IPlayOptions {
   delayStart: number
   customPrefix: string
@@ -181,7 +191,7 @@ export default abstract class AnnouncementSystem {
    *
    * @returns Promise which resolves when the last audio file has finished playing.
    */
-  async playAudioFiles(fileIds: AudioItem[], download: boolean = false, skipMissingAudio: boolean = false): Promise<void> {
+  async playAudioFiles(fileIds: AudioItem[], download: boolean = false, missingAudioMode: MissingAudioMode = 'skip-service'): Promise<void> {
     if (fileIds.length === 0) {
       console.warn('No audio files to play.')
       return
@@ -205,7 +215,7 @@ export default abstract class AnnouncementSystem {
     })
 
     const crunker = new Crunker({ sampleRate: AnnouncementSystem.SAMPLE_RATE })
-    const audio = await this.concatSoundClips(standardisedFileIds, skipMissingAudio)
+    const audio = await this.concatSoundClips(standardisedFileIds, missingAudioMode)
 
     if (audio.numberOfChannels > 1) {
       // This is stereo. We need to mux it to mono.
@@ -271,7 +281,7 @@ export default abstract class AnnouncementSystem {
     }
   }
 
-  async concatSoundClips(files: AudioItemObject[], skipMissingAudio: boolean = false): Promise<AudioBuffer> {
+  async concatSoundClips(files: AudioItemObject[], missingAudioMode: MissingAudioMode = 'skip-service'): Promise<AudioBuffer> {
     const crunker = new Crunker({ sampleRate: AnnouncementSystem.SAMPLE_RATE })
 
     const filesWithUris: (AudioItemObject & { uri: string })[] = files.map(file => ({
@@ -281,38 +291,52 @@ export default abstract class AnnouncementSystem {
 
     let audioBuffers: AudioBuffer[]
 
-    if (skipMissingAudio) {
-      const results = await Promise.all(
-        filesWithUris.map(async file => {
-          try {
-            const [buffer] = await crunker.fetchAudio(file.uri)
-            return { buffer, file }
-          } catch (e) {
-            console.warn(`[AnnouncementSystem] Skipping missing audio file: ${file.uri}`)
-            return null
-          }
-        }),
-      )
-
-      audioBuffers = results
-        .filter((item): item is { buffer: AudioBuffer; file: (typeof filesWithUris)[0] } => item !== null)
-        .reduce((acc, { buffer, file }) => {
-          if ((file.opts?.delayStart ?? 0) > 0) {
-            acc.push(this.createSilence(file.opts!.delayStart!))
-          }
-          acc.push(buffer)
-          return acc
-        }, [] as AudioBuffer[])
-    } else {
+    if (missingAudioMode === 'skip-service') {
       const audioBuffers_P = crunker.fetchAudio(...filesWithUris.map(file => file.uri))
 
       audioBuffers = (await audioBuffers_P).reduce((acc, curr, i) => {
         if (filesWithUris[i].opts?.delayStart!! > 0) {
           acc.push(this.createSilence(filesWithUris[i].opts!!.delayStart!!))
         }
-
         acc.push(curr)
+        return acc
+      }, [] as AudioBuffer[])
+    } else {
+      const results = await Promise.all(
+        filesWithUris.map(async file => {
+          try {
+            const [buffer] = await crunker.fetchAudio(file.uri)
+            return { buffer, file }
+          } catch (e) {
+            console.warn(`[AnnouncementSystem] Missing audio file (${missingAudioMode}): ${file.uri}`)
+            return { buffer: null, file }
+          }
+        }),
+      )
 
+      let lastBuffer: AudioBuffer | null = null
+      let lastStationBuffer: AudioBuffer | null = null
+      audioBuffers = results.reduce((acc, { buffer, file }) => {
+        const isStationClip = file.id.startsWith('station.')
+        let resolved: AudioBuffer | null
+
+        if (buffer !== null) {
+          resolved = buffer
+          lastBuffer = buffer
+          if (isStationClip) lastStationBuffer = buffer
+        } else if (missingAudioMode === 'repeat-last') {
+          resolved = lastBuffer
+        } else if (missingAudioMode === 'repeat-last-station') {
+          resolved = isStationClip ? lastStationBuffer : null
+        } else {
+          resolved = null // play-silence
+        }
+
+        if (resolved === null) return acc
+        if ((file.opts?.delayStart ?? 0) > 0) {
+          acc.push(this.createSilence(file.opts!.delayStart!))
+        }
+        acc.push(resolved)
         return acc
       }, [] as AudioBuffer[])
     }

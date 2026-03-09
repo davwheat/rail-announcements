@@ -26,6 +26,7 @@ import type {
   IStandingTrainAnnouncementOptions,
   ChimeType,
 } from '../announcement-data/systems/stations/AmeyPhil'
+import type { MissingAudioMode } from '../announcement-data/AnnouncementSystem'
 
 import dayjs from 'dayjs'
 import dayjsUtc from 'dayjs/plugin/utc'
@@ -416,6 +417,13 @@ const ChimeTypeNames: Record<ChimeType | '', string> = {
   four: '4 chimes',
 }
 
+const MissingAudioModeNames: Record<MissingAudioMode, string> = {
+  'skip-service': 'Skip affected services',
+  'play-silence': 'Play silence for missing audio',
+  'repeat-last-station': 'Repeat last station name only',
+  'repeat-last': 'Repeat last audio clip',
+}
+
 export function LiveTrainAnnouncements<SystemKeys extends string>({
   nextTrainHandler,
   disruptedTrainHandler,
@@ -539,6 +547,11 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
     'amey.live-trains.announce-short-platforms-after-split',
     false,
     x => x === true || x === false,
+  )
+  const [missingAudioMode, setMissingAudioMode] = useStateWithLocalStorage<MissingAudioMode>(
+    'amey.live-trains.missing-audio-mode',
+    'skip-service',
+    (x): x is MissingAudioMode => ['skip-service', 'play-silence', 'repeat-last-station', 'repeat-last'].includes(x as string),
   )
   const [isPlaying, _setIsPlaying] = useState(false)
   const setIsPlaying = useCallback(
@@ -735,6 +748,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
 
       const options: IStandingTrainAnnouncementOptions = {
         fromLive: true,
+        missingAudioMode,
         thisStationCode: selectedCrs,
         mindTheGap: mindTheGap,
         hour: h === '00' ? '00 - midnight' : h,
@@ -785,6 +799,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       announceViaPoints,
       setIsPlayingAfter,
       announceShortPlatformsAfterSplit,
+      missingAudioMode,
     ],
   )
 
@@ -896,6 +911,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
 
       const options: INextTrainAnnouncementOptions = {
         fromLive: true,
+        missingAudioMode,
         chime: chimeType || systems[systemKey].DEFAULT_CHIME,
         hour: h === '00' ? '00 - midnight' : h,
         min: m === '00' ? '00 - hundred-hours' : m,
@@ -945,6 +961,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       announceViaPoints,
       setIsPlayingAfter,
       announceShortPlatformsAfterSplit,
+      missingAudioMode,
     ],
   )
 
@@ -988,6 +1005,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
 
       const options: IDisruptedTrainAnnouncementOptions = {
         fromLive: true,
+        missingAudioMode,
         chime: chimeType || systems[systemKey].DEFAULT_CHIME,
         hour: h === '00' ? '00 - midnight' : h,
         min: m === '00' ? '00 - hundred-hours' : m,
@@ -1052,6 +1070,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       chimeType,
       announceViaPoints,
       setIsPlayingAfter,
+      missingAudioMode,
     ],
   )
 
@@ -1423,6 +1442,16 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
             value={{ value: chimeType, label: ChimeTypeNames[chimeType] }}
             onChange={val => setChimeType(val!.value!!)}
             options={Object.entries(ChimeTypeNames).map(([k, v]) => ({ value: k as ChimeType | '', label: v }))}
+          />
+        </label>
+
+        <label htmlFor="missing-audio-mode-select" className="option-select">
+          Missing audio
+          <Select<Option<MissingAudioMode>, false>
+            id="missing-audio-mode-select"
+            value={{ value: missingAudioMode, label: MissingAudioModeNames[missingAudioMode] }}
+            onChange={val => setMissingAudioMode(val!.value)}
+            options={Object.entries(MissingAudioModeNames).map(([k, v]) => ({ value: k as MissingAudioMode, label: v }))}
           />
         </label>
 

@@ -6,7 +6,7 @@ import CustomAnnouncementPane, { ICustomAnnouncementPreset } from '@components/P
 import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
 import { getStationByCrs } from '@data/StationManipulators'
 import crsToStationItemMapper, { stationItemCompleter } from '@helpers/crsToStationItemMapper'
-import { AudioItem, CustomAnnouncementButton, CustomAnnouncementTab } from '../../AnnouncementSystem'
+import { AudioItem, CustomAnnouncementButton, CustomAnnouncementTab, MissingAudioMode } from '../../AnnouncementSystem'
 import DelayCodeMapping from './DarwinDelayCodes_Male1.json'
 import NamedServices from './named-services.json'
 
@@ -31,6 +31,7 @@ export interface INextTrainAnnouncementOptions {
   announceShortPlatformsAfterSplit: boolean
   notCallingAtStations: { crsCode: string }[]
   fromLive?: true
+  missingAudioMode?: MissingAudioMode
 }
 
 export interface IStandingTrainAnnouncementOptions extends Omit<INextTrainAnnouncementOptions, 'chime'> {
@@ -49,6 +50,7 @@ export interface IDisruptedTrainAnnouncementOptions {
   disruptionReason: string | string[]
   delayTime: string
   fromLive?: true
+  missingAudioMode?: MissingAudioMode
 }
 
 interface IFastTrainAnnouncementOptions {
@@ -68,6 +70,7 @@ export interface ITrainApproachingAnnouncementOptions {
   terminatingStationCode: string
   vias: CallingAtPoint[]
   originStationCode: string
+  missingAudioMode?: MissingAudioMode
 }
 
 export interface IPlatformAlterationAnnouncementOptions {
@@ -82,6 +85,7 @@ export interface IPlatformAlterationAnnouncementOptions {
   terminatingStationCode: string
   vias: CallingAtPoint[]
   callingAt?: CallingAtPoint[]
+  missingAudioMode?: MissingAudioMode
 }
 
 export interface ILivePlatformAlterationAnnouncementOptions {
@@ -98,6 +102,7 @@ export interface ILivePlatformAlterationAnnouncementOptions {
   callingAt?: CallingAtPoint[]
   coaches: string
   fromLive: true
+  missingAudioMode?: MissingAudioMode
 }
 
 export interface ILiveTrainApproachingAnnouncementOptions {
@@ -112,6 +117,7 @@ export interface ILiveTrainApproachingAnnouncementOptions {
   originStationCode: string
   callingAt?: CallingAtPoint[]
   fromLive: true
+  missingAudioMode?: MissingAudioMode
 }
 
 interface SplitInfoStop {
@@ -4941,7 +4947,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       )),
     )
 
-    await this.playAudioFiles(files, download, !!options.fromLive)
+    await this.playAudioFiles(files, download, options.missingAudioMode ?? 'skip-service')
   }
 
   async playStandingTrainAnnouncement(options: IStandingTrainAnnouncementOptions, download: boolean = false): Promise<void> {
@@ -5044,7 +5050,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       )
     }
 
-    await this.playAudioFiles(files, download, !!options.fromLive)
+    await this.playAudioFiles(files, download, options.missingAudioMode ?? 'skip-service')
   }
 
   protected readonly disruptionOptions = {
@@ -5157,7 +5163,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         break
     }
 
-    await this.playAudioFiles(files, download, !!options.fromLive)
+    await this.playAudioFiles(files, download, options.missingAudioMode ?? 'skip-service')
   }
 
   async playFastTrainAnnouncement(options: IFastTrainAnnouncementOptions, download: boolean = false): Promise<void> {
@@ -5242,7 +5248,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
 
     files.push({ id: 's.this train is the service from', opts: { delayStart: this.SHORT_DELAY } }, `station.e.${options.originStationCode}`)
 
-    await this.playAudioFiles(files, download, 'fromLive' in options)
+    await this.playAudioFiles(files, download, options.missingAudioMode ?? 'skip-service')
   }
 
   async playPlatformAlterationAnnouncement(
@@ -5360,7 +5366,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       )
     }
 
-    await this.playAudioFiles(files, download, 'fromLive' in options)
+    await this.playAudioFiles(files, download, options.missingAudioMode ?? 'skip-service')
   }
 
   protected getAnnouncementButtons(): Record<string, CustomAnnouncementButton[]> {
@@ -5614,6 +5620,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         announceShortPlatformsAfterSplit: false,
         notCallingAtStations: [],
         fromLive: undefined,
+        missingAudioMode: undefined,
       },
       props: {
         presets: this.announcementPresets.nextTrain,
@@ -5792,6 +5799,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         terminatingStationCode: this.STATIONS[0],
         vias: [],
         originStationCode: this.STATIONS[0],
+        missingAudioMode: undefined,
       },
       props: {
         playHandler: this.playTrainApproachingAnnouncement.bind(this),
@@ -5911,6 +5919,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         mindTheGap: false,
         notCallingAtStations: [],
         fromLive: undefined,
+        missingAudioMode: undefined,
       },
       props: {
         presets: this.announcementPresets.nextTrain.filter(x => 'thisStationCode' in x.state),
@@ -6090,6 +6099,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         delayTime: '65',
         disruptionReason: '',
         fromLive: undefined,
+        missingAudioMode: undefined,
       },
       props: {
         presets: this.announcementPresets.disruptedTrain,
@@ -6253,6 +6263,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         terminatingStationCode: this.STATIONS[0],
         vias: [],
         callingAt: [],
+        missingAudioMode: undefined,
       },
       props: {
         presets: this.announcementPresets.nextTrain,

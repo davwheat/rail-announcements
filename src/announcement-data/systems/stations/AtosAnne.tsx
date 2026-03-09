@@ -2301,7 +2301,23 @@ export default class AtosAnne extends StationAnnouncementSystem {
   /**
    * @returns "Platform X for the HH:mm YYYYYY service to ZZZZ (via AAAA)."
    */
-  private assembleTrainInfo({ hour, min, toc, via, terminatingStationCode, destAllHigh = false, delayStart = 0 }): AudioItem[] {
+  private assembleTrainInfo({
+    hour,
+    min,
+    toc,
+    via,
+    terminatingStationCode,
+    destAllHigh = false,
+    delayStart = 0,
+  }: {
+    hour: string
+    min: string
+    toc: string
+    via?: string
+    terminatingStationCode: string
+    destAllHigh?: boolean
+    delayStart?: number
+  }): AudioItem[] {
     const files: AudioItem[] = [
       { id: `times.hour.${hour}`, opts: { delayStart } },
       `times.mins.${min}`,
@@ -2433,7 +2449,7 @@ export default class AtosAnne extends StationAnnouncementSystem {
     await this.playAudioFiles(files, download)
   }
 
-  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab> = {
+  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab<string>> = {
     nextTrain: {
       name: 'Next train',
       component: CustomAnnouncementPane,
@@ -2491,7 +2507,7 @@ export default class AtosAnne extends StationAnnouncementSystem {
             default: '12 coaches',
             options: AVAILABLE_COACHES_CARRIAGES.map(c => ({ title: c, value: c })),
             type: 'select',
-            onlyShowWhen: state => state.transportType === 'train',
+            onlyShowWhen: (state: Record<string, unknown>) => state.transportType === 'train',
           },
           seating: {
             name: 'Seating availability',
@@ -2576,7 +2592,7 @@ export default class AtosAnne extends StationAnnouncementSystem {
             name: '',
             type: 'custom',
             default: 'delayed',
-            component: ({ value, onChange }) => {
+            component: ({ value, onChange }: { value: any; onChange: (value: any) => void }) => {
               return (
                 <fieldset>
                   <legend>Disruption type</legend>
@@ -2614,7 +2630,17 @@ export default class AtosAnne extends StationAnnouncementSystem {
             type: 'custom',
             // default: 'unknown',
             default: AVAILABLE_DELAY_TIMES[0].toString(),
-            component: ({ activeState, value, onChange, availableDelayTimes }) => {
+            component: ({
+              activeState,
+              value,
+              onChange,
+              availableDelayTimes,
+            }: {
+              activeState: Record<string, unknown>
+              value: any
+              onChange: (value: any) => void
+              availableDelayTimes: any
+            }) => {
               if (activeState.disruptionType !== 'delayed') {
                 return null
               }
@@ -2628,7 +2654,7 @@ export default class AtosAnne extends StationAnnouncementSystem {
                       onChange(e.target.value)
                     }}
                   >
-                    {availableDelayTimes.map(d => (
+                    {availableDelayTimes.map((d: any) => (
                       <option key={d.value} value={d.value}>
                         {d.title}
                       </option>
@@ -2648,7 +2674,17 @@ export default class AtosAnne extends StationAnnouncementSystem {
             name: '',
             type: 'custom',
             default: AVAILABLE_PLATFORMS[0],
-            component: ({ activeState, value, onChange, availablePlatforms }) => {
+            component: ({
+              activeState,
+              value,
+              onChange,
+              availablePlatforms,
+            }: {
+              activeState: Record<string, unknown>
+              value: any
+              onChange: (value: any) => void
+              availablePlatforms: any
+            }) => {
               if (activeState.disruptionType !== 'cancelled') {
                 return null
               }
@@ -2662,7 +2698,7 @@ export default class AtosAnne extends StationAnnouncementSystem {
                       onChange(e.target.value)
                     }}
                   >
-                    {availablePlatforms.map(d => (
+                    {availablePlatforms.map((d: any) => (
                       <option key={d.value} value={d.value}>
                         {d.title}
                       </option>

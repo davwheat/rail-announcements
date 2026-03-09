@@ -10,7 +10,7 @@ import { AudioItem, CustomAnnouncementButton, CustomAnnouncementTab } from '../.
 import DelayCodeMapping from './DarwinDelayCodes_Male1.json'
 import NamedServices from './named-services.json'
 
-import type { RttResponse } from '../../../../functions/api/get-service-rtt'
+import type { RttResponse } from '../../../api-types/get-service-rtt-types'
 import { RttUtils } from '@data/RttUtils'
 
 export type ChimeType = 'three' | 'four' | 'none'
@@ -127,6 +127,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
   readonly ID: string = 'AMEY_PHIL_V1'
   readonly FILE_PREFIX: string = 'station/ketech/phil'
   readonly SYSTEM_TYPE = 'station'
+  readonly DESCRIPTION: string =
+    'Generate UK railway station announcements using real audio recordings from Phil Sayer, the voice of the Amey/KeTech announcement system used at hundreds of UK stations.'
 
   protected readonly BEFORE_TOC_DELAY: number = 150
   protected readonly BEFORE_SECTION_DELAY: number = 550
@@ -1224,9 +1226,9 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       'BEF',
       'BEG',
       'BEH',
-      'BEL',
       'BEM',
       'BEN',
+      'BER',
       'BES',
       'BET',
       'BEU',
@@ -6177,7 +6179,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             type: 'select',
             options: new Array(360).fill(0).map((_, i) => ({ value: (i + 1).toString(), title: `${i + 1} minute${i === 0 ? '' : 's'}` })),
             default: '65',
-            onlyShowWhen(activeState) {
+            onlyShowWhen(activeState: Record<string, unknown>) {
               return activeState.disruptionType === 'delayedBy'
             },
           },
@@ -6271,7 +6273,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             default: this.PLATFORMS[6],
             options: this.PLATFORMS.map(p => ({ title: `Platform ${p.toUpperCase()}`, value: p })),
             type: 'select',
-            onlyShowWhen(activeState) {
+            onlyShowWhen(activeState: Record<string, unknown>) {
               return activeState.announceOldPlatform
             },
           },

@@ -1155,6 +1155,8 @@ export default class TfLElizabethLine extends AnnouncementSystem {
   readonly ID = 'TFL_ELIZ_LINE_V1'
   readonly FILE_PREFIX = 'TfL/Elizabeth Line'
   readonly SYSTEM_TYPE = 'train'
+  readonly DESCRIPTION =
+    'Generate TfL Elizabeth Line on-train announcements using real audio recordings from the Elizabeth line announcement system.'
 
   headerComponent() {
     return "This system contains stations not related to the line itself due to TfL's shared announcement set between Overground and Elizabeth line."
@@ -1233,7 +1235,7 @@ export default class TfLElizabethLine extends AnnouncementSystem {
     await this.playAudioFiles(files, download)
   }
 
-  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab> = {
+  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab<string>> = {
     thisStation: {
       name: 'Stopped at station',
       component: CustomAnnouncementPane,

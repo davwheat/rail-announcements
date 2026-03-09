@@ -2,9 +2,9 @@ import React, { useState } from 'react'
 
 import ImportIcon from 'mdi-react/ApplicationImportIcon'
 import { useHtmlDialog } from 'use-html-dialog'
-import { captureException } from '@sentry/gatsby'
+import { captureException } from '@sentry/nextjs'
 
-import type { RttResponse } from '../../functions/api/get-service-rtt'
+import type { RttResponse } from '../api-types/get-service-rtt-types'
 import LoadingSpinner from './LoadingSpinner'
 import { RttUtils } from '@data/RttUtils'
 import { Dayjs } from 'dayjs'

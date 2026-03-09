@@ -6,22 +6,21 @@ import SavedAnnouncementLoader from '@components/SavedAnnouncementLoader'
 
 import RailSymbol from '@assets/rail-symbol-2/white-on-red-inset.svg'
 
-import { Link, PageProps } from 'gatsby'
+import Link from 'next/link'
 
 import BackIcon from 'mdi-react/ArrowLeftIcon'
 
 import type AnnouncementSystem from '@announcement-data/AnnouncementSystem'
 
 interface IProps {
-  location: PageProps['location']
   system: typeof AnnouncementSystem
 }
 
-export default function SystemPageTemplate({ location, system }: IProps) {
+export default function SystemPageTemplate({ system }: IProps) {
   const s: AnnouncementSystem = new (system as any)()
 
   return (
-    <Layout location={location} title={s.NAME}>
+    <Layout title={s.NAME} description={s.DESCRIPTION}>
       <SavedAnnouncementLoader />
 
       <header>
@@ -51,7 +50,7 @@ export default function SystemPageTemplate({ location, system }: IProps) {
       <NavBar />
 
       <main css={{ margin: '0 24px' }}>
-        <Link css={{ marginTop: 24, display: 'inline-block' }} className="button" to="/">
+        <Link css={{ marginTop: 24, display: 'inline-block' }} className="button" href="/">
           <span className="buttonLabel">
             <BackIcon /> Back to system selection
           </span>

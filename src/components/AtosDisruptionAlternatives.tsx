@@ -1,7 +1,8 @@
-import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd'
+import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd'
 import Select from 'react-select'
 import { nanoid } from 'nanoid'
 import { getStationByCrs } from '@data/StationManipulators'
+import React from 'react'
 
 interface Option {
   readonly label: string
@@ -33,7 +34,7 @@ interface ICallingAtSelectorProps {
   platforms: string[]
 }
 
-function AtosDisruptionAlternatives({ onChange, value, availableStations, hours, mins, platforms }: ICallingAtSelectorProps): JSX.Element {
+function AtosDisruptionAlternatives({ onChange, value, availableStations, hours, mins, platforms }: ICallingAtSelectorProps): React.JSX.Element {
   const firstTerminatingStation = availableStations.low[0]
 
   return (
@@ -140,7 +141,7 @@ function AtosDisruptionAlternativeServicePanel({
   hours,
   mins,
   platforms,
-}: IAtosDisruptionAlternativeServicePanelProps): JSX.Element {
+}: IAtosDisruptionAlternativeServicePanelProps): React.JSX.Element {
   return (
     <div
       css={{
@@ -341,7 +342,7 @@ function AtosDisruptionAlternativeServicePanel({
         >
           {(value.service.via !== 'none' ? availableStations.high : availableStations.low).map(option => (
             <option value={option} key={option}>
-              {getStationByCrs(option).stationName}
+              {getStationByCrs(option)!.stationName}
             </option>
           ))}
         </select>
@@ -375,7 +376,7 @@ function AtosDisruptionAlternativeServicePanel({
           >
             {availableStations.low.map(option => (
               <option value={option} key={option}>
-                {getStationByCrs(option).stationName}
+                {getStationByCrs(option)!.stationName}
               </option>
             ))}
           </select>

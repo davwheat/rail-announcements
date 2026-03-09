@@ -269,7 +269,7 @@ export default class Crunker {
   export(buffer: AudioBuffer, type: string = 'audio/wav'): ExportedCrunkerAudio {
     const recorded = this._interleave(buffer)
     const dataview = this._writeHeaders(recorded, buffer.numberOfChannels, buffer.sampleRate)
-    const audioBlob = new Blob([dataview], { type })
+    const audioBlob = new Blob([dataview as any], { type })
 
     return {
       blob: audioBlob,

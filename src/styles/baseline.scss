@@ -130,20 +130,18 @@ body {
   color: #000;
 
   &,
-  #gatsby-focus-wrapper,
-  #___gatsby {
+  #__next {
     min-height: 100vh;
   }
 }
 
 body,
-#___gatsby,
-#gatsby-focus-wrapper {
+#__next {
   height: 100%;
   overflow-x: hidden;
 }
 
-#gatsby-focus-wrapper {
+#__next {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;

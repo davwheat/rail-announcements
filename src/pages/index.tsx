@@ -7,7 +7,7 @@ import SavedAnnouncementLoader from '@components/SavedAnnouncementLoader'
 import RailSymbol from '@assets/rail-symbol-2/white-on-red-inset.svg'
 import MegaphoneIcon from 'mdi-react/MegaphoneOutlineIcon'
 
-import { Link, PageProps } from 'gatsby'
+import Link from 'next/link'
 import Breakpoints from '@data/breakpoints'
 import { Fragment } from 'react'
 
@@ -39,9 +39,9 @@ const Systems = [
   },
 ]
 
-function IndexPage({ location }: PageProps) {
+export default function IndexPage() {
   return (
-    <Layout location={location}>
+    <Layout description="Generate station and on-train announcements for the UK rail network using real audio recordings. Covers rolling stock from Avanti, LNER, Thameslink, TfL, Transport for Wales, and West Midlands Trains, plus station systems from Amey/KeTech and ScotRail.">
       <SavedAnnouncementLoader />
 
       <header>
@@ -89,7 +89,7 @@ function IndexPage({ location }: PageProps) {
           }}
         >
           Listen to real-time train announcements for almost any UK station
-          <Link className="button" to="/amey-live-train-announcements">
+          <Link className="button" href="/amey-live-train-announcements">
             <span className="buttonLabel">
               <MegaphoneIcon />
               Yes please!
@@ -111,7 +111,7 @@ function IndexPage({ location }: PageProps) {
                       to={system.url}
                       title={
                         <>
-                          {system.new && (
+                          {(system as any).new && (
                             <>
                               <span
                                 css={{
@@ -145,13 +145,11 @@ function IndexPage({ location }: PageProps) {
 
       <Disclaimers
         customDisclaimers={[
-          <p>
-            Files relating to the Atos Worldline system have been removed from this site. <Link to="/atos-worldline">Learn more</Link>
+          <p key="atos">
+            Files relating to the Atos Worldline system have been removed from this site. <Link href="/atos-worldline">Learn more</Link>
           </p>,
         ]}
       />
     </Layout>
   )
 }
-
-export default IndexPage

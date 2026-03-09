@@ -1,4 +1,4 @@
-import { TrainService } from '../../../functions/api/get-services'
+import { TrainService } from '../../api-types/get-services-types'
 
 /**
  * Find short platform information for a station stop.

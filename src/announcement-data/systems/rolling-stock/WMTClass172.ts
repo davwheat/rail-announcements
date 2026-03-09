@@ -106,6 +106,7 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
   readonly ID = 'WMT_CLASS_172_V1'
   readonly FILE_PREFIX = 'WMT/172'
   readonly SYSTEM_TYPE = 'train'
+  readonly DESCRIPTION = 'Generate West Midlands Trains Class 172 on-train announcements using real audio recordings from Julie Berry.'
 
   private readonly StationsWithForcedChangeHere = {
     SBJ: ['stations.SBT'],

@@ -1,5 +1,5 @@
-import React from 'react'
-import * as Sentry from '@sentry/gatsby'
+import * as React from 'react'
+import * as Sentry from '@sentry/nextjs'
 
 interface IAnnouncementTabErrorBoundaryProps {
   systemId: string
@@ -33,7 +33,7 @@ export default function AnnouncementTabErrorBoundary(props: IAnnouncementTabErro
               style={{ width: '100%' }}
               rows={8}
               readOnly
-              value={`${error?.name}: ${error.message}\n\n${error.stack || '<no stacktrace>'}`}
+              value={`${(error as any)?.name}: ${(error as any).message}\n\n${(error as any).stack || '<no stacktrace>'}`}
             />
             <textarea style={{ width: '100%' }} rows={25} readOnly value={componentStack} />
           </details>

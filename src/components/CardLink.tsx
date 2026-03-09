@@ -1,6 +1,5 @@
 import React from 'react'
-
-import { Link } from 'gatsby'
+import Link from 'next/link'
 
 interface ICardLinkProps {
   title: React.ReactNode
@@ -15,7 +14,7 @@ function CardLink({ title, description, to, className }: ICardLinkProps) {
   return (
     <Link
       className={className}
-      to={to}
+      href={to}
       css={{
         textDecoration: 'none !important',
         display: 'flex',

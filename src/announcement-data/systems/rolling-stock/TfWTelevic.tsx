@@ -22,6 +22,9 @@ export default class TfWTelevic extends TrainAnnouncementSystem {
   readonly ID = 'TFW_TELEVIC_V1'
   readonly FILE_PREFIX = 'TfW/Televic'
   readonly SYSTEM_TYPE = 'train'
+  readonly DESCRIPTION =
+    'Generate Transport for Wales Televic on-train announcements using real audio recordings from Elin Llwyd and Eryl Jones.'
+  readonly AvailableStationNames = { high: [] as string[], low: [] as string[] }
 
   private readonly announcementPresets: Readonly<
     Record<string, ICustomAnnouncementPreset<IStartOfJourneyAnnouncementOptions | IStoppedAtStationAnnouncementOptions>[]>

@@ -8,8 +8,6 @@ import useStateWithLocalStorage from '@hooks/useStateWithLocalStorage'
 import dayjs from 'dayjs'
 import { css } from '@emotion/react'
 
-import type { PageProps } from 'gatsby'
-
 const changelogItemHeading = css({
   marginTop: 16,
   fontWeight: '700',
@@ -26,7 +24,7 @@ Changelog.sort((a, b) => {
   return b.date.localeCompare(a.date)
 })
 
-function ChangelogPage({ location }: PageProps) {
+export default function ChangelogPage() {
   const [lastViewed, setLastViewed] = useStateWithLocalStorage('changelog_lastViewedAt', +new Date(), val => {
     if (isNaN(new Date(val).getTime())) return false
     if (new Date(val) > new Date()) return false
@@ -40,7 +38,7 @@ function ChangelogPage({ location }: PageProps) {
   }, [])
 
   return (
-    <Layout location={location}>
+    <Layout title="Changelog" description="See what's new on the UK Rail Announcement Generator — recent additions, fixes, and other changes.">
       <header>
         <h1>Changelog</h1>
       </header>
@@ -155,5 +153,3 @@ function ChangelogPage({ location }: PageProps) {
     </Layout>
   )
 }
-
-export default ChangelogPage

@@ -1,3 +1,5 @@
+import type { PagesFunction } from '@cloudflare/workers-types'
+
 export const onRequest: PagesFunction<Env> = async context => {
   const { request, env } = context
   const { searchParams } = new URL(request.url)

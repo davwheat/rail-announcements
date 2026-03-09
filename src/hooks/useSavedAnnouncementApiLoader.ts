@@ -1,9 +1,9 @@
-import { selectedTabIdsState, tabStatesState } from '@atoms/index'
+import { selectedTabIdsState, tabStateFamily } from '@atoms/index'
 import { SystemTabState } from '@data/SystemTabState'
 import { SnackbarKey, useSnackbar } from 'notistack'
 import { useEffect } from 'react'
-import { useSetRecoilState } from 'recoil'
-import { navigate } from 'gatsby'
+import { useSetAtom, useStore } from 'jotai'
+import { useRouter } from 'next/router'
 
 const idToPath: Record<string, string> = {
   // Rolling stock
@@ -28,9 +28,10 @@ const idToPath: Record<string, string> = {
 
 export default function useSavedAnnouncementApiLoader() {
   const { enqueueSnackbar, closeSnackbar } = useSnackbar()
+  const router = useRouter()
 
-  const setSelectedTabIds = useSetRecoilState(selectedTabIdsState)
-  const setTabState = useSetRecoilState(tabStatesState)
+  const setSelectedTabIds = useSetAtom(selectedTabIdsState)
+  const store = useStore()
 
   useEffect(() => {
     const url = new URL(window.location.href)
@@ -58,14 +59,14 @@ export default function useSavedAnnouncementApiLoader() {
             if (path !== url.pathname) {
               console.log('Navigating to', `${path}${url.search}`)
 
-              navigate(`${path}${url.search}`)
+              router.push(`${path}${url.search}`)
               return
             }
 
             console.log('Setting selected tab', state.tabId)
-            console.log('Setting state', { [state.tabId]: state.state })
+            console.log('Setting state', { [`${state.systemId}::${state.tabId}`]: state.state })
 
-            setTabState({ [state.tabId]: state.state })
+            store.set(tabStateFamily(`${state.systemId}::${state.tabId}`), state.state)
             setSelectedTabIds(prev => ({ ...prev, [state.systemId]: state.tabId }))
 
             enqueueSnackbar("We've loaded your shared announcement options", { variant: 'success' })

@@ -1,20 +1,26 @@
 {
   "compilerOptions": {
     "module": "esnext",
-    "target": "esnext",
-    "lib": ["dom", "esnext"],
+    "target": "es2022",
+    "lib": ["dom", "dom.iterable", "esnext"],
     "jsx": "react-jsx",
     "jsxImportSource": "@emotion/react",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "esModuleInterop": true,
     "strict": true,
     "skipLibCheck": true,
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
-    "outDir": "./dist", // not actually used
     "resolveJsonModule": true,
     "strictNullChecks": true,
     "forceConsistentCasingInFileNames": true,
+    "incremental": true,
+    "noEmit": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
     "paths": {
       "@components/*": ["./src/components/*"],
       "@data/*": ["./src/data/*"],
@@ -24,7 +30,9 @@
       "@announcement-data/*": ["./src/announcement-data/*"],
       "@hooks/*": ["./src/hooks/*"],
       "@assets/*": ["./src/assets/*"]
-    }
+    },
+    "isolatedModules": true
   },
-  "include": ["./src/**/*", "./gatsby-node.ts", "./gatsby-config.ts", "./gatsby-browser.tsx", "./gatsby-ssr.tsx", "./plugins/**/*"]
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules", "functions"]
 }

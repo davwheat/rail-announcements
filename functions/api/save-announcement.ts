@@ -5,6 +5,7 @@ dayjs.extend(utc)
 
 import { v4 as uuid } from 'uuid'
 import { Validator } from '@cfworker/json-schema'
+import type { PagesFunction } from '@cloudflare/workers-types'
 
 interface ISystemTabStateJson {
   systemId: string

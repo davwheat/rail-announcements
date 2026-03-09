@@ -10,6 +10,12 @@ interface TabProps {
   onTabChange?: (index: number) => void
 }
 
+// Prevents inactive tab content from re-rendering when the selected tab index changes.
+// React.memo bails out when the children prop (the tab's React element) is the same reference.
+const TabContentWrapper = React.memo(function TabContentWrapper({ children }: { children: React.ReactNode }) {
+  return <>{children}</>
+})
+
 const Tabs = React.memo(({ tabNames, tabItems, customKeyPrefix = '', selectedTabIndex, onTabChange }: TabProps) => {
   if (tabNames.length !== tabItems.length) {
     throw new Error('Different amount of tabNames and tabItems provided.')
@@ -95,7 +101,9 @@ const Tabs = React.memo(({ tabNames, tabItems, customKeyPrefix = '', selectedTab
 
       <TabPanels>
         {tabItems.map((tab, i) => (
-          <TabPanel key={`${customKeyPrefix}${tabNames[i]}`}>{tab}</TabPanel>
+          <TabPanel key={`${customKeyPrefix}${tabNames[i]}`}>
+            <TabContentWrapper>{tab}</TabContentWrapper>
+          </TabPanel>
         ))}
       </TabPanels>
     </OGTabs>

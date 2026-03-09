@@ -1,5 +1,5 @@
 import { CallingAtPoint } from '@components/CallingAtSelector'
-import { RttResponse } from '../../functions/api/get-service-rtt'
+import { RttResponse } from '../api-types/get-service-rtt-types'
 import { stationItemCompleter } from '@helpers/crsToStationItemMapper'
 
 import dayjs from 'dayjs'
@@ -44,14 +44,14 @@ export class RttUtils {
   }
 
   static getEligibleLocations(rttService: RttResponse): CallingAtPointWithRttDetail[] {
-    rttService[eligibleLocationsSymbol] ??= this.getEligibleLocationsInternal(rttService).map(l => ({
+    ;(rttService as any)[eligibleLocationsSymbol] ??= this.getEligibleLocationsInternal(rttService).map(l => ({
       ...stationItemCompleter(l.crs!),
       rttPlatform: l.platform ?? null,
       arrLateness: l.realtimeGbttArrivalLateness ?? null,
       depLateness: l.realtimeGbttDepartureLateness ?? null,
     }))
 
-    return rttService[eligibleLocationsSymbol]
+    return (rttService as any)[eligibleLocationsSymbol]
   }
 
   private static getEligibleLocationsInternal(rttService: RttResponse) {

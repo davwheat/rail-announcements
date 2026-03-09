@@ -45,22 +45,19 @@ When you've cloned the repository, install the required dependencies with Yarn:
 yarn install
 ```
 
-Then you can start the three (yes, three) development services:
+Then start the development server:
 
 ```bash
-# In one terminal, run (for the website):
-yarn run develop
-
-# When this says "You can now view rail-announcements in the browser.", open a new terminal and run (for the live trains API):
-yarn run develop:workers
-
-# Finally, open a new terminal and run (to serve the audio files):
-yarn run serve-audio
+yarn dev
 ```
 
-You'll be able to access the website at [http://local.davw.network:8787](http://local.davw.network:8787). `local.davw.network` is a domain that
-will always resolve to your local machine, and is used to ensure that the website works correctly with the audio files and backend API during
-local development.
+The website will be available at [http://localhost:3000](http://localhost:3000).
+
+To also run the Cloudflare Workers backend (required for live trains features), use Wrangler in a second terminal:
+
+```bash
+npx wrangler pages dev
+```
 
 #### Additional steps
 
@@ -77,11 +74,11 @@ RTT_API_PASSWORD=your_password
 
 ### Website contributions
 
-This site is created with the React Framework using Gatsby. If you're not familiar with React or Gatsby, you may want to research them before
-contributing.
+This site is built with [Next.js](https://nextjs.org/) and React. If you're not familiar with them, you may want to read their documentation
+before contributing.
 
 **Before committing your changes, format your code:**
 
 ```bash
-yarn run format
+yarn format
 ```

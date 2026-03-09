@@ -143,7 +143,7 @@ const AVAILABLE_DISRUPTION_REASONS = [
   'emergency services dealing with an incident near the railway',
   'urgent repairs to the track',
 ].sort()
-const AVAILABLE_SEATING_AVAILABILITY = []
+const AVAILABLE_SEATING_AVAILABILITY: string[] = []
 const AVAILABLE_SPECIAL_REMARKS = [
   {
     title: 'Make sure you have the correct ticket',
@@ -314,7 +314,21 @@ export default class AtosMatt extends StationAnnouncementSystem {
   /**
    * @returns "Platform X for the HH:mm YYYYYY service to ZZZZ (via AAAA)."
    */
-  private assembleTrainInfo({ hour, min, toc, via, terminatingStationCode, destAllHigh = false }): AudioItem[] {
+  private assembleTrainInfo({
+    hour,
+    min,
+    toc,
+    via,
+    terminatingStationCode,
+    destAllHigh = false,
+  }: {
+    hour: string
+    min: string
+    toc: string
+    via?: string
+    terminatingStationCode: string
+    destAllHigh?: boolean
+  }): AudioItem[] {
     const files = [
       `times.hour.${hour}`,
       `times.mins.${min}`,
@@ -327,18 +341,18 @@ export default class AtosMatt extends StationAnnouncementSystem {
 
     if (destAllHigh) {
       if (via !== 'none') {
-        if (!this.validateOptions({ stationsHigh: [terminatingStationCode, via] })) return
-        files.push(`stations.high.${terminatingStationCode}`, 'via', `stations.high.${via}`)
+        if (!this.validateOptions({ stationsHigh: [terminatingStationCode, via!] })) return []
+        files.push(`stations.high.${terminatingStationCode}`, 'via', `stations.high.${via!}`)
       } else {
-        if (!this.validateOptions({ stationsHigh: [terminatingStationCode] })) return
+        if (!this.validateOptions({ stationsHigh: [terminatingStationCode] })) return []
         files.push(`stations.high.${terminatingStationCode}`)
       }
     } else {
       if (via !== 'none') {
-        if (!this.validateOptions({ stationsHigh: [terminatingStationCode], stationsLow: [via] })) return
+        if (!this.validateOptions({ stationsHigh: [terminatingStationCode], stationsLow: [via!] })) return []
         files.push(`stations.high.${terminatingStationCode}`, 'via', `stations.low.${via}`)
       } else {
-        if (!this.validateOptions({ stationsLow: [terminatingStationCode] })) return
+        if (!this.validateOptions({ stationsLow: [terminatingStationCode] })) return []
         files.push(`stations.low.${terminatingStationCode}`)
       }
     }
@@ -569,7 +583,7 @@ export default class AtosMatt extends StationAnnouncementSystem {
     return true
   }
 
-  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab> = {
+  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab<string>> = {
     nextTrain: {
       name: 'Next train',
       component: CustomAnnouncementPane,
@@ -699,7 +713,7 @@ export default class AtosMatt extends StationAnnouncementSystem {
             name: '',
             type: 'custom',
             default: 'delayed',
-            component: ({ value, onChange }) => {
+            component: ({ value, onChange }: { value: any; onChange: (value: any) => void }) => {
               return (
                 <fieldset>
                   <legend>Disruption type</legend>
@@ -736,7 +750,17 @@ export default class AtosMatt extends StationAnnouncementSystem {
             name: '',
             type: 'custom',
             default: 'unknown',
-            component: ({ activeState, value, onChange, availableDelayTimes }) => {
+            component: ({
+              activeState,
+              value,
+              onChange,
+              availableDelayTimes,
+            }: {
+              activeState: Record<string, unknown>
+              value: any
+              onChange: (value: any) => void
+              availableDelayTimes: any
+            }) => {
               if (activeState.disruptionType !== 'delayed') {
                 return null
               }
@@ -750,7 +774,7 @@ export default class AtosMatt extends StationAnnouncementSystem {
                       onChange(e.target.value)
                     }}
                   >
-                    {availableDelayTimes.map(d => (
+                    {availableDelayTimes.map((d: any) => (
                       <option key={d.value} value={d.value}>
                         {d.title}
                       </option>
@@ -770,7 +794,17 @@ export default class AtosMatt extends StationAnnouncementSystem {
             name: '',
             type: 'custom',
             default: AVAILABLE_PLATFORMS.low[0],
-            component: ({ activeState, value, onChange, availablePlatforms }) => {
+            component: ({
+              activeState,
+              value,
+              onChange,
+              availablePlatforms,
+            }: {
+              activeState: Record<string, unknown>
+              value: any
+              onChange: (value: any) => void
+              availablePlatforms: any
+            }) => {
               if (activeState.disruptionType !== 'cancelled') {
                 return null
               }
@@ -784,7 +818,7 @@ export default class AtosMatt extends StationAnnouncementSystem {
                       onChange(e.target.value)
                     }}
                   >
-                    {availablePlatforms.map(d => (
+                    {availablePlatforms.map((d: any) => (
                       <option key={d.value} value={d.value}>
                         {d.title}
                       </option>

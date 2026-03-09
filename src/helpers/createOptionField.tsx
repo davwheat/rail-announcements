@@ -3,8 +3,6 @@ import Select from 'react-select'
 
 import type { OptionsExplanation } from '@announcement-data/AnnouncementSystem'
 
-import './optionFields.less'
-
 interface OptionFieldOptions {
   onChange: (value: any) => void
   value: any
@@ -17,7 +15,7 @@ export interface Option<Value extends string = string> {
   readonly value: Value
 }
 
-export default function createOptionField(optionData: OptionsExplanation, options: OptionFieldOptions) {
+export default function createOptionField(optionData: OptionsExplanation<any, any>, options: OptionFieldOptions) {
   if (optionData.onlyShowWhen?.(options?.activeState!!) === false) {
     return null
   }
@@ -67,7 +65,7 @@ export default function createOptionField(optionData: OptionsExplanation, option
             id="system-select"
             value={{ value: options.value, label: opts.find(option => option.value === options.value)?.label || '' }}
             onChange={val => {
-              options.onChange(val.value)
+              options.onChange(val!.value)
             }}
             options={opts}
           />
@@ -82,6 +80,6 @@ export default function createOptionField(optionData: OptionsExplanation, option
 
     case 'customNoState':
       const Component2 = optionData.component
-      return <Component2 key={options.key} activeState={options.activeState} {...optionData.props} />
+      return <Component2 key={options.key} activeState={options.activeState!} {...optionData.props} />
   }
 }

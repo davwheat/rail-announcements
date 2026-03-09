@@ -1,76 +1,11 @@
 import TiplocToStation from './tiploc_to_station.json'
+import { PagesFunction } from '@cloudflare/workers-types'
+export type { RttResponse, RttOrigin, RttDestination, RttLocation, RttAssociation, LocationDisplayAs } from './get-service-rtt-types'
+import type { RttResponse } from './get-service-rtt-types'
 
 interface RttError {
   error: string
 }
-
-export interface RttResponse {
-  serviceUid: string
-  runDate: string
-  serviceType: string
-  isPassenger: boolean
-  trainIdentity: string
-  powerType: string
-  trainClass: string
-  atocCode: string
-  atocName: string
-  performanceMonitored: boolean
-  origin: Origin[]
-  destination: Destination[]
-  locations: Location[]
-}
-
-interface Origin {
-  tiploc: string
-  description: string
-  workingTime: string
-  publicTime: string
-  crs?: string
-}
-
-interface Destination {
-  tiploc: string
-  description: string
-  workingTime: string
-  publicTime: string
-  crs?: string
-}
-
-type LocationDisplayAs = 'CALL' | 'PASS' | 'ORIGIN' | 'DESTINATION' | 'STARTS' | 'TERMINATES' | 'CANCELLED_CALL' | 'CANCELLED_PASS'
-
-interface Location {
-  tiploc: string
-  crs?: string
-  description: string
-  origin: Origin[]
-  destination: Destination[]
-  isCall: boolean
-  isPublicCall: boolean
-  platform?: string
-  gbttBookedArrival?: string
-  gbttBookedArrivalNextDay?: true
-  gbttBookedDeparture?: string
-  gbttBookedDepartureNextDay?: true
-  realtimeDeparture?: string
-  realtimeDepartureNextDay?: true
-  realtimeArrival?: string
-  realtimeArrivalNextDay?: true
-  path?: string
-  associations?: Association[]
-  displayAs: LocationDisplayAs
-  realtimeActivated?: true
-  realtimeGbttArrivalLateness?: number
-  realtimeGbttDepartureLateness?: number
-}
-
-interface Association {
-  type: AssociationType
-  associatedUid: string
-  associatedRunDate: string
-  service?: RttResponse
-}
-
-type AssociationType = 'divide' | 'join'
 
 async function fetchRttService(
   serviceUid: string,
@@ -103,13 +38,13 @@ async function fetchRttService(
 
   // Fill in CRS data
   response.origin.forEach(origin => {
-    const station = TiplocToStation[origin.tiploc]
+    const station = (TiplocToStation as any)[origin.tiploc]
     if (station) {
       origin.crs = station.crs
     }
   })
   response.destination.forEach(destination => {
-    const station = TiplocToStation[destination.tiploc]
+    const station = (TiplocToStation as any)[destination.tiploc]
     if (station) {
       destination.crs = station.crs
     }
@@ -117,13 +52,13 @@ async function fetchRttService(
   response.locations ??= []
   response.locations.forEach(location => {
     location.origin.forEach(origin => {
-      const station = TiplocToStation[origin.tiploc]
+      const station = (TiplocToStation as any)[origin.tiploc]
       if (station) {
         origin.crs = station.crs
       }
     })
     location.destination.forEach(destination => {
-      const station = TiplocToStation[destination.tiploc]
+      const station = (TiplocToStation as any)[destination.tiploc]
       if (station) {
         destination.crs = station.crs
       }

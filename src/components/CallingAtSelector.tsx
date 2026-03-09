@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd'
+import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd'
 import createOptionField from '@helpers/createOptionField'
 import { nanoid } from 'nanoid'
 import { AllStationsTitleValueMap } from '@data/StationManipulators'
@@ -64,7 +64,7 @@ function CallingAtSelector({
   enableSplits = false,
   enableRrbContinuations = false,
   className,
-}: ICallingAtSelectorProps): JSX.Element {
+}: ICallingAtSelectorProps): React.JSX.Element {
   const AvailableStations = React.useMemo(() => {
     const options = AllStationsTitleValueMap.filter(s => availableStations.includes(s.value))
 
@@ -270,7 +270,7 @@ function CallingAtSelector({
                                       name: 'Split formation',
                                       type: 'select',
                                       options: enableSplits,
-                                      onlyShowWhen(activeState) {
+                                      onlyShowWhen(activeState: any) {
                                         return activeState.splitType !== 'none' && activeState.splitType !== undefined
                                       },
                                     },
@@ -302,7 +302,7 @@ function CallingAtSelector({
                                         enableRequestStops: enableRequestStops,
                                         enableSplits: false,
                                       },
-                                      onlyShowWhen(activeState) {
+                                      onlyShowWhen(activeState: any) {
                                         return activeState.splitType === 'splits'
                                       },
                                     },

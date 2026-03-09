@@ -489,6 +489,64 @@ const changelog: IChangelogVersion[] = [
     date: '2025-04-28',
     additions: ['New West Midlands Railway Class 172 announcement system', 'New West Midlands Railway Class 323 announcement system'],
   },
+  {
+    date: '2025-05-07',
+    additions: ['[WMR Class 172] Add termination announcements', '[WMR Class 172] Add Solihull, Tyseley, and Warminster stations'],
+  },
+  {
+    date: '2025-05-21',
+    additions: [
+      '[WMR Class 172] Add Spring Road, Hall Green, Yardley Wood, Shirley, and Whitlocks End stations',
+      '[WMR Class 172] Improve audio quality for several stations and common phrases',
+    ],
+  },
+  {
+    date: '2025-06-05',
+    additions: [
+      '[WMR Class 172] Add "change here for" announcements and Stourbridge Town station',
+      '[WMR Class 172] Add Lapworth, Hatton, Warwick Parkway, and Leamington Spa stations',
+      '[WMR Class 172] Add announcement buttons: bing bong and short platform (move to front four coaches)',
+    ],
+  },
+  {
+    date: '2025-06-21',
+    additions: [
+      '[WMR Class 172] Add Stratford-upon-Avon line stations (Wythall, Earlswood, The Lakes, Wood End, Danzey, Henley-in-Arden, Wootton Wawen, Wilmcote, Stratford Parkway, Stratford-upon-Avon)',
+    ],
+  },
+  {
+    date: '2025-08-05',
+    fixes: [
+      '[TfL Northern Line] Fix incorrect announcement segments for Finchley Central',
+      '[TfL Northern Line] Fix extra info playing for approaching West Finchley',
+    ],
+  },
+  {
+    date: '2026-01-19',
+    additions: ['[Amey Phil & Celia] Add Corby station'],
+  },
+  {
+    date: '2026-02-23',
+    additions: [
+      '[WMR Class 172] Update announcements from Freedom of Information request',
+      '[WMR Class 172] Add Hereford, Birmingham New Street, Colwall, Berkswell, and Bescot Stadium stations',
+    ],
+  },
+  {
+    date: '2026-03-03',
+    additions: [
+      '[WMR Class 172] Add option to choose TOC audio (West Midlands Railway, London Midland, or generic)',
+      '[WMR Class 172] Add significantly more stations sourced from Freedom of Information request',
+    ],
+  },
+  {
+    date: '2026-03-08',
+    otherChanges: ['Rewrote website with significant performance improvements'],
+  },
+  {
+    date: '2026-03-09',
+    additions: ['[Avanti Pendolino] Identified male voice artist'],
+  },
 ]
 
 export default changelog

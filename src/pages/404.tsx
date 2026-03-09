@@ -1,12 +1,12 @@
 import React from 'react'
 
 import Layout from '@components/Layout'
-import { Link } from 'gatsby'
+import Link from 'next/link'
 import NavBar from '@components/NavBar'
 
-function Error404Page({ location }): JSX.Element {
+export default function Error404Page(): React.JSX.Element {
   return (
-    <Layout location={location}>
+    <Layout title="Page not found">
       <header>
         <h1>Error 404 - Not found</h1>
       </header>
@@ -15,10 +15,8 @@ function Error404Page({ location }): JSX.Element {
 
       <main>
         <p>Oh no! Looks like this page couldn't be found.</p>
-        <Link to="/">Go to home page</Link>
+        <Link href="/">Go to home page</Link>
       </main>
     </Layout>
   )
 }
-
-export default Error404Page

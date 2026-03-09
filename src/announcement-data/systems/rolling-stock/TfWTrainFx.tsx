@@ -31,6 +31,7 @@ export default class TfWTrainFx extends TrainAnnouncementSystem {
   readonly ID = 'TFW_TRAINFX_V1'
   readonly FILE_PREFIX = 'TfW/TrainFX'
   readonly SYSTEM_TYPE = 'train'
+  readonly DESCRIPTION = 'Generate Transport for Wales TrainFX on-train announcements using real audio recordings.'
 
   private async playStartOfJourneyAnnouncement(options: IStartOfJourneyAnnouncementOptions, download: boolean = false): Promise<void> {
     const { callingAtCodes } = options
@@ -145,7 +146,7 @@ export default class TfWTrainFx extends TrainAnnouncementSystem {
     }
 
     if (!this.validateStationExists(stationCode, pitch)) {
-      return
+      return []
     }
 
     return [{ id: 'conjoiners.this train is for', opts: { delayStart: delay } }, `stations.${pitch}.${stationCode}`]

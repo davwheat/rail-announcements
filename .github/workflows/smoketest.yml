@@ -27,7 +27,7 @@ permissions:
   pull-requests: write
 
 env:
-  NODE_VERSION: 20.x
+  NODE_VERSION: 24.x
   CF_PAGES_PROJECT_NAME: rail-announcements
   CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
@@ -47,13 +47,13 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.head.sha || github.ref }}
 
       - name: Find existing build status comment
         continue-on-error: true
-        uses: peter-evans/find-comment@v3
+        uses: peter-evans/find-comment@v4
         if:
           ${{ github.event_name == 'pull_request' || github.event_name == 'pull_request_target' && contains(github.event.label.name, '🚀 request
           deploy') }}
@@ -65,7 +65,7 @@ jobs:
 
       - name: Create or update comment
         continue-on-error: true
-        uses: peter-evans/create-or-update-comment@v4
+        uses: peter-evans/create-or-update-comment@v5
         if:
           ${{ github.event_name == 'pull_request' || github.event_name == 'pull_request_target' && contains(github.event.label.name, '🚀 request
           deploy') }}
@@ -85,7 +85,7 @@ jobs:
             </table>
 
       - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
@@ -97,14 +97,13 @@ jobs:
       - name: Verify formatting
         run: yarn format:check
 
-      - name: Restore Gatsby cache
-        uses: actions/cache@v4
-        id: gatsbyCache
+      - name: Restore Next.js cache
+        uses: actions/cache@v5
         with:
-          path: ./.cache
-          key: ${{ runner.os }}-gatsby-cache-${{ secrets.CACHE_VERSION }}-${{ hashFiles('public') }}
+          path: ./.next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('yarn.lock') }}-${{ hashFiles('src/**/*.ts', 'src/**/*.tsx') }}
           restore-keys: |
-            ${{ runner.os }}-gatsby-cache-${{ secrets.CACHE_VERSION }}-
+            ${{ runner.os }}-nextjs-${{ hashFiles('yarn.lock') }}-
 
       - name: Build site
         run: yarn build:ci
@@ -134,22 +133,18 @@ jobs:
           command: d1 migrations apply rail-announcements
 
       - name: Publish to Cloudflare Pages
-        uses: cloudflare/pages-action@1
+        uses: cloudflare/wrangler-action@v3
         if: ${{ github.event_name != 'pull_request_target' || contains(github.event.label.name, '🚀 request deploy') }}
         id: cf-pages-upload
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: ${{ env.CF_PAGES_PROJECT_NAME }}
-          directory: public # e.g. 'dist'
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-          wranglerVersion: '3'
           # Use PR head branch if available, otherwise use the current branch
-          branch: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name }}
+          command: pages deploy --branch=${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name }}
 
       - name: Remove deploy label
         if: ${{ github.event_name == 'pull_request_target' && contains(github.event.label.name, '🚀 request deploy') }}
-        uses: actions/github-script@v6
+        uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -162,7 +157,7 @@ jobs:
 
       - name: Find existing build status comment
         continue-on-error: true
-        uses: peter-evans/find-comment@v3
+        uses: peter-evans/find-comment@v4
         if:
           ${{ github.event_name == 'pull_request' || github.event_name == 'pull_request_target' && contains(github.event.label.name, '🚀 request
           deploy') }}
@@ -177,7 +172,7 @@ jobs:
         if:
           ${{ (github.event_name == 'pull_request' || github.event_name == 'pull_request_target' && contains(github.event.label.name, '🚀 request
           deploy')) && steps.find_current_status_comment.outputs.comment-id != '' }}
-        uses: peter-evans/create-or-update-comment@v4
+        uses: peter-evans/create-or-update-comment@v5
         with:
           comment-id: ${{ steps.find_current_status_comment.outputs.comment-id }}
           edit-mode: replace
@@ -191,9 +186,9 @@ jobs:
             &nbsp;✅&nbsp; Deploy successful!
             </td></tr>
             <tr><td><strong>Preview URL:</strong></td><td>
-            <a href='${{ steps.cf-pages-upload.outputs.url }}'>${{ steps.cf-pages-upload.outputs.url }}</a>
+            <a href='${{ steps.cf-pages-upload.outputs.deployment-url }}'>${{ steps.cf-pages-upload.outputs.deployment-url }}</a>
             </td></tr>
             <tr><td><strong>Branch Preview URL:</strong></td><td>
-            <a href='${{ steps.cf-pages-upload.outputs.alias }}'>${{ steps.cf-pages-upload.outputs.alias }}</a>
+            <a href='${{ steps.cf-pages-upload.outputs.pages-deployment-alias-url }}'>${{ steps.cf-pages-upload.outputs.pages-deployment-alias-url }}</a>
             </td></tr>
             </table>

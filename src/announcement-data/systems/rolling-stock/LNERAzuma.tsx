@@ -83,6 +83,7 @@ export default class LnerAzuma extends TrainAnnouncementSystem {
   readonly ID = 'LNER_AZUMA_V1'
   readonly FILE_PREFIX = 'LNER/Azuma'
   readonly SYSTEM_TYPE = 'train'
+  readonly DESCRIPTION = 'Generate LNER Azuma (Class 800/801) on-train announcements using real audio recordings.'
 
   readonly STATION_INFO: Record<string, AudioItem[]> = {
     NCL: ['station.CAR', 'station.HEX', 'and', 'tyne and wear metro'],

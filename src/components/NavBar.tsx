@@ -1,4 +1,4 @@
-import { Link } from 'gatsby'
+import Link from 'next/link'
 import Breakpoints from '@data/breakpoints'
 
 export default function NavBar() {
@@ -17,10 +17,10 @@ export default function NavBar() {
         },
       }}
     >
-      <Link to="/">Home</Link>
-      <Link to="/amey-live-train-announcements">Live announcements</Link>
-      <Link to="/about">About</Link>
-      <Link to="/changelog">Latest changes</Link>
+      <Link href="/">Home</Link>
+      <Link href="/amey-live-train-announcements">Live announcements</Link>
+      <Link href="/about">About</Link>
+      <Link href="/changelog">Latest changes</Link>
     </nav>
   )
 }

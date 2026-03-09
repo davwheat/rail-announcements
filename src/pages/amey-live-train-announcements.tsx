@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import React, { useMemo } from 'react'
 
 import Layout from '@components/Layout'
 import NavBar from '@components/NavBar'
@@ -6,14 +6,13 @@ import Disclaimers from '@components/Disclaimers'
 import { LiveTrainAnnouncements } from '@components/AmeyLiveTrainAnnouncements'
 
 import Breakpoints from '@data/breakpoints'
-import { PageProps } from 'gatsby'
 
 import RailSymbol from '@assets/rail-symbol-2/white-on-red-inset.svg'
 import AmeyPhil from '@announcement-data/systems/stations/AmeyPhil'
 import AmeyCelia from '@announcement-data/systems/stations/AmeyCelia'
 import AnnouncementTabErrorBoundary from '@components/AnnouncementTabErrorBoundary'
 
-function AmeyTrainAnnouncementsPage({ location }: PageProps): JSX.Element {
+export default function AmeyTrainAnnouncementsPage(): React.JSX.Element {
   const systems = useMemo<Record<'Phil Sayer' | 'Celia Drummond', AmeyPhil>>(() => {
     return {
       'Phil Sayer': new AmeyPhil(),
@@ -41,11 +40,7 @@ function AmeyTrainAnnouncementsPage({ location }: PageProps): JSX.Element {
   }, [systems])
 
   return (
-    <Layout
-      location={location}
-      title="Live announcements"
-      description="Listen to real-time train announcements for (almost) any UK railway station."
-    >
+    <Layout title="Live announcements" description="Listen to real-time train announcements for (almost) any UK railway station.">
       <header>
         <h1
           css={{
@@ -110,28 +105,28 @@ function AmeyTrainAnnouncementsPage({ location }: PageProps): JSX.Element {
             supportedPlatforms={supportedPlatforms}
             approachingTrainHandler={Object.entries(systems).reduce(
               (acc, [key, system]) => {
-                acc[key] = system.playTrainApproachingAnnouncement.bind(system)
+                acc[key as keyof typeof systems] = system.playTrainApproachingAnnouncement.bind(system)
                 return acc
               },
               {} as Record<keyof typeof systems, any>,
             )}
             nextTrainHandler={Object.entries(systems).reduce(
               (acc, [key, system]) => {
-                acc[key] = system.playNextTrainAnnouncement.bind(system)
+                acc[key as keyof typeof systems] = system.playNextTrainAnnouncement.bind(system)
                 return acc
               },
               {} as Record<keyof typeof systems, any>,
             )}
             standingTrainHandler={Object.entries(systems).reduce(
               (acc, [key, system]) => {
-                acc[key] = system.playStandingTrainAnnouncement.bind(system)
+                acc[key as keyof typeof systems] = system.playStandingTrainAnnouncement.bind(system)
                 return acc
               },
               {} as Record<keyof typeof systems, any>,
             )}
             disruptedTrainHandler={Object.entries(systems).reduce(
               (acc, [key, system]) => {
-                acc[key] = system.playDisruptedTrainAnnouncement.bind(system)
+                acc[key as keyof typeof systems] = system.playDisruptedTrainAnnouncement.bind(system)
                 return acc
               },
               {} as Record<keyof typeof systems, any>,
@@ -144,5 +139,3 @@ function AmeyTrainAnnouncementsPage({ location }: PageProps): JSX.Element {
     </Layout>
   )
 }
-
-export default AmeyTrainAnnouncementsPage

@@ -60,6 +60,7 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
   readonly ID = 'WMT_CLASS_323_V1'
   readonly FILE_PREFIX = 'WMT/323'
   readonly SYSTEM_TYPE = 'train'
+  readonly DESCRIPTION = 'Generate West Midlands Trains Class 323 on-train announcements using real audio recordings from Julie Berry.'
 
   private async playApproachingStationAnnouncement(options: IApproachingStationAnnouncementOptions, download: boolean = false): Promise<void> {
     const files: AudioItem[] = []

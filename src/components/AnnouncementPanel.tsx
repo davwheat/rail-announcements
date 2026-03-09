@@ -1,13 +1,13 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import Tabs from './Tabs'
 import AnnouncementTabErrorBoundary from './AnnouncementTabErrorBoundary'
 
-import { useRecoilState } from 'recoil'
+import { useAtom } from 'jotai'
 import { selectedTabIdsState } from '@atoms'
 import { deletePersonalPreset, getPersonalPresets, initPersonalPresetsDb, savePersonalPreset } from '@data/db'
 
-import * as Sentry from '@sentry/gatsby'
+import * as Sentry from '@sentry/nextjs'
 
 import type AnnouncementSystem from '@announcement-data/AnnouncementSystem'
 
@@ -24,15 +24,20 @@ function AnnouncementPanel({ system }: IProps) {
     window.__system = AnnouncementSystem
   }
 
-  const AnnouncementSystemInstance: AnnouncementSystem = AnnouncementSystem ? new (AnnouncementSystem as any)() : null
-  const customTabs = AnnouncementSystemInstance?.customAnnouncementTabs ?? {}
+  const AnnouncementSystemInstance: AnnouncementSystem = useMemo(
+    () => (AnnouncementSystem ? new (AnnouncementSystem as any)() : null),
+    [AnnouncementSystem],
+  )
 
-  const TabPanelMap = React.useMemo(
+  const customTabs = useMemo(() => AnnouncementSystemInstance?.customAnnouncementTabs ?? {}, [AnnouncementSystemInstance])
+
+  const TabPanelMap = useMemo(
     () =>
       !AnnouncementSystem || !AnnouncementSystemInstance
         ? null
         : Object.entries(customTabs).reduce(
-            (acc, [id, { component: TabComponent, ...opts }], i) => {
+            (acc, [id, { component: TabComponentUntyped, ...opts }], i) => {
+              const TabComponent = TabComponentUntyped as React.ComponentType<any>
               acc[opts.name] = (
                 <AnnouncementTabErrorBoundary
                   key={opts.name}
@@ -50,7 +55,7 @@ function AnnouncementPanel({ system }: IProps) {
                     getPersonalPresets={getPersonalPresets}
                     deletePersonalPreset={deletePersonalPreset}
                     defaultState={JSON.stringify(opts.defaultState)}
-                    importStateFromRttService={opts.importStateFromRttService}
+                    importStateFromRttService={opts.importStateFromRttService ?? null}
                   />
                 </AnnouncementTabErrorBoundary>
               )
@@ -59,11 +64,14 @@ function AnnouncementPanel({ system }: IProps) {
             },
             {} as Record<string, React.ReactElement>,
           ),
-    [customTabs, AnnouncementSystem, AnnouncementSystemInstance, isPresetsDbReady, savePersonalPreset, getPersonalPresets],
+    [customTabs, AnnouncementSystem, AnnouncementSystemInstance, isPresetsDbReady],
   )
-  const TabPanels: React.ReactElement[] = Object.values(TabPanelMap ?? {})
 
-  const [selectedTabIds, setSelectedTabIds] = useRecoilState(selectedTabIdsState)
+  const TabPanels: React.ReactElement[] = useMemo(() => Object.values(TabPanelMap ?? {}), [TabPanelMap])
+
+  const tabNames = useMemo(() => Object.values(customTabs).map(tab => tab.name), [customTabs])
+
+  const [selectedTabIds, setSelectedTabIds] = useAtom(selectedTabIdsState)
 
   function getSelectedTab() {
     const tabId = selectedTabIds?.[AnnouncementSystemInstance?.ID ?? '']
@@ -140,7 +148,7 @@ function AnnouncementPanel({ system }: IProps) {
           key={AnnouncementSystemInstance?.ID}
           selectedTabIndex={getSelectedTab()}
           onTabChange={setSelectedTab}
-          tabNames={Object.values(customTabs).map(tab => tab.name)}
+          tabNames={tabNames}
           tabItems={TabPanels ?? []}
           customKeyPrefix={AnnouncementSystemInstance?.ID}
         />

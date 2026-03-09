@@ -1,17 +1,12 @@
 import Layout from '@components/Layout'
 import NavBar from '@components/NavBar'
-
-import { StaticImage } from 'gatsby-plugin-image'
 import Breakpoints from '@data/breakpoints'
 
-import type { PageProps } from 'gatsby'
-
-function AboutPage({ location }: PageProps) {
+export default function AboutPage() {
   return (
     <Layout
       title="About"
       description="Rail announcements is a website developed by David Wheatley, containing various announcement systems utilising freedom of information released and recorded audio."
-      location={location}
     >
       <header>
         <h1>About</h1>
@@ -36,7 +31,7 @@ function AboutPage({ location }: PageProps) {
           },
         }}
       >
-        <StaticImage
+        <img
           css={{
             float: 'left',
             marginTop: 10,
@@ -53,7 +48,8 @@ function AboutPage({ location }: PageProps) {
             },
           }}
           width={150}
-          src="../assets/dav.jpg"
+          height={150}
+          src="/images/dav.jpg"
           alt="Portrait image of David"
         />
 
@@ -76,5 +72,3 @@ function AboutPage({ location }: PageProps) {
     </Layout>
   )
 }
-
-export default AboutPage

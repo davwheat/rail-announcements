@@ -1,22 +1,14 @@
-import { atom } from 'recoil'
-import { persistentAtom } from 'recoil-persistence/react'
+import { atom } from 'jotai'
+import { atomWithStorage, createJSONStorage } from 'jotai/utils'
+import { atomFamily } from 'jotai-family'
 
-export const selectedTabIdsState = persistentAtom<Record<string, string> | null>(
-  {
-    key: 'selectedTabIds',
-    default: {},
-  },
-  {
-    validator: state => state !== null && typeof state === 'object',
-  },
+const ssrSafeLocalStorage = createJSONStorage<Record<string, string>>(() =>
+  typeof window !== 'undefined' ? localStorage : ({ getItem: () => null, setItem: () => {}, removeItem: () => {} } as unknown as Storage),
 )
 
-export const isPlayingAnnouncementState = atom<boolean>({
-  key: 'isPlayingAnnouncement',
-  default: false,
-})
+export const selectedTabIdsState = atomWithStorage<Record<string, string>>('selectedTabIds', {}, ssrSafeLocalStorage)
 
-export const tabStatesState = atom<Record<string, Record<string, unknown>> | null>({
-  key: 'tabStates',
-  default: null,
-})
+export const isPlayingAnnouncementState = atom<boolean>(false)
+
+/** Per-tab state atom. Key is `${systemId}::${tabId}`. Each tab subscribes only to its own atom. */
+export const tabStateFamily = atomFamily((_stateKey: string) => atom<Record<string, unknown> | null>(null))

@@ -11,6 +11,8 @@ export default class AmeyCelia extends AmeyPhil {
   readonly ID = 'AMEY_CELIA_V1'
   readonly FILE_PREFIX = 'station/ketech/celia'
   readonly SYSTEM_TYPE = 'station'
+  readonly DESCRIPTION =
+    'Generate UK railway station announcements using real audio recordings from Celia Drummond, the voice of the Amey/KeTech announcement system used at hundreds of UK stations.'
 
   protected readonly BEFORE_TOC_DELAY: number = 30
   protected readonly BEFORE_SECTION_DELAY: number = 550
@@ -689,9 +691,9 @@ export default class AmeyCelia extends AmeyPhil {
       'BEF',
       'BEG',
       'BEH',
-      'BEL',
       'BEM',
       'BEN',
+      'BER',
       'BES',
       'BET',
       'BEU',

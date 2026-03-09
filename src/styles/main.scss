@@ -6,10 +6,10 @@
   --link-color: #00528a;
 }
 
-@import './br-font.less';
-// @import './hammersmith-font.less';
-@import './baseline.less';
-@import './buttons.less';
+@import './br-font.scss';
+// @import './hammersmith-font.scss';
+@import './baseline.scss';
+@import './buttons.scss';
 
 .warningMessage {
   background: rgba(255, 187, 0, 0.15);
@@ -120,8 +120,8 @@ h3 {
   font-size: 1.4rem;
 }
 
-@import './checkbox.less';
-@import './text-input.less';
+@import './checkbox.scss';
+@import './text-input.scss';
 
 .react-tabs__tab-panel:not(.react-tabs__tab-panel--selected) {
   display: none;

@@ -63,10 +63,12 @@ const announcementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>>
 }
 
 export default class AvantiPendolino extends TrainAnnouncementSystem {
-  readonly NAME = 'Avanti West Coast - Pendolino (Class 390) - Emma Lintern & Unknown Male'
+  readonly NAME = 'Avanti West Coast - Pendolino (Class 390) - Emma Lintern & Pete Gold'
   readonly ID = 'AWC_PENDOLINO'
   readonly FILE_PREFIX = 'AWC/390'
   readonly SYSTEM_TYPE = 'train'
+  readonly DESCRIPTION =
+    'Generate Avanti West Coast Pendolino (Class 390) on-train announcements using real audio recordings from Emma Lintern and Pete Gold.'
 
   private async playApproachingStationAnnouncement(options: IApproachingStationAnnouncementOptions, download: boolean = false): Promise<void> {
     const files: AudioItem[] = []

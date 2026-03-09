@@ -1,8 +1,8 @@
 import { isPlayingAnnouncementState } from '@atoms'
-import { useRecoilState } from 'recoil'
+import { useAtom } from 'jotai'
 
 export default function useIsPlayingAnnouncement(): [boolean, (newVal: boolean) => void] {
-  const [globalState, setGlobalState] = useRecoilState(isPlayingAnnouncementState)
+  const [globalState, setGlobalState] = useAtom(isPlayingAnnouncementState)
 
   return [
     globalState,

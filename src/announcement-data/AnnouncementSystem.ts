@@ -3,7 +3,7 @@ import Crunker from '../helpers/crunker'
 import type { ICustomAnnouncementPaneProps } from '@components/PanelPanes/CustomAnnouncementPane'
 import type { ICustomButtonPaneProps } from '@components/PanelPanes/CustomButtonPane'
 import type React from 'react'
-import { RttResponse } from '../../functions/api/get-service-rtt'
+import { RttResponse } from '../api-types/get-service-rtt-types'
 
 export interface IPlayOptions {
   delayStart: number
@@ -64,7 +64,7 @@ interface ICustomOptions<Props extends {}, Component extends React.ComponentType
 
 interface ICustomNoStateOptions {
   type: 'customNoState'
-  component: (props: { activeState: Record<string, unknown>; [key: string]: any }) => JSX.Element
+  component: (props: { activeState: Record<string, unknown>; [key: string]: any }) => React.JSX.Element
   props?: Record<string, unknown>
   onlyShowWhen?: (activeState: Record<string, unknown>) => boolean
 }
@@ -78,7 +78,7 @@ export interface AudioItemObject {
 
 export interface CustomAnnouncementTab<OptionIds extends string> {
   name: string
-  component: React.ComponentType<ICustomAnnouncementPaneProps<OptionIds> | ICustomButtonPaneProps>
+  component: React.ComponentType<ICustomAnnouncementPaneProps<OptionIds>> | React.ComponentType<ICustomButtonPaneProps>
   props: Omit<
     ICustomAnnouncementPaneProps<OptionIds> | ICustomButtonPaneProps,
     | 'name'
@@ -151,6 +151,11 @@ export default abstract class AnnouncementSystem {
    */
   abstract readonly SYSTEM_TYPE: 'station' | 'train'
 
+  /**
+   * Short description of the announcement system, used for SEO meta tags.
+   */
+  readonly DESCRIPTION: string | undefined = undefined
+
   private static readonly SAMPLE_RATE = 48000
 
   headerComponent(): React.ReactNode {
@@ -185,7 +190,7 @@ export default abstract class AnnouncementSystem {
     window.Crunker = Crunker
 
     if ('audioSession' in window.navigator) {
-      window.navigator.audioSession.type = 'playback'
+      ;(window.navigator.audioSession as any).type = 'playback'
     }
 
     window.__audio = fileIds
@@ -213,20 +218,21 @@ export default abstract class AnnouncementSystem {
     } else {
       return new Promise<void>(resolve => {
         crunker.play(audio, source => {
+          const ctx: AudioContext = (crunker as any)._context
           console.log('[Crunker] About to play audio...')
-          crunker._context.onstatechange = a => console.log('state changed:', a)
-          console.log('Context state: ', crunker._context.state)
+          ctx.onstatechange = a => console.log('state changed:', a)
+          console.log('Context state: ', ctx.state)
 
-          if (crunker._context.state === 'suspended') {
+          if (ctx.state === 'suspended') {
             console.log('[Crunker] Resuming audio context')
-            crunker._context.resume()
-            console.log('Context state: ', crunker._context.state)
+            ctx.resume()
+            console.log('Context state: ', ctx.state)
 
             const isFirefoxUser = navigator.userAgent.toLowerCase().includes('firefox')
 
             if (!isFirefoxUser) {
               setTimeout(() => {
-                if (crunker._context.state === 'suspended') {
+                if (ctx.state === 'suspended') {
                   console.error('[Crunker] Failed to resume audio context')
 
                   document.getElementById('resume-audio-button')?.remove()
@@ -236,7 +242,7 @@ export default abstract class AnnouncementSystem {
                   button.id = 'resume-audio-button'
                   button.style.margin = '16px'
                   button.onclick = () => {
-                    crunker._context.resume()
+                    ctx.resume()
                     button.remove()
                   }
 

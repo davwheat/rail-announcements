@@ -66,6 +66,8 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
   readonly ID = 'SN_CLASS_377_V1'
   readonly FILE_PREFIX = 'SN/377'
   readonly SYSTEM_TYPE = 'train'
+  readonly DESCRIPTION =
+    'Generate Bombardier Electrostar and Turbostar (Southeastern/Southern) on-train announcements using real audio recordings from Julie Berry.'
 
   private async playApproachingStationAnnouncement(options: IApproachingStationAnnouncementOptions, download: boolean = false): Promise<void> {
     const files: AudioItem[] = []

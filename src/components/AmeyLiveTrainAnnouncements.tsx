@@ -14,9 +14,7 @@ import {
   type TimingLocation,
   type EndPointLocation,
   AssociatedServiceDetail,
-} from '../../functions/api/get-services'
-
-import './AmeyLiveTrainAnnouncements.css'
+} from '../api-types/get-services-types'
 
 import type { CallingAtPoint } from '@components/CallingAtSelector'
 import type { Option } from '@helpers/createOptionField'
@@ -36,7 +34,6 @@ import Breakpoints from '@data/breakpoints'
 import { isMindTheGapStation } from '@data/liveTrains/mindTheGap'
 import { isShortPlatform } from '@data/liveTrains/shortPlatforms'
 import NoSSR from './NoSSR'
-import { LoadingIndicator } from 'react-select/dist/declarations/src/components/indicators'
 import LoadingSpinner from './LoadingSpinner'
 
 dayjs.extend(dayjsUtc)
@@ -1885,7 +1882,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
           <Logs css={{ marginTop: 16 }} logs={logs} />
 
           <img
-            src={NREPowered}
+            src={NREPowered.src}
             alt="Powered by National Rail Enquiries"
             css={{
               maxWidth: '100%',

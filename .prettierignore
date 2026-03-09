@@ -3,3 +3,4 @@ package-lock.json
 public
 size-plugin.json
 functions/.wrangler
+next-env.d.ts

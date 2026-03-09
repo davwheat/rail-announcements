@@ -4,7 +4,7 @@ import LoadingSpinner from '@components/LoadingSpinner'
 import createOptionField from '@helpers/createOptionField'
 import useIsPlayingAnnouncement from '@helpers/useIsPlayingAnnouncement'
 
-import { addBreadcrumb, captureException } from '@sentry/gatsby'
+import { addBreadcrumb, captureException } from '@sentry/nextjs'
 
 import PlayIcon from 'mdi-react/PlayIcon'
 import ShareIcon from 'mdi-react/ShareVariantIcon'
@@ -17,8 +17,8 @@ import TickIcon from 'mdi-react/CheckIcon'
 import DeleteIcon from 'mdi-react/DeleteOutlineIcon'
 import CopyIcon from 'mdi-react/ContentCopyIcon'
 
-import { useRecoilState } from 'recoil'
-import { tabStatesState } from '@atoms/index'
+import { useAtom } from 'jotai'
+import { tabStateFamily } from '@atoms/index'
 import { SystemTabState } from '@data/SystemTabState'
 
 import copy from 'copy-to-clipboard'
@@ -29,10 +29,10 @@ import clsx from 'clsx'
 import type { OptionsExplanation } from '@announcement-data/AnnouncementSystem'
 import type { IPersonalPresetObject } from '@data/db'
 import type AnnouncementSystem from '@announcement-data/AnnouncementSystem'
-import { RttResponse } from '../../../functions/api/get-service-rtt'
+import { RttResponse } from '../../api-types/get-service-rtt-types'
 import ImportStateFromRtt from '@components/ImportStateFromRtt'
 
-export interface ICustomAnnouncementPreset<State = Record<string, unknown>> {
+export interface ICustomAnnouncementPreset<State = any> {
   name: string
   state: State
 }
@@ -71,7 +71,7 @@ function CustomAnnouncementPane({
   importStateFromRttService = null,
 }: ICustomAnnouncementPaneProps<string>) {
   const { enqueueSnackbar } = useSnackbar()
-  const defaultState = JSON.parse(_defaultState)
+  const defaultState = React.useMemo(() => JSON.parse(_defaultState), [_defaultState])
 
   const [playError, setPlayError] = React.useState<Error | null>(null)
   const [isSharing, setIsSharing] = React.useState(false)
@@ -79,16 +79,14 @@ function CustomAnnouncementPane({
   const [loadingPersonalPresets, setLoadingPersonalPresets] = React.useState(true)
 
   const [isPlayingAnnouncement, setIsPlayingAnnouncement] = useIsPlayingAnnouncement()
-  const [allTabStates, setAllTabStates] = useRecoilState(tabStatesState)
-
-  const optionsState = allTabStates?.[tabId]
+  const stateKey = `${systemId}::${tabId}`
+  const [optionsState, setOptionsState] = useAtom(tabStateFamily(stateKey))
 
   useEffect(() => {
     // Set default options if currently null
     if (!optionsState) {
-      setAllTabStates(prevState => ({
-        ...(prevState || {}),
-        [tabId]: Object.entries(options).reduce((acc, [key, opt]) => {
+      setOptionsState(
+        Object.entries(options).reduce((acc, [key, opt]) => {
           if (options[key].type === 'customNoState') return acc
 
           // @ts-expect-error
@@ -96,17 +94,17 @@ function CustomAnnouncementPane({
 
           return acc
         }, {}),
-      }))
+      )
     }
   }, [optionsState])
 
-  const AnnouncementSystemInstance: AnnouncementSystem = new (system as any)()
+  const AnnouncementSystemInstance: AnnouncementSystem = React.useMemo(() => new (system as any)(), [system])
 
   function createFieldUpdater(field: string): (value: any) => void {
     return (value): void => {
       if (isPlayingAnnouncement) return
 
-      setAllTabStates(prevState => ({ ...(prevState || {}), [tabId]: { ...(prevState?.[tabId] || {}), [field]: value } }))
+      setOptionsState(prevState => ({ ...(prevState || {}), [field]: value }))
     }
   }
 
@@ -291,7 +289,60 @@ function CustomAnnouncementPane({
         backgroundColor: '#eee',
       }}
     >
-      {presets && (
+      <div
+        inert={isPlayingAnnouncement || isSharing || undefined}
+        data-scrim-message={isPlayingAnnouncement ? 'Playing announcement...' : isSharing ? 'Sharing announcement...' : undefined}
+        css={{
+          position: 'relative',
+          '&[inert]::after': {
+            content: 'attr(data-scrim-message)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '2em',
+            position: 'absolute',
+            inset: 0,
+            background: 'rgba(0, 0, 0, 0.25)',
+            zIndex: 1,
+          },
+        }}
+      >
+        {presets && (
+          <section
+            css={{
+              paddingBottom: 24,
+              marginBottom: 24,
+              borderBottom: '2px solid black',
+            }}
+          >
+            <h3>Presets</h3>
+
+            <div
+              css={{
+                display: 'flex',
+                gap: 8,
+                flexWrap: 'wrap',
+              }}
+            >
+              {presets.length === 0 && <p>Sorry, no presets are available for this announcement.</p>}
+
+              {presets.map(preset => (
+                <button
+                  key={preset.name}
+                  onClick={() => {
+                    setOptionsState(preset.state)
+                  }}
+                >
+                  <span className="buttonLabel">
+                    <PresetIcon />
+                    {preset.name}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
+
         <section
           css={{
             paddingBottom: 24,
@@ -299,160 +350,82 @@ function CustomAnnouncementPane({
             borderBottom: '2px solid black',
           }}
         >
-          <h3>Presets</h3>
-
-          <div
-            css={{
-              display: 'flex',
-              gap: 8,
-              flexWrap: 'wrap',
-            }}
-          >
-            {presets.length === 0 && <p>Sorry, no presets are available for this announcement.</p>}
-
-            {presets.map(preset => (
-              <button
-                key={preset.name}
-                disabled={isPlayingAnnouncement}
-                onClick={() => {
-                  setAllTabStates(prevState => ({ ...(prevState || {}), [tabId]: preset.state }))
-                }}
-              >
-                <span className="buttonLabel">
-                  <PresetIcon />
-                  {preset.name}
-                </span>
-              </button>
-            ))}
+          <div css={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: '0.7rem' }}>
+            <h3 css={{ margin: 0 }}>Personal presets</h3>
+            <button className="outlined icon" onClick={loadPersonalPresetsForTab}>
+              <ReloadIcon size={24} css={{ verticalAlign: 'middle' }} />
+              <span className="sr-only">Reload</span>
+            </button>
           </div>
+
+          {!isPersonalPresetsReady || loadingPersonalPresets || !personalPresets ? (
+            <div
+              css={{
+                alignSelf: 'center',
+                justifySelf: 'center',
+                textAlign: 'center',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexDirection: 'column',
+                gap: 16,
+              }}
+            >
+              <LoadingSpinner />
+              <p>Loading your personal presets&hellip;</p>
+            </div>
+          ) : (
+            <div
+              css={{
+                display: 'flex',
+                gap: 8,
+                flexWrap: 'wrap',
+              }}
+            >
+              {personalPresets.length === 0 && (
+                <p css={{ marginTop: 8, marginBottom: 0 }}>You have no personal presets for this announcement type.</p>
+              )}
+
+              {personalPresets.map(preset => (
+                <PersonalPresetButton
+                  key={preset.presetId}
+                  presetData={preset}
+                  onClick={() => setOptionsState({ ...defaultState, ...preset.state })}
+                  onDelete={() => deletePersonalPreset(systemId, tabId, preset.presetId).finally(loadPersonalPresetsForTab)}
+                />
+              ))}
+            </div>
+          )}
         </section>
-      )}
 
-      <section
-        css={{
-          paddingBottom: 24,
-          marginBottom: 24,
-          borderBottom: '2px solid black',
-        }}
-      >
-        <div css={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: '0.7rem' }}>
-          <h3 css={{ margin: 0 }}>Personal presets</h3>
-          <button className="outlined icon" onClick={loadPersonalPresetsForTab}>
-            <ReloadIcon size={24} css={{ verticalAlign: 'middle' }} />
-            <span className="sr-only">Reload</span>
-          </button>
-        </div>
+        <fieldset>
+          <h3>Options</h3>
 
-        {!isPersonalPresetsReady || loadingPersonalPresets || !personalPresets ? (
-          <div
-            css={{
-              alignSelf: 'center',
-              justifySelf: 'center',
-              textAlign: 'center',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexDirection: 'column',
-              gap: 16,
-            }}
-          >
-            <LoadingSpinner />
-            <p>Loading your personal presets&hellip;</p>
-          </div>
-        ) : (
-          <div
-            css={{
-              display: 'flex',
-              gap: 8,
-              flexWrap: 'wrap',
-            }}
-          >
-            {personalPresets.length === 0 && (
-              <p css={{ marginTop: 8, marginBottom: 0 }}>You have no personal presets for this announcement type.</p>
-            )}
+          {importStateFromRttService !== null && (
+            <ImportStateFromRtt
+              disabled={false}
+              importStateFromRttService={(...args) => {
+                const state = importStateFromRttService(...args, optionsState || {})
+                setOptionsState({ ...defaultState, ...state })
+              }}
+            />
+          )}
 
-            {personalPresets.map(preset => (
-              <PersonalPresetButton
-                key={preset.presetId}
-                disabled={isPlayingAnnouncement}
-                presetData={preset}
-                onClick={() => setAllTabStates(prevState => ({ ...(prevState || {}), [tabId]: { ...defaultState, ...preset.state } }))}
-                onDelete={() => deletePersonalPreset(systemId, tabId, preset.presetId).finally(loadPersonalPresetsForTab)}
-              />
-            ))}
-          </div>
-        )}
-      </section>
+          {Object.keys(options).length === 0 && <p>No options available</p>}
 
-      {isPlayingAnnouncement && (
-        <p
-          css={{
-            background: 'rgba(255, 0, 0, 0.15)',
-            borderLeft: '#f00 4px solid',
-            padding: '8px 16px',
-          }}
-        >
-          <strong>All options are disabled while an announcement is playing.</strong>
-        </p>
-      )}
+          <>
+            {Object.entries(options)
+              .map(([key, opt]) => {
+                if (opt.onlyShowWhen && !opt.onlyShowWhen(optionsState)) return null
 
-      <fieldset
-        css={[
-          (isPlayingAnnouncement || isSharing) && {
-            position: 'relative',
-            '&::after': {
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '2em',
-              content: '"Please wait..."',
-              position: 'absolute',
-              top: 0,
-              bottom: 0,
-              right: 0,
-              left: 0,
-              background: 'rgba(0, 0, 0, 0.25)',
-              zIndex: 1,
-            },
-          },
-          isPlayingAnnouncement && {
-            '&::after': {
-              content: '"Playing announcement..."',
-            },
-          },
-          isSharing && {
-            '&::after': {
-              content: '"Sharing announcement..."',
-            },
-          },
-        ]}
-      >
-        <h3>Options</h3>
+                return createOptionField(opt, { onChange: createFieldUpdater(key), value: optionsState[key], key, activeState: optionsState })
+              })
+              .filter(x => !!x)}
+          </>
+        </fieldset>
+      </div>
 
-        {importStateFromRttService !== null && (
-          <ImportStateFromRtt
-            disabled={isPlayingAnnouncement}
-            importStateFromRttService={(...args) => {
-              const state = importStateFromRttService(...args, allTabStates[tabId] || {})
-              setAllTabStates(prevState => ({ ...(prevState || {}), [tabId]: { ...defaultState, ...state } }))
-            }}
-          />
-        )}
-
-        {Object.keys(options).length === 0 && <p>No options available</p>}
-
-        <>
-          {Object.entries(options)
-            .map(([key, opt]) => {
-              if (opt.onlyShowWhen && !opt.onlyShowWhen(optionsState)) return null
-
-              return createOptionField(opt, { onChange: createFieldUpdater(key), value: optionsState[key], key, activeState: optionsState })
-            })
-            .filter(x => !!x)}
-        </>
-      </fieldset>
-
-      <div css={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
+      <div css={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginTop: 16 }}>
         <div className="buttonGroup">
           <button disabled={isPlayingAnnouncement} onClick={playAnnouncement}>
             <span className="buttonLabel">
@@ -465,20 +438,18 @@ function CustomAnnouncementPane({
           </button>
         </div>
 
-        <button className="outlined" onClick={shareAnnouncement} disabled={isSharing}>
+        <button className="outlined" onClick={shareAnnouncement}>
           <span className="buttonLabel">
             <ShareIcon /> Copy sharable link to announcement
           </span>
         </button>
 
-        <button className="outlined" onClick={saveAnnouncementAsPersonalPreset} disabled={isSharing}>
+        <button className="outlined" onClick={saveAnnouncementAsPersonalPreset}>
           <span className="buttonLabel">
             <SaveIcon /> Save as personal preset
           </span>
         </button>
       </div>
-
-      {isPlayingAnnouncement && <p css={{ marginTop: 8 }}>Assembling and playing announcement...</p>}
     </div>
   )
 }
@@ -489,17 +460,16 @@ interface IPersonalPresetButtonProps {
   presetData: IPersonalPresetObject
   onClick: () => void
   onDelete: () => void
-  disabled: boolean
 }
 
-function PersonalPresetButton({ presetData, onClick, onDelete, disabled }: IPersonalPresetButtonProps) {
+function PersonalPresetButton({ presetData, onClick, onDelete }: IPersonalPresetButtonProps) {
   const timeoutRef = React.useRef<number | null>(null)
 
   const [awaitingDeleteConfirmation, setAwaitingDeleteConfirmation] = React.useState(false)
 
   return (
     <div className="buttonGroup">
-      <button disabled={disabled} onClick={() => onClick()} data-state={JSON.stringify(presetData.state)}>
+      <button disabled={false} onClick={() => onClick()} data-state={JSON.stringify(presetData.state)}>
         <span className="buttonLabel">
           <PersonalPresetIcon />
           {presetData.name}
@@ -508,7 +478,7 @@ function PersonalPresetButton({ presetData, onClick, onDelete, disabled }: IPers
       {process.env.NODE_ENV === 'development' && (
         <button
           className="icon outlined"
-          disabled={disabled}
+          disabled={false}
           onClick={() => {
             copy(JSON.stringify(presetData.state, null, 2), {
               format: 'text/plain',
@@ -522,7 +492,7 @@ function PersonalPresetButton({ presetData, onClick, onDelete, disabled }: IPers
       )}
       <button
         className={clsx('icon danger', { outlined: !awaitingDeleteConfirmation })}
-        disabled={disabled}
+        disabled={false}
         onClick={() => {
           if (!awaitingDeleteConfirmation) {
             if (timeoutRef.current) window.clearTimeout(timeoutRef.current)

@@ -12,7 +12,9 @@
     "build:ci": "STATIC_EXPORT=true next build --webpack && next-sitemap",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md,less}\"",
     "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,md,less}\"",
-    "cf-typegen": "wrangler types --path='./functions/types.d.ts'"
+    "cf-typegen": "wrangler types --path='./functions/types.d.ts'",
+    "serve-audio": "http-server ./audio/ -c-1 --port 8088 --cors",
+    "develop:workers": "wrangler pages dev --port 8787"
   },
   "dependencies": {
     "@cfworker/json-schema": "^4.1.1",
@@ -37,19 +39,16 @@
     "react-dom": "^19.2.4",
     "react-fullscreen-crossbrowser": "^1.1.3",
     "react-select": "^5.10.2",
-    "recoil": "^0.7.7",
-    "recoil-persist": "^5.1.0",
-    "recoil-persistence": "^0.3.0-beta.1",
     "uk-railway-stations": "^1.8.4",
     "use-html-dialog": "^0.2.1",
-    "uuid": "^9.0.1"
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260307.1",
     "@types/node": "^24.12.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@types/uuid": "^9.0.8",
+    "@types/uuid": "^11.0.0",
     "next-sitemap": "^4.2.3",
     "null-loader": "^4.0.1",
     "prettier": "^3.8.1",
@@ -57,7 +56,7 @@
     "typescript": "^5.9.3",
     "wrangler": "^4.71.0"
   },
-  "packageManager": "yarn@4.8.1",
+  "packageManager": "yarn@4.13.0",
   "resolutions": {
     "react": "^19",
     "react-dom": "^19",

@@ -181,7 +181,7 @@ export default abstract class AnnouncementSystem {
    *
    * @returns Promise which resolves when the last audio file has finished playing.
    */
-  async playAudioFiles(fileIds: AudioItem[], download: boolean = false): Promise<void> {
+  async playAudioFiles(fileIds: AudioItem[], download: boolean = false, skipMissingAudio: boolean = false): Promise<void> {
     if (fileIds.length === 0) {
       console.warn('No audio files to play.')
       return
@@ -205,7 +205,7 @@ export default abstract class AnnouncementSystem {
     })
 
     const crunker = new Crunker({ sampleRate: AnnouncementSystem.SAMPLE_RATE })
-    const audio = await this.concatSoundClips(standardisedFileIds)
+    const audio = await this.concatSoundClips(standardisedFileIds, skipMissingAudio)
 
     if (audio.numberOfChannels > 1) {
       // This is stereo. We need to mux it to mono.
@@ -271,7 +271,7 @@ export default abstract class AnnouncementSystem {
     }
   }
 
-  async concatSoundClips(files: AudioItemObject[]): Promise<AudioBuffer> {
+  async concatSoundClips(files: AudioItemObject[], skipMissingAudio: boolean = false): Promise<AudioBuffer> {
     const crunker = new Crunker({ sampleRate: AnnouncementSystem.SAMPLE_RATE })
 
     const filesWithUris: (AudioItemObject & { uri: string })[] = files.map(file => ({
@@ -279,17 +279,47 @@ export default abstract class AnnouncementSystem {
       uri: this.generateAudioFileUrl(file.id, file?.opts?.customPrefix),
     }))
 
-    const audioBuffers_P = crunker.fetchAudio(...filesWithUris.map(file => file.uri))
+    let audioBuffers: AudioBuffer[]
 
-    const audioBuffers = (await audioBuffers_P).reduce((acc, curr, i) => {
-      if (filesWithUris[i].opts?.delayStart!! > 0) {
-        acc.push(this.createSilence(filesWithUris[i].opts!!.delayStart!!))
-      }
+    if (skipMissingAudio) {
+      const results = await Promise.all(
+        filesWithUris.map(async file => {
+          try {
+            const [buffer] = await crunker.fetchAudio(file.uri)
+            return { buffer, file }
+          } catch (e) {
+            console.warn(`[AnnouncementSystem] Skipping missing audio file: ${file.uri}`)
+            return null
+          }
+        }),
+      )
 
-      acc.push(curr)
+      audioBuffers = results
+        .filter((item): item is { buffer: AudioBuffer; file: (typeof filesWithUris)[0] } => item !== null)
+        .reduce((acc, { buffer, file }) => {
+          if ((file.opts?.delayStart ?? 0) > 0) {
+            acc.push(this.createSilence(file.opts!.delayStart!))
+          }
+          acc.push(buffer)
+          return acc
+        }, [] as AudioBuffer[])
+    } else {
+      const audioBuffers_P = crunker.fetchAudio(...filesWithUris.map(file => file.uri))
 
-      return acc
-    }, [] as AudioBuffer[])
+      audioBuffers = (await audioBuffers_P).reduce((acc, curr, i) => {
+        if (filesWithUris[i].opts?.delayStart!! > 0) {
+          acc.push(this.createSilence(filesWithUris[i].opts!!.delayStart!!))
+        }
+
+        acc.push(curr)
+
+        return acc
+      }, [] as AudioBuffer[])
+    }
+
+    if (audioBuffers.length === 0) {
+      return this.createSilence(0)
+    }
 
     return crunker.concatAudio(audioBuffers)
   }

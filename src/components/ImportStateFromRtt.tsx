@@ -105,9 +105,7 @@ export default function ImportStateFromRtt({ importStateFromRttService, disabled
     })
     try {
       const resp = await fetch(
-        process.env.NODE_ENV === 'development'
-          ? `http://local.davw.network:8787/api/get-service-rtt?${params}`
-          : `/api/get-service-rtt?${params}`,
+        `/api/get-service-rtt?${params}`,
       )
 
       if (!resp.ok) {

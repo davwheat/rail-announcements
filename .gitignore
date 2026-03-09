@@ -60,6 +60,7 @@ typings/
 .next/
 out/
 .cache/
+next-env.d.ts
 
 # Mac files
 .DS_Store

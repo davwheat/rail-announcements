@@ -30,6 +30,7 @@ export interface INextTrainAnnouncementOptions {
   coaches: string
   announceShortPlatformsAfterSplit: boolean
   notCallingAtStations: { crsCode: string }[]
+  fromLive?: true
 }
 
 export interface IStandingTrainAnnouncementOptions extends Omit<INextTrainAnnouncementOptions, 'chime'> {
@@ -47,6 +48,7 @@ export interface IDisruptedTrainAnnouncementOptions {
   disruptionType: 'delay' | 'delayedBy' | 'cancel'
   disruptionReason: string | string[]
   delayTime: string
+  fromLive?: true
 }
 
 interface IFastTrainAnnouncementOptions {
@@ -4939,7 +4941,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       )),
     )
 
-    await this.playAudioFiles(files, download)
+    await this.playAudioFiles(files, download, !!options.fromLive)
   }
 
   async playStandingTrainAnnouncement(options: IStandingTrainAnnouncementOptions, download: boolean = false): Promise<void> {
@@ -5042,7 +5044,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       )
     }
 
-    await this.playAudioFiles(files, download)
+    await this.playAudioFiles(files, download, !!options.fromLive)
   }
 
   protected readonly disruptionOptions = {
@@ -5155,7 +5157,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         break
     }
 
-    await this.playAudioFiles(files, download)
+    await this.playAudioFiles(files, download, !!options.fromLive)
   }
 
   async playFastTrainAnnouncement(options: IFastTrainAnnouncementOptions, download: boolean = false): Promise<void> {
@@ -5240,7 +5242,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
 
     files.push({ id: 's.this train is the service from', opts: { delayStart: this.SHORT_DELAY } }, `station.e.${options.originStationCode}`)
 
-    await this.playAudioFiles(files, download)
+    await this.playAudioFiles(files, download, 'fromLive' in options)
   }
 
   async playPlatformAlterationAnnouncement(
@@ -5358,7 +5360,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       )
     }
 
-    await this.playAudioFiles(files, download)
+    await this.playAudioFiles(files, download, 'fromLive' in options)
   }
 
   protected getAnnouncementButtons(): Record<string, CustomAnnouncementButton[]> {
@@ -5611,6 +5613,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         firstClassLocation: 'none',
         announceShortPlatformsAfterSplit: false,
         notCallingAtStations: [],
+        fromLive: undefined,
       },
       props: {
         presets: this.announcementPresets.nextTrain,
@@ -5907,6 +5910,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         firstClassLocation: 'none',
         mindTheGap: false,
         notCallingAtStations: [],
+        fromLive: undefined,
       },
       props: {
         presets: this.announcementPresets.nextTrain.filter(x => 'thisStationCode' in x.state),
@@ -6085,6 +6089,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         disruptionType: 'delayedBy',
         delayTime: '65',
         disruptionReason: '',
+        fromLive: undefined,
       },
       props: {
         presets: this.announcementPresets.disruptedTrain,

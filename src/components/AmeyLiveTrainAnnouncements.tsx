@@ -68,7 +68,6 @@ function reverseShortPlatform(data: string | undefined | null): string | null {
 
 function getCallingPoints(
   train: TrainService,
-  stations: string[],
   getStation: (location: TimingLocation | EndPointLocation) => string,
 ): CallingAtPoint[] {
   const mainReversalMap: Record<string, boolean[]> = {}
@@ -87,10 +86,6 @@ function getCallingPoints(
     // Force the calling point if the train divides here
     if (s.associations?.filter(a => a.category === AssociationCategory.Divide).length) return true
     if (s.isCancelled || s.isOperational || s.isPass) {
-      mainReversalMap[s.tiploc].shift()
-      return false
-    }
-    if (!stations.includes(s.crs)) {
       mainReversalMap[s.tiploc].shift()
       return false
     }
@@ -149,7 +144,6 @@ function getCallingPoints(
             .service!!.locations.filter(s => {
               if (!s.crs) return false
               if (s.isCancelled || s.isOperational || s.isPass) return false
-              if (!stations.includes(s.crs)) return false
               return true
             })
             .map(l => ({ crsCode: l.crs!!, name: l.locationName, randomId: '', requestStop: p.activities?.includes('R') }))
@@ -251,13 +245,11 @@ function getCallingPoints(
 
 function getCancelledCallingPoints(
   train: TrainService,
-  stations: string[],
   getStation: (location: TimingLocation | EndPointLocation) => string,
 ): CallingAtPoint[] {
   const callingPoints = train.subsequentLocations.filter(s => {
     if (!s.crs) return false
     if (!s.isCancelled || s.isOperational || s.isPass) return false
-    if (!stations.includes(s.crs)) return false
     // Ignore pick-up only
     if (s.activities?.includes('U')) return false
     return true
@@ -287,7 +279,6 @@ function getCancelledCallingPoints(
               .service!!.locations.filter(s => {
                 if (!s.crs) return false
                 if (!s.isCancelled || s.isOperational || s.isPass) return false
-                if (!stations.includes(s.crs)) return false
                 // Ignore pick-up only
                 if (s.activities?.includes('U')) return false
                 return true
@@ -739,7 +730,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         train.uid,
       )
 
-      const callingAt = getCallingPoints(train, systems[systemKey].STATIONS, loc => getStation(loc, systemKey))
+      const callingAt = getCallingPoints(train, loc => getStation(loc, systemKey))
       const [vias] = announceViaPoints
         ? getViaPoints(train, systems[systemKey].STATIONS, stationNameToCrsMap, loc => getStation(loc, systemKey))
         : [[]]
@@ -749,6 +740,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       console.log(`Mind the gap: ${mindTheGap}`)
 
       const options: IStandingTrainAnnouncementOptions = {
+        fromLive: true,
         thisStationCode: selectedCrs,
         mindTheGap: mindTheGap,
         hour: h === '00' ? '00 - midnight' : h,
@@ -762,7 +754,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         callingAt,
         firstClassLocation: 'none',
         announceShortPlatformsAfterSplit,
-        notCallingAtStations: getCancelledCallingPoints(train, systems[systemKey].STATIONS, loc => getStation(loc, systemKey)),
+        notCallingAtStations: getCancelledCallingPoints(train, loc => getStation(loc, systemKey)),
       }
 
       console.log(options)
@@ -903,12 +895,13 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         train.uid,
       )
 
-      const callingAt = getCallingPoints(train, systems[systemKey].STATIONS, loc => getStation(loc, systemKey))
+      const callingAt = getCallingPoints(train, loc => getStation(loc, systemKey))
       const [vias] = announceViaPoints
         ? getViaPoints(train, systems[systemKey].STATIONS, stationNameToCrsMap, loc => getStation(loc, systemKey))
         : [[]]
 
       const options: INextTrainAnnouncementOptions = {
+        fromLive: true,
         chime: chimeType || systems[systemKey].DEFAULT_CHIME,
         hour: h === '00' ? '00 - midnight' : h,
         min: m === '00' ? '00 - hundred-hours' : m,
@@ -921,7 +914,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         callingAt,
         firstClassLocation: 'none',
         announceShortPlatformsAfterSplit,
-        notCallingAtStations: getCancelledCallingPoints(train, systems[systemKey].STATIONS, loc => getStation(loc, systemKey)),
+        notCallingAtStations: getCancelledCallingPoints(train, loc => getStation(loc, systemKey)),
       }
 
       console.log(options)
@@ -1000,6 +993,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       }
 
       const options: IDisruptedTrainAnnouncementOptions = {
+        fromLive: true,
         chime: chimeType || systems[systemKey].DEFAULT_CHIME,
         hour: h === '00' ? '00 - midnight' : h,
         min: m === '00' ? '00 - hundred-hours' : m,
@@ -1098,7 +1092,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
 
       try {
         const resp = await fetch(
-          process.env.NODE_ENV === 'development' ? `http://local.davw.network:8787/api/get-services?${params}` : `/api/get-services?${params}`,
+          `/api/get-services?${params}`,
         )
 
         if (!resp.ok) {

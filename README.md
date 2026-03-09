@@ -53,10 +53,20 @@ yarn dev
 
 The website will be available at [http://localhost:3000](http://localhost:3000).
 
-To also run the Cloudflare Workers backend (required for live trains features), use Wrangler in a second terminal:
+For full functionality, run these additional servers in separate terminals:
+
+**Cloudflare Workers backend** (required for live trains features):
 
 ```bash
-npx wrangler pages dev
+yarn develop:workers
+```
+
+Next.js will automatically proxy `/api/*` requests to Wrangler at `:8787`, so no CORS issues arise.
+
+**Audio server** (required for announcement playback):
+
+```bash
+yarn serve-audio
 ```
 
 #### Additional steps

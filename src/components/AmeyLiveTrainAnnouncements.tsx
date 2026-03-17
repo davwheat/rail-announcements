@@ -1141,7 +1141,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       addLog(`${services.length} services found`)
       console.log(`[Live Trains] ${services.length} services found`)
       services = services.filter(
-        s => s.isPassengerService && (s.platform === null || systemKeyForPlatform[getPlatformForSystemSelection(s.platform)] !== null),
+        s => s.isPassengerService && (!s.platform || systemKeyForPlatform[getPlatformForSystemSelection(s.platform)] !== null),
       )
       addLog(`${services.length} of which are passenger services`)
       console.log(`[Live Trains] ${services.length} of which are passenger services`)
@@ -1218,7 +1218,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
               return false
             }
 
-            if (s.platform === null) {
+            if (!s.platform) {
               addLog(`Skipping ${s.trainid} ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has no confirmed platform`)
               console.log(`[Live Trains] Skipping ${s.rid} (${s.std} to ${s.destination[0].locationName}) as it has no confirmed platform`)
               return false
@@ -1261,7 +1261,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
               console.log(`[Live Trains] Skipping ${s.rid} (${std} to ${s.destination[0].locationName}) as it has no estimated time`)
               return false
             }
-            if (s.platform === null) {
+            if (!s.platform) {
               addLog(`Skipping ${s.trainid} ${s.rid} (${std} to ${s.destination[0].locationName}) as it has no confirmed platform`)
               console.log(`[Live Trains] Skipping ${s.rid} (${std} to ${s.destination[0].locationName}) as it has no confirmed platform`)
               return false

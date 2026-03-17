@@ -19,39 +19,49 @@ There is no test suite in this project. Use `yarn build` to verify changes compi
 ## Development Environment
 
 Three services are needed for full local development:
+
 1. `yarn dev` — Next.js dev server on port 3000
-2. `yarn serve-audio` — HTTP server for audio files on port 8088. The dev audio CDN URL (`http://10.0.1.46:8088`) is hardcoded in `AnnouncementSystem.ts`
-3. `yarn develop:workers` — Cloudflare Workers on port 8787 for API endpoints. Next.js proxies `/api/*` to this in dev (configured in `next.config.ts`)
+2. `yarn serve-audio` — HTTP server for audio files on port 8088. The dev audio CDN URL (`http://10.0.1.46:8088`) is hardcoded in
+   `AnnouncementSystem.ts`
+3. `yarn develop:workers` — Cloudflare Workers on port 8787 for API endpoints. Next.js proxies `/api/*` to this in dev (configured in
+   `next.config.ts`)
 
 Worker environment variables (`RTT_API_USERNAME`, `RTT_API_PASSWORD`, `RDM_*_API_KEY`) go in `.dev.vars`.
 
 ## Code Style
 
-Prettier: no semicolons, single quotes, 145-character line width, trailing commas everywhere, arrow parens avoided. Run `yarn format` before committing. Emotion CSS-in-JS is used for component styling (via `css` prop, configured as the JSX pragma in `tsconfig.json`).
+Prettier: no semicolons, single quotes, 145-character line width, trailing commas everywhere, arrow parens avoided. Run `yarn format` before
+committing. Emotion CSS-in-JS is used for component styling (via `css` prop, configured as the JSX pragma in `tsconfig.json`).
 
 ## Architecture
 
 ### Announcement System Class Hierarchy
 
-All systems extend the abstract `AnnouncementSystem` base class in `src/announcement-data/AnnouncementSystem.ts`. Two intermediate base classes add domain-specific behaviour:
+All systems extend the abstract `AnnouncementSystem` base class in `src/announcement-data/AnnouncementSystem.ts`. Two intermediate base classes
+add domain-specific behaviour:
 
-- **`StationAnnouncementSystem`** — for platform/station PA systems. Adds `showAudioNotExistsError(fileName)` for user-facing missing-audio alerts. Systems: AmeyPhil, AmeyCelia, ScotRail.
-- **`TrainAnnouncementSystem`** — for on-train PA systems. Adds `validateStationExists(stationCrs, type?)` which checks high/low pitch audio availability via an `AvailableStationNames: { high: string[]; low: string[] }` property. Systems: BombardierXstar, ThameslinkClass700, TfWTrainFx, etc.
+- **`StationAnnouncementSystem`** — for platform/station PA systems. Adds `showAudioNotExistsError(fileName)` for user-facing missing-audio
+  alerts. Systems: AmeyPhil, AmeyCelia, ScotRail.
+- **`TrainAnnouncementSystem`** — for on-train PA systems. Adds `validateStationExists(stationCrs, type?)` which checks high/low pitch audio
+  availability via an `AvailableStationNames: { high: string[]; low: string[] }` property. Systems: BombardierXstar, ThameslinkClass700,
+  TfWTrainFx, etc.
 - Some systems (TfL Jubilee/Northern/Elizabeth lines) extend `AnnouncementSystem` directly.
 
 Every system must define: `NAME`, `ID`, `FILE_PREFIX`, `SYSTEM_TYPE` (`'station'` | `'train'`), and populate `customAnnouncementTabs`.
 
-Systems are registered in `src/announcement-data/AllSystems.ts` which exports `AllTrainAnnouncementSystems`, `AllStationAnnouncementSystems`, `AllOtherAnnouncementSystems`, and the combined `AllAnnouncementSystems`.
+Systems are registered in `src/announcement-data/AllSystems.ts` which exports `AllTrainAnnouncementSystems`, `AllStationAnnouncementSystems`,
+`AllOtherAnnouncementSystems`, and the combined `AllAnnouncementSystems`.
 
 ### Creating an Announcement System
 
-A system class defines tabs, each with options and a play handler. The play handler reads option values, builds an `AudioItem[]` array of clip IDs, and calls `this.playAudioFiles(items)`. The pattern in every system:
+A system class defines tabs, each with options and a play handler. The play handler reads option values, builds an `AudioItem[]` array of clip
+IDs, and calls `this.playAudioFiles(items)`. The pattern in every system:
 
 ```typescript
 class MySystem extends TrainAnnouncementSystem {
   readonly NAME = 'Display Name'
   readonly ID = 'MY_SYSTEM_V1'
-  readonly FILE_PREFIX = 'path/prefix'  // CDN subdirectory
+  readonly FILE_PREFIX = 'path/prefix' // CDN subdirectory
   readonly SYSTEM_TYPE = 'train'
 
   readonly customAnnouncementTabs = {
@@ -59,10 +69,14 @@ class MySystem extends TrainAnnouncementSystem {
       name: 'Tab Name',
       component: CustomAnnouncementPane,
       props: {
-        options: { /* option definitions */ },
+        options: {
+          /* option definitions */
+        },
         playHandler: this.playMyAnnouncement.bind(this),
       },
-      defaultState: { /* initial option values */ },
+      defaultState: {
+        /* initial option values */
+      },
     },
   }
 
@@ -89,7 +103,9 @@ Each tab is a `CustomAnnouncementTab<OptionIds>` with one of two component types
    - `buttons?` or `buttonSections?`: arrays of `CustomAnnouncementButton`
    - Each button has a `label` and either explicit `play`/`download` handlers or a `files: AudioItem[]` array (handlers auto-derived)
 
-Option types: `select`, `multiselect`, `boolean`, `number`, `time`, `custom` (custom React component with state), `customNoState` (stateless component). All support `onlyShowWhen(activeState)` for conditional visibility. Options are rendered to UI by `src/helpers/createOptionField.tsx`.
+Option types: `select`, `multiselect`, `boolean`, `number`, `time`, `custom` (custom React component with state), `customNoState` (stateless
+component). All support `onlyShowWhen(activeState)` for conditional visibility. Options are rendered to UI by
+`src/helpers/createOptionField.tsx`.
 
 ### Audio Pipeline
 
@@ -101,6 +117,7 @@ Option types: `select`, `multiselect`, `boolean`, `number`, `time`, `custom` (cu
 - `pluraliseAudio(items, options?)` inserts "and" clips and applies delays between items in a list
 
 **`MissingAudioMode`** controls behaviour when a clip can't be fetched:
+
 - `skip-service` — abort the entire announcement (default)
 - `play-silence` — silently omit the missing clip
 - `repeat-last-station` — reuse the last station clip (matched by `station.` prefix) for missing station clips
@@ -113,62 +130,81 @@ Option types: `select`, `multiselect`, `boolean`, `number`, `time`, `custom` (cu
 **Singleton:** one instance lives on `window.__crunker`, accessed via `AnnouncementSystem.getCrunker()`. Never create instances directly.
 
 **Key behaviours:**
+
 - Sample rate: 48 000 Hz (configured at construction in `getCrunker()`)
 - Lazy `AudioContext` creation (`_tryCreateContext` returns null instead of throwing if iOS blocks it pre-gesture)
-- Auto-unlock on first user gesture (touchstart/touchend/click/keydown): plays a silent scratch buffer + calls `ctx.resume()` within the gesture handler
-- `MediaStreamAudioDestinationNode` routing: audio is connected to a `MediaStreamDestination` feeding a hidden `<audio>` element, which tricks iOS Safari into allowing background playback (screen locked). A permanently-looping silent buffer keeps the stream alive between announcements. Falls back to direct `ctx.destination` when `MediaStreamAudioDestinationNode` is unavailable.
+- Auto-unlock on first user gesture (touchstart/touchend/click/keydown): plays a silent scratch buffer + calls `ctx.resume()` within the gesture
+  handler
+- `MediaStreamAudioDestinationNode` routing: audio is connected to a `MediaStreamDestination` feeding a hidden `<audio>` element, which tricks
+  iOS Safari into allowing background playback (screen locked). A permanently-looping silent buffer keeps the stream alive between announcements.
+  Falls back to direct `ctx.destination` when `MediaStreamAudioDestinationNode` is unavailable.
 - Auto-suspend after 30 s of inactivity; auto-resume on next `play()` call
 - Persistent `statechange` listener auto-resumes the context if it becomes `suspended` or `interrupted` (iOS) mid-playback
 - `_cleanBuffer()` assigns a scratch buffer to finished sources on Apple devices for proper GC
-- `play()` returns `CrunkerPlayResult { source, contextResume }` — `contextResume` is a promise that rejects after 1 s if the context stays suspended, so callers can show a "Resume audio" button
+- `play()` returns `CrunkerPlayResult { source, contextResume }` — `contextResume` is a promise that rejects after 1 s if the context stays
+  suspended, so callers can show a "Resume audio" button
 - SSR-safe: webpack's `null-loader` nullifies Crunker imports on the server (configured in `next.config.ts`)
 
 ### State Management
 
 **Jotai atoms** in `src/atoms/index.ts`:
+
 - `tabStateFamily(stateKey)` — per-tab option state, keyed as `${systemId}::${tabId}`. Returns `Record<string, unknown> | null`
 - `selectedTabIdsState` — persisted to localStorage, maps `systemId` → selected `tabId`
 - `isPlayingAnnouncementState` — global boolean preventing concurrent playback
 
 **Persistence layers:**
+
 - **localStorage** — selected tab per system
-- **IndexedDB** — personal presets (`src/data/db/index.tsx`). Each preset has `presetId` (UUID), `name`, `systemId`, `tabId`, and the full state object
-- **API (Cloudflare D1)** — shareable announcements. `SystemTabState` class (`src/data/SystemTabState.ts`) serialises state and saves/loads via `/api/save-announcement` and `/api/get-announcement`
+- **IndexedDB** — personal presets (`src/data/db/index.tsx`). Each preset has `presetId` (UUID), `name`, `systemId`, `tabId`, and the full state
+  object
+- **API (Cloudflare D1)** — shareable announcements. `SystemTabState` class (`src/data/SystemTabState.ts`) serialises state and saves/loads via
+  `/api/save-announcement` and `/api/get-announcement`
 
 ### Pages & Routing
 
 Next.js file-based routing under `src/pages/`. System pages live at:
+
 - `/rolling-stock/{system-slug}` — train systems
 - `/stations/{system-slug}` — station systems
 - `/amey-live-train-announcements` — live departures page
 
-All system pages use `SystemPageTemplate`, which instantiates the system class and renders `AnnouncementPanel`. `AnnouncementPanel` reads `customAnnouncementTabs`, renders tab navigation, initialises IndexedDB, and delegates to the appropriate pane component.
+All system pages use `SystemPageTemplate`, which instantiates the system class and renders `AnnouncementPanel`. `AnnouncementPanel` reads
+`customAnnouncementTabs`, renders tab navigation, initialises IndexedDB, and delegates to the appropriate pane component.
 
-`SavedAnnouncementLoader` reads `?announcementId=` from the URL on mount, fetches the saved state from the API, navigates to the correct system page, and restores the state.
+`SavedAnnouncementLoader` reads `?announcementId=` from the URL on mount, fetches the saved state from the API, navigates to the correct system
+page, and restores the state.
 
 ### Cloudflare Workers (API)
 
 Functions in `functions/api/`:
+
 - **`save-announcement.ts`** — `POST /api/save-announcement`. Validates body (100 kB state limit), stores in D1, returns UUID
 - **`get-announcement.ts`** — `GET /api/get-announcement?id=<uuid>`. Fetches from D1, increments `load_count`
-- **`get-service-rtt.ts`** — `GET /api/get-service-rtt?uid=<uid>&date=<date>`. Proxies Realtime Trains API with Basic Auth, enriches locations with CRS codes via tiploc mapping, recursively fetches associated (split/join) services
+- **`get-service-rtt.ts`** — `GET /api/get-service-rtt?uid=<uid>&date=<date>`. Proxies Realtime Trains API with Basic Auth, enriches locations
+  with CRS codes via tiploc mapping, recursively fetches associated (split/join) services
 - **`get-services.ts`** — `GET /api/get-services?station=<crs>`. Fetches departure board from RDM API, processes service associations
 
 ### RTT Integration
 
-`ImportStateFromRtt` component provides a dialog for pasting a Realtime Trains URL. It parses the UID and date, fetches the service via the Workers API, and calls the tab's `importStateFromRttService` function to populate option state from the live data.
+`ImportStateFromRtt` component provides a dialog for pasting a Realtime Trains URL. It parses the UID and date, fetches the service via the
+Workers API, and calls the tab's `importStateFromRttService` function to populate option state from the live data.
 
-`RttUtils` (`src/data/RttUtils.ts`) provides helpers: `getCallingPoints`, `getEligibleLocations`, `getCancelledCallingPoints`, `getScheduledDepartureTime`, `getRealtimeDepartureTime`, etc.
+`RttUtils` (`src/data/RttUtils.ts`) provides helpers: `getCallingPoints`, `getEligibleLocations`, `getCancelledCallingPoints`,
+`getScheduledDepartureTime`, `getRealtimeDepartureTime`, etc.
 
 ### Station Data
 
-Station data comes from the `uk-railway-stations` npm package. `src/data/StationManipulators.ts` exports `AllStationsCrsToNameMap`, `AllStationsTitleValueMap`, `getStationByCrs()`, and `getStationByName()`.
+Station data comes from the `uk-railway-stations` npm package. `src/data/StationManipulators.ts` exports `AllStationsCrsToNameMap`,
+`AllStationsTitleValueMap`, `getStationByCrs()`, and `getStationByName()`.
 
-`CallingAtSelector` (`src/components/CallingAtSelector.tsx`) is a drag-and-drop station picker used by most systems. Its `CallingAtPoint` type includes optional fields for short platforms, request stops, split details, and replacement bus continuations.
+`CallingAtSelector` (`src/components/CallingAtSelector.tsx`) is a drag-and-drop station picker used by most systems. Its `CallingAtPoint` type
+includes optional fields for short platforms, request stops, split details, and replacement bus continuations.
 
 ### Path Aliases
 
 Configured in both `tsconfig.json` and `next.config.ts` webpack config:
+
 - `@components` → `src/components`
 - `@announcement-data` → `src/announcement-data`
 - `@helpers` → `src/helpers`
@@ -180,9 +216,9 @@ Configured in both `tsconfig.json` and `next.config.ts` webpack config:
 ### Global Window Properties
 
 ```typescript
-window.__crunker    // Crunker singleton
-window.__audio      // Currently playing AudioItem[] (set during playback, cleared on end)
-window.__system     // Current AnnouncementSystem class
+window.__crunker // Crunker singleton
+window.__audio // Currently playing AudioItem[] (set during playback, cleared on end)
+window.__system // Current AnnouncementSystem class
 window.__audioDrivers // Record<systemId, AnnouncementSystem class> for all train systems
 ```
 

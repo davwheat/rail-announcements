@@ -549,14 +549,8 @@ const changelog: IChangelogVersion[] = [
   },
   {
     date: '2026-03-17',
-    additions: [
-      'Show a banner when your browser does not support the Web Audio API',
-      'Show an error when personal presets are unavailable',
-    ],
-    fixes: [
-      'Numerous improvements to audio playback reliability, especially on Apple devices',
-      'Excessive padding on mobile devices',
-    ],
+    additions: ['Show a banner when your browser does not support the Web Audio API', 'Show an error when personal presets are unavailable'],
+    fixes: ['Numerous improvements to audio playback reliability, especially on Apple devices', 'Excessive padding on mobile devices'],
   },
 ]
 

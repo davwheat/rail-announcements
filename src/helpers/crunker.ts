@@ -60,6 +60,20 @@ export default class Crunker {
   private _scratchBuffer: AudioBuffer | null = null
   private _suspendTimer: ReturnType<typeof setTimeout> | null = null
   private _isPlaying: boolean = false
+  private _stateChangeListenerAttached: boolean = false
+
+  /**
+   * Persistent MediaStreamDestination node reused across `play()` calls.
+   * Routing audio through this tricks iOS Safari into treating playback
+   * as a live stream, allowing it to continue with the screen locked.
+   */
+  private _streamDest: MediaStreamAudioDestinationNode | null = null
+  /**
+   * Hidden `<audio>` element whose `srcObject` is the MediaStream from
+   * `_streamDest`. Kept alive across plays so Safari maintains the
+   * "live stream" session.
+   */
+  private _streamAudio: HTMLAudioElement | null = null
 
   /**
    * Creates a new instance of Crunker with the provided options.
@@ -92,6 +106,7 @@ export default class Crunker {
     if (!this._context) {
       throw new Error('Crunker: AudioContext is not available yet. This may resolve after a user interaction on this device.')
     }
+    this._attachStateChangeListener()
     return this._context
   }
 
@@ -118,9 +133,8 @@ export default class Crunker {
       }
       if (!this._context) return
 
-      // Mobile Safari bug: opening/closing tabs can change the sampleRate from
-      // 44100 to 48000. Recreate the context to fix it.
-      if (!this._mobileUnloaded && this._context.sampleRate !== 44100) {
+      // Mobile Safari bug: opening/closing tabs can change the sampleRate. Recreate the context to fix it.
+      if (!this._mobileUnloaded && this._context.sampleRate !== this._requestedSampleRate) {
         this._mobileUnloaded = true
         this._context.close()
         this._context = this._tryCreateContext(this._requestedSampleRate)
@@ -129,7 +143,7 @@ export default class Crunker {
 
       // Create a scratch buffer if we haven't yet
       if (!this._scratchBuffer) {
-        this._scratchBuffer = this._context.createBuffer(1, 1, 22050)
+        this._scratchBuffer = this._context.createBuffer(1, 1, this._requestedSampleRate!)
       }
 
       // Create an empty buffer source, connect and play it.
@@ -162,6 +176,31 @@ export default class Crunker {
     document.addEventListener('touchend', unlock, true)
     document.addEventListener('click', unlock, true)
     document.addEventListener('keydown', unlock, true)
+  }
+
+  /**
+   * Attaches a persistent `statechange` listener on the AudioContext that
+   * automatically resumes it whenever it becomes `suspended` or `interrupted`
+   * (iOS-specific) while audio is still playing. Without this, a mid-playback
+   * suspension (e.g. phone call, screen lock) would leave `_isPlaying` stuck
+   * as `true` and block all future playback.
+   *
+   * @internal
+   */
+  private _attachStateChangeListener(): void {
+    if (this._stateChangeListenerAttached || !this._context) return
+    this._stateChangeListenerAttached = true
+
+    this._context.addEventListener('statechange', () => {
+      if (!this._context) return
+
+      const state = this._context.state as string
+      if ((state === 'suspended' || state === 'interrupted') && this._isPlaying) {
+        this._context.resume().catch(() => {
+          // Resume failed — context may have been closed or the browser refuses.
+        })
+      }
+    })
   }
 
   /**
@@ -466,7 +505,37 @@ export default class Crunker {
     const source = ctx.createBufferSource()
 
     source.buffer = buffer
-    source.connect(ctx.destination)
+
+    // Route through a MediaStreamDestination so iOS Safari treats playback
+    // as a live stream, allowing audio to continue with the screen locked.
+    // Only one output path is used to avoid duplicating the audio.
+    if (typeof MediaStreamAudioDestinationNode !== 'undefined') {
+      if (!this._streamDest) {
+        this._streamDest = ctx.createMediaStreamDestination()
+
+        this._streamAudio = document.createElement('audio')
+        this._streamAudio.srcObject = this._streamDest.stream
+        // Prevent the element from being visible or taking up space
+        this._streamAudio.style.display = 'none'
+        document.body.appendChild(this._streamAudio)
+      }
+
+      // Feed a permanently-looping silent buffer into the stream so it always
+      // has data. This prevents the <audio> element from repeating the last
+      // chunk after an announcement ends.
+      const keepAlive = ctx.createBufferSource()
+      keepAlive.buffer = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate) // 1s silent buffer
+      keepAlive.loop = true
+      keepAlive.connect(this._streamDest)
+      keepAlive.start()
+
+      source.connect(this._streamDest)
+      this._streamAudio!.play().catch(() => {
+        // Ignore — autoplay may be blocked; callers handle contextResume rejection
+      })
+    } else {
+      source.connect(ctx.destination)
+    }
 
     this._isPlaying = true
 
@@ -579,6 +648,13 @@ export default class Crunker {
       clearTimeout(this._suspendTimer)
       this._suspendTimer = null
     }
+    if (this._streamAudio) {
+      this._streamAudio.pause()
+      this._streamAudio.srcObject = null
+      this._streamAudio.remove()
+      this._streamAudio = null
+    }
+    this._streamDest = null
     this._context?.close()
     return this
   }

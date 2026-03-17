@@ -173,6 +173,18 @@ export default abstract class AnnouncementSystem {
 
   private static readonly SAMPLE_RATE = 48000
 
+  /**
+   * Returns the shared Crunker singleton, stored on `window` so
+   * the AudioContext, unlock listeners and auto-suspend state
+   * persist across the entire page lifecycle.
+   */
+  static getCrunker(): Crunker {
+    if (!window.__crunker) {
+      window.__crunker = new Crunker({ sampleRate: AnnouncementSystem.SAMPLE_RATE })
+    }
+    return window.__crunker
+  }
+
   headerComponent(): React.ReactNode {
     return null
   }
@@ -202,8 +214,6 @@ export default abstract class AnnouncementSystem {
       return
     }
 
-    window.Crunker = Crunker
-
     window.__audio = fileIds
     console.info('Playing audio files:', fileIds)
 
@@ -215,7 +225,7 @@ export default abstract class AnnouncementSystem {
       }
     })
 
-    const crunker = new Crunker({ sampleRate: AnnouncementSystem.SAMPLE_RATE })
+    const crunker = AnnouncementSystem.getCrunker()
     const audio = await this.concatSoundClips(standardisedFileIds, missingAudioMode)
 
     if (audio.numberOfChannels > 1) {
@@ -266,7 +276,7 @@ export default abstract class AnnouncementSystem {
   }
 
   async concatSoundClips(files: AudioItemObject[], missingAudioMode: MissingAudioMode = 'skip-service'): Promise<AudioBuffer> {
-    const crunker = new Crunker({ sampleRate: AnnouncementSystem.SAMPLE_RATE })
+    const crunker = AnnouncementSystem.getCrunker()
 
     const filesWithUris: (AudioItemObject & { uri: string })[] = files.map(file => ({
       ...file,
@@ -333,10 +343,9 @@ export default abstract class AnnouncementSystem {
   }
 
   private createSilence(msLength: number): AudioBuffer {
-    const SAMPLE_RATE = 48000
-    const msToLength = (ms: number) => Math.ceil((ms / 1000) * SAMPLE_RATE)
+    const msToLength = (ms: number) => Math.ceil((ms / 1000) * AnnouncementSystem.SAMPLE_RATE)
 
-    return new AudioContext().createBuffer(1, msToLength(msLength), SAMPLE_RATE)
+    return AnnouncementSystem.getCrunker().context.createBuffer(1, msToLength(msLength), AnnouncementSystem.SAMPLE_RATE)
   }
 
   /**

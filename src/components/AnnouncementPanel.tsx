@@ -19,6 +19,7 @@ function AnnouncementPanel({ system }: IProps) {
   const AnnouncementSystem = system
 
   const [isPresetsDbReady, setIsPresetsDbReady] = useState<boolean>(false)
+  const [presetsDbError, setPresetsDbError] = useState<boolean>(false)
 
   if (typeof window !== 'undefined') {
     window.__system = AnnouncementSystem
@@ -51,6 +52,7 @@ function AnnouncementPanel({ system }: IProps) {
                     system={AnnouncementSystem}
                     systemId={AnnouncementSystemInstance.ID}
                     isPersonalPresetsReady={isPresetsDbReady}
+                    personalPresetsError={presetsDbError}
                     savePersonalPreset={savePersonalPreset}
                     getPersonalPresets={getPersonalPresets}
                     deletePersonalPreset={deletePersonalPreset}
@@ -64,7 +66,7 @@ function AnnouncementPanel({ system }: IProps) {
             },
             {} as Record<string, React.ReactElement>,
           ),
-    [customTabs, AnnouncementSystem, AnnouncementSystemInstance, isPresetsDbReady],
+    [customTabs, AnnouncementSystem, AnnouncementSystemInstance, isPresetsDbReady, presetsDbError],
   )
 
   const TabPanels: React.ReactElement[] = useMemo(() => Object.values(TabPanelMap ?? {}), [TabPanelMap])
@@ -109,6 +111,7 @@ function AnnouncementPanel({ system }: IProps) {
     } catch (e) {
       console.log('Failed to initialise personal presets database', e)
       Sentry.captureException(e)
+      setPresetsDbError(true)
     }
   }
 

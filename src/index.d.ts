@@ -32,5 +32,17 @@ declare global {
     __system?: typeof AnnouncementSystem | null
     __audioDrivers?: Record<string, typeof AnnouncementSystem>
     Crunker?: any
+
+    webkitAudioContext?: typeof AudioContext
+    mozAudioContext?: typeof AudioContext
+
+    webkitAudioContext?: {
+      prototype: AudioContext
+      new (contextOptions?: AudioContextOptions): AudioContext
+    }
+    mozAudioContext?: {
+      prototype: AudioContext
+      new (contextOptions?: AudioContextOptions): AudioContext
+    }
   }
 }

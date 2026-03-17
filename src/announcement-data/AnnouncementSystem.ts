@@ -15,6 +15,11 @@ import { RttResponse } from '../api-types/get-service-rtt-types'
  */
 export type MissingAudioMode = 'skip-service' | 'play-silence' | 'repeat-last-station' | 'repeat-last'
 
+// Set audio session type as early as possible so the browser knows we intend playback
+if (typeof window !== 'undefined' && 'audioSession' in window.navigator) {
+  ;(window.navigator.audioSession as any).type = 'playback'
+}
+
 export interface IPlayOptions {
   delayStart: number
   customPrefix: string
@@ -172,7 +177,7 @@ export default abstract class AnnouncementSystem {
     return null
   }
 
-  private readonly AUDIO_CDN = process.env.NODE_ENV === 'development' ? 'http://local.davw.network:8088' : 'https://cdn.railannouncements.co.uk'
+  private readonly AUDIO_CDN = process.env.NODE_ENV === 'development' ? 'http://10.0.1.46:8088' : 'https://cdn.railannouncements.co.uk'
 
   /**
    * Generates a URL for the provided audio file ID.
@@ -199,10 +204,6 @@ export default abstract class AnnouncementSystem {
 
     window.Crunker = Crunker
 
-    if ('audioSession' in window.navigator) {
-      ;(window.navigator.audioSession as any).type = 'playback'
-    }
-
     window.__audio = fileIds
     console.info('Playing audio files:', fileIds)
 
@@ -227,55 +228,38 @@ export default abstract class AnnouncementSystem {
       window.__audio = undefined
     } else {
       return new Promise<void>(resolve => {
-        crunker.play(audio, source => {
-          const ctx: AudioContext = (crunker as any)._context
-          console.log('[Crunker] About to play audio...')
-          ctx.onstatechange = a => console.log('state changed:', a)
-          console.log('Context state: ', ctx.state)
-
-          if (ctx.state === 'suspended') {
-            console.log('[Crunker] Resuming audio context')
-            ctx.resume()
-            console.log('Context state: ', ctx.state)
-
-            const isFirefoxUser = navigator.userAgent.toLowerCase().includes('firefox')
-
-            if (!isFirefoxUser) {
-              setTimeout(() => {
-                if (ctx.state === 'suspended') {
-                  console.error('[Crunker] Failed to resume audio context')
-
-                  document.getElementById('resume-audio-button')?.remove()
-
-                  const button = document.createElement('button')
-                  button.textContent = 'Resume audio'
-                  button.id = 'resume-audio-button'
-                  button.style.margin = '16px'
-                  button.onclick = () => {
-                    ctx.resume()
-                    button.remove()
-                  }
-
-                  const container = document.getElementById('resume-audio-container')
-                  if (container) container.appendChild(button)
-                  else document.body.appendChild(button)
-
-                  alert(
-                    "Your device or web browser is refusing to let the website play audio.\n\nThis is especially common on iPhones and iPads. We'd recommend you try using a desktop computer or an alternative device.\n\nTry scrolling to and pressing the 'Resume audio' button. If this doesn't help, there's nothing else that we can do. Sorry!",
-                  )
-
-                  button.scrollIntoView()
-                  resolve()
-                }
-              }, 1000)
-            }
-          }
-
+        const { contextResume } = crunker.play(audio, source => {
           source.addEventListener('ended', () => {
             console.log('[Crunker] Finished playing audio')
             window.__audio = undefined
             resolve()
           })
+        })
+
+        contextResume.catch(err => {
+          console.error('[Crunker]', err.message)
+
+          document.getElementById('resume-audio-button')?.remove()
+
+          const button = document.createElement('button')
+          button.textContent = 'Resume audio'
+          button.id = 'resume-audio-button'
+          button.style.margin = '16px'
+          button.onclick = () => {
+            crunker.context.resume()
+            button.remove()
+          }
+
+          const container = document.getElementById('resume-audio-container')
+          if (container) container.appendChild(button)
+          else document.body.appendChild(button)
+
+          alert(
+            "Your device or web browser is refusing to let the website play audio.\n\nThis is especially common on iPhones and iPads. We'd recommend you try using a desktop computer or an alternative device.\n\nTry scrolling to and pressing the 'Resume audio' button. If this doesn't help, there's nothing else that we can do. Sorry!",
+          )
+
+          button.scrollIntoView()
+          resolve()
         })
       })
     }

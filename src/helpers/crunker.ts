@@ -13,6 +13,12 @@ export interface CrunkerConstructorOptions {
    * @default 200
    */
   concurrentNetworkRequests: number
+  /**
+   * Automatically attempt to unlock the AudioContext on the first user interaction (touch, click, or keypress). This is needed on many mobile browsers that require a user gesture before audio can play.
+   *
+   * @default true
+   */
+  autoUnlock: boolean
 }
 
 export type CrunkerInputTypes = string | File | Blob
@@ -27,12 +33,33 @@ export interface ExportedCrunkerAudio {
 }
 
 /**
+ * Result of calling `play()`, including the source node and a promise that
+ * rejects if the AudioContext could not be resumed (e.g. no user interaction).
+ */
+export interface CrunkerPlayResult {
+  source: AudioBufferSourceNode
+  /**
+   * Resolves if the AudioContext is running, rejects with an error if the
+   * context remains suspended after a timeout (typically due to browser
+   * autoplay policy).
+   */
+  contextResume: Promise<void>
+}
+
+/**
  * Crunker is the simple way to merge, concatenate, play, export and download audio files using the Web Audio API.
  */
 export default class Crunker {
   private readonly _sampleRate: number
+  private readonly _requestedSampleRate: number | undefined
   private readonly _concurrentNetworkRequests: number
-  private readonly _context: AudioContext
+  private _context: AudioContext | null = null
+
+  private _audioUnlocked: boolean = false
+  private _mobileUnloaded: boolean = false
+  private _scratchBuffer: AudioBuffer | null = null
+  private _suspendTimer: ReturnType<typeof setTimeout> | null = null
+  private _isPlaying: boolean = false
 
   /**
    * Creates a new instance of Crunker with the provided options.
@@ -40,23 +67,208 @@ export default class Crunker {
    * If `sampleRate` is not defined, it will auto-select an appropriate sample rate
    * for the device being used.
    */
-  constructor({ sampleRate, concurrentNetworkRequests = 200 }: Partial<CrunkerConstructorOptions> = {}) {
-    this._context = this._createContext(sampleRate)
+  constructor({ sampleRate, concurrentNetworkRequests = 200, autoUnlock = true }: Partial<CrunkerConstructorOptions> = {}) {
+    this._requestedSampleRate = sampleRate
+    this._context = this._tryCreateContext(sampleRate)
 
-    sampleRate ||= this._context.sampleRate
+    sampleRate ||= this._context?.sampleRate ?? 44_100
 
     this._sampleRate = sampleRate
     this._concurrentNetworkRequests = concurrentNetworkRequests
+
+    if (autoUnlock) {
+      this._unlockAudio()
+    }
   }
 
   /**
-   * Creates Crunker's internal AudioContext.
+   * Returns the AudioContext, creating it if necessary.
+   * Throws if the context cannot be created.
+   */
+  private _ensureContext(): AudioContext {
+    if (!this._context) {
+      this._context = this._tryCreateContext(this._requestedSampleRate)
+    }
+    if (!this._context) {
+      throw new Error('Crunker: AudioContext is not available yet. This may resolve after a user interaction on this device.')
+    }
+    return this._context
+  }
+
+  /**
+   * Attempts to automatically unlock the AudioContext on the first user interaction.
+   *
+   * Some browsers/devices will only allow audio to be played after a user interaction.
+   * This registers event listeners that will unlock the context on the first touch, click, or keypress.
+   *
+   * Based on Howler.js's unlock approach.
+   */
+  private _unlockAudio(): void {
+    if (this._audioUnlocked) {
+      return
+    }
+
+    const unlock = () => {
+      if (this._audioUnlocked) return
+
+      // If we don't have a context yet (e.g. iOS blocked creation), try again
+      // within this user gesture where it's more likely to succeed.
+      if (!this._context) {
+        this._context = this._tryCreateContext(this._requestedSampleRate)
+      }
+      if (!this._context) return
+
+      // Mobile Safari bug: opening/closing tabs can change the sampleRate from
+      // 44100 to 48000. Recreate the context to fix it.
+      if (!this._mobileUnloaded && this._context.sampleRate !== 44100) {
+        this._mobileUnloaded = true
+        this._context.close()
+        this._context = this._tryCreateContext(this._requestedSampleRate)
+        if (!this._context) return
+      }
+
+      // Create a scratch buffer if we haven't yet
+      if (!this._scratchBuffer) {
+        this._scratchBuffer = this._context.createBuffer(1, 1, 22050)
+      }
+
+      // Create an empty buffer source, connect and play it.
+      // This is what actually unlocks the AudioContext on iOS/Android.
+      const source = this._context.createBufferSource()
+      source.buffer = this._scratchBuffer
+      source.connect(this._context.destination)
+      source.start(0)
+
+      // Calling resume() on a stack initiated by user gesture is what
+      // actually unlocks the audio on Android Chrome >= 55.
+      if (typeof this._context.resume === 'function') {
+        this._context.resume()
+      }
+
+      // Once the empty buffer has played, the context is unlocked.
+      source.onended = () => {
+        source.disconnect(0)
+
+        this._audioUnlocked = true
+
+        document.removeEventListener('touchstart', unlock, true)
+        document.removeEventListener('touchend', unlock, true)
+        document.removeEventListener('click', unlock, true)
+        document.removeEventListener('keydown', unlock, true)
+      }
+    }
+
+    document.addEventListener('touchstart', unlock, true)
+    document.addEventListener('touchend', unlock, true)
+    document.addEventListener('click', unlock, true)
+    document.addEventListener('keydown', unlock, true)
+  }
+
+  /**
+   * Automatically suspend the AudioContext after no sound has played for 30 seconds.
+   * This saves processing/energy and fixes various browser-specific bugs with audio getting stuck.
+   *
+   * Based on Howler.js's auto-suspend approach.
    *
    * @internal
    */
-  private _createContext(sampleRate: number = 44_100): AudioContext {
-    window.AudioContext = window.AudioContext || (window as any).webkitAudioContext || (window as any).mozAudioContext
-    return new AudioContext({ sampleRate })
+  private _autoSuspend(): void {
+    if (!this._context || typeof this._context.suspend !== 'function') {
+      return
+    }
+
+    // Don't suspend if something is currently playing.
+    if (this._isPlaying) {
+      return
+    }
+
+    if (this._suspendTimer) {
+      clearTimeout(this._suspendTimer)
+    }
+
+    // If no sound has played after 30 seconds, suspend the context.
+    this._suspendTimer = setTimeout(() => {
+      this._suspendTimer = null
+
+      if (!this._context || this._isPlaying) return
+
+      this._context.suspend()
+    }, 30_000)
+  }
+
+  /**
+   * Automatically resume the AudioContext when a new sound is played.
+   * Handles the `suspended` and iOS-specific `interrupted` states.
+   *
+   * Based on Howler.js's auto-resume approach.
+   *
+   * @internal
+   */
+  private _autoResume(): void {
+    if (!this._context || typeof this._context.resume !== 'function') {
+      return
+    }
+
+    const state = this._context.state as string
+
+    // Clear any pending suspend timer since we're about to play.
+    if (state === 'running' && (this._context as any).state !== 'interrupted' && this._suspendTimer) {
+      clearTimeout(this._suspendTimer)
+      this._suspendTimer = null
+    } else if (state === 'suspended' || state === 'interrupted') {
+      this._context.resume()
+    }
+  }
+
+  /**
+   * Clean up a finished buffer source to prevent memory leaks on iOS.
+   * On Apple devices, assigns the scratch buffer to detached sources so
+   * iOS can properly garbage-collect the WebAudio buffers.
+   *
+   * Based on Howler.js's _cleanBuffer approach.
+   *
+   * @internal
+   */
+  private _cleanBuffer(source: AudioBufferSourceNode): void {
+    const isApple = typeof navigator !== 'undefined' && navigator.vendor && navigator.vendor.indexOf('Apple') >= 0
+
+    source.onended = null
+    source.disconnect(0)
+
+    if (isApple && this._scratchBuffer) {
+      try {
+        source.buffer = this._scratchBuffer
+      } catch {
+        // Ignore — some browsers don't allow reassigning buffer
+      }
+    }
+  }
+
+  /**
+   * Attempts to create an AudioContext. Returns null if creation fails
+   * (e.g. iOS before user interaction).
+   *
+   * @internal
+   */
+  private _tryCreateContext(sampleRate: number = 44_100): AudioContext | null {
+    const options = { sampleRate }
+    const constructors = [
+      typeof AudioContext !== 'undefined' ? AudioContext : undefined,
+      (globalThis as any).webkitAudioContext,
+      (globalThis as any).mozAudioContext,
+    ]
+
+    for (const Ctor of constructors) {
+      if (Ctor) {
+        try {
+          return new Ctor(options) as AudioContext
+        } catch {
+          // Constructor exists but failed (e.g. iOS restrictions) — try next
+        }
+      }
+    }
+
+    return null
   }
 
   /**
@@ -64,7 +276,7 @@ export default class Crunker {
    * The internal AudioContext used by Crunker.
    */
   get context(): AudioContext {
-    return this._context
+    return this._ensureContext()
   }
 
   /**
@@ -88,6 +300,8 @@ export default class Crunker {
    * Asynchronously fetches multiple audio files and returns an array of AudioBuffers.
    */
   private async _fetchAudio(...filepaths: CrunkerInputTypes[]): Promise<AudioBuffer[]> {
+    const ctx = this._ensureContext()
+
     return await Promise.all(
       filepaths.map(async filepath => {
         let buffer: ArrayBuffer
@@ -108,7 +322,7 @@ export default class Crunker {
           })
         }
 
-        return await this._context.decodeAudioData(buffer)
+        return await ctx.decodeAudioData(buffer)
       }),
     )
   }
@@ -121,11 +335,8 @@ export default class Crunker {
    * ![](https://user-images.githubusercontent.com/12958674/88806278-968f0680-d186-11ea-9cb5-8ef2606ffcc7.png)
    */
   mergeAudio(buffers: AudioBuffer[]): AudioBuffer {
-    const output = this._context.createBuffer(
-      this._maxNumberOfChannels(buffers),
-      this._sampleRate * this._maxDuration(buffers),
-      this._sampleRate,
-    )
+    const ctx = this._ensureContext()
+    const output = ctx.createBuffer(this._maxNumberOfChannels(buffers), this._sampleRate * this._maxDuration(buffers), this._sampleRate)
 
     buffers.forEach(buffer => {
       for (let channelNumber = 0; channelNumber < buffer.numberOfChannels; channelNumber++) {
@@ -151,7 +362,8 @@ export default class Crunker {
    * ![](https://user-images.githubusercontent.com/12958674/88806297-9d1d7e00-d186-11ea-8cd2-c64cb0324845.png)
    */
   concatAudio(buffers: AudioBuffer[]): AudioBuffer {
-    const output = this._context.createBuffer(this._maxNumberOfChannels(buffers), this._totalLength(buffers), this._sampleRate)
+    const ctx = this._ensureContext()
+    const output = ctx.createBuffer(this._maxNumberOfChannels(buffers), this._totalLength(buffers), this._sampleRate)
     let offset = 0
 
     buffers.forEach(buffer => {
@@ -181,11 +393,8 @@ export default class Crunker {
     if (padStart < 0) throw new Error('Crunker: Parameter "padStart" in padAudio must be positive')
     if (seconds < 0) throw new Error('Crunker: Parameter "seconds" in padAudio must be positive')
 
-    const updatedBuffer = this._context.createBuffer(
-      buffer.numberOfChannels,
-      Math.ceil(buffer.length + seconds * buffer.sampleRate),
-      buffer.sampleRate,
-    )
+    const ctx = this._ensureContext()
+    const updatedBuffer = ctx.createBuffer(buffer.numberOfChannels, Math.ceil(buffer.length + seconds * buffer.sampleRate), buffer.sampleRate)
 
     for (let channelNumber = 0; channelNumber < buffer.numberOfChannels; channelNumber++) {
       const channelData = buffer.getChannelData(channelNumber)
@@ -214,9 +423,10 @@ export default class Crunker {
   sliceAudio(buffer: AudioBuffer, start: number, end: number, fadeIn: number = 0, fadeOut: number = 0): AudioBuffer {
     if (start >= end) throw new Error('Crunker: "start" time should be less than "end" time in sliceAudio method')
 
+    const ctx = this._ensureContext()
     const length = Math.round((end - start) * this._sampleRate)
     const offset = Math.round(start * this._sampleRate)
-    const newBuffer = this._context.createBuffer(buffer.numberOfChannels, length, this._sampleRate)
+    const newBuffer = ctx.createBuffer(buffer.numberOfChannels, length, this._sampleRate)
 
     for (let channel = 0; channel < buffer.numberOfChannels; channel++) {
       const inputData = buffer.getChannelData(channel)
@@ -242,18 +452,66 @@ export default class Crunker {
 
   /**
    * Plays the provided AudioBuffer in an AudioBufferSourceNode.
+   *
+   * Automatically resumes a suspended or interrupted AudioContext before playback.
+   * Returns the source node and a `contextResume` promise that rejects if the
+   * AudioContext remains suspended (e.g. browser autoplay policy blocked it).
    */
-  play(buffer: AudioBuffer, beforePlay: (source: AudioBufferSourceNode) => void): AudioBufferSourceNode {
-    const source = this._context.createBufferSource()
+  play(buffer: AudioBuffer, beforePlay: (source: AudioBufferSourceNode) => void): CrunkerPlayResult {
+    const ctx = this._ensureContext()
+
+    // Auto-resume the context if it's suspended or interrupted (iOS-specific state)
+    this._autoResume()
+
+    const source = ctx.createBufferSource()
 
     source.buffer = buffer
-    source.connect(this._context.destination)
+    source.connect(ctx.destination)
+
+    this._isPlaying = true
+
+    // Clean up the buffer source when playback ends to prevent iOS memory leaks,
+    // and kick off auto-suspend timer.
+    source.addEventListener('ended', () => {
+      this._isPlaying = false
+      this._cleanBuffer(source)
+      this._autoSuspend()
+    })
 
     beforePlay(source)
 
     source.start()
 
-    return source
+    // Build a promise that checks whether the context actually resumed.
+    // If it's still suspended after 1 second, reject so callers can show UI.
+    const contextResume = new Promise<void>((resolve, reject) => {
+      const state = ctx.state as string
+      if (state === 'running') {
+        resolve()
+        return
+      }
+
+      // Listen for the context to transition to 'running'
+      const onStateChange = () => {
+        if (ctx.state === 'running') {
+          ctx.removeEventListener('statechange', onStateChange)
+          clearTimeout(timeout)
+          resolve()
+        }
+      }
+      ctx.addEventListener('statechange', onStateChange)
+
+      const timeout = setTimeout(() => {
+        ctx.removeEventListener('statechange', onStateChange)
+        if (ctx.state !== 'running') {
+          reject(new Error('Crunker: AudioContext failed to resume. The browser is blocking audio playback without user interaction.'))
+        } else {
+          resolve()
+        }
+      }, 1000)
+    })
+
+    return { source, contextResume }
   }
 
   /**
@@ -302,15 +560,26 @@ export default class Crunker {
    *
    * @param callback callback to run if the browser does not support the Web Audio API
    */
+  static notSupported<T>(callback: () => T): T | undefined {
+    return Crunker._isSupported() ? undefined : callback()
+  }
+
+  /**
+   * Instance method for backwards compatibility. Delegates to `Crunker.notSupported`.
+   */
   notSupported<T>(callback: () => T): T | undefined {
-    return this._isSupported() ? undefined : callback()
+    return Crunker.notSupported(callback)
   }
 
   /**
    * Closes Crunker's internal AudioContext.
    */
   close(): this {
-    this._context.close()
+    if (this._suspendTimer) {
+      clearTimeout(this._suspendTimer)
+      this._suspendTimer = null
+    }
+    this._context?.close()
     return this
   }
 
@@ -346,8 +615,8 @@ export default class Crunker {
    *
    * @internal
    */
-  private _isSupported(): boolean {
-    return 'AudioContext' in window || 'webkitAudioContext' in window || 'mozAudioContext' in window
+  private static _isSupported(): boolean {
+    return typeof window !== 'undefined' && ('AudioContext' in window || 'webkitAudioContext' in window || 'mozAudioContext' in window)
   }
 
   /**

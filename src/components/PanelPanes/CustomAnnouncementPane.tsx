@@ -45,6 +45,7 @@ export interface ICustomAnnouncementPaneProps<OptionIds extends string> {
   systemId: string
   tabId: string
   isPersonalPresetsReady: boolean
+  personalPresetsError: boolean
   savePersonalPreset: (preset: IPersonalPresetObject) => Promise<void>
   getPersonalPresets: (systemId: string, tabId: string) => Promise<IPersonalPresetObject[]>
   deletePersonalPreset: (systemId: string, tabId: string, presetId: string) => Promise<void>
@@ -64,6 +65,7 @@ function CustomAnnouncementPane({
   systemId,
   tabId,
   isPersonalPresetsReady,
+  personalPresetsError,
   savePersonalPreset,
   getPersonalPresets,
   deletePersonalPreset,
@@ -358,7 +360,9 @@ function CustomAnnouncementPane({
             </button>
           </div>
 
-          {!isPersonalPresetsReady || loadingPersonalPresets || !personalPresets ? (
+          {personalPresetsError ? (
+            <p>Personal presets are not available in this browser.</p>
+          ) : !isPersonalPresetsReady || loadingPersonalPresets || !personalPresets ? (
             <div
               css={{
                 alignSelf: 'center',

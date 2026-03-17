@@ -1,3 +1,4 @@
+@use "sass:meta";
 :root {
   --primary-red: #f04c63;
   --primary-blue: #51c5dd;
@@ -6,10 +7,10 @@
   --link-color: #00528a;
 }
 
-@import './br-font.scss';
+@include meta.load-css('br-font.scss');
 // @import './hammersmith-font.scss';
-@import './baseline.scss';
-@import './buttons.scss';
+@include meta.load-css('baseline.scss');
+@include meta.load-css('buttons.scss');
 
 .warningMessage {
   background: rgba(255, 187, 0, 0.15);
@@ -120,8 +121,8 @@ h3 {
   font-size: 1.4rem;
 }
 
-@import './checkbox.scss';
-@import './text-input.scss';
+@include meta.load-css('checkbox.scss');
+@include meta.load-css('text-input.scss');
 
 .react-tabs__tab-panel:not(.react-tabs__tab-panel--selected) {
   display: none;

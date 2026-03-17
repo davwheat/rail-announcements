@@ -49,7 +49,7 @@ export default function SystemPageTemplate({ system }: IProps) {
 
       <NavBar />
 
-      <main css={{ margin: '0 24px' }}>
+      <main>
         <Link css={{ marginTop: 24, display: 'inline-block' }} className="button" href="/">
           <span className="buttonLabel">
             <BackIcon /> Back to system selection

@@ -173,9 +173,9 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
 
     switch (options.serviceType) {
       case 'southeastern':
-      case 'connex':
         files.push('welcome aboard this southeastern service to')
         break
+      case 'connex':
       case 'generic':
         files.push('welcome abord this service to')
         break

@@ -4958,7 +4958,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       )),
     )
 
-    await this.playAudioFiles(files, download, options.missingAudioMode ?? 'skip-service')
+    await this.playAudioFiles(files, download, options.missingAudioMode ?? 'skip-service', options.fromLive ? 1000 : 0)
   }
 
   async playStandingTrainAnnouncement(options: IStandingTrainAnnouncementOptions, download: boolean = false): Promise<void> {
@@ -5063,7 +5063,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
 
     files.push(...this.getServiceLoadingFiles(options.serviceLoading))
 
-    await this.playAudioFiles(files, download, options.missingAudioMode ?? 'skip-service')
+    await this.playAudioFiles(files, download, options.missingAudioMode ?? 'skip-service', options.fromLive ? 1000 : 0)
   }
 
   private getServiceLoadingFiles(serviceLoading: ServiceLoading): AudioItem[] {
@@ -5192,7 +5192,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         break
     }
 
-    await this.playAudioFiles(files, download, options.missingAudioMode ?? 'skip-service')
+    await this.playAudioFiles(files, download, options.missingAudioMode ?? 'skip-service', options.fromLive ? 1000 : 0)
   }
 
   async playFastTrainAnnouncement(options: IFastTrainAnnouncementOptions, download: boolean = false): Promise<void> {
@@ -5277,7 +5277,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
 
     files.push({ id: 's.this train is the service from', opts: { delayStart: this.SHORT_DELAY } }, `station.e.${options.originStationCode}`)
 
-    await this.playAudioFiles(files, download, options.missingAudioMode ?? 'skip-service')
+    await this.playAudioFiles(files, download, options.missingAudioMode ?? 'skip-service', 'fromLive' in options ? 1000 : 0)
   }
 
   async playPlatformAlterationAnnouncement(

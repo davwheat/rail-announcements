@@ -208,7 +208,12 @@ export default abstract class AnnouncementSystem {
    *
    * @returns Promise which resolves when the last audio file has finished playing.
    */
-  async playAudioFiles(fileIds: AudioItem[], download: boolean = false, missingAudioMode: MissingAudioMode = 'skip-service'): Promise<void> {
+  async playAudioFiles(
+    fileIds: AudioItem[],
+    download: boolean = false,
+    missingAudioMode: MissingAudioMode = 'skip-service',
+    startDelay: number = 0,
+  ): Promise<void> {
     if (fileIds.length === 0) {
       console.warn('No audio files to play.')
       return
@@ -224,6 +229,14 @@ export default abstract class AnnouncementSystem {
         return fileId
       }
     })
+
+    if (startDelay > 0 && standardisedFileIds.length > 0) {
+      const first = standardisedFileIds[0]
+      standardisedFileIds[0] = {
+        ...first,
+        opts: { ...first.opts, delayStart: (first.opts?.delayStart ?? 0) + startDelay },
+      }
+    }
 
     const crunker = AnnouncementSystem.getCrunker()
     const audio = await this.concatSoundClips(standardisedFileIds, missingAudioMode)

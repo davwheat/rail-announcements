@@ -33,7 +33,7 @@ interface IStoppedAtStationAnnouncementOptions {
 interface IInitialDepartureAnnouncementOptions {
   terminatesAtCode: string
   callingAtCodes: { crsCode: string; name: string; randomId: string }[]
-  isSoutheastern: boolean
+  serviceType: 'thameslink' | 'southeastern' | 'generic'
 }
 
 const announcementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {
@@ -231,10 +231,16 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
     const files: AudioItem[] = []
 
     if (!this.validateStationExists(terminatesAtCode, 'low')) return
-    if (options.isSoutheastern) {
-      files.push('welcome aboard this southeastern service to', { id: `stations.low.${terminatesAtCode}`, opts: { delayStart: 250 } })
-    } else {
-      files.push('welcome aboard this service to', { id: `stations.low.${terminatesAtCode}`, opts: { delayStart: 250 } })
+    switch (options.serviceType) {
+      case 'southeastern':
+        files.push('welcome aboard this southeastern service to', { id: `stations.low.${terminatesAtCode}`, opts: { delayStart: 250 } })
+        break
+      case 'generic':
+        files.push('this train is for', { id: `stations.low.${terminatesAtCode}`, opts: { delayStart: 250 } })
+        break
+      default:
+        files.push('welcome aboard this service to', { id: `stations.low.${terminatesAtCode}`, opts: { delayStart: 250 } })
+        break
     }
 
     if (callingAtCodes.length === 0) {
@@ -808,7 +814,7 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
       defaultState: {
         terminatesAtCode: this.allAvailableStationsAndTestStations[0].value,
         callingAtCodes: [],
-        isSoutheastern: false,
+        serviceType: 'thameslink',
       },
       props: {
         playHandler: this.playInitialDepartureAnnouncement.bind(this),
@@ -829,10 +835,15 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
             },
             default: [],
           },
-          isSoutheastern: {
-            name: 'Southeastern service?',
-            default: false,
-            type: 'boolean',
+          serviceType: {
+            name: 'Service type',
+            default: 'thameslink',
+            options: [
+              { title: 'Thameslink/Great Northern', value: 'thameslink' },
+              { title: 'Southeastern', value: 'southeastern' },
+              { title: 'Generic', value: 'generic' },
+            ],
+            type: 'select',
           },
         },
       },

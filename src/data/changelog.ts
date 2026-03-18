@@ -549,8 +549,26 @@ const changelog: IChangelogVersion[] = [
   },
   {
     date: '2026-03-17',
-    additions: ['Show a banner when your browser does not support the Web Audio API', 'Show an error when personal presets are unavailable'],
-    fixes: ['Numerous improvements to audio playback reliability, especially on Apple devices', 'Excessive padding on mobile devices'],
+    additions: [
+      'Show a banner when your browser does not support the Web Audio API',
+      'Show an error when personal presets are unavailable',
+      '[Live Announcements] Announce full and standing train loading',
+      '[Amey Phil & Celia] Support "carriages" wording for train formation',
+    ],
+    fixes: [
+      'Numerous improvements to audio playback reliability, especially on Apple devices',
+      'Excessive padding on mobile devices',
+      '[Live Announcements] Handle trains without a confirmed platform',
+    ],
+  },
+  {
+    date: '2026-03-18',
+    additions: [
+      '[Amey Phil & Celia] Updated disruption reason audio files',
+      '[Class 700] Support Southeastern and generic service type announcements',
+      '[Electrostar/Turbostar] Support Southern, Southeastern, Connex, and generic service type announcements',
+      '[Electrostar/Turbostar] Add terminating station announcement when approaching final destination',
+    ],
   },
 ]
 

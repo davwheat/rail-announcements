@@ -2,36 +2,20 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Commands
-
-```bash
-yarn dev                  # Start Next.js dev server (webpack), port 3000
-yarn build                # Build for production (static export when STATIC_EXPORT=true)
-yarn format               # Format all files with Prettier
-yarn format:check         # Check formatting without writing
-
-yarn serve-audio          # Serve audio files locally on port 8088 (required for audio in dev)
-yarn develop:workers      # Start Cloudflare Workers dev server on port 8787 (required for live trains & API)
-```
-
-There is no test suite in this project. Use `yarn build` to verify changes compile.
+Do not run yarn commands. There is no test suite in this project.
 
 ## Development Environment
 
-Three services are needed for full local development:
-
-1. `yarn dev` — Next.js dev server on port 3000
-2. `yarn serve-audio` — HTTP server for audio files on port 8088. The dev audio CDN URL (`http://10.0.1.46:8088`) is hardcoded in
-   `AnnouncementSystem.ts`
-3. `yarn develop:workers` — Cloudflare Workers on port 8787 for API endpoints. Next.js proxies `/api/*` to this in dev (configured in
-   `next.config.ts`)
+Three services are needed for full local development: the Next.js dev server on port 3000, an HTTP server for audio files on port 8088 (the dev
+audio CDN URL `http://local.davw.network:8088` is hardcoded in `AnnouncementSystem.ts`), and Cloudflare Workers on port 8787 for API endpoints
+(Next.js proxies `/api/*` to this in dev, configured in `next.config.ts`).
 
 Worker environment variables (`RTT_API_USERNAME`, `RTT_API_PASSWORD`, `RDM_*_API_KEY`) go in `.dev.vars`.
 
 ## Code Style
 
-Prettier: no semicolons, single quotes, 145-character line width, trailing commas everywhere, arrow parens avoided. Run `yarn format` before
-committing. Emotion CSS-in-JS is used for component styling (via `css` prop, configured as the JSX pragma in `tsconfig.json`).
+Prettier: no semicolons, single quotes, 145-character line width, trailing commas everywhere, arrow parens avoided. Emotion CSS-in-JS is used for
+component styling (via `css` prop, configured as the JSX pragma in `tsconfig.json`).
 
 ## Architecture
 
@@ -122,6 +106,39 @@ component). All support `onlyShowWhen(activeState)` for conditional visibility. 
 - `play-silence` — silently omit the missing clip
 - `repeat-last-station` — reuse the last station clip (matched by `station.` prefix) for missing station clips
 - `repeat-last` — reuse the last successfully fetched clip of any type
+
+### Audio File Storage
+
+Audio files are MP3s stored in the `audio/` directory, organised by system. Each system's `FILE_PREFIX` property maps directly to a subdirectory
+under `audio/`. Examples:
+
+| System                 | `FILE_PREFIX`          | Audio directory               |
+| ---------------------- | ---------------------- | ----------------------------- |
+| Avanti Pendolino       | `AWC/390`              | `audio/AWC/390/`              |
+| LNER Azuma             | `LNER/Azuma`           | `audio/LNER/Azuma/`           |
+| Thameslink Class 700   | `TL/700`               | `audio/TL/700/`               |
+| Ketech Celia (station) | `station/ketech/celia` | `audio/station/ketech/celia/` |
+| TfL Elizabeth Line     | `TfL/Elizabeth Line`   | `audio/TfL/Elizabeth Line/`   |
+
+**Clip ID naming format:** Clip IDs use dot-notation where dots become path separators. The URL is built by `generateAudioFileUrl()` in
+`AnnouncementSystem.ts`:
+
+```
+{AUDIO_CDN}/{FILE_PREFIX}/{clipId with dots replaced by /}.mp3
+```
+
+Examples for a system with `FILE_PREFIX = 'AWC/390'`:
+
+| Clip ID        | Resolves to                |
+| -------------- | -------------------------- |
+| `stations.BHI` | `AWC/390/stations/BHI.mp3` |
+| `chime`        | `AWC/390/chime.mp3`        |
+
+Some systems have subdirectories for variants (e.g. `stations/high/` and `stations/low/` for pitch variants in Thameslink, or `m/`/`e/`/`b/` for
+speaker gender in TfL systems). The `processAudioFileId()` method can be overridden per-system to transform clip IDs before URL generation.
+
+In production, `AUDIO_CDN` is `https://cdn.railannouncements.co.uk`. In development it points to `http://10.0.1.46:8088` which serves files from
+the local `audio/` directory.
 
 ### Crunker (Web Audio Wrapper)
 

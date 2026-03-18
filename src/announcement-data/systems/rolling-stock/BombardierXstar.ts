@@ -8,6 +8,8 @@ import TrainAnnouncementSystem from '../../TrainAnnouncementSystem'
 
 interface IApproachingStationAnnouncementOptions {
   stationCode: string
+  terminatesHere: boolean
+  serviceType: 'southern' | 'southeastern' | 'connex' | 'generic'
   mindTheGap: boolean
   keepBelongings: boolean
   cannotUseOyster: boolean
@@ -17,11 +19,13 @@ interface IStoppedAtStationAnnouncementOptions {
   thisStationCode: string
   terminatesAtCode: string
   callingAtCodes: { crsCode: string; name: string; randomId: string }[]
+  serviceType: 'southern' | 'southeastern' | 'connex' | 'generic'
 }
 
 interface IDepartingStationAnnouncementOptions {
   terminatesAtCode: string
   nextStationCode: string
+  serviceType: 'southern' | 'southeastern' | 'connex' | 'generic'
 }
 
 const announcementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {
@@ -32,6 +36,7 @@ const announcementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>>
         thisStationCode: 'HHE',
         terminatesAtCode: 'ORE',
         callingAtCodes: ['WVF', 'PMP', 'LWS', 'PLG', 'EBN', 'HMD', 'PEB', 'COB', 'CLL', 'BEX', 'SLQ', 'HGS'].map(crsToStationItemMapper),
+        serviceType: 'southern',
       },
     },
     {
@@ -40,6 +45,7 @@ const announcementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>>
         thisStationCode: 'PRP',
         terminatesAtCode: 'VIC',
         callingAtCodes: ['HHE', 'GTW', 'ECR', 'CLJ'].map(crsToStationItemMapper),
+        serviceType: 'southern',
       },
     },
     {
@@ -48,6 +54,7 @@ const announcementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>>
         thisStationCode: 'PRP',
         terminatesAtCode: 'LIT',
         callingAtCodes: ['HOV', 'PLD', 'SSE', 'LAC', 'WRH', 'WWO', 'DUR', 'GBS', 'ANG'].map(crsToStationItemMapper),
+        serviceType: 'southern',
       },
     },
     {
@@ -56,6 +63,7 @@ const announcementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>>
         thisStationCode: 'DKG',
         terminatesAtCode: 'VIC',
         callingAtCodes: ['BXW', 'LHD', 'AHD', 'EPS', 'EWE', 'CHE', 'SUO', 'CSH', 'HCB', 'MIJ', 'MTC', 'BAL', 'CLJ'].map(crsToStationItemMapper),
+        serviceType: 'southern',
       },
     },
   ],
@@ -74,6 +82,16 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
 
     files.push('bing bong')
     files.push('we are now approaching', `stations.${options.stationCode}`)
+
+    if (options.terminatesHere) {
+      files.push('our final destination')
+
+      if (options.serviceType === 'southern') {
+        files.push('thank you for travelling with southern')
+      } else if (options.serviceType === 'connex') {
+        files.push('thank you for travelling with connex')
+      }
+    }
 
     if (options.mindTheGap) {
       files.push('please mind the gap between the train and the platform')
@@ -116,11 +134,31 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
       files.push('this train terminates here all change please ensure')
     } else if (remainingStops.length === 1) {
       // Next station is the termination point.
-      files.push('this train is the southern service to', `stations.${terminatesAtCode}`)
+      switch (options.serviceType) {
+        case 'generic':
+          files.push('this train is for', `stations.${terminatesAtCode}`)
+          break
+        case 'southern':
+          files.push('this train is the southern service to', `stations.${terminatesAtCode}`)
+          break
+        default:
+          files.push('this train is the service to', `stations.${terminatesAtCode}`)
+          break
+      }
       files.push('the next station is', remainingStops[0])
     } else {
       // We are not at the termination point.
-      files.push('this train is the southern service to', `stations.${terminatesAtCode}`)
+      switch (options.serviceType) {
+        case 'generic':
+          files.push('this train is for', `stations.${terminatesAtCode}`)
+          break
+        case 'southern':
+          files.push('this train is the southern service to', `stations.${terminatesAtCode}`)
+          break
+        default:
+          files.push('this train is the service to', `stations.${terminatesAtCode}`)
+          break
+      }
       files.push('calling at')
       files.push(...this.pluraliseAudio(remainingStops, { beforeAndDelay: 75 }))
       files.push('the next station is', remainingStops[0])
@@ -133,12 +171,20 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
     const files: AudioItem[] = []
     files.push('bing bong')
 
-    files.push(
-      'welcome aboard the southern service to',
-      `stations.${options.terminatesAtCode}`,
-      'the next station is',
-      `stations.${options.nextStationCode}`,
-    )
+    switch (options.serviceType) {
+      case 'southeastern':
+      case 'connex':
+        files.push('welcome aboard this southeastern service to')
+        break
+      case 'generic':
+        files.push('welcome abord this service to')
+        break
+      default:
+        files.push('welcome aboard the southern service to')
+        break
+    }
+
+    files.push(`stations.${options.terminatesAtCode}`, 'the next station is', `stations.${options.nextStationCode}`)
 
     await this.playAudioFiles(files, download)
   }
@@ -459,6 +505,8 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
       component: CustomAnnouncementPane,
       defaultState: {
         stationCode: this.RealAvailableStationNames[0],
+        terminatesHere: false,
+        serviceType: 'southern',
         mindTheGap: true,
         keepBelongings: false,
         cannotUseOyster: false,
@@ -470,6 +518,22 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
             name: 'Next station',
             default: this.RealAvailableStationNames[0],
             options: AllStationsTitleValueMap.filter(s => this.RealAvailableStationNames.includes(s.value)),
+            type: 'select',
+          },
+          terminatesHere: {
+            name: 'Terminates here?',
+            type: 'boolean',
+            default: false,
+          },
+          serviceType: {
+            name: 'Service type',
+            default: 'southern',
+            options: [
+              { title: 'Southern', value: 'southern' },
+              { title: 'Southeastern', value: 'southeastern' },
+              { title: 'Connex', value: 'connex' },
+              { title: 'Generic', value: 'generic' },
+            ],
             type: 'select',
           },
           mindTheGap: {
@@ -497,6 +561,7 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
         thisStationCode: this.RealAvailableStationNames[0],
         terminatesAtCode: this.RealAvailableStationNames[0],
         callingAtCodes: [],
+        serviceType: 'southern',
       },
       props: {
         playHandler: this.playStoppedAtStationAnnouncement.bind(this),
@@ -523,6 +588,17 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
             },
             default: [],
           },
+          serviceType: {
+            name: 'Service type',
+            default: 'southern',
+            options: [
+              { title: 'Southern', value: 'southern' },
+              { title: 'Southeastern', value: 'southeastern' },
+              { title: 'Connex', value: 'connex' },
+              { title: 'Generic', value: 'generic' },
+            ],
+            type: 'select',
+          },
         },
       },
     } as CustomAnnouncementTab<keyof IStoppedAtStationAnnouncementOptions>,
@@ -532,6 +608,7 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
       defaultState: {
         terminatesAtCode: this.RealAvailableStationNames[0],
         nextStationCode: this.RealAvailableStationNames[0],
+        serviceType: 'southern',
       },
       props: {
         playHandler: this.playDepartingStationAnnouncement.bind(this),
@@ -546,6 +623,17 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
             name: 'Next station',
             default: this.RealAvailableStationNames[0],
             options: AllStationsTitleValueMap.filter(s => this.RealAvailableStationNames.includes(s.value)),
+            type: 'select',
+          },
+          serviceType: {
+            name: 'Service type',
+            default: 'southern',
+            options: [
+              { title: 'Southern', value: 'southern' },
+              { title: 'Southeastern', value: 'southeastern' },
+              { title: 'Connex', value: 'connex' },
+              { title: 'Generic', value: 'generic' },
+            ],
             type: 'select',
           },
         },

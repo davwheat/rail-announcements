@@ -25,6 +25,7 @@ import type {
   ILiveTrainApproachingAnnouncementOptions,
   IStandingTrainAnnouncementOptions,
   ChimeType,
+  ServiceLoading,
 } from '../announcement-data/systems/stations/AmeyPhil'
 import type { MissingAudioMode } from '../announcement-data/AnnouncementSystem'
 
@@ -65,6 +66,32 @@ function reverseShortPlatform(data: string | undefined | null): string | null {
   }
 
   return data
+}
+
+function getServiceLoadingFromFormation(formation: any): ServiceLoading {
+  if (!formation) return 'none'
+
+  let percentage: number | null = null
+
+  // Try overall service loading first
+  const overallPercentage = formation?.serviceLoading?.loadingPercentage?.Value
+  if (typeof overallPercentage === 'number') {
+    percentage = overallPercentage
+  }
+
+  // Fall back to averaging per-coach loading
+  if (percentage === null && Array.isArray(formation?.coaches)) {
+    const coachLoadings = formation.coaches.map((c: any) => c?.loading?.Value).filter((v: any) => typeof v === 'number') as number[]
+
+    if (coachLoadings.length > 0) {
+      percentage = coachLoadings.reduce((sum: number, v: number) => sum + v, 0) / coachLoadings.length
+    }
+  }
+
+  if (percentage === null) return 'none'
+
+  if (percentage > 70) return 'full and standing'
+  return 'none'
 }
 
 function getCallingPoints(train: TrainService, getStation: (location: TimingLocation | EndPointLocation) => string): CallingAtPoint[] {
@@ -756,6 +783,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         isDelayed: delayMins > 5,
         toc,
         coaches: train.length ? `${train.length} coaches` : 'None',
+        serviceLoading: getServiceLoadingFromFormation(train.formation),
         platform: getPlatform(train.platform, systemKey),
         terminatingStationCode: getStation(train.destination[0], systemKey),
         vias,
@@ -918,6 +946,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         isDelayed: delayMins > 5,
         toc,
         coaches: train.length ? `${train.length} coaches` : 'None',
+        serviceLoading: getServiceLoadingFromFormation(train.formation),
         platform: getPlatform(train.platform, systemKey),
         terminatingStationCode: getStation(train.destination[0], systemKey),
         vias,
@@ -999,7 +1028,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         const audioOptions = systems[systemKey].DelayCodeMapping[reasonData.value.toString()]?.e
 
         if (audioOptions) {
-          delayReason = audioOptions.split(',')
+          delayReason = Array.isArray(audioOptions) ? audioOptions : [audioOptions]
         }
       }
 

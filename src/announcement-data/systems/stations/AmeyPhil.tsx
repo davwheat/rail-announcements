@@ -15,6 +15,7 @@ import { RttUtils } from '@data/RttUtils'
 
 export type ChimeType = 'three' | 'four' | 'none'
 export type FirstClassLocation = 'none' | 'front' | 'middle' | 'rear'
+export type ServiceLoading = 'none' | 'full and standing' | 'no seats available'
 
 export interface INextTrainAnnouncementOptions {
   chime: ChimeType
@@ -28,6 +29,7 @@ export interface INextTrainAnnouncementOptions {
   callingAt: CallingAtPoint[]
   firstClassLocation: FirstClassLocation
   coaches: string
+  serviceLoading: ServiceLoading
   announceShortPlatformsAfterSplit: boolean
   notCallingAtStations: { crsCode: string }[]
   fromLive?: true
@@ -142,7 +144,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
   protected readonly BEFORE_SECTION_DELAY: number = 550
   protected readonly SHORT_DELAY: number = 500
 
-  readonly DelayCodeMapping: Record<string, { e: string; m: string }> = DelayCodeMapping
+  readonly DelayCodeMapping: Record<string, { e: string | string[] | null; m: string | string[] | null; text: string }> = DelayCodeMapping
 
   protected readonly genericOptions = {
     platform: 's.platform-2',
@@ -205,6 +207,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             vias: [],
             callingAt: ['ANG', 'GBS', 'DUR', 'WWO', 'WRH', 'SWK', 'PLD', 'HOV'].map(crsToStationItemMapper),
             coaches: '8 coaches',
+            serviceLoading: 'none' as const,
             mindTheGap: true,
             thisStationCode: 'LIT',
             firstClassLocation: 'none',
@@ -248,6 +251,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
               'FTN',
             ].map(stationItemCompleter),
             coaches: '8 coaches',
+            serviceLoading: 'none' as const,
             mindTheGap: false,
             thisStationCode: 'VIC',
             firstClassLocation: 'none',
@@ -271,6 +275,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             vias: ['GTW'].map(crsToStationItemMapper),
             callingAt: ['PRP', 'HSK', 'BUG', 'HHE', 'GTW'].map(crsToStationItemMapper),
             coaches: '8 coaches',
+            serviceLoading: 'none' as const,
             mindTheGap: false,
             thisStationCode: 'BTN',
             firstClassLocation: 'none',
@@ -312,6 +317,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
               { crsCode: 'HYM', shortPlatform: 'front.9' },
             ].map(stationItemCompleter),
             coaches: '11 coaches',
+            serviceLoading: 'none' as const,
             mindTheGap: false,
             firstClassLocation: 'rear',
             announceShortPlatformsAfterSplit: false,
@@ -334,6 +340,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             vias: [],
             callingAt: ['SPT', 'MAC', 'SOT', 'RUG', 'MKC'].map(stationItemCompleter),
             coaches: '9 coaches',
+            serviceLoading: 'none' as const,
             mindTheGap: false,
             thisStationCode: 'MAN',
             firstClassLocation: 'front',
@@ -397,6 +404,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
               'SER',
             ].map(crsToStationItemMapper),
             coaches: '5 coaches',
+            serviceLoading: 'none' as const,
             mindTheGap: false,
             thisStationCode: 'ABD',
             firstClassLocation: 'front',
@@ -423,6 +431,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
               crsToStationItemMapper,
             ),
             coaches: '5 coaches',
+            serviceLoading: 'none' as const,
             mindTheGap: false,
             thisStationCode: 'MAN',
             firstClassLocation: 'front',
@@ -446,6 +455,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             vias: [],
             callingAt: ['HDM', 'BCS', 'BAN', 'LMS', 'WRW', 'WRP', 'DDG', 'SOL', 'BMO', 'BSW', 'ROW'].map(crsToStationItemMapper),
             coaches: '5 coaches',
+            serviceLoading: 'none' as const,
             mindTheGap: false,
             thisStationCode: 'MYB',
             firstClassLocation: 'none',
@@ -484,6 +494,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
               'HMT',
             ].map(stationItemCompleter),
             coaches: '3 coaches',
+            serviceLoading: 'none' as const,
             mindTheGap: false,
             firstClassLocation: 'none',
             announceShortPlatformsAfterSplit: false,
@@ -507,6 +518,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             vias: ['CWX'].map(crsToStationItemMapper),
             callingAt: ['BDS', 'TCR', 'ZFD', 'LST', 'ZLW', 'CWX', 'CUS', 'WWC'].map(crsToStationItemMapper),
             coaches: '9 coaches',
+            serviceLoading: 'none' as const,
             mindTheGap: false,
             firstClassLocation: 'none',
             announceShortPlatformsAfterSplit: false,
@@ -552,6 +564,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         vias: ['SLO'].map(stationItemCompleter),
         callingAt: this.STATIONS.map(stationItemCompleter),
         coaches: '1 coach',
+        serviceLoading: 'none' as const,
         announceShortPlatformsAfterSplit: false,
         notCallingAtStations: [],
       },
@@ -4899,14 +4912,10 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     }
 
     if (options.coaches !== 'None') {
-      const coaches = options.coaches.split(' ')[0]
+      const [count, unit] = options.coaches.split(' ')
 
       // Platforms share the same audio as coach numbers
-      files.push(
-        { id: 's.this train is formed of', opts: { delayStart: 250 } },
-        `platform.s.${coaches}`,
-        `e.${coaches === '1' ? 'coach' : 'coaches'}`,
-      )
+      files.push({ id: 's.this train is formed of', opts: { delayStart: 250 } }, `platform.s.${count}`, `e.${unit}`)
     }
 
     files.push(
@@ -4934,6 +4943,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         ),
       )
     }
+
+    files.push(...this.getServiceLoadingFiles(options.serviceLoading))
 
     files.push(
       ...getPlatFiles(this.BEFORE_SECTION_DELAY),
@@ -5050,7 +5061,25 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       )
     }
 
+    files.push(...this.getServiceLoadingFiles(options.serviceLoading))
+
     await this.playAudioFiles(files, download, options.missingAudioMode ?? 'skip-service')
+  }
+
+  private getServiceLoadingFiles(serviceLoading: ServiceLoading): AudioItem[] {
+    if (serviceLoading === 'full and standing') {
+      return [{ id: 'e.this service has been reported as full and standing', opts: { delayStart: 500 } }]
+    }
+
+    if (serviceLoading === 'no seats available') {
+      return [
+        { id: 's.im sorry to inform you', opts: { delayStart: 500 } },
+        'm.that this service has standing passengers already',
+        'e.and no seats are available for passengers joining at this station',
+      ]
+    }
+
+    return []
   }
 
   protected readonly disruptionOptions = {
@@ -5616,6 +5645,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         vias: [],
         callingAt: [],
         coaches: '8 coaches',
+        serviceLoading: 'none',
         firstClassLocation: 'none',
         announceShortPlatformsAfterSplit: false,
         notCallingAtStations: [],
@@ -5737,31 +5767,21 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             ],
           },
           coaches: {
-            name: 'Coach count',
+            name: 'Coach/carriage count',
             default: '8 coaches',
+            options: ['None', '1 coach', ...Array.from({ length: 19 }, (_, i) => i + 2).flatMap(n => [`${n} coaches`, `${n} carriages`])].map(
+              c => ({ title: c, value: c }),
+            ),
+            type: 'select',
+          },
+          serviceLoading: {
+            name: 'Service loading',
+            default: 'none',
             options: [
-              'None',
-              '1 coach',
-              '2 coaches',
-              '3 coaches',
-              '4 coaches',
-              '5 coaches',
-              '6 coaches',
-              '7 coaches',
-              '8 coaches',
-              '9 coaches',
-              '10 coaches',
-              '11 coaches',
-              '12 coaches',
-              '13 coaches',
-              '14 coaches',
-              '15 coaches',
-              '16 coaches',
-              '17 coaches',
-              '18 coaches',
-              '19 coaches',
-              '20 coaches',
-            ].map(c => ({ title: c, value: c })),
+              { title: 'None', value: 'none' },
+              { title: 'Reported as full and standing', value: 'full and standing' },
+              { title: 'No seats available', value: 'no seats available' },
+            ],
             type: 'select',
           },
           announceShortPlatformsAfterSplit: {
@@ -5915,6 +5935,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         callingAt: [],
         announceShortPlatformsAfterSplit: false,
         coaches: '8 coaches',
+        serviceLoading: 'none',
         firstClassLocation: 'none',
         mindTheGap: false,
         notCallingAtStations: [],
@@ -6037,31 +6058,21 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             ],
           },
           coaches: {
-            name: 'Coach count',
+            name: 'Coach/carriage count',
             default: '8 coaches',
+            options: ['None', '1 coach', ...Array.from({ length: 19 }, (_, i) => i + 2).flatMap(n => [`${n} coaches`, `${n} carriages`])].map(
+              c => ({ title: c, value: c }),
+            ),
+            type: 'select',
+          },
+          serviceLoading: {
+            name: 'Service loading',
+            default: 'none',
             options: [
-              'None',
-              '1 coach',
-              '2 coaches',
-              '3 coaches',
-              '4 coaches',
-              '5 coaches',
-              '6 coaches',
-              '7 coaches',
-              '8 coaches',
-              '9 coaches',
-              '10 coaches',
-              '11 coaches',
-              '12 coaches',
-              '13 coaches',
-              '14 coaches',
-              '15 coaches',
-              '16 coaches',
-              '17 coaches',
-              '18 coaches',
-              '19 coaches',
-              '20 coaches',
-            ].map(c => ({ title: c, value: c })),
+              { title: 'None', value: 'none' },
+              { title: 'Reported as full and standing', value: 'full and standing' },
+              { title: 'No seats available', value: 'no seats available' },
+            ],
             type: 'select',
           },
           announceShortPlatformsAfterSplit: {
@@ -6435,6 +6446,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       chime: existingOptions.chime,
       announceShortPlatformsAfterSplit: existingOptions.announceShortPlatformsAfterSplit,
       coaches: existingOptions.coaches,
+      serviceLoading: existingOptions.serviceLoading,
       firstClassLocation: existingOptions.firstClassLocation,
 
       hour: h === '00' ? '00 - midnight' : h,
@@ -6571,6 +6583,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     return {
       announceShortPlatformsAfterSplit: existingOptions.announceShortPlatformsAfterSplit,
       coaches: existingOptions.coaches,
+      serviceLoading: existingOptions.serviceLoading,
       firstClassLocation: existingOptions.firstClassLocation,
       mindTheGap: existingOptions.mindTheGap,
 

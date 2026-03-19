@@ -171,7 +171,7 @@ export default abstract class AnnouncementSystem {
    */
   readonly DESCRIPTION: string | undefined = undefined
 
-  private static readonly SAMPLE_RATE = 48000
+  private static readonly SAMPLE_RATE = 44100
 
   /**
    * Returns the shared Crunker singleton, stored on `window` so

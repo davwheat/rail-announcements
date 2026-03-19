@@ -2065,8 +2065,8 @@
     "text": "This service has been delayed by a fault with the radio system between the driver and the signaller"
   },
   "832": {
-    "e": "disruption-reason.e.signalling difficulties",
-    "m": "disruption-reason.m.signalling difficulties",
+    "e": "disruption-reason.e.a temporary fault with the signalling equipment",
+    "m": "disruption-reason.m.a temporary fault with the signalling equipment",
     "text": "This service has been delayed by a fault with the signalling system"
   },
   "834": {
@@ -2470,8 +2470,8 @@
     "text": "This service has been delayed by a fault on a train earlier"
   },
   "914": {
-    "e": "disruption-reason.e.signalling difficulties",
-    "m": "disruption-reason.m.signalling difficulties",
+    "e": "disruption-reason.e.a temporary fault with the signalling equipment",
+    "m": "disruption-reason.m.a temporary fault with the signalling equipment",
     "text": "This service has been delayed by issues with communication systems"
   },
   "915": {

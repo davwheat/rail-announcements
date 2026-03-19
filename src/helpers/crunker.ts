@@ -64,16 +64,15 @@ export default class Crunker {
 
   /**
    * Persistent MediaStreamDestination node reused across `play()` calls.
-   * Routing audio through this tricks iOS Safari into treating playback
-   * as a live stream, allowing it to continue with the screen locked.
+   * Routing audio through this keeps the audio graph connected to a
+   * destination that iOS Safari treats as a live stream.
    */
   private _streamDest: MediaStreamAudioDestinationNode | null = null
   /**
-   * Hidden `<audio>` element whose `srcObject` is the MediaStream from
-   * `_streamDest`. Kept alive across plays so Safari maintains the
-   * "live stream" session.
+   * Persistent looping source that feeds the `_streamDest` with data so it
+   * never runs dry. Created once alongside `_streamDest`.
    */
-  private _streamAudio: HTMLAudioElement | null = null
+  private _keepAliveSource: AudioBufferSourceNode | null = null
 
   /**
    * Creates a new instance of Crunker with the provided options.
@@ -506,36 +505,18 @@ export default class Crunker {
 
     source.buffer = buffer
 
-    // Route through a MediaStreamDestination so iOS Safari treats playback
-    // as a live stream, allowing audio to continue with the screen locked.
-    // Only one output path is used to avoid duplicating the audio.
-    if (typeof MediaStreamAudioDestinationNode !== 'undefined') {
-      if (!this._streamDest) {
-        this._streamDest = ctx.createMediaStreamDestination()
-
-        this._streamAudio = document.createElement('audio')
-        this._streamAudio.srcObject = this._streamDest.stream
-        // Prevent the element from being visible or taking up space
-        this._streamAudio.style.display = 'none'
-        document.body.appendChild(this._streamAudio)
-      }
-
-      // Feed a permanently-looping silent buffer into the stream so it always
-      // has data. This prevents the <audio> element from repeating the last
-      // chunk after an announcement ends.
-      const keepAlive = ctx.createBufferSource()
-      keepAlive.buffer = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate) // 1s silent buffer
-      keepAlive.loop = true
-      keepAlive.connect(this._streamDest)
-      keepAlive.start()
-
-      source.connect(this._streamDest)
-      this._streamAudio!.play().catch(() => {
-        // Ignore — autoplay may be blocked; callers handle contextResume rejection
-      })
-    } else {
-      source.connect(ctx.destination)
+    // Feed a permanently-looping silent buffer into the stream so it
+    // never runs dry between announcements.
+    if (!this._keepAliveSource) {
+      const keepAliveBuffer = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate)
+      this._keepAliveSource = ctx.createBufferSource()
+      this._keepAliveSource.buffer = keepAliveBuffer
+      this._keepAliveSource.loop = true
+      this._keepAliveSource.connect(ctx.destination)
+      this._keepAliveSource.start()
     }
+
+    source.connect(ctx.destination)
 
     this._isPlaying = true
 
@@ -648,11 +629,10 @@ export default class Crunker {
       clearTimeout(this._suspendTimer)
       this._suspendTimer = null
     }
-    if (this._streamAudio) {
-      this._streamAudio.pause()
-      this._streamAudio.srcObject = null
-      this._streamAudio.remove()
-      this._streamAudio = null
+    if (this._keepAliveSource) {
+      this._keepAliveSource.stop()
+      this._keepAliveSource.disconnect()
+      this._keepAliveSource = null
     }
     this._streamDest = null
     this._context?.close()

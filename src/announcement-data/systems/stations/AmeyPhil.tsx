@@ -12,6 +12,7 @@ import NamedServices from './named-services.json'
 
 import type { RttResponse } from '../../../api-types/get-service-rtt-types'
 import { RttUtils } from '@data/RttUtils'
+import dayjs from 'dayjs'
 
 export type ChimeType = 'three' | 'four' | 'none'
 export type FirstClassLocation = 'none' | 'front' | 'middle' | 'rear'
@@ -6396,6 +6397,13 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     } as CustomAnnouncementTab<string>,
   }
 
+  private coachCountFromRtt(passengerVehicleCount: number | undefined): string | null {
+    if (passengerVehicleCount == null || passengerVehicleCount <= 0) return null
+    if (passengerVehicleCount > 20) return null
+    if (passengerVehicleCount === 1) return '1 coach'
+    return `${passengerVehicleCount} coaches`
+  }
+
   /**
    * @param rttService RTT service data
    * @param fromStation The station from which to interpret data from
@@ -6418,8 +6426,9 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       return true
     })
 
-    const h = originLocation.gbttBookedDeparture!!.substring(0, 2)
-    const m = originLocation.gbttBookedDeparture!!.substring(2, 4)
+    const depTime = dayjs(originLocation.scheduledDeparture!!)
+    const h = depTime.format('HH')
+    const m = depTime.format('mm')
 
     let platform = originLocation.platform?.toLowerCase() ?? existingOptions.platform
     if (!this.PLATFORMS.includes(platform)) platform = existingOptions.platform
@@ -6442,10 +6451,12 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       )
     }
 
+    const coaches = this.coachCountFromRtt(originLocation.passengerVehicleCount) ?? existingOptions.coaches
+
     return {
       chime: existingOptions.chime,
       announceShortPlatformsAfterSplit: existingOptions.announceShortPlatformsAfterSplit,
-      coaches: existingOptions.coaches,
+      coaches,
       serviceLoading: existingOptions.serviceLoading,
       firstClassLocation: existingOptions.firstClassLocation,
 
@@ -6490,8 +6501,9 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       return true
     })
 
-    const h = originLocation.gbttBookedDeparture!!.substring(0, 2)
-    const m = originLocation.gbttBookedDeparture!!.substring(2, 4)
+    const depTime = dayjs(originLocation.scheduledDeparture!!)
+    const h = depTime.format('HH')
+    const m = depTime.format('mm')
 
     let platform = originLocation.platform?.toLowerCase() ?? existingOptions.platform
     if (!this.PLATFORMS.includes(platform)) platform = existingOptions.platform
@@ -6553,8 +6565,9 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       return true
     })
 
-    const h = originLocation.gbttBookedDeparture!!.substring(0, 2)
-    const m = originLocation.gbttBookedDeparture!!.substring(2, 4)
+    const depTime = dayjs(originLocation.scheduledDeparture!!)
+    const h = depTime.format('HH')
+    const m = depTime.format('mm')
 
     let platform = originLocation.platform?.toLowerCase() ?? existingOptions.platform
     if (!this.PLATFORMS.includes(platform)) platform = existingOptions.platform
@@ -6580,9 +6593,11 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       alert('The station location being emulated is not available with this announcement system. The station has been reset to a default value.')
     }
 
+    const coaches = this.coachCountFromRtt(originLocation.passengerVehicleCount) ?? existingOptions.coaches
+
     return {
       announceShortPlatformsAfterSplit: existingOptions.announceShortPlatformsAfterSplit,
-      coaches: existingOptions.coaches,
+      coaches,
       serviceLoading: existingOptions.serviceLoading,
       firstClassLocation: existingOptions.firstClassLocation,
       mindTheGap: existingOptions.mindTheGap,

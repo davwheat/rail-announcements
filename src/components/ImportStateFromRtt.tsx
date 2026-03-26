@@ -194,24 +194,6 @@ export default function ImportStateFromRtt({ importStateFromRttService, disabled
           >
             <div
               css={{
-                padding: 12,
-                paddingLeft: 16,
-                borderLeft: '4px solid var(--primary-blue)',
-                background: `color-mix(in srgb, var(--primary-blue), transparent 92%)`,
-                marginBottom: 24,
-              }}
-            >
-              <p css={{ marginBottom: 0 }}>
-                This feature is currently in beta. If you encounter issues, please report them on{' '}
-                <a target="_blank" href="https://github.com/davwheat/rail-announcements/issues/270">
-                  this GitHub tracking issue
-                </a>
-                .
-              </p>
-            </div>
-
-            <div
-              css={{
                 position: 'relative',
                 marginBottom: 24,
               }}
@@ -398,12 +380,13 @@ export default function ImportStateFromRtt({ importStateFromRttService, disabled
                                   gap: '8px 16px',
                                   // center
                                   alignItems: 'center',
-                                  cursor: 'pointer',
+                                  cursor: location.cancelled ? 'not-allowed' : 'pointer',
                                   padding: 12,
                                   border: '2px solid #ddd',
                                   marginTop: 'var(--item-spacing)',
                                   marginBottom: 'var(--item-spacing)',
                                   position: 'relative',
+                                  opacity: location.cancelled ? 0.5 : 1,
 
                                   '&:has(input:checked)': {
                                     borderColor: 'var(--primary-blue)',
@@ -416,6 +399,7 @@ export default function ImportStateFromRtt({ importStateFromRttService, disabled
                                   name="originLocation"
                                   id={`originLocation-${i}`}
                                   checked={selectedOriginIndex === i}
+                                  disabled={location.cancelled}
                                   onChange={() => setSelectedOriginIndex(i)}
                                   css={{ gridArea: 'radio', height: 24, width: 24, margin: 0 }}
                                 />
@@ -458,11 +442,19 @@ export default function ImportStateFromRtt({ importStateFromRttService, disabled
                                 <div css={{ gridArea: 'location' }}>{location.name}</div>
                                 <div css={{ gridArea: 'detail', color: '#888', fontWeight: 'normal', fontSize: '0.8em' }}>
                                   {[
+                                    location.cancelled && 'Cancelled',
                                     location.rttPlatform && `Platform ${location.rttPlatform}`,
-                                    !isSetDownOnly && location.depLateness && `Departed ${latenessString(location.depLateness)}`,
-                                    isPickUpOnly && location.arrLateness && `Arrived ${latenessString(location.arrLateness)}`,
-                                    isSetDownOnly && 'Set down only',
-                                    isPickUpOnly && 'Pick up only',
+                                    !location.cancelled &&
+                                      !isSetDownOnly &&
+                                      location.depLateness &&
+                                      `Departed ${latenessString(location.depLateness)}`,
+                                    !location.cancelled &&
+                                      isPickUpOnly &&
+                                      location.arrLateness &&
+                                      `Arrived ${latenessString(location.arrLateness)}`,
+                                    !location.cancelled && isSetDownOnly && 'Set down only',
+                                    !location.cancelled && isPickUpOnly && 'Pick up only',
+                                    !location.cancelled && location.requestStop && 'Request stop',
                                   ]
                                     .filter(Boolean)
                                     .join(' • ')}

@@ -9,3 +9,8 @@ mode = "smart"
 binding = "DB"
 database_name = "rail-announcements"
 database_id = "49f5fff6-f5dd-475c-b5ae-b1d617fd8fc2"
+
+[[kv_namespaces]]
+binding = "KV"
+remote = false
+id = "c78c58b5a1cc453cad904dd1a4fb9c71"

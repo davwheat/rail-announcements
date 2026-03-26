@@ -75,11 +75,10 @@ Some features require additional work in order to test locally.
 
 ##### Realtime Trains importing
 
-You'll need to create a `.dev.vars` file at the root of the repository with your [RTT API](https://api.rtt.io/) username and password:
+You'll need to create a `.dev.vars` file at the root of the repository with your [RTT API](https://api-portal.rtt.io/welcome/) JWT/token:
 
 ```bash
-RTT_API_USERNAME=rttapi_username
-RTT_API_PASSWORD=your_password
+RTT_API_TOKEN=eyJh...
 ```
 
 ### Website contributions

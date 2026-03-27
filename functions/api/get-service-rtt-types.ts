@@ -34,4 +34,12 @@ export interface RttLocation {
   departureLateness?: number
   passengerVehicleCount?: number
   requestStop?: boolean
+  divisions?: RttDivision[]
+}
+
+export interface RttDivision {
+  serviceUid: string
+  position: 'front' | 'middle' | 'rear' | 'unknown'
+  vehicleCount?: number
+  callingPoints: { crs?: string; tiploc: string }[]
 }

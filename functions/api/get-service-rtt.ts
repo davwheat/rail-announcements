@@ -1,6 +1,6 @@
 import { PagesFunction } from '@cloudflare/workers-types'
-export type { RttResponse, RttOrigin, RttDestination, RttLocation, LocationDisplayAs } from './get-service-rtt-types'
-import type { RttResponse, RttOrigin, RttDestination, RttLocation, LocationDisplayAs } from './get-service-rtt-types'
+export type { RttResponse, RttOrigin, RttDestination, RttLocation, LocationDisplayAs, RttDivision } from './get-service-rtt-types'
+import type { RttResponse, RttOrigin, RttDestination, RttLocation, LocationDisplayAs, RttDivision } from './get-service-rtt-types'
 
 // ── New RTT API v2 response types ──────────────────────────────────────────────
 
@@ -35,6 +35,7 @@ interface V2PlannedActualData {
 interface V2LocationMetadata {
   platform?: V2PlannedActualData
   numberOfVehicles?: number
+  allocationIndex?: number
   isRequestStop?: boolean
 }
 
@@ -43,10 +44,33 @@ interface V2LocationPair {
   temporalData?: V2IndividualTemporalData
 }
 
+interface V2AssociatedService {
+  associationData: {
+    associationType: string
+    isPublic?: boolean
+  }
+  scheduleMetadata: {
+    identity: string
+    departureDate: string
+  }
+}
+
 interface V2ServiceLocation {
   temporalData: V2LocationTemporalData
   locationMetadata?: V2LocationMetadata
   location: V2GeographicLocation
+  associatedServices?: V2AssociatedService[]
+}
+
+interface V2AllocationItem {
+  identity: string
+  numberOfVehicles?: number
+}
+
+interface V2Allocation {
+  allocationIndex: number
+  passengerVehicles?: number
+  allocationItems?: V2AllocationItem[]
 }
 
 interface V2ServiceResponse {
@@ -60,6 +84,7 @@ interface V2ServiceResponse {
       trainReportingIdentity?: string
     }
     locations: V2ServiceLocation[]
+    allocationData?: V2Allocation[]
     origin?: V2LocationPair[]
     destination?: V2LocationPair[]
   }
@@ -119,6 +144,46 @@ function getRealtimeTime(individual: V2IndividualTemporalData | undefined): stri
   return individual.realtimeActual ?? individual.realtimeForecast ?? undefined
 }
 
+/**
+ * Determine which part of the train is splitting off by comparing allocation items
+ * before and after the split. Falls back to 'rear' if data is missing or inconsistent.
+ */
+function determineSplitPosition(
+  beforeAlloc: V2Allocation | undefined,
+  afterAlloc: V2Allocation | undefined,
+): 'front' | 'middle' | 'rear' | 'unknown' {
+  if (!beforeAlloc?.allocationItems?.length || !afterAlloc?.allocationItems?.length) {
+    return 'rear'
+  }
+
+  const beforeIds = beforeAlloc.allocationItems.map(i => i.identity)
+  const afterIds = new Set(afterAlloc.allocationItems.map(i => i.identity))
+
+  const missingIndices: number[] = []
+  for (let i = 0; i < beforeIds.length; i++) {
+    if (!afterIds.has(beforeIds[i])) {
+      missingIndices.push(i)
+    }
+  }
+
+  if (missingIndices.length === 0) return 'rear'
+
+  const firstMissing = missingIndices[0]
+  const lastMissing = missingIndices[missingIndices.length - 1]
+  const isContiguous = lastMissing - firstMissing + 1 === missingIndices.length
+
+  if (!isContiguous) return 'rear'
+  if (firstMissing === 0) return 'front'
+  if (lastMissing === beforeIds.length - 1) return 'rear'
+
+  // Units splitting from the middle — default to rear per user preference
+  return 'rear'
+}
+
+function isPublicCallType(callType: V2LocationTemporalData['scheduledCallType']): boolean {
+  return callType === 'ADVERTISED_OPEN' || callType === 'ADVERTISED_SET_DOWN' || callType === 'ADVERTISED_PICK_UP'
+}
+
 // ── Access token management ────────────────────────────────────────────────────
 
 const RTT_API_VERSION = '2026-03-27'
@@ -155,9 +220,9 @@ async function getAccessToken(refreshToken: string, kv: KVNamespace): Promise<st
   return data.token
 }
 
-// ── Core fetch + transform ─────────────────────────────────────────────────────
+// ── API fetch helper ─────────────────────────────────────────────────────────
 
-async function fetchRttService(serviceUid: string, runDate: string, token: string): Promise<RttResponse> {
+async function fetchV2Service(serviceUid: string, runDate: string, token: string): Promise<V2ServiceResponse> {
   const req = await fetch(
     `https://data.rtt.io/gb-nr/service?identity=${encodeURIComponent(serviceUid)}&departureDate=${encodeURIComponent(runDate)}&detail=true`,
     {
@@ -171,17 +236,118 @@ async function fetchRttService(serviceUid: string, runDate: string, token: strin
   )
 
   if (req.status === 404) {
-    const v2Response = await req.text()
-    console.log('RTT API response:', v2Response)
+    const body = await req.text()
+    console.log('RTT API 404 response:', body)
     throw new Error('Service not found')
   }
   if (!req.ok) {
-    const v2Response = await req.text()
-    console.log('RTT API response:', v2Response)
+    const body = await req.text()
+    console.log('RTT API error response:', body)
     throw new Error(`Failed to fetch RTT service: ${req.status} ${req.statusText}`)
   }
 
-  const v2Response: V2ServiceResponse = await req.json()
+  return req.json()
+}
+
+// ── Division resolution ──────────────────────────────────────────────────────
+
+async function resolveDivisions(mainService: V2ServiceResponse['service'], token: string): Promise<Map<number, RttDivision[]>> {
+  const divisionsByLocationIndex = new Map<number, RttDivision[]>()
+
+  // Build allocation lookup: allocationIndex → V2Allocation
+  const allocations = new Map<number, V2Allocation>()
+  for (const alloc of mainService.allocationData ?? []) {
+    allocations.set(alloc.allocationIndex, alloc)
+  }
+
+  // Collect all DIVIDE_INTO associations with their location indices
+  const divideRequests: { locationIndex: number; assoc: V2AssociatedService }[] = []
+  for (let i = 0; i < mainService.locations.length; i++) {
+    const loc = mainService.locations[i]
+    for (const assoc of loc.associatedServices ?? []) {
+      if (assoc.associationData.associationType === 'DIVIDE_INTO') {
+        divideRequests.push({ locationIndex: i, assoc })
+      }
+    }
+  }
+
+  if (divideRequests.length === 0) return divisionsByLocationIndex
+
+  // Fetch all divided services in parallel
+  const results = await Promise.allSettled(
+    divideRequests.map(async ({ locationIndex, assoc }) => {
+      const splitLoc = mainService.locations[locationIndex]
+      const splitTiplocs = new Set(splitLoc.location.longCodes ?? [])
+
+      const v2Response = await fetchV2Service(assoc.scheduleMetadata.identity, assoc.scheduleMetadata.departureDate, token)
+      const assocService = v2Response.service
+      if (!assocService) return null
+
+      // Find the split point in the associated service's locations (match by tiploc)
+      const splitPointIdx = assocService.locations.findIndex(l => (l.location.longCodes ?? []).some(t => splitTiplocs.has(t)))
+
+      // Take public call locations after the split point (excluding the split point itself)
+      const callingPoints: RttDivision['callingPoints'] = []
+      for (let j = splitPointIdx + 1; j < assocService.locations.length; j++) {
+        const assocLoc = assocService.locations[j]
+        if (!isPublicCallType(assocLoc.temporalData.scheduledCallType)) continue
+        if (assocLoc.temporalData.displayAs === 'CANCELLED' || assocLoc.temporalData.displayAs === 'DIVERTED') continue
+        callingPoints.push({
+          crs: assocLoc.location.shortCodes?.[0],
+          tiploc: assocLoc.location.longCodes?.[0] ?? '',
+        })
+      }
+
+      // Determine split position from allocation data
+      const splitAllocIdx = splitLoc.locationMetadata?.allocationIndex
+      const nextLoc = mainService.locations[locationIndex + 1]
+      const nextAllocIdx = nextLoc?.locationMetadata?.allocationIndex
+      const position = determineSplitPosition(
+        splitAllocIdx != null ? allocations.get(splitAllocIdx) : undefined,
+        nextAllocIdx != null ? allocations.get(nextAllocIdx) : undefined,
+      )
+
+      // Determine vehicle count: diff between this location and the next
+      const vehiclesHere = splitLoc.locationMetadata?.numberOfVehicles
+      const vehiclesNext = nextLoc?.locationMetadata?.numberOfVehicles
+      let vehicleCount: number | undefined
+      if (vehiclesHere != null && vehiclesNext != null) {
+        const diff = vehiclesHere - vehiclesNext
+        if (diff > 0) vehicleCount = diff
+      }
+
+      return {
+        locationIndex,
+        division: {
+          serviceUid: assoc.scheduleMetadata.identity,
+          position,
+          vehicleCount,
+          callingPoints,
+        } satisfies RttDivision,
+      }
+    }),
+  )
+
+  for (const result of results) {
+    if (result.status === 'rejected') {
+      console.error('Failed to fetch divided service:', result.reason)
+      continue
+    }
+    if (!result.value) continue
+
+    const { locationIndex, division } = result.value
+    const existing = divisionsByLocationIndex.get(locationIndex) ?? []
+    existing.push(division)
+    divisionsByLocationIndex.set(locationIndex, existing)
+  }
+
+  return divisionsByLocationIndex
+}
+
+// ── Core fetch + transform ─────────────────────────────────────────────────────
+
+async function fetchRttService(serviceUid: string, runDate: string, token: string): Promise<RttResponse> {
+  const v2Response = await fetchV2Service(serviceUid, runDate, token)
   console.log('RTT API response:', JSON.stringify(v2Response, null, 2))
   const service = v2Response.service
 
@@ -214,6 +380,9 @@ async function fetchRttService(serviceUid: string, runDate: string, token: strin
     return dest
   })
 
+  // Resolve train divisions (splits) — fetch associated services in parallel
+  const divisionsByIndex = await resolveDivisions(service, token)
+
   const locationCount = service.locations.length
   const locations: RttLocation[] = service.locations.map((loc, index) => {
     const temporal = loc.temporalData
@@ -224,8 +393,7 @@ async function fetchRttService(serviceUid: string, runDate: string, token: strin
     const departure = temporal.departure
 
     const scheduledCallType = temporal.scheduledCallType
-    const isPublicCall =
-      scheduledCallType === 'ADVERTISED_OPEN' || scheduledCallType === 'ADVERTISED_SET_DOWN' || scheduledCallType === 'ADVERTISED_PICK_UP'
+    const isPublicCall = isPublicCallType(scheduledCallType)
 
     const displayAs = mapDisplayAs(temporal.displayAs, scheduledCallType, index === 0, index === locationCount - 1)
 
@@ -247,6 +415,7 @@ async function fetchRttService(serviceUid: string, runDate: string, token: strin
       departureLateness: departure?.realtimeAdvertisedLateness,
       passengerVehicleCount,
       requestStop: locMeta?.isRequestStop || undefined,
+      divisions: divisionsByIndex.get(index),
     }
   })
 

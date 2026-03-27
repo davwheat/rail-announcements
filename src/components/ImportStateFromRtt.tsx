@@ -455,6 +455,7 @@ export default function ImportStateFromRtt({ importStateFromRttService, disabled
                                     !location.cancelled && isSetDownOnly && 'Set down only',
                                     !location.cancelled && isPickUpOnly && 'Pick up only',
                                     !location.cancelled && location.requestStop && 'Request stop',
+                                    !location.cancelled && location.divisionInfo,
                                   ]
                                     .filter(Boolean)
                                     .join(' • ')}

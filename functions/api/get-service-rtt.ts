@@ -121,7 +121,7 @@ function getRealtimeTime(individual: V2IndividualTemporalData | undefined): stri
 
 // ── Access token management ────────────────────────────────────────────────────
 
-const RTT_API_VERSION = '2026-03-26'
+const RTT_API_VERSION = '2026-03-27'
 const KV_TOKEN_KEY = 'rtt_access_token'
 
 async function getAccessToken(refreshToken: string, kv: KVNamespace): Promise<string> {
@@ -159,7 +159,7 @@ async function getAccessToken(refreshToken: string, kv: KVNamespace): Promise<st
 
 async function fetchRttService(serviceUid: string, runDate: string, token: string): Promise<RttResponse> {
   const req = await fetch(
-    `https://data.rtt.io/gb-nr/service?identity=${encodeURIComponent(serviceUid)}&departureDate=${encodeURIComponent(runDate)}`,
+    `https://data.rtt.io/gb-nr/service?identity=${encodeURIComponent(serviceUid)}&departureDate=${encodeURIComponent(runDate)}&detail=true`,
     {
       headers: {
         Accept: 'application/json',
@@ -171,9 +171,13 @@ async function fetchRttService(serviceUid: string, runDate: string, token: strin
   )
 
   if (req.status === 404) {
+    const v2Response = await req.text()
+    console.log('RTT API response:', v2Response)
     throw new Error('Service not found')
   }
   if (!req.ok) {
+    const v2Response = await req.text()
+    console.log('RTT API response:', v2Response)
     throw new Error(`Failed to fetch RTT service: ${req.status} ${req.statusText}`)
   }
 

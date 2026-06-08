@@ -41,7 +41,7 @@
     "react-select": "^5.10.2",
     "uk-railway-stations": "^1.8.4",
     "use-html-dialog": "^0.2.1",
-    "uuid": "^13.0.0"
+    "uuid": "^14.0.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260307.1",

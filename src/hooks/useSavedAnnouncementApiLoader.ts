@@ -24,6 +24,9 @@ const idToPath: Record<string, string> = {
   AMEY_CELIA_V1: '/stations/amey-celia-drummond',
   AMEY_PHIL_V1: '/stations/amey-phil-sayer',
   SCOTRAIL_STN_V1: '/stations/scotrail',
+
+  // International
+  BANEDANMARK_V1: '/international/banedanmark',
 }
 
 export default function useSavedAnnouncementApiLoader() {

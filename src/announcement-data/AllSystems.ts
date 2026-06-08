@@ -9,6 +9,8 @@ import AmeyCelia from './systems/stations/AmeyCelia'
 // import AtosAnne from './systems/stations/AtosAnne'
 import ScotRail from './systems/stations/ScotRail'
 
+import Banedanmark from './systems/international/denmark/Banedanmark'
+
 import TfLJubileeLine from './systems/rolling-stock/TfLJubileeLine'
 import TfLNorthernLine from './systems/rolling-stock/TfLNorthernLine'
 import TfLElizabethLine from './systems/rolling-stock/TfLElizabeth'
@@ -32,6 +34,7 @@ export const AllStationAnnouncementSystems: (typeof StationAnnouncementSystem)[]
   AmeyPhil,
   AmeyCelia,
   ScotRail,
+  Banedanmark,
 ]
 
 export const AllOtherAnnouncementSystems: (typeof AnnouncementSystem)[] = [TfLJubileeLine, TfLNorthernLine, TfLElizabethLine]

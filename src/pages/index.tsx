@@ -5,6 +5,7 @@ import CardLink from '@components/CardLink'
 import SavedAnnouncementLoader from '@components/SavedAnnouncementLoader'
 
 import RailSymbol from '@assets/rail-symbol-2/white-on-red-inset.svg'
+import DkFlag from '@twemoji/svg/1f1e9-1f1f0.svg'
 import MegaphoneIcon from 'mdi-react/MegaphoneOutlineIcon'
 
 import Link from 'next/link'
@@ -36,6 +37,10 @@ const Systems = [
       { title: 'Amey — Celia Drummond', url: '/stations/amey-celia-drummond' },
       { title: 'ScotRail', url: '/stations/scotrail' },
     ],
+  },
+  {
+    groupTitle: 'International',
+    systems: [{ title: 'Banedanmark (Denmark)', url: '/international/banedanmark', flag: DkFlag, country: 'Denmark', new: true }],
   },
 ]
 
@@ -130,6 +135,15 @@ export default function IndexPage() {
                                 New!
                               </span>
                             </>
+                          )}
+                          {(system as any).flag && (
+                            <img
+                              src={(system as any).flag}
+                              alt={`${(system as any).country} flag`}
+                              width={22}
+                              height={22}
+                              css={{ verticalAlign: '-4px', marginRight: 8, borderRadius: 3 }}
+                            />
                           )}
                           {system.title}
                         </>

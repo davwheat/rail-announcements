@@ -189,7 +189,7 @@ export default abstract class AnnouncementSystem {
     return null
   }
 
-  private readonly AUDIO_CDN = process.env.NODE_ENV === 'development' ? 'http://10.0.1.46:8088' : 'https://cdn.railannouncements.co.uk'
+  private readonly AUDIO_CDN = process.env.NODE_ENV === 'development' ? 'http://local.davw.network:8088' : 'https://cdn.railannouncements.co.uk'
 
   /**
    * Generates a URL for the provided audio file ID.

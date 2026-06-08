@@ -92,3 +92,5 @@ static/temp/
 ~$*.xlsx
 
 .dev.vars
+
+tsconfig.tsbuildinfo

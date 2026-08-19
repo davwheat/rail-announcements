@@ -573,10 +573,7 @@ const changelog: IChangelogVersion[] = [
   {
     date: '2026-08-19',
     additions: [
-      '[Piccadilly Line] Add TfL Piccadilly Line system, using audio recovered from a 1973 Tube Stock announcement card',
-      '[Piccadilly Line] Simulate the on-train passenger information display, in step with the announcement playing',
-      "[Piccadilly Line] Play the Heathrow branch announcements that depend on the train's destination, such as telling Terminal 5 customers to change at Hatton Cross",
-      '[Piccadilly Line] Play terminating announcements when the train has reached, or is about to reach, its destination',
+      '[Piccadilly Line] Add TfL Piccadilly Line system, using audio recovered from a 1973 Tube Stock PCMCIA card',
     ],
   },
 ]

@@ -49,7 +49,8 @@ interface IStationExtras {
 const StationExtras: Record<number, IStationExtras> = {
   11: { interchange: { atStation: 400, approaching: 450 } },
   15: { interchange: { atStation: 401, approaching: 451 }, localInfo: { atStation: 600, approaching: 650 } },
-  17: { interchange: { atStation: 402, approaching: 452 }, localInfo: { atStation: 601, approaching: 651 } },
+  16: { localInfo: { atStation: 601, approaching: 651 } },
+  17: { interchange: { atStation: 402, approaching: 452 } },
   18: { localInfo: { atStation: 602, approaching: 652 } },
   19: { interchange: { atStation: 403, approaching: 453 } },
   20: { interchange: { atStation: 404, approaching: 454 } },

@@ -424,11 +424,6 @@ export default class TfLPiccadillyLine extends AnnouncementSystem {
     return (
       <>
         <PisDisplay label="Simulated 1973 Tube Stock passenger information display" idleText="Piccadilly Line" />
-
-        <p css={{ marginTop: 12 }}>
-          Audio and display text come from a KeTech announcement card read out of a 1973 Tube Stock announcer. Announcements that carry no
-          display text of their own, such as interchange and local information, leave the previous message on screen.
-        </p>
       </>
     )
   }

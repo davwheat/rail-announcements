@@ -14,6 +14,7 @@ import Banedanmark from './systems/international/denmark/Banedanmark'
 import TfLJubileeLine from './systems/rolling-stock/TfLJubileeLine'
 import TfLNorthernLine from './systems/rolling-stock/TfLNorthernLine'
 import TfLElizabethLine from './systems/rolling-stock/TfLElizabeth'
+import TfLPiccadillyLine from './systems/rolling-stock/TfLPiccadillyLine'
 import LnerAzuma from './systems/rolling-stock/LNERAzuma'
 
 import TrainAnnouncementSystem from './TrainAnnouncementSystem'
@@ -37,7 +38,7 @@ export const AllStationAnnouncementSystems: (typeof StationAnnouncementSystem)[]
   Banedanmark,
 ]
 
-export const AllOtherAnnouncementSystems: (typeof AnnouncementSystem)[] = [TfLJubileeLine, TfLNorthernLine, TfLElizabethLine]
+export const AllOtherAnnouncementSystems: (typeof AnnouncementSystem)[] = [TfLJubileeLine, TfLNorthernLine, TfLElizabethLine, TfLPiccadillyLine]
 
 export const AllAnnouncementSystems: (typeof AnnouncementSystem)[] = [
   ...AllStationAnnouncementSystems,

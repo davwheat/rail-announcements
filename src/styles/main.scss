@@ -8,6 +8,7 @@
 }
 
 @include meta.load-css('br-font.scss');
+@include meta.load-css('pis-font.scss');
 // @import './hammersmith-font.scss';
 @include meta.load-css('baseline.scss');
 @include meta.load-css('buttons.scss');

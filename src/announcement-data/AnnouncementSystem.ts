@@ -205,6 +205,8 @@ export default abstract class AnnouncementSystem {
    *
    * @param fileIds Array of audio files to play.
    * @param download Whether to save the concatenated audio to the device.
+   * @param onPlaybackStart Called once the audio is audibly playing, so callers can start
+   *   anything that has to stay in step with it.
    *
    * @returns Promise which resolves when the last audio file has finished playing.
    */
@@ -213,6 +215,7 @@ export default abstract class AnnouncementSystem {
     download: boolean = false,
     missingAudioMode: MissingAudioMode = 'skip-service',
     startDelay: number = 0,
+    onPlaybackStart?: () => void,
   ): Promise<void> {
     if (fileIds.length === 0) {
       console.warn('No audio files to play.')
@@ -258,6 +261,11 @@ export default abstract class AnnouncementSystem {
             resolve()
           })
         })
+
+        contextResume.then(
+          () => onPlaybackStart?.(),
+          () => {},
+        )
 
         contextResume.catch(err => {
           console.error('[Crunker]', err.message)

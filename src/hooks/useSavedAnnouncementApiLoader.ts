@@ -19,6 +19,7 @@ const idToPath: Record<string, string> = {
   TFL_ELIZ_LINE_V1: '/rolling-stock/tfl/elizabeth-line',
   TFL_JUBILEE_LINE_V1: '/rolling-stock/tfl/jubilee-line',
   TFL_NORTHERN_LINE_V1: '/rolling-stock/tfl/northern-line',
+  TFL_PICCADILLY_LINE_V1: '/rolling-stock/tfl/piccadilly-line',
 
   // Stations
   AMEY_CELIA_V1: '/stations/amey-celia-drummond',

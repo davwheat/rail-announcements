@@ -25,6 +25,7 @@ const Systems = [
       { title: 'TfL Jubilee Line', url: '/rolling-stock/tfl/jubilee-line' },
       { title: 'TfL Northern Line', url: '/rolling-stock/tfl/northern-line' },
       { title: 'TfL Elizabeth Line', url: '/rolling-stock/tfl/elizabeth-line' },
+      { title: 'TfL Piccadilly Line', url: '/rolling-stock/tfl/piccadilly-line', new: true },
       { title: 'Avanti West Coast Pendolino', url: '/rolling-stock/avanti-west-coast-pendolino' },
       { title: 'WMR & LNR Class 172', url: '/rolling-stock/wmt-class-172' },
       { title: 'WMR Class 323', url: '/rolling-stock/wmt-class-323' },

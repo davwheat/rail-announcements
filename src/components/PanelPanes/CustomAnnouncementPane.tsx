@@ -52,8 +52,7 @@ export interface ICustomAnnouncementPaneProps<OptionIds extends string> {
   system: typeof AnnouncementSystem
   defaultState: string
   importStateFromRttService:
-    | null
-    | ((rttService: RttResponse, fromLocationIndex: number, existingOptions: Record<OptionIds, any>) => Record<OptionIds, any>)
+    null | ((rttService: RttResponse, fromLocationIndex: number, existingOptions: Record<OptionIds, any>) => Record<OptionIds, any>)
   /**
    * Applied after every option change, letting a tab enforce invariants between options which cannot both be set.
    */

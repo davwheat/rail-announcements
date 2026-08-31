@@ -26,13 +26,7 @@ export interface IPlayOptions {
 }
 
 export type OptionsExplanation<P extends {}, C extends React.ComponentType<P>> =
-  | IMultiselectOptions
-  | ISelectOptions
-  | IBooleanOptions
-  | INumberOptions
-  | ITimeOptions
-  | ICustomOptions<P, C>
-  | ICustomNoStateOptions
+  IMultiselectOptions | ISelectOptions | IBooleanOptions | INumberOptions | ITimeOptions | ICustomOptions<P, C> | ICustomNoStateOptions
 
 interface IMultiselectOptions {
   name: string

@@ -572,9 +572,11 @@ const changelog: IChangelogVersion[] = [
   },
   {
     date: '2026-08-19',
-    additions: [
-      '[Piccadilly Line] Add TfL Piccadilly Line system, using audio recovered from a 1973 Tube Stock PCMCIA card',
-    ],
+    additions: ['[Piccadilly Line] Add TfL Piccadilly Line system, using audio recovered from a 1973 Tube Stock PCMCIA card'],
+  },
+  {
+    date: '2026-08-31',
+    additions: ['[Electrostar/Turbostar] Add support for dividing trains and short platform announcements'],
   },
 ]
 

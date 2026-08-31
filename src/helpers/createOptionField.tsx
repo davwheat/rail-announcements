@@ -28,7 +28,7 @@ export default function createOptionField(optionData: OptionsExplanation<any, an
             type="checkbox"
             checked={options.value}
             onChange={e => options.onChange(e.currentTarget.checked)}
-            disabled={optionData?.disabled || false}
+            disabled={typeof optionData.disabled === 'function' ? optionData.disabled(options.activeState ?? {}) : optionData.disabled || false}
           />{' '}
           {optionData.name}
         </label>

@@ -54,6 +54,10 @@ export interface ICustomAnnouncementPaneProps<OptionIds extends string> {
   importStateFromRttService:
     | null
     | ((rttService: RttResponse, fromLocationIndex: number, existingOptions: Record<OptionIds, any>) => Record<OptionIds, any>)
+  /**
+   * Applied after every option change, letting a tab enforce invariants between options which cannot both be set.
+   */
+  normaliseState?: (state: Record<OptionIds, any>) => Record<OptionIds, any>
 }
 
 function CustomAnnouncementPane({
@@ -71,6 +75,7 @@ function CustomAnnouncementPane({
   deletePersonalPreset,
   defaultState: _defaultState,
   importStateFromRttService = null,
+  normaliseState,
 }: ICustomAnnouncementPaneProps<string>) {
   const { enqueueSnackbar } = useSnackbar()
   const defaultState = React.useMemo(() => JSON.parse(_defaultState), [_defaultState])
@@ -106,7 +111,11 @@ function CustomAnnouncementPane({
     return (value): void => {
       if (isPlayingAnnouncement) return
 
-      setOptionsState(prevState => ({ ...(prevState || {}), [field]: value }))
+      setOptionsState(prevState => {
+        const nextState = { ...(prevState || {}), [field]: value }
+
+        return normaliseState ? normaliseState(nextState) : nextState
+      })
     }
   }
 

@@ -5,7 +5,12 @@ import PisDisplay from '@components/PisDisplay'
 import { pisDisplayState, type IPisDisplayMessage } from '@atoms'
 import { getDefaultStore } from 'jotai'
 
-import AnnouncementSystem, { AudioItem, CustomAnnouncementButton, CustomAnnouncementTab } from '../../AnnouncementSystem'
+import AnnouncementSystem, {
+  AnyCustomAnnouncementTab,
+  AudioItem,
+  CustomAnnouncementButton,
+  CustomAnnouncementTab,
+} from '../../AnnouncementSystem'
 import {
   EngineeringAnnouncements,
   GeneralAnnouncements,
@@ -322,7 +327,10 @@ interface IDestinationOptions {
   stationNumber: string
 }
 
-const announcementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {
+const announcementPresets: Readonly<{
+  approachingStation: ICustomAnnouncementPreset<IApproachingStationOptions>[]
+  atStation: ICustomAnnouncementPreset<IAtStationOptions>[]
+}> = {
   approachingStation: [
     {
       name: 'Finsbury Park',
@@ -502,7 +510,7 @@ export default class TfLPiccadillyLine extends AnnouncementSystem {
     }))
   }
 
-  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab<string>> = {
+  readonly customAnnouncementTabs: Record<string, AnyCustomAnnouncementTab> = {
     approachingStation: {
       name: 'Next station',
       component: CustomAnnouncementPane,
@@ -535,7 +543,7 @@ export default class TfLPiccadillyLine extends AnnouncementSystem {
           },
         },
       },
-    } as CustomAnnouncementTab<keyof IApproachingStationOptions>,
+    } satisfies CustomAnnouncementTab<IApproachingStationOptions>,
     atStation: {
       name: 'Stopped at station',
       component: CustomAnnouncementPane,
@@ -566,8 +574,7 @@ export default class TfLPiccadillyLine extends AnnouncementSystem {
             name: 'Announce the destination',
             default: true,
             type: 'boolean',
-            onlyShowWhen: ({ destinationNumber, stationNumber }: Record<string, unknown>) =>
-              destinationNumber !== NONE && destinationNumber !== stationNumber,
+            onlyShowWhen: ({ destinationNumber, stationNumber }) => destinationNumber !== NONE && destinationNumber !== stationNumber,
           },
           reducedAccess: {
             name: 'Reduced station access',
@@ -583,7 +590,7 @@ export default class TfLPiccadillyLine extends AnnouncementSystem {
           },
         },
       },
-    } as CustomAnnouncementTab<keyof IAtStationOptions>,
+    } satisfies CustomAnnouncementTab<IAtStationOptions>,
     destination: {
       name: 'Destination info',
       component: CustomAnnouncementPane,
@@ -601,7 +608,7 @@ export default class TfLPiccadillyLine extends AnnouncementSystem {
           },
         },
       },
-    } as CustomAnnouncementTab<keyof IDestinationOptions>,
+    } satisfies CustomAnnouncementTab<IDestinationOptions>,
     announcementButtons: {
       name: 'Announcement buttons',
       component: CustomButtonPane,

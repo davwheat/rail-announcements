@@ -3,7 +3,7 @@ import CustomAnnouncementPane, { ICustomAnnouncementPreset } from '@components/P
 import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
 import { AllStationsTitleValueMap } from '@data/StationManipulators'
 import crsToStationItemMapper from '@helpers/crsToStationItemMapper'
-import { AudioItem, AudioItemObject, CustomAnnouncementTab } from '../../AnnouncementSystem'
+import { AnnouncementState, AnyCustomAnnouncementTab, AudioItem, AudioItemObject, CustomAnnouncementTab } from '../../AnnouncementSystem'
 import TrainAnnouncementSystem from '../../TrainAnnouncementSystem'
 
 /**
@@ -46,21 +46,23 @@ const SHORT_PLATFORM_LENGTHS = [
   { value: 'half of the train', title: 'Half of the train' },
 ]
 
-const PORTION_POSITIONS = [
+const PORTION_POSITIONS: { value: PortionPosition; title: string }[] = [
   { value: 'front', title: 'Front' },
   { value: 'rear', title: 'Rear' },
 ]
 
-const PORTION_ACTIONS = [
+const PORTION_ACTIONS: { value: PortionAction; title: string }[] = [
   { value: 'continueTo', title: 'Will continue to…' },
   { value: 'terminateAt', title: 'Will terminate at…' },
 ]
 
 type PortionAction = 'continueTo' | 'terminateAt'
 
+const DEFAULT_PORTION_ACTION: PortionAction = 'continueTo'
+
 type ShortPlatformAlighting = 'none' | 'canOnly' | 'cannot'
 
-const SHORT_PLATFORM_ALIGHTING = [
+const SHORT_PLATFORM_ALIGHTING: { value: ShortPlatformAlighting; title: string }[] = [
   { value: 'none', title: 'No' },
   { value: 'canOnly', title: 'Can only alight from…' },
   { value: 'cannot', title: 'Cannot alight from…' },
@@ -68,15 +70,16 @@ const SHORT_PLATFORM_ALIGHTING = [
 
 type StationOptions = { title: string; value: string }[]
 
-const whenDividing = (activeState: Record<string, unknown>) => activeState.dividesEnRoute === true && activeState.terminatesHere !== true
+const whenDividing = (activeState: IDivisionOptions & { terminatesHere?: boolean }) =>
+  activeState.dividesEnRoute === true && activeState.terminatesHere !== true
 
-const optionGroupHeading = (label: string, onlyShowWhen?: (activeState: Record<string, unknown>) => boolean) => ({
+const optionGroupHeading = <State extends AnnouncementState>(label: string, onlyShowWhen?: (activeState: State) => boolean) => ({
   type: 'customNoState' as const,
   component: () => <h4 css={{ margin: '20px 0 0' }}>{label}</h4>,
   onlyShowWhen,
 })
 
-const divisionToggle = (name: string, disabled?: (activeState: Record<string, unknown>) => boolean) => ({
+const divisionToggle = <State extends AnnouncementState>(name: string, disabled?: (activeState: State) => boolean) => ({
   dividesEnRoute: {
     name,
     type: 'boolean' as const,
@@ -106,7 +109,7 @@ const divisionPortionOptions = (stationOptions: StationOptions) => ({
   },
   portionAAction: {
     name: 'Then',
-    default: 'continueTo',
+    default: DEFAULT_PORTION_ACTION,
     options: PORTION_ACTIONS,
     type: 'select' as const,
     onlyShowWhen: whenDividing,
@@ -135,7 +138,7 @@ const divisionPortionOptions = (stationOptions: StationOptions) => ({
   },
   portionBAction: {
     name: 'Then',
-    default: 'continueTo',
+    default: DEFAULT_PORTION_ACTION,
     options: PORTION_ACTIONS,
     type: 'select' as const,
     onlyShowWhen: whenDividing,
@@ -149,19 +152,19 @@ const divisionPortionOptions = (stationOptions: StationOptions) => ({
   },
 })
 
-const DIVISION_DEFAULT_STATE = {
+const DIVISION_DEFAULT_STATE: IDivisionOptions = {
   dividesEnRoute: false,
   portionAFirstCoach: '1',
   portionALastCoach: '4',
-  portionAAction: 'continueTo',
+  portionAAction: DEFAULT_PORTION_ACTION,
   portionADestinationCode: 'BOG',
   portionBFirstCoach: '5',
   portionBLastCoach: '8',
-  portionBAction: 'continueTo',
+  portionBAction: DEFAULT_PORTION_ACTION,
   portionBDestinationCode: 'EBN',
 }
 
-const whenAnnouncingCoachNumber = (activeState: Record<string, unknown>) => activeState.announceCoachNumber === true
+const whenAnnouncingCoachNumber = (activeState: ICoachNumberOptions) => activeState.announceCoachNumber === true
 
 const coachNumberOptions = {
   coachNumberHeading: optionGroupHeading('Coach number'),
@@ -186,7 +189,7 @@ const coachNumberOptions = {
   },
 }
 
-const COACH_NUMBER_DEFAULT_STATE = {
+const COACH_NUMBER_DEFAULT_STATE: ICoachNumberOptions = {
   announceCoachNumber: false,
   coachNumber: '4',
   totalCoaches: '8',
@@ -242,7 +245,7 @@ interface IDepartingStationAnnouncementOptions extends IDivisionOptions, ICoachN
   serviceType: 'southern' | 'southeastern' | 'connex' | 'generic'
 }
 
-const announcementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {
+const announcementPresets: Readonly<{ stopped: ICustomAnnouncementPreset<IStoppedAtStationAnnouncementOptions>[] }> = {
   stopped: [
     {
       name: 'Haywards Heath to Ore',
@@ -1034,7 +1037,7 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
     return arr
   }
 
-  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab<string>> = {
+  readonly customAnnouncementTabs: Record<string, AnyCustomAnnouncementTab> = {
     approachingStation: {
       name: 'Approaching station',
       component: CustomAnnouncementPane,
@@ -1054,7 +1057,7 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
       props: {
         playHandler: this.playApproachingStationAnnouncement.bind(this),
         // A train terminating here cannot also divide here.
-        normaliseState: (state: Record<string, any>) => (state.terminatesHere ? { ...state, dividesEnRoute: false } : state),
+        normaliseState: state => (state.terminatesHere ? { ...state, dividesEnRoute: false } : state),
         options: {
           stationCode: {
             name: 'Next station',
@@ -1105,14 +1108,14 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
             default: 'front',
             options: PORTION_POSITIONS,
             type: 'select',
-            onlyShowWhen: (activeState: Record<string, unknown>) => activeState.shortPlatform !== 'none',
+            onlyShowWhen: activeState => activeState.shortPlatform !== 'none',
           },
           shortPlatformLength: {
             name: 'Short platform — length',
             default: '4 coaches',
             options: SHORT_PLATFORM_LENGTHS,
             type: 'select',
-            onlyShowWhen: (activeState: Record<string, unknown>) => activeState.shortPlatform !== 'none',
+            onlyShowWhen: activeState => activeState.shortPlatform !== 'none',
           },
           optionGroupHeadingDivision: optionGroupHeading('Division'),
           ...divisionToggle('Divides here?', activeState => activeState.terminatesHere === true),
@@ -1120,7 +1123,7 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
           ...coachNumberOptions,
         },
       },
-    } as CustomAnnouncementTab<keyof IApproachingStationAnnouncementOptions>,
+    } satisfies CustomAnnouncementTab<IApproachingStationAnnouncementOptions, 'shortPlatformHeading' | 'optionGroupHeadingDivision'>,
     stoppedAtStation: {
       name: 'Stopped at station',
       component: CustomAnnouncementPane,
@@ -1148,7 +1151,7 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
             default: this.RealAvailableStationNames[0],
             options: this.allAvailableStationOptions,
             type: 'select',
-            onlyShowWhen: (activeState: Record<string, unknown>) => activeState.dividesEnRoute !== true,
+            onlyShowWhen: activeState => activeState.dividesEnRoute !== true,
           },
           callingAtCodes: {
             name: '',
@@ -1184,7 +1187,7 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
           ...coachNumberOptions,
         },
       },
-    } as CustomAnnouncementTab<keyof IStoppedAtStationAnnouncementOptions>,
+    } satisfies CustomAnnouncementTab<IStoppedAtStationAnnouncementOptions, 'optionGroupHeadingDivision'>,
     departingStation: {
       name: 'Departing station',
       component: CustomAnnouncementPane,
@@ -1203,7 +1206,7 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
             default: this.RealAvailableStationNames[0],
             options: this.allAvailableStationOptions,
             type: 'select',
-            onlyShowWhen: (activeState: Record<string, unknown>) => activeState.dividesEnRoute !== true,
+            onlyShowWhen: activeState => activeState.dividesEnRoute !== true,
           },
           nextStationCode: {
             name: 'Next station',
@@ -1228,7 +1231,7 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
           ...coachNumberOptions,
         },
       },
-    } as CustomAnnouncementTab<keyof IDepartingStationAnnouncementOptions>,
+    } satisfies CustomAnnouncementTab<IDepartingStationAnnouncementOptions, 'optionGroupHeadingDivision'>,
     announcementButtons: {
       name: 'Announcement buttons',
       component: CustomButtonPane,

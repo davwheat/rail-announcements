@@ -1,4 +1,4 @@
-import type { AudioItem } from '@announcement-data/AnnouncementSystem'
+import type { AnnouncementSystemClass, AudioItem } from '@announcement-data/AnnouncementSystem'
 import type AnnouncementSystem from '@announcement-data/AnnouncementSystem'
 import type Crunker from './helpers/crunker'
 import type React from 'react'
@@ -30,8 +30,8 @@ declare module '*.inline.svg' {
 declare global {
   interface Window {
     __audio?: AudioItem[]
-    __system?: typeof AnnouncementSystem | null
-    __audioDrivers?: Record<string, typeof AnnouncementSystem>
+    __system?: AnnouncementSystemClass | null
+    __audioDrivers?: Record<string, AnnouncementSystemClass>
     __crunker?: Crunker
 
     webkitAudioContext?: typeof AudioContext

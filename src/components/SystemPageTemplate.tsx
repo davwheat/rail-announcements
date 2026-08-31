@@ -11,13 +11,14 @@ import Link from 'next/link'
 import BackIcon from 'mdi-react/ArrowLeftIcon'
 
 import type AnnouncementSystem from '@announcement-data/AnnouncementSystem'
+import type { AnnouncementSystemClass } from '@announcement-data/AnnouncementSystem'
 
 interface IProps {
-  system: typeof AnnouncementSystem
+  system: AnnouncementSystemClass
 }
 
 export default function SystemPageTemplate({ system }: IProps) {
-  const s: AnnouncementSystem = new (system as any)()
+  const s: AnnouncementSystem = new system()
 
   return (
     <Layout title={s.NAME} description={s.DESCRIPTION}>

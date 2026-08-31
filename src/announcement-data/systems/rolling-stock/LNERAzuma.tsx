@@ -1,7 +1,7 @@
 import CallingAtSelector, { CallingAtPoint } from '@components/CallingAtSelector'
 import CustomAnnouncementPane, { ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
 import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
-import { AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
+import { AnyCustomAnnouncementTab, AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
 import TrainAnnouncementSystem from '../../TrainAnnouncementSystem'
 import crsToStationItemMapper from '@helpers/crsToStationItemMapper'
 
@@ -22,7 +22,10 @@ interface IApproachingStationAnnouncementOptions {
   terminates: boolean
 }
 
-const announcementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {
+const announcementPresets: Readonly<{
+  stopped: ICustomAnnouncementPreset<IStoppedAtStationAnnouncementOptions>[]
+  departingStation: ICustomAnnouncementPreset<IDepartingStationAnnouncementOptions>[]
+}> = {
   stopped: [
     {
       name: 'YRK - ABD',
@@ -388,7 +391,7 @@ export default class LnerAzuma extends TrainAnnouncementSystem {
     return files
   }
 
-  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab<string>> = {
+  readonly customAnnouncementTabs: Record<string, AnyCustomAnnouncementTab> = {
     stoppedAtStation: {
       name: 'Stopped at station',
       component: CustomAnnouncementPane,
@@ -424,7 +427,7 @@ export default class LnerAzuma extends TrainAnnouncementSystem {
           },
         },
       },
-    } as CustomAnnouncementTab<keyof IStoppedAtStationAnnouncementOptions>,
+    } satisfies CustomAnnouncementTab<IStoppedAtStationAnnouncementOptions>,
     departingStation: {
       name: 'Route start & departing station',
       component: CustomAnnouncementPane,
@@ -453,7 +456,7 @@ export default class LnerAzuma extends TrainAnnouncementSystem {
           },
         },
       },
-    } as CustomAnnouncementTab<keyof IDepartingStationAnnouncementOptions>,
+    } satisfies CustomAnnouncementTab<IDepartingStationAnnouncementOptions>,
     aproachingStation: {
       name: 'Approaching station',
       component: CustomAnnouncementPane,
@@ -477,7 +480,7 @@ export default class LnerAzuma extends TrainAnnouncementSystem {
           },
         },
       },
-    } as CustomAnnouncementTab<keyof IApproachingStationAnnouncementOptions>,
+    } satisfies CustomAnnouncementTab<IApproachingStationAnnouncementOptions>,
     announcementButtons: {
       name: 'Announcement buttons',
       component: CustomButtonPane,

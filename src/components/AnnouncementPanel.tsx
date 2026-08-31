@@ -10,9 +10,10 @@ import { deletePersonalPreset, getPersonalPresets, initPersonalPresetsDb, savePe
 import * as Sentry from '@sentry/nextjs'
 
 import type AnnouncementSystem from '@announcement-data/AnnouncementSystem'
+import type { AnnouncementSystemClass } from '@announcement-data/AnnouncementSystem'
 
 interface IProps {
-  system: typeof AnnouncementSystem
+  system: AnnouncementSystemClass
 }
 
 function AnnouncementPanel({ system }: IProps) {
@@ -25,8 +26,8 @@ function AnnouncementPanel({ system }: IProps) {
     window.__system = AnnouncementSystem
   }
 
-  const AnnouncementSystemInstance: AnnouncementSystem = useMemo(
-    () => (AnnouncementSystem ? new (AnnouncementSystem as any)() : null),
+  const AnnouncementSystemInstance = useMemo<AnnouncementSystem | null>(
+    () => (AnnouncementSystem ? new AnnouncementSystem() : null),
     [AnnouncementSystem],
   )
 
@@ -37,8 +38,7 @@ function AnnouncementPanel({ system }: IProps) {
       !AnnouncementSystem || !AnnouncementSystemInstance
         ? null
         : Object.entries(customTabs).reduce(
-            (acc, [id, { component: TabComponentUntyped, ...opts }], i) => {
-              const TabComponent = TabComponentUntyped as React.ComponentType<any>
+            (acc, [id, { component: TabComponent, ...opts }]) => {
               acc[opts.name] = (
                 <AnnouncementTabErrorBoundary
                   key={opts.name}

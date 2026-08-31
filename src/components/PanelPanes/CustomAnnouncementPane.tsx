@@ -26,22 +26,25 @@ import { enqueueSnackbar, useSnackbar } from 'notistack'
 import { v4 as uuid } from 'uuid'
 import clsx from 'clsx'
 
-import type { OptionsExplanation } from '@announcement-data/AnnouncementSystem'
+import type { AnnouncementState, AnnouncementSystemClass, TabOptions } from '@announcement-data/AnnouncementSystem'
 import type { IPersonalPresetObject } from '@data/db'
 import type AnnouncementSystem from '@announcement-data/AnnouncementSystem'
 import { RttResponse } from '../../api-types/get-service-rtt-types'
 import ImportStateFromRtt from '@components/ImportStateFromRtt'
 
-export interface ICustomAnnouncementPreset<State = any> {
+export interface ICustomAnnouncementPreset<State extends AnnouncementState = AnnouncementState> {
   name: string
-  state: State
+  /**
+   * Merged over the tab's default state, so a preset only needs to name the options it changes.
+   */
+  state: Partial<State>
 }
 
-export interface ICustomAnnouncementPaneProps<OptionIds extends string> {
-  options: Record<OptionIds, OptionsExplanation<any, any>>
-  playHandler: (options: Record<OptionIds, unknown>, download?: boolean) => Promise<void>
+export interface ICustomAnnouncementPaneProps<State extends AnnouncementState = AnnouncementState, ExtraOptionIds extends string = never> {
+  options: TabOptions<State, ExtraOptionIds>
+  playHandler: (options: State, download?: boolean) => Promise<void>
   name: string
-  presets?: ICustomAnnouncementPreset<Record<OptionIds, unknown>>[]
+  presets?: ICustomAnnouncementPreset<State>[]
   systemId: string
   tabId: string
   isPersonalPresetsReady: boolean
@@ -49,14 +52,17 @@ export interface ICustomAnnouncementPaneProps<OptionIds extends string> {
   savePersonalPreset: (preset: IPersonalPresetObject) => Promise<void>
   getPersonalPresets: (systemId: string, tabId: string) => Promise<IPersonalPresetObject[]>
   deletePersonalPreset: (systemId: string, tabId: string, presetId: string) => Promise<void>
-  system: typeof AnnouncementSystem
+  system: AnnouncementSystemClass
+  /**
+   * The tab's default state, serialised, so that a new object identity doesn't re-run the effects
+   * which depend on it.
+   */
   defaultState: string
-  importStateFromRttService:
-    null | ((rttService: RttResponse, fromLocationIndex: number, existingOptions: Record<OptionIds, any>) => Record<OptionIds, any>)
+  importStateFromRttService: null | ((rttService: RttResponse, fromLocationIndex: number, existingOptions: State) => State)
   /**
    * Applied after every option change, letting a tab enforce invariants between options which cannot both be set.
    */
-  normaliseState?: (state: Record<OptionIds, any>) => Record<OptionIds, any>
+  normaliseState?: (state: State) => State
 }
 
 function CustomAnnouncementPane({
@@ -75,9 +81,9 @@ function CustomAnnouncementPane({
   defaultState: _defaultState,
   importStateFromRttService = null,
   normaliseState,
-}: ICustomAnnouncementPaneProps<string>) {
+}: ICustomAnnouncementPaneProps) {
   const { enqueueSnackbar } = useSnackbar()
-  const defaultState = React.useMemo(() => JSON.parse(_defaultState), [_defaultState])
+  const defaultState: AnnouncementState = React.useMemo(() => JSON.parse(_defaultState), [_defaultState])
 
   const [playError, setPlayError] = React.useState<Error | null>(null)
   const [isSharing, setIsSharing] = React.useState(false)
@@ -89,22 +95,27 @@ function CustomAnnouncementPane({
   const [optionsState, setOptionsState] = useAtom(tabStateFamily(stateKey))
 
   useEffect(() => {
-    // Set default options if currently null
+    const defaults = Object.entries(options).reduce<AnnouncementState>((acc, [key, opt]) => {
+      if (opt.type === 'customNoState') return acc
+
+      acc[key] = opt.default
+
+      return acc
+    }, {})
+
     if (!optionsState) {
-      setOptionsState(
-        Object.entries(options).reduce((acc, [key, opt]) => {
-          if (options[key].type === 'customNoState') return acc
+      setOptionsState(defaults)
+      return
+    }
 
-          // @ts-expect-error
-          acc[key] = opt.default
-
-          return acc
-        }, {}),
-      )
+    // A shared or restored announcement predates any option added since it was saved, so fill the
+    // gaps before a play handler reads state which its options type says is always there.
+    if (Object.keys(defaults).some(key => !(key in optionsState))) {
+      setOptionsState({ ...defaults, ...optionsState })
     }
   }, [optionsState])
 
-  const AnnouncementSystemInstance: AnnouncementSystem = React.useMemo(() => new (system as any)(), [system])
+  const AnnouncementSystemInstance: AnnouncementSystem = React.useMemo(() => new system(), [system])
 
   function createFieldUpdater(field: string): (value: any) => void {
     return (value): void => {
@@ -340,7 +351,7 @@ function CustomAnnouncementPane({
                 <button
                   key={preset.name}
                   onClick={() => {
-                    setOptionsState(preset.state)
+                    setOptionsState({ ...defaultState, ...preset.state })
                   }}
                 >
                   <span className="buttonLabel">

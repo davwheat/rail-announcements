@@ -4,7 +4,7 @@ import StationAnnouncementSystem from '@announcement-data/StationAnnouncementSys
 import CallingAtSelector from '@components/CallingAtSelector'
 import CustomAnnouncementPane, { ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
 import { AllStationsTitleValueMap } from '@data/StationManipulators'
-import { AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
+import { AnyCustomAnnouncementTab, AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
 import type { IAlternativeServicesState } from '@components/AtosDisruptionAlternatives'
 import { platform } from 'os'
 
@@ -880,7 +880,10 @@ const AVAILABLE_DISRUPTION_REASONS = {
   'waiting for a part of the train to be attached': [''],
 }
 
-const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {
+const AnnouncementPresets: Readonly<{
+  nextTrain: ICustomAnnouncementPreset<INextTrainAnnouncementOptions>[]
+  disruptedTrain: ICustomAnnouncementPreset<IDelayedTrainAnnouncementOptions>[]
+}> = {
   nextTrain: [],
   disruptedTrain: [],
 }
@@ -1040,7 +1043,7 @@ export default class ScotRail extends StationAnnouncementSystem {
     await this.playAudioFiles(files, download)
   }
 
-  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab<string>> = {
+  readonly customAnnouncementTabs: Record<string, AnyCustomAnnouncementTab> = {
     nextTrain: {
       name: 'Next train',
       component: CustomAnnouncementPane,
@@ -1132,7 +1135,7 @@ export default class ScotRail extends StationAnnouncementSystem {
           // },
         },
       },
-    } as CustomAnnouncementTab<keyof INextTrainAnnouncementOptions>,
+    } satisfies CustomAnnouncementTab<INextTrainAnnouncementOptions>,
     // fastTrain: {
     //   name: 'Fast train',
     //   component: CustomAnnouncementPane,

@@ -2,7 +2,7 @@ import React from 'react'
 import CustomAnnouncementPane, { ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
 import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
 import { getStationByCrs } from '@data/StationManipulators'
-import { AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
+import { AnyCustomAnnouncementTab, AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
 import TrainAnnouncementSystem from '../../TrainAnnouncementSystem'
 import crsToStationItemMapper from '@helpers/crsToStationItemMapper'
 import CallingAtSelector from '@components/CallingAtSelector'
@@ -26,9 +26,10 @@ export default class TfWTelevic extends TrainAnnouncementSystem {
     'Generate Transport for Wales Televic on-train announcements using real audio recordings from Elin Llwyd and Eryl Jones.'
   readonly AvailableStationNames = { high: [] as string[], low: [] as string[] }
 
-  private readonly announcementPresets: Readonly<
-    Record<string, ICustomAnnouncementPreset<IStartOfJourneyAnnouncementOptions | IStoppedAtStationAnnouncementOptions>[]>
-  > = {
+  private readonly announcementPresets: Readonly<{
+    startOfJourney: ICustomAnnouncementPreset<IStartOfJourneyAnnouncementOptions>[]
+    stoppedAtStation: ICustomAnnouncementPreset<IStoppedAtStationAnnouncementOptions>[]
+  }> = {
     startOfJourney: [
       {
         name: 'CDF to BYI',
@@ -488,7 +489,7 @@ export default class TfWTelevic extends TrainAnnouncementSystem {
     })
   }
 
-  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab<string>> = {
+  readonly customAnnouncementTabs: Record<string, AnyCustomAnnouncementTab> = {
     startOfJourney: {
       name: 'Start of journey',
       component: CustomAnnouncementPane,
@@ -514,7 +515,7 @@ export default class TfWTelevic extends TrainAnnouncementSystem {
           },
         },
       },
-    } as CustomAnnouncementTab<keyof IStartOfJourneyAnnouncementOptions>,
+    } satisfies CustomAnnouncementTab<IStartOfJourneyAnnouncementOptions>,
     stoppedAtStation: {
       name: 'Stopped at station',
       component: CustomAnnouncementPane,
@@ -546,7 +547,7 @@ export default class TfWTelevic extends TrainAnnouncementSystem {
           },
         },
       },
-    } as CustomAnnouncementTab<keyof IStoppedAtStationAnnouncementOptions>,
+    } satisfies CustomAnnouncementTab<IStoppedAtStationAnnouncementOptions>,
     announcementButtons: {
       name: 'Announcement buttons',
       component: CustomButtonPane,

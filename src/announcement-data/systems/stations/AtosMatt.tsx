@@ -4,7 +4,7 @@ import StationAnnouncementSystem from '@announcement-data/StationAnnouncementSys
 import CallingAtSelector from '@components/CallingAtSelector'
 import CustomAnnouncementPane, { ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
 import { AllStationsTitleValueMap } from '@data/StationManipulators'
-import { AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
+import { AnyCustomAnnouncementTab, AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
 import crsToStationItemMapper from '@helpers/crsToStationItemMapper'
 import AtosDisruptionAlternatives, { IAlternativeServicesState } from '@components/AtosDisruptionAlternatives'
 import { nanoid } from 'nanoid'
@@ -169,7 +169,10 @@ interface IValidateOptions {
   special: string[]
 }
 
-const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {
+const AnnouncementPresets: Readonly<{
+  nextTrain: ICustomAnnouncementPreset<INextTrainAnnouncementOptions>[]
+  disruptedTrain: ICustomAnnouncementPreset<IDelayedTrainAnnouncementOptions>[]
+}> = {
   nextTrain: [
     {
       name: '13:57 | HHE to LIT',
@@ -583,10 +586,22 @@ export default class AtosMatt extends StationAnnouncementSystem {
     return true
   }
 
-  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab<string>> = {
+  readonly customAnnouncementTabs: Record<string, AnyCustomAnnouncementTab> = {
     nextTrain: {
       name: 'Next train',
       component: CustomAnnouncementPane,
+      defaultState: {
+        platform: AVAILABLE_PLATFORMS.high[0],
+        hour: AVAILABLE_HOURS[0],
+        min: AVAILABLE_MINUTES[0],
+        toc: AVAILABLE_TOCS[0].toLowerCase(),
+        terminatingStationCode: AVAILABLE_STATIONS.low[0],
+        via: 'none',
+        callingAt: [],
+        coaches: AVAILABLE_NUMBERS.filter(x => parseInt(x) > 1)[0],
+        seating: 'none',
+        special: [],
+      },
       props: {
         playHandler: this.playNextTrainAnnouncement.bind(this),
         presets: AnnouncementPresets.nextTrain,
@@ -656,10 +671,13 @@ export default class AtosMatt extends StationAnnouncementSystem {
           },
         },
       },
-    },
+    } satisfies CustomAnnouncementTab<INextTrainAnnouncementOptions>,
     fastTrain: {
       name: 'Fast train',
       component: CustomAnnouncementPane,
+      defaultState: {
+        platform: AVAILABLE_PLATFORMS.low.filter(x => AVAILABLE_PLATFORMS.high.includes(x))[0],
+      },
       props: {
         playHandler: this.playThroughTrainAnnouncement.bind(this),
         options: {
@@ -671,10 +689,22 @@ export default class AtosMatt extends StationAnnouncementSystem {
           },
         },
       },
-    },
+    } satisfies CustomAnnouncementTab<IThroughTrainAnnouncementOptions>,
     disruptedTrain: {
       name: 'Delayed/cancelled train',
       component: CustomAnnouncementPane,
+      defaultState: {
+        hour: AVAILABLE_HOURS[0],
+        min: AVAILABLE_MINUTES[0],
+        toc: AVAILABLE_TOCS[0].toLowerCase(),
+        terminatingStationCode: AVAILABLE_STATIONS.low[0],
+        via: 'none',
+        disruptionType: 'delayed',
+        delayTime: 'unknown',
+        platform: AVAILABLE_PLATFORMS.low[0],
+        disruptionReason: 'unknown',
+        alternativeServices: [],
+      },
       props: {
         playHandler: this.playDisruptedTrainAnnouncement.bind(this),
         presets: AnnouncementPresets.disruptedTrain,
@@ -756,10 +786,10 @@ export default class AtosMatt extends StationAnnouncementSystem {
               onChange,
               availableDelayTimes,
             }: {
-              activeState: Record<string, unknown>
-              value: any
-              onChange: (value: any) => void
-              availableDelayTimes: any
+              activeState: IDelayedTrainAnnouncementOptions
+              value: string
+              onChange: (value: string) => void
+              availableDelayTimes: { title: string; value: string }[]
             }) => {
               if (activeState.disruptionType !== 'delayed') {
                 return null
@@ -774,7 +804,7 @@ export default class AtosMatt extends StationAnnouncementSystem {
                       onChange(e.target.value)
                     }}
                   >
-                    {availableDelayTimes.map((d: any) => (
+                    {availableDelayTimes.map(d => (
                       <option key={d.value} value={d.value}>
                         {d.title}
                       </option>
@@ -800,10 +830,10 @@ export default class AtosMatt extends StationAnnouncementSystem {
               onChange,
               availablePlatforms,
             }: {
-              activeState: Record<string, unknown>
-              value: any
-              onChange: (value: any) => void
-              availablePlatforms: any
+              activeState: IDelayedTrainAnnouncementOptions
+              value: string
+              onChange: (value: string) => void
+              availablePlatforms: { title: string; value: string }[]
             }) => {
               if (activeState.disruptionType !== 'cancelled') {
                 return null
@@ -818,7 +848,7 @@ export default class AtosMatt extends StationAnnouncementSystem {
                       onChange(e.target.value)
                     }}
                   >
-                    {availablePlatforms.map((d: any) => (
+                    {availablePlatforms.map(d => (
                       <option key={d.value} value={d.value}>
                         {d.title}
                       </option>
@@ -851,7 +881,7 @@ export default class AtosMatt extends StationAnnouncementSystem {
           },
         },
       },
-    },
+    } satisfies CustomAnnouncementTab<IDelayedTrainAnnouncementOptions>,
     // announcementButtons: {
     //   name: 'Announcement buttons',
     //   component: CustomButtonPane,

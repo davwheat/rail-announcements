@@ -1,6 +1,6 @@
 import StationAnnouncementSystem from '@announcement-data/StationAnnouncementSystem'
 import CustomAnnouncementPane, { ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
-import { AudioItem, CustomAnnouncementTab } from '../../../AnnouncementSystem'
+import { AnyCustomAnnouncementTab, AudioItem, CustomAnnouncementTab } from '../../../AnnouncementSystem'
 
 import BanedanmarkDestinationsPicker from './BanedanmarkDestinationsPicker'
 import Destinations from './banedanmarkDestinations.json'
@@ -311,7 +311,7 @@ export default class Banedanmark extends StationAnnouncementSystem {
     trackChange: false,
   }
 
-  private readonly presets: ICustomAnnouncementPreset[] = [
+  private readonly presets: ICustomAnnouncementPreset<IBanedanmarkAnnouncementOptions>[] = [
     {
       name: 'Aarhus H — spor 3 — om ca. 10 min',
       state: { destinations: ['ar'], hour: '14', minute: '30', track: '3', countdown: 'ca10min', trackChange: false },
@@ -329,7 +329,7 @@ export default class Banedanmark extends StationAnnouncementSystem {
     disruption: 'awaitstime',
   }
 
-  private readonly disruptionPresets: ICustomAnnouncementPreset[] = [
+  private readonly disruptionPresets: ICustomAnnouncementPreset<IDisruptionOptions>[] = [
     {
       name: 'Aarhus H — afventer tid',
       state: { destinations: ['ar'], hour: '14', minute: '30', disruption: 'awaitstime' },
@@ -340,7 +340,7 @@ export default class Banedanmark extends StationAnnouncementSystem {
     },
   ]
 
-  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab<string>> = {
+  readonly customAnnouncementTabs: Record<string, AnyCustomAnnouncementTab> = {
     announcement: {
       name: 'Platform announcement',
       component: CustomAnnouncementPane,
@@ -350,7 +350,7 @@ export default class Banedanmark extends StationAnnouncementSystem {
         presets: this.presets,
         options: this.announcementOptions,
       },
-    } as CustomAnnouncementTab<keyof IBanedanmarkAnnouncementOptions>,
+    } satisfies CustomAnnouncementTab<IBanedanmarkAnnouncementOptions>,
     disruption: {
       name: 'Disruption',
       component: CustomAnnouncementPane,
@@ -360,6 +360,6 @@ export default class Banedanmark extends StationAnnouncementSystem {
         presets: this.disruptionPresets,
         options: this.disruptionOptions,
       },
-    } as CustomAnnouncementTab<keyof IDisruptionOptions>,
+    } satisfies CustomAnnouncementTab<IDisruptionOptions>,
   }
 }

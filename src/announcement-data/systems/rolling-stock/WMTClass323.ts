@@ -2,7 +2,7 @@ import CallingAtSelector from '@components/CallingAtSelector'
 import CustomAnnouncementPane, { ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
 import { AllStationsTitleValueMap } from '@data/StationManipulators'
 import crsToStationItemMapper from '@helpers/crsToStationItemMapper'
-import { AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
+import { AnyCustomAnnouncementTab, AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
 import TrainAnnouncementSystem from '../../TrainAnnouncementSystem'
 
 interface IApproachingStationAnnouncementOptions {
@@ -24,7 +24,7 @@ interface IWelcomeAnnouncementOptions {
   callingAtCodes: { crsCode: string; name: string; randomId: string }[]
 }
 
-const announcementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {
+const announcementPresets: Readonly<{ welcome: ICustomAnnouncementPreset<IWelcomeAnnouncementOptions>[] }> = {
   welcome: [
     {
       name: 'Reddich to Four Oaks',
@@ -155,7 +155,7 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
     low: this.RealAvailableStationNames,
   }
 
-  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab<string>> = {
+  readonly customAnnouncementTabs: Record<string, AnyCustomAnnouncementTab> = {
     approachingStation: {
       name: 'Approaching station',
       component: CustomAnnouncementPane,
@@ -179,7 +179,7 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
           },
         },
       },
-    } as CustomAnnouncementTab<keyof IApproachingStationAnnouncementOptions>,
+    } satisfies CustomAnnouncementTab<IApproachingStationAnnouncementOptions>,
     nextStation: {
       name: 'Next station',
       component: CustomAnnouncementPane,
@@ -197,7 +197,7 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
           },
         },
       },
-    } as CustomAnnouncementTab<keyof INextStationAnnouncementOptions>,
+    } satisfies CustomAnnouncementTab<INextStationAnnouncementOptions>,
     welcomeAboard: {
       name: 'Welcome aboard',
       component: CustomAnnouncementPane,
@@ -232,13 +232,12 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
           },
         },
       },
-    } as CustomAnnouncementTab<keyof IWelcomeAnnouncementOptions>,
+    } satisfies CustomAnnouncementTab<IWelcomeAnnouncementOptions>,
     thisIs: {
       name: 'This is…',
       component: CustomAnnouncementPane,
       defaultState: {
         stationCode: this.RealAvailableStationNames[0],
-        mindTheGap: false,
       },
       props: {
         playHandler: this.playThisIsAnnouncement.bind(this),
@@ -251,6 +250,6 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
           },
         },
       },
-    } as CustomAnnouncementTab<keyof IThisIsAnnouncementOptions>,
+    } satisfies CustomAnnouncementTab<IThisIsAnnouncementOptions>,
   }
 }

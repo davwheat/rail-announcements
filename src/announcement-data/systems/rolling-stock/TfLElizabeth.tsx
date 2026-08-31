@@ -1,6 +1,6 @@
 import CustomAnnouncementPane, { ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
 import crsToStationItemMapper from '@helpers/crsToStationItemMapper'
-import AnnouncementSystem, { AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
+import AnnouncementSystem, { AnyCustomAnnouncementTab, AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
 
 const ChangeOptions = [
   'Bakerloo',
@@ -1136,7 +1136,7 @@ interface IApproachingStationAnnouncementOptions {
   terminating: boolean
 }
 
-const announcementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {
+const announcementPresets: Readonly<{ thisStation: ICustomAnnouncementPreset<IAtStationAnnouncementOptions>[] }> = {
   thisStation: [
     {
       name: 'Farringdon towards Abbey Wood',
@@ -1235,7 +1235,7 @@ export default class TfLElizabethLine extends AnnouncementSystem {
     await this.playAudioFiles(files, download)
   }
 
-  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab<string>> = {
+  readonly customAnnouncementTabs: Record<string, AnyCustomAnnouncementTab> = {
     thisStation: {
       name: 'Stopped at station',
       component: CustomAnnouncementPane,
@@ -1278,7 +1278,7 @@ export default class TfLElizabethLine extends AnnouncementSystem {
           },
         },
       },
-    } as CustomAnnouncementTab<keyof IAtStationAnnouncementOptions>,
+    } satisfies CustomAnnouncementTab<IAtStationAnnouncementOptions>,
     approachingStation: {
       name: 'Approaching station',
       component: CustomAnnouncementPane,
@@ -1288,7 +1288,6 @@ export default class TfLElizabethLine extends AnnouncementSystem {
       },
       props: {
         playHandler: this.playApproachingStationAnnouncement.bind(this),
-        presets: announcementPresets.approachingStation,
         options: {
           nextStationCrs: {
             name: 'Next station',
@@ -1303,7 +1302,7 @@ export default class TfLElizabethLine extends AnnouncementSystem {
           },
         },
       },
-    } as CustomAnnouncementTab<keyof IApproachingStationAnnouncementOptions>,
+    } satisfies CustomAnnouncementTab<IApproachingStationAnnouncementOptions>,
 
     // announcementButtons: {
     //   name: 'Announcement buttons',

@@ -2,7 +2,7 @@ import CallingAtSelector from '@components/CallingAtSelector'
 import CustomAnnouncementPane, { ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
 import { AllStationsTitleValueMap } from '@data/StationManipulators'
 import crsToStationItemMapper from '@helpers/crsToStationItemMapper'
-import { AudioItem, AudioItemObject, CustomAnnouncementTab } from '../../AnnouncementSystem'
+import { AnyCustomAnnouncementTab, AudioItem, AudioItemObject, CustomAnnouncementTab } from '../../AnnouncementSystem'
 import TrainAnnouncementSystem from '../../TrainAnnouncementSystem'
 import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
 
@@ -21,7 +21,7 @@ interface IWelcomeAnnouncementOptions {
   callingAtCodes: { crsCode: string; name: string; randomId: string }[]
 }
 
-const announcementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {
+const announcementPresets: Readonly<{ welcome: ICustomAnnouncementPreset<IWelcomeAnnouncementOptions>[] }> = {
   welcome: [
     {
       name: 'Dorridge to Worcester Forgate Street',
@@ -377,7 +377,7 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
     { title: 'Generic', value: 'Generic' },
   ]
 
-  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab<string>> = {
+  readonly customAnnouncementTabs: Record<string, AnyCustomAnnouncementTab> = {
     approachingStation: {
       name: 'Approaching station',
       component: CustomAnnouncementPane,
@@ -420,14 +420,13 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
           },
         },
       },
-    } as CustomAnnouncementTab<keyof IApproachingStationAnnouncementOptions>,
+    } satisfies CustomAnnouncementTab<IApproachingStationAnnouncementOptions>,
     stoppedAtStation: {
       name: 'Stopped at station',
       component: CustomAnnouncementPane,
       defaultState: {
         terminatesAtCode: this.RealAvailableStationNames[0],
         toc: this.AvailableTOCs[0].value,
-        terminatesHere: false,
         readAllStations: true,
         callingAtCodes: [],
       },
@@ -463,7 +462,7 @@ export default class WMTClass172 extends TrainAnnouncementSystem {
           },
         },
       },
-    } as CustomAnnouncementTab<keyof IWelcomeAnnouncementOptions>,
+    } satisfies CustomAnnouncementTab<IWelcomeAnnouncementOptions>,
     announcementButtons: {
       name: 'Announcement buttons',
       component: CustomButtonPane,

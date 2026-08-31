@@ -4,7 +4,7 @@ import CallingAtSelector from '@components/CallingAtSelector'
 import CustomAnnouncementPane, { ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
 import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
 import { AllStationsTitleValueMap } from '@data/StationManipulators'
-import { AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
+import { AnyCustomAnnouncementTab, AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
 import TrainAnnouncementSystem from '../../TrainAnnouncementSystem'
 import crsToStationItemMapper from '@helpers/crsToStationItemMapper'
 
@@ -36,7 +36,7 @@ interface IInitialDepartureAnnouncementOptions {
   serviceType: 'thameslink' | 'southeastern' | 'generic'
 }
 
-const announcementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {
+const announcementPresets: Readonly<{ stopped: ICustomAnnouncementPreset<IStoppedAtStationAnnouncementOptions>[] }> = {
   stopped: [
     {
       name: 'Burgess Hill to Bedford',
@@ -807,7 +807,7 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
     return arr
   }
 
-  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab<string>> = {
+  readonly customAnnouncementTabs: Record<string, AnyCustomAnnouncementTab> = {
     initialDeparture: {
       name: 'Initial departure',
       component: CustomAnnouncementPane,
@@ -847,7 +847,7 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
           },
         },
       },
-    } as CustomAnnouncementTab<keyof IInitialDepartureAnnouncementOptions>,
+    } satisfies CustomAnnouncementTab<IInitialDepartureAnnouncementOptions>,
     approachingStation: {
       name: 'Approaching station',
       component: CustomAnnouncementPane,
@@ -884,8 +884,8 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
           },
           changeForOverridden: {
             type: 'customNoState',
-            component: ({ activeState }: { activeState: Record<string, unknown> }) => {
-              if (Object.keys(this.StationsWithForcedChangeHere).includes(activeState.stationCode as string)) {
+            component: ({ activeState }: { activeState: IApproachingStationAnnouncementOptions }) => {
+              if (Object.keys(this.StationsWithForcedChangeHere).includes(activeState.stationCode)) {
                 return <p className="warningMessage">The "Change for" setting will have no effect for this station.</p>
               }
 
@@ -900,8 +900,8 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
           },
           poiMessage: {
             type: 'customNoState',
-            component: ({ activeState }: { activeState: Record<string, unknown> }) => {
-              if (Object.keys(this.StationsWithAttractions).includes(activeState.stationCode as string)) {
+            component: ({ activeState }: { activeState: IApproachingStationAnnouncementOptions }) => {
+              if (Object.keys(this.StationsWithAttractions).includes(activeState.stationCode)) {
                 return (
                   <p className="infoMessage">
                     This announcement will also contain additional information which cannot be modified, relating to local points of interest.
@@ -914,7 +914,7 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
           },
         },
       },
-    } as CustomAnnouncementTab<keyof IApproachingStationAnnouncementOptions>,
+    } satisfies CustomAnnouncementTab<IApproachingStationAnnouncementOptions, 'changeForOverridden' | 'poiMessage'>,
     stoppedAtStation: {
       name: 'Stopped at station',
       component: CustomAnnouncementPane,
@@ -957,7 +957,7 @@ export default class ThameslinkClass700 extends TrainAnnouncementSystem {
           },
         },
       },
-    } as CustomAnnouncementTab<keyof IStoppedAtStationAnnouncementOptions>,
+    } satisfies CustomAnnouncementTab<IStoppedAtStationAnnouncementOptions>,
     announcementButtons: {
       name: 'Announcement buttons',
       component: CustomButtonPane,

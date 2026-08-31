@@ -270,7 +270,7 @@ function CallingAtSelector({
                                       name: 'Split formation',
                                       type: 'select',
                                       options: enableSplits,
-                                      onlyShowWhen(activeState: any) {
+                                      onlyShowWhen(activeState) {
                                         return activeState.splitType !== 'none' && activeState.splitType !== undefined
                                       },
                                     },
@@ -280,7 +280,7 @@ function CallingAtSelector({
                                       onChange(v) {
                                         onChange(value.map(s => (s.randomId === stop.randomId ? { ...s, splitForm: v } : s)))
                                       },
-                                      activeState: stop as any,
+                                      activeState: stop,
                                     },
                                   )}
 
@@ -291,7 +291,7 @@ function CallingAtSelector({
                                       default: [],
                                       name: '',
                                       type: 'custom',
-                                      component: CallingAtSelector as any,
+                                      component: CallingAtSelector,
                                       props: {
                                         availableStations: availableStations,
                                         additionalOptions: additionalOptions,
@@ -302,7 +302,7 @@ function CallingAtSelector({
                                         enableRequestStops: enableRequestStops,
                                         enableSplits: false,
                                       },
-                                      onlyShowWhen(activeState: any) {
+                                      onlyShowWhen(activeState) {
                                         return activeState.splitType === 'splits'
                                       },
                                     },
@@ -312,7 +312,7 @@ function CallingAtSelector({
                                       onChange(v) {
                                         onChange(value.map(s => (s.randomId === stop.randomId ? { ...s, splitCallingPoints: v } : s)))
                                       },
-                                      activeState: stop as any,
+                                      activeState: stop,
                                     },
                                   )}
                                 </>

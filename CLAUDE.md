@@ -53,14 +53,10 @@ class MySystem extends TrainAnnouncementSystem {
       name: 'Tab Name',
       component: CustomAnnouncementPane,
       props: {
-        options: {
-          /* option definitions */
-        },
+        options: {/* option definitions */},
         playHandler: this.playMyAnnouncement.bind(this),
       },
-      defaultState: {
-        /* initial option values */
-      },
+      defaultState: {/* initial option values */},
     },
   }
 

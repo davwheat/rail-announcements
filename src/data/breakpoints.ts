@@ -43,10 +43,9 @@ interface Breakpoints {
          * If first breakpoint is greater than second, the value shown by your IDE will be wrong,
          * but the output value will be correct.
          */
-        [K in Exclude<
-          BreakpointNames,
-          T
-        >]: `@media (min-width: ${(typeof pixelValues)[T]}px) and (max-width: ${(typeof oneBelowPixelValues)[K]}px)`
+        [
+          K in Exclude<BreakpointNames, T>
+        ]: `@media (min-width: ${(typeof pixelValues)[T]}px) and (max-width: ${(typeof oneBelowPixelValues)[K]}px)`
       }
     }
   }

@@ -17,11 +17,11 @@ import TfLElizabethLine from './systems/rolling-stock/TfLElizabeth'
 import TfLPiccadillyLine from './systems/rolling-stock/TfLPiccadillyLine'
 import LnerAzuma from './systems/rolling-stock/LNERAzuma'
 
-import TrainAnnouncementSystem from './TrainAnnouncementSystem'
-import StationAnnouncementSystem from './StationAnnouncementSystem'
-import AnnouncementSystem from './AnnouncementSystem'
+import type TrainAnnouncementSystem from './TrainAnnouncementSystem'
+import type StationAnnouncementSystem from './StationAnnouncementSystem'
+import type { AnnouncementSystemClass } from './AnnouncementSystem'
 
-export const AllTrainAnnouncementSystems: (typeof TrainAnnouncementSystem)[] = [
+export const AllTrainAnnouncementSystems: AnnouncementSystemClass<TrainAnnouncementSystem>[] = [
   ThameslinkClass700,
   BombardierXstar,
   TfWTrainFx,
@@ -29,7 +29,7 @@ export const AllTrainAnnouncementSystems: (typeof TrainAnnouncementSystem)[] = [
   LnerAzuma,
 ]
 
-export const AllStationAnnouncementSystems: (typeof StationAnnouncementSystem)[] = [
+export const AllStationAnnouncementSystems: AnnouncementSystemClass<StationAnnouncementSystem>[] = [
   // AtosMatt,
   // AtosAnne,
   AmeyPhil,
@@ -38,9 +38,9 @@ export const AllStationAnnouncementSystems: (typeof StationAnnouncementSystem)[]
   Banedanmark,
 ]
 
-export const AllOtherAnnouncementSystems: (typeof AnnouncementSystem)[] = [TfLJubileeLine, TfLNorthernLine, TfLElizabethLine, TfLPiccadillyLine]
+export const AllOtherAnnouncementSystems: AnnouncementSystemClass[] = [TfLJubileeLine, TfLNorthernLine, TfLElizabethLine, TfLPiccadillyLine]
 
-export const AllAnnouncementSystems: (typeof AnnouncementSystem)[] = [
+export const AllAnnouncementSystems: AnnouncementSystemClass[] = [
   ...AllStationAnnouncementSystems,
   ...AllTrainAnnouncementSystems,
   ...AllOtherAnnouncementSystems,

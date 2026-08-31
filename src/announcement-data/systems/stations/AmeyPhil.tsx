@@ -6,7 +6,14 @@ import CustomAnnouncementPane, { ICustomAnnouncementPreset } from '@components/P
 import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
 import { getStationByCrs } from '@data/StationManipulators'
 import crsToStationItemMapper, { stationItemCompleter } from '@helpers/crsToStationItemMapper'
-import { AudioItem, CustomAnnouncementButton, CustomAnnouncementTab, MissingAudioMode } from '../../AnnouncementSystem'
+import {
+  AnyCustomAnnouncementTab,
+  AudioItem,
+  CustomAnnouncementButton,
+  CustomAnnouncementTab,
+  CustomButtonTab,
+  MissingAudioMode,
+} from '../../AnnouncementSystem'
 import DelayCodeMapping from './DarwinDelayCodes_Male1.json'
 import NamedServices from './named-services.json'
 
@@ -32,7 +39,7 @@ export interface INextTrainAnnouncementOptions {
   coaches: string
   serviceLoading: ServiceLoading
   announceShortPlatformsAfterSplit: boolean
-  notCallingAtStations: { crsCode: string }[]
+  notCallingAtStations: CallingAtPoint[]
   fromLive?: true
   missingAudioMode?: MissingAudioMode
 }
@@ -5630,7 +5637,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     }
   }
 
-  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab<string>> = {
+  readonly customAnnouncementTabs: Record<string, AnyCustomAnnouncementTab> = {
     nextTrain: {
       name: 'Next train',
       component: CustomAnnouncementPane,
@@ -5805,7 +5812,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           },
         },
       },
-    } as CustomAnnouncementTab<keyof INextTrainAnnouncementOptions>,
+    } satisfies CustomAnnouncementTab<INextTrainAnnouncementOptions>,
     approachingTrain: {
       name: 'Approaching train',
       component: CustomAnnouncementPane,
@@ -5918,13 +5925,12 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           },
         },
       },
-    } as CustomAnnouncementTab<keyof ITrainApproachingAnnouncementOptions>,
+    } satisfies CustomAnnouncementTab<ITrainApproachingAnnouncementOptions>,
     standingTrain: {
       name: 'Standing train',
       component: CustomAnnouncementPane,
       importStateFromRttService: this.standingTrainOptionsFromRtt.bind(this),
       defaultState: {
-        chime: 'three',
         thisStationCode: this.STATIONS[0],
         platform: this.PLATFORMS[1],
         hour: '07',
@@ -6096,7 +6102,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           },
         },
       },
-    } as CustomAnnouncementTab<keyof IStandingTrainAnnouncementOptions>,
+    } satisfies CustomAnnouncementTab<IStandingTrainAnnouncementOptions>,
     disruptedTrain: {
       name: 'Disrupted train',
       component: CustomAnnouncementPane,
@@ -6206,7 +6212,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             type: 'select',
             options: new Array(360).fill(0).map((_, i) => ({ value: (i + 1).toString(), title: `${i + 1} minute${i === 0 ? '' : 's'}` })),
             default: '65',
-            onlyShowWhen(activeState: Record<string, unknown>) {
+            onlyShowWhen(activeState) {
               return activeState.disruptionType === 'delayedBy'
             },
           },
@@ -6218,7 +6224,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           },
         },
       },
-    } as CustomAnnouncementTab<keyof IDisruptedTrainAnnouncementOptions>,
+    } satisfies CustomAnnouncementTab<IDisruptedTrainAnnouncementOptions>,
     fastTrain: {
       name: 'Fast train',
       component: CustomAnnouncementPane,
@@ -6259,7 +6265,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           },
         },
       },
-    } as CustomAnnouncementTab<keyof IFastTrainAnnouncementOptions>,
+    } satisfies CustomAnnouncementTab<IFastTrainAnnouncementOptions>,
     platformAlteration: {
       name: 'Platform alteration',
       component: CustomAnnouncementPane,
@@ -6301,7 +6307,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             default: this.PLATFORMS[6],
             options: this.PLATFORMS.map(p => ({ title: `Platform ${p.toUpperCase()}`, value: p })),
             type: 'select',
-            onlyShowWhen(activeState: Record<string, unknown>) {
+            onlyShowWhen(activeState) {
               return activeState.announceOldPlatform
             },
           },
@@ -6387,14 +6393,14 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           },
         },
       },
-    } as CustomAnnouncementTab<keyof IPlatformAlterationAnnouncementOptions>,
+    } satisfies CustomAnnouncementTab<IPlatformAlterationAnnouncementOptions>,
     announcementButtons: {
       name: 'Announcement buttons',
       component: CustomButtonPane,
       props: {
         buttonSections: this.getAnnouncementButtons(),
       },
-    } as CustomAnnouncementTab<string>,
+    } satisfies CustomButtonTab,
   }
 
   private coachCountFromRtt(passengerVehicleCount: number | undefined): string | null {

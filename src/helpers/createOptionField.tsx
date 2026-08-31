@@ -1,13 +1,13 @@
 import React from 'react'
 import Select from 'react-select'
 
-import type { OptionsExplanation } from '@announcement-data/AnnouncementSystem'
+import type { AnnouncementState, OptionsExplanation } from '@announcement-data/AnnouncementSystem'
 
-interface OptionFieldOptions {
+interface OptionFieldOptions<State extends AnnouncementState> {
   onChange: (value: any) => void
   value: any
   key: string
-  activeState?: Record<string, unknown>
+  activeState?: State
 }
 
 export interface Option<Value extends string = string> {
@@ -15,8 +15,11 @@ export interface Option<Value extends string = string> {
   readonly value: Value
 }
 
-export default function createOptionField(optionData: OptionsExplanation<any, any>, options: OptionFieldOptions) {
-  if (optionData.onlyShowWhen?.(options?.activeState!!) === false) {
+export default function createOptionField<State extends AnnouncementState = AnnouncementState>(
+  optionData: OptionsExplanation<any, State>,
+  options: OptionFieldOptions<State>,
+) {
+  if (options.activeState && optionData.onlyShowWhen?.(options.activeState) === false) {
     return null
   }
 
@@ -28,7 +31,11 @@ export default function createOptionField(optionData: OptionsExplanation<any, an
             type="checkbox"
             checked={options.value}
             onChange={e => options.onChange(e.currentTarget.checked)}
-            disabled={optionData?.disabled || false}
+            disabled={
+              typeof optionData.disabled === 'function'
+                ? !!options.activeState && optionData.disabled(options.activeState)
+                : (optionData.disabled ?? false)
+            }
           />{' '}
           {optionData.name}
         </label>

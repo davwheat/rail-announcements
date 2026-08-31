@@ -1,6 +1,6 @@
-import CustomAnnouncementPane, { ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
+import CustomAnnouncementPane from '@components/PanelPanes/CustomAnnouncementPane'
 import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
-import AnnouncementSystem, { AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
+import AnnouncementSystem, { AnyCustomAnnouncementTab, AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
 
 interface IDestination {
   station: string
@@ -800,8 +800,6 @@ interface IAtStationAnnouncementOptions {
   terminatingStationName: string
 }
 
-const announcementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {}
-
 export default class TfLNorthernLine extends AnnouncementSystem {
   readonly NAME = 'TfL Northern Line'
   readonly ID = 'TFL_NORTHERN_LINE_V1'
@@ -908,7 +906,7 @@ export default class TfLNorthernLine extends AnnouncementSystem {
     await this.playAudioFiles(files, download)
   }
 
-  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab<string>> = {
+  readonly customAnnouncementTabs: Record<string, AnyCustomAnnouncementTab> = {
     destinationInfo: {
       name: 'Destination info',
       component: CustomAnnouncementPane,
@@ -917,7 +915,6 @@ export default class TfLNorthernLine extends AnnouncementSystem {
       },
       props: {
         playHandler: this.playDestinationInfoAnnouncement.bind(this),
-        presets: announcementPresets.destinationInfo,
         options: {
           stationName: {
             name: 'Destination station',
@@ -942,7 +939,7 @@ export default class TfLNorthernLine extends AnnouncementSystem {
           },
         },
       },
-    } as CustomAnnouncementTab<keyof IDestinationInfoAnnouncementOptions>,
+    } satisfies CustomAnnouncementTab<IDestinationInfoAnnouncementOptions>,
     nextStation: {
       name: 'Next station',
       component: CustomAnnouncementPane,
@@ -963,7 +960,7 @@ export default class TfLNorthernLine extends AnnouncementSystem {
           terminating: {
             name: 'Terminates here?',
             default: false,
-            onlyShowWhen(activeState: Record<string, unknown>) {
+            onlyShowWhen(activeState) {
               const data = NextStationData.find(s => s.label === activeState.stationLabel)
 
               return !!(data?.terminatingAudio && !data.onlyTerminates)
@@ -973,14 +970,14 @@ export default class TfLNorthernLine extends AnnouncementSystem {
           mindTheGap: {
             name: 'Mind the gap?',
             default: true,
-            onlyShowWhen(activeState: Record<string, unknown>) {
+            onlyShowWhen(activeState) {
               return !!NextStationData.find(s => s.label === activeState.stationLabel)?.conditionalMindTheGap
             },
             type: 'boolean',
           },
         },
       },
-    } as CustomAnnouncementTab<keyof INextStationAnnouncementOptions>,
+    } satisfies CustomAnnouncementTab<INextStationAnnouncementOptions>,
     thisStation: {
       name: 'Stopped at station',
       component: CustomAnnouncementPane,
@@ -1032,7 +1029,7 @@ export default class TfLNorthernLine extends AnnouncementSystem {
           },
         },
       },
-    } as CustomAnnouncementTab<keyof IAtStationAnnouncementOptions>,
+    } satisfies CustomAnnouncementTab<IAtStationAnnouncementOptions>,
     announcementButtons: {
       name: 'Announcement buttons',
       component: CustomButtonPane,

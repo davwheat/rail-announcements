@@ -5,7 +5,7 @@ import CallingAtSelector from '@components/CallingAtSelector'
 import CustomAnnouncementPane, { ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
 import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
 import { AllStationsTitleValueMap } from '@data/StationManipulators'
-import { AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
+import { AnyCustomAnnouncementTab, AudioItem, CustomAnnouncementTab, CustomButtonTab } from '../../AnnouncementSystem'
 import crsToStationItemMapper from '@helpers/crsToStationItemMapper'
 import AtosDisruptionAlternatives, { IAlternativeServicesState } from '@components/AtosDisruptionAlternatives'
 import createAnnouncementButton from '@helpers/createAnnouncementButton'
@@ -2099,7 +2099,10 @@ const AVAILABLE_SPECIAL_REMARKS = [
   },
 ]
 
-const AnnouncementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {
+const AnnouncementPresets: Readonly<{
+  nextTrain: ICustomAnnouncementPreset<INextTrainAnnouncementOptions>[]
+  disruptedTrain: ICustomAnnouncementPreset<IDelayedTrainAnnouncementOptions>[]
+}> = {
   nextTrain: [
     {
       name: '07:11 | Brighton to Cambridge',
@@ -2449,10 +2452,23 @@ export default class AtosAnne extends StationAnnouncementSystem {
     await this.playAudioFiles(files, download)
   }
 
-  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab<string>> = {
+  readonly customAnnouncementTabs: Record<string, AnyCustomAnnouncementTab> = {
     nextTrain: {
       name: 'Next train',
       component: CustomAnnouncementPane,
+      defaultState: {
+        platform: AVAILABLE_PLATFORMS[0],
+        hour: AVAILABLE_HOURS[0],
+        min: AVAILABLE_MINUTES[0],
+        toc: AVAILABLE_TOCS[0].toLowerCase(),
+        terminatingStationCode: AVAILABLE_STATIONS.low[0],
+        via: 'none',
+        callingAt: [],
+        coaches: '12 coaches',
+        seating: 'none',
+        special: [],
+        transportType: AVAILABLE_TRANSPORT[0],
+      },
       props: {
         playHandler: this.playNextTrainAnnouncement.bind(this),
         presets: AnnouncementPresets.nextTrain,
@@ -2507,7 +2523,7 @@ export default class AtosAnne extends StationAnnouncementSystem {
             default: '12 coaches',
             options: AVAILABLE_COACHES_CARRIAGES.map(c => ({ title: c, value: c })),
             type: 'select',
-            onlyShowWhen: (state: Record<string, unknown>) => state.transportType === 'train',
+            onlyShowWhen: state => state.transportType === 'train',
           },
           seating: {
             name: 'Seating availability',
@@ -2529,10 +2545,14 @@ export default class AtosAnne extends StationAnnouncementSystem {
           },
         },
       },
-    },
+    } satisfies CustomAnnouncementTab<INextTrainAnnouncementOptions>,
     fastTrain: {
       name: 'Fast train',
       component: CustomAnnouncementPane,
+      defaultState: {
+        platform: AVAILABLE_PLATFORMS[0],
+        transportType: AVAILABLE_TRANSPORT[0],
+      },
       props: {
         playHandler: this.playThroughTrainAnnouncement.bind(this),
         options: {
@@ -2550,10 +2570,22 @@ export default class AtosAnne extends StationAnnouncementSystem {
           },
         },
       },
-    },
+    } satisfies CustomAnnouncementTab<IThroughTrainAnnouncementOptions>,
     disruptedTrain: {
       name: 'Delayed/cancelled train',
       component: CustomAnnouncementPane,
+      defaultState: {
+        hour: AVAILABLE_HOURS[0],
+        min: AVAILABLE_MINUTES[0],
+        toc: AVAILABLE_TOCS[0].toLowerCase(),
+        terminatingStationCode: AVAILABLE_STATIONS.high[0],
+        via: 'none',
+        disruptionType: 'delayed',
+        delayTime: AVAILABLE_DELAY_TIMES[0].toString(),
+        platform: AVAILABLE_PLATFORMS[0],
+        disruptionReason: 'unknown',
+        alternativeServices: [],
+      },
       props: {
         playHandler: this.playDisruptedTrainAnnouncement.bind(this),
         presets: AnnouncementPresets.disruptedTrain,
@@ -2636,10 +2668,10 @@ export default class AtosAnne extends StationAnnouncementSystem {
               onChange,
               availableDelayTimes,
             }: {
-              activeState: Record<string, unknown>
-              value: any
-              onChange: (value: any) => void
-              availableDelayTimes: any
+              activeState: IDelayedTrainAnnouncementOptions
+              value: string
+              onChange: (value: string) => void
+              availableDelayTimes: { title: string; value: string }[]
             }) => {
               if (activeState.disruptionType !== 'delayed') {
                 return null
@@ -2654,7 +2686,7 @@ export default class AtosAnne extends StationAnnouncementSystem {
                       onChange(e.target.value)
                     }}
                   >
-                    {availableDelayTimes.map((d: any) => (
+                    {availableDelayTimes.map(d => (
                       <option key={d.value} value={d.value}>
                         {d.title}
                       </option>
@@ -2680,10 +2712,10 @@ export default class AtosAnne extends StationAnnouncementSystem {
               onChange,
               availablePlatforms,
             }: {
-              activeState: Record<string, unknown>
-              value: any
-              onChange: (value: any) => void
-              availablePlatforms: any
+              activeState: IDelayedTrainAnnouncementOptions
+              value: string
+              onChange: (value: string) => void
+              availablePlatforms: { title: string; value: string }[]
             }) => {
               if (activeState.disruptionType !== 'cancelled') {
                 return null
@@ -2698,7 +2730,7 @@ export default class AtosAnne extends StationAnnouncementSystem {
                       onChange(e.target.value)
                     }}
                   >
-                    {availablePlatforms.map((d: any) => (
+                    {availablePlatforms.map(d => (
                       <option key={d.value} value={d.value}>
                         {d.title}
                       </option>
@@ -2731,7 +2763,7 @@ export default class AtosAnne extends StationAnnouncementSystem {
           },
         },
       },
-    },
+    } satisfies CustomAnnouncementTab<IDelayedTrainAnnouncementOptions>,
     announcementButtons: {
       name: 'Other announcements',
       component: CustomButtonPane,
@@ -2792,6 +2824,6 @@ export default class AtosAnne extends StationAnnouncementSystem {
           ],
         },
       },
-    },
+    } satisfies CustomButtonTab,
   }
 }

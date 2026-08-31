@@ -2,7 +2,7 @@ import CallingAtSelector, { CallingAtPoint } from '@components/CallingAtSelector
 import CustomAnnouncementPane, { ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
 import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
 import { AllStationsTitleValueMap } from '@data/StationManipulators'
-import { AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
+import { AnyCustomAnnouncementTab, AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
 import TrainAnnouncementSystem from '../../TrainAnnouncementSystem'
 import crsToStationItemMapper from '@helpers/crsToStationItemMapper'
 
@@ -18,7 +18,7 @@ interface IWelcomeAboardAnnouncementOptions {
   callingLocations: CallingAtPoint[]
 }
 
-const announcementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {
+const announcementPresets: Readonly<{ welcomeOnBoard: ICustomAnnouncementPreset<IWelcomeAboardAnnouncementOptions>[] }> = {
   welcomeOnBoard: [
     {
       name: 'London to Birmingham (fast)',
@@ -154,7 +154,7 @@ export default class AvantiPendolino extends TrainAnnouncementSystem {
     low: this.RealAvailableStationNames,
   }
 
-  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab<string>> = {
+  readonly customAnnouncementTabs: Record<string, AnyCustomAnnouncementTab> = {
     approachingStation: {
       name: 'Approaching station',
       component: CustomAnnouncementPane,
@@ -190,7 +190,7 @@ export default class AvantiPendolino extends TrainAnnouncementSystem {
           },
         },
       },
-    } as CustomAnnouncementTab<keyof IApproachingStationAnnouncementOptions>,
+    } satisfies CustomAnnouncementTab<IApproachingStationAnnouncementOptions>,
     welcomeAboard: {
       name: 'Welcome on board',
       component: CustomAnnouncementPane,
@@ -219,7 +219,7 @@ export default class AvantiPendolino extends TrainAnnouncementSystem {
           },
         },
       },
-    } as CustomAnnouncementTab<keyof IWelcomeAboardAnnouncementOptions>,
+    } satisfies CustomAnnouncementTab<IWelcomeAboardAnnouncementOptions>,
     announcementButtons: {
       name: 'Announcement buttons',
       component: CustomButtonPane,

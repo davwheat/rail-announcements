@@ -2,7 +2,7 @@ import React from 'react'
 import CustomAnnouncementPane from '@components/PanelPanes/CustomAnnouncementPane'
 import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
 import { getStationByCrs } from '@data/StationManipulators'
-import { AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
+import { AnyCustomAnnouncementTab, AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
 import TrainAnnouncementSystem from '../../TrainAnnouncementSystem'
 import crsToStationItemMapper from '@helpers/crsToStationItemMapper'
 import CallingAtSelector from '@components/CallingAtSelector'
@@ -494,7 +494,7 @@ export default class TfWTrainFx extends TrainAnnouncementSystem {
     }
   })
 
-  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab<string>> = {
+  readonly customAnnouncementTabs: Record<string, AnyCustomAnnouncementTab> = {
     startOfJourney: {
       name: 'Start of journey',
       component: CustomAnnouncementPane,
@@ -518,7 +518,7 @@ export default class TfWTrainFx extends TrainAnnouncementSystem {
           },
         },
       },
-    } as CustomAnnouncementTab<keyof IStartOfJourneyAnnouncementOptions>,
+    } satisfies CustomAnnouncementTab<IStartOfJourneyAnnouncementOptions>,
     stoppedAtStation: {
       name: 'At station',
       component: CustomAnnouncementPane,
@@ -543,7 +543,7 @@ export default class TfWTrainFx extends TrainAnnouncementSystem {
           },
         },
       },
-    } as CustomAnnouncementTab<keyof IStoppedAtStationAnnouncementOptions>,
+    } satisfies CustomAnnouncementTab<IStoppedAtStationAnnouncementOptions>,
     departingStop: {
       name: 'Departing stop',
       component: CustomAnnouncementPane,
@@ -567,7 +567,7 @@ export default class TfWTrainFx extends TrainAnnouncementSystem {
           },
         },
       },
-    } as CustomAnnouncementTab<keyof IDepartingStopAnnouncementOptions>,
+    } satisfies CustomAnnouncementTab<IDepartingStopAnnouncementOptions>,
     approachingStation: {
       name: 'Approaching stop',
       component: CustomAnnouncementPane,
@@ -609,7 +609,7 @@ export default class TfWTrainFx extends TrainAnnouncementSystem {
           },
         },
       },
-    } as CustomAnnouncementTab<keyof IApproachingStopAnnouncementOptions>,
+    } satisfies CustomAnnouncementTab<IApproachingStopAnnouncementOptions>,
     announcementButtons: {
       name: 'Announcement buttons',
       component: CustomButtonPane,

@@ -25,63 +25,113 @@ export interface IPlayOptions {
   customPrefix: string
 }
 
-export type OptionsExplanation<P extends {}, C extends React.ComponentType<P>> =
-  | IMultiselectOptions
-  | ISelectOptions
-  | IBooleanOptions
-  | INumberOptions
-  | ITimeOptions
-  | ICustomOptions<P, C>
-  | ICustomNoStateOptions
+/**
+ * The option state of a single announcement tab: one entry per option shown in the tab's UI.
+ *
+ * State is serialised with `JSON.stringify` when a tab is saved as a personal preset or shared, so
+ * every value must survive a JSON round trip.
+ */
+export type AnnouncementState = Record<string, any>
 
-interface IMultiselectOptions {
+/**
+ * Props that every `custom` option component receives, alongside its own `props`.
+ *
+ * `activeState` is optional so that components which ignore it still satisfy the option's type.
+ */
+export interface ICustomOptionComponentProps<Value, State extends AnnouncementState = AnnouncementState> {
+  value: Value
+  onChange: (value: Value) => void
+  activeState?: State
+}
+
+interface IOptionsCommon<State extends AnnouncementState> {
+  /**
+   * Hides the option unless the tab's current state satisfies this predicate.
+   */
+  onlyShowWhen?: (activeState: State) => boolean
+}
+
+/**
+ * Describes one option in an announcement tab.
+ *
+ * `Value` is the type of the state entry the option writes to, and rules out option types which
+ * can't produce it: `select` needs a string entry, `boolean` a boolean one, and so on.
+ */
+export type OptionsExplanation<Value = any, State extends AnnouncementState = AnnouncementState> =
+  | IMultiselectOptions<Value, State>
+  | ISelectOptions<Value, State>
+  | IBooleanOptions<Value, State>
+  | INumberOptions<Value, State>
+  | ITimeOptions<Value, State>
+  | ICustomOptions<Value, State>
+  | ICustomNoStateOptions<State>
+
+type MultiselectValue<Value> = Extract<Value, readonly string[]>
+type MultiselectItem<Value> = MultiselectValue<Value>[number]
+
+interface IMultiselectOptions<Value, State extends AnnouncementState> extends IOptionsCommon<State> {
   name: string
   type: 'multiselect'
-  default: string[]
-  options: { title: string; value: string }[]
-  onlyShowWhen?: (activeState: Record<string, unknown>) => boolean
+  default: MultiselectValue<Value>
+  options: { title: string; value: MultiselectItem<Value> }[]
 }
-interface ISelectOptions {
+
+interface ISelectOptions<Value, State extends AnnouncementState> extends IOptionsCommon<State> {
   name: string
   type: 'select'
-  default: string
-  options: { title: string; value: string }[]
-  onlyShowWhen?: (activeState: Record<string, unknown>) => boolean
+  default: Extract<Value, string>
+  options: { title: string; value: Extract<Value, string> }[]
 }
-interface IBooleanOptions {
+
+interface IBooleanOptions<Value, State extends AnnouncementState> extends IOptionsCommon<State> {
   name: string
   type: 'boolean'
-  default: boolean
-  onlyShowWhen?: (activeState: Record<string, unknown>) => boolean
-  disabled?: boolean
+  default: Extract<Value, boolean>
+  disabled?: boolean | ((activeState: State) => boolean)
 }
-interface ITimeOptions {
+
+interface ITimeOptions<Value, State extends AnnouncementState> extends IOptionsCommon<State> {
   name: string
   type: 'time'
-  default: `${string}:${string}`
-  onlyShowWhen?: (activeState: Record<string, unknown>) => boolean
+  default: Value extends string ? `${string}:${string}` : never
 }
-interface INumberOptions {
+
+interface INumberOptions<Value, State extends AnnouncementState> extends IOptionsCommon<State> {
   name: string
   type: 'number'
-  default: number
-  onlyShowWhen?: (activeState: Record<string, unknown>) => boolean
+  default: Extract<Value, number>
 }
 
-interface ICustomOptions<Props extends {}, Component extends React.ComponentType<Props>> {
+interface ICustomOptions<Value, State extends AnnouncementState> extends IOptionsCommon<State> {
   name: string
   type: 'custom'
-  component: Component
-  props?: Props
-  default: any
-  onlyShowWhen?: (activeState: Record<string, unknown>) => boolean
+  /**
+   * Declared as a method so its props are compared bivariantly: a component may demand extra props
+   * of its own, supplied through `props`, as long as it accepts the option's value type.
+   */
+  component(props: ICustomOptionComponentProps<Value, State>): React.ReactNode
+  props?: object
+  default: Value
 }
 
-interface ICustomNoStateOptions {
+interface ICustomNoStateOptions<State extends AnnouncementState> extends IOptionsCommon<State> {
+  name?: string
   type: 'customNoState'
-  component: (props: { activeState: Record<string, unknown>; [key: string]: any }) => React.JSX.Element
-  props?: Record<string, unknown>
-  onlyShowWhen?: (activeState: Record<string, unknown>) => boolean
+  /**
+   * Declared as a method for the same reason as {@link ICustomOptions.component}.
+   */
+  component(props: { activeState: State }): React.ReactNode
+  props?: object
+}
+
+/**
+ * The option descriptors for a tab: one per key of the tab's state, plus any keys named in
+ * `ExtraOptionIds`, which render UI without holding state of their own.
+ */
+export type TabOptions<State extends AnnouncementState, ExtraOptionIds extends string = never> = {
+  [Key in keyof State]: OptionsExplanation<State[Key], State>
+} & {
+  [Key in ExtraOptionIds]: ICustomNoStateOptions<State>
 }
 
 export type AudioItem = string | AudioItemObject
@@ -91,32 +141,73 @@ export interface AudioItemObject {
   opts?: Partial<IPlayOptions>
 }
 
-export interface CustomAnnouncementTab<OptionIds extends string> {
+/**
+ * Props which `AnnouncementPanel` supplies, rather than the announcement system itself.
+ */
+type PaneInjectedProps =
+  | 'name'
+  | 'systemId'
+  | 'tabId'
+  | 'isPersonalPresetsReady'
+  | 'personalPresetsError'
+  | 'savePersonalPreset'
+  | 'getPersonalPresets'
+  | 'deletePersonalPreset'
+  | 'system'
+  | 'defaultState'
+  | 'importStateFromRttService'
+
+/**
+ * A tab of any shape, with its state type erased.
+ *
+ * Use it for collections holding a whole system's tabs, and declare each tab in the collection with
+ * `satisfies CustomAnnouncementTab<...>` or `satisfies CustomButtonTab` so its own state type is
+ * still checked.
+ */
+export interface AnyCustomAnnouncementTab {
   name: string
-  component: React.ComponentType<ICustomAnnouncementPaneProps<OptionIds>> | React.ComponentType<ICustomButtonPaneProps>
-  props: Omit<
-    ICustomAnnouncementPaneProps<OptionIds> | ICustomButtonPaneProps,
-    | 'name'
-    | 'systemId'
-    | 'tabId'
-    | 'isPersonalPresetsReady'
-    | 'savePersonalPreset'
-    | 'getPersonalPresets'
-    | 'deletePersonalPreset'
-    | 'system'
-    | 'defaultState'
-    | 'importStateFromRttService'
-  >
+  component: React.ComponentType<any>
+  props: object
+  defaultState?: AnnouncementState
+  importStateFromRttService?: (rttService: RttResponse, fromLocationIndex: number, existingOptions: any) => any
+}
+
+/**
+ * An options-driven tab, rendered by `CustomAnnouncementPane`.
+ *
+ * `State` is the tab's option state, which types its options, presets, play handler and RTT import.
+ * `ExtraOptionIds` names any `customNoState` options which render UI but hold no state.
+ */
+export interface CustomAnnouncementTab<
+  State extends AnnouncementState = AnnouncementState,
+  ExtraOptionIds extends string = never,
+> extends AnyCustomAnnouncementTab {
+  component: React.ComponentType<ICustomAnnouncementPaneProps<any>>
+  props: Omit<ICustomAnnouncementPaneProps<State, ExtraOptionIds>, PaneInjectedProps>
   /**
    * Merged with any personal preset to allow migration if new features are added.
    */
-  defaultState?: Record<OptionIds, any>
-  importStateFromRttService?: (
-    rttService: RttResponse,
-    fromLocationIndex: number,
-    existingOptions: Record<OptionIds, any>,
-  ) => Record<OptionIds, any>
+  defaultState: State
+  importStateFromRttService?: (rttService: RttResponse, fromLocationIndex: number, existingOptions: State) => State
 }
+
+/**
+ * A tab of one-press announcement buttons, rendered by `CustomButtonPane`.
+ */
+export interface CustomButtonTab extends AnyCustomAnnouncementTab {
+  component: React.ComponentType<ICustomButtonPaneProps>
+  props: Omit<ICustomButtonPaneProps, 'system'>
+  defaultState?: never
+  importStateFromRttService?: never
+}
+
+/**
+ * A constructible announcement system class.
+ *
+ * `typeof AnnouncementSystem` refers to the abstract base, which can't be instantiated; every
+ * registered system can be, so components which construct one take this instead.
+ */
+export type AnnouncementSystemClass<System extends AnnouncementSystem = AnnouncementSystem> = new () => System
 
 export type CustomAnnouncementButton = {
   label: string
@@ -378,7 +469,7 @@ export default abstract class AnnouncementSystem {
     return fileId
   }
 
-  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab<string>> = {}
+  readonly customAnnouncementTabs: Record<string, AnyCustomAnnouncementTab> = {}
 
   /**
    * Takes an array of audio files, and adds an `and` audio file where needed.

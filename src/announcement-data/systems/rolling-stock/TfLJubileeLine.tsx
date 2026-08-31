@@ -1,6 +1,6 @@
 import CustomAnnouncementPane, { ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
 import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
-import AnnouncementSystem, { AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
+import AnnouncementSystem, { AnyCustomAnnouncementTab, AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
 
 interface IStationDataItem {
   name: string
@@ -211,7 +211,7 @@ interface IDestinationInfoAnnouncementOptions {
 
 const elizAffectedStations = StationData.filter(station => station.postEliz).map(station => station.name)
 
-const announcementPresets: Readonly<Record<string, ICustomAnnouncementPreset[]>> = {
+const announcementPresets: Readonly<{ destinationInfo: ICustomAnnouncementPreset<IDestinationInfoAnnouncementOptions>[] }> = {
   destinationInfo: [
     {
       name: 'Westbound - Stanmore',
@@ -316,7 +316,7 @@ export default class TfLJubileeLine extends AnnouncementSystem {
     await this.playAudioFiles(files, download)
   }
 
-  readonly customAnnouncementTabs: Record<string, CustomAnnouncementTab<string>> = {
+  readonly customAnnouncementTabs: Record<string, AnyCustomAnnouncementTab> = {
     destinationInfo: {
       name: 'Destination info',
       component: CustomAnnouncementPane,
@@ -335,7 +335,7 @@ export default class TfLJubileeLine extends AnnouncementSystem {
           },
         },
       },
-    } as CustomAnnouncementTab<keyof IDestinationInfoAnnouncementOptions>,
+    } satisfies CustomAnnouncementTab<IDestinationInfoAnnouncementOptions>,
     nextStation: {
       name: 'Next station',
       component: CustomAnnouncementPane,
@@ -361,7 +361,7 @@ export default class TfLJubileeLine extends AnnouncementSystem {
               { title: 'Right', value: 'right' },
             ],
             type: 'select',
-            onlyShowWhen: ({ stationName }: Record<string, unknown>) => {
+            onlyShowWhen: ({ stationName }) => {
               const stationData = StationData.find(s => s.name === stationName)
 
               return !stationData?.fullMessages
@@ -371,13 +371,13 @@ export default class TfLJubileeLine extends AnnouncementSystem {
             name: 'Use Elizabeth line version',
             default: true,
             type: 'boolean',
-            onlyShowWhen: ({ stationName }: Record<string, unknown>) => {
+            onlyShowWhen: ({ stationName }) => {
               return elizAffectedStations.includes(stationName as string)
             },
           },
         },
       },
-    } as CustomAnnouncementTab<keyof INextStationAnnouncementOptions>,
+    } satisfies CustomAnnouncementTab<INextStationAnnouncementOptions>,
     thisStation: {
       name: 'Stopped at station',
       component: CustomAnnouncementPane,
@@ -398,13 +398,13 @@ export default class TfLJubileeLine extends AnnouncementSystem {
             name: 'Use Elizabeth line version',
             default: true,
             type: 'boolean',
-            onlyShowWhen: ({ stationName }: Record<string, unknown>) => {
+            onlyShowWhen: ({ stationName }) => {
               return elizAffectedStations.includes(stationName as string)
             },
           },
         },
       },
-    } as CustomAnnouncementTab<keyof IAtStationAnnouncementOptions>,
+    } satisfies CustomAnnouncementTab<IAtStationAnnouncementOptions>,
     announcementButtons: {
       name: 'Announcement buttons',
       component: CustomButtonPane,

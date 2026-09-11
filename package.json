@@ -62,6 +62,7 @@
   "resolutions": {
     "react": "^19",
     "react-dom": "^19",
-    "@types/react-dom": "^19.2.3"
+    "@types/react-dom": "^19.2.3",
+    "tar": "7.5.21"
   }
 }

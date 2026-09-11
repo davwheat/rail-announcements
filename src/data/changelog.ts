@@ -578,6 +578,13 @@ const changelog: IChangelogVersion[] = [
     date: '2026-08-31',
     additions: ['[Electrostar/Turbostar] Add support for dividing trains and short platform announcements'],
   },
+  {
+    date: '2026-09-10',
+    additions: [
+      '[First Great Western] Add TrainFX system voiced by Faye Dicker, covering FGW and GWR branding',
+      '[Northern] Add TrainFX system covering Northern Rail and Northern Electrics branding',
+    ],
+  },
 ]
 
 export default changelog

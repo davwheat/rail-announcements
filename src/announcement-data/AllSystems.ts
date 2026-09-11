@@ -2,6 +2,8 @@ import ThameslinkClass700 from './systems/rolling-stock/TLClass700'
 import BombardierXstar from './systems/rolling-stock/BombardierXstar'
 import TfWTrainFx from './systems/rolling-stock/TfWTrainFx'
 import TfWTelevic from './systems/rolling-stock/TfWTelevic'
+import FGWTrainFx from './systems/rolling-stock/FGWTrainFx'
+import NorthernTrainFx from './systems/rolling-stock/NorthernTrainFx'
 
 import AmeyPhil from './systems/stations/AmeyPhil'
 import AmeyCelia from './systems/stations/AmeyCelia'
@@ -27,6 +29,8 @@ export const AllTrainAnnouncementSystems: AnnouncementSystemClass<TrainAnnouncem
   TfWTrainFx,
   TfWTelevic,
   LnerAzuma,
+  FGWTrainFx,
+  NorthernTrainFx,
 ]
 
 export const AllStationAnnouncementSystems: AnnouncementSystemClass<StationAnnouncementSystem>[] = [

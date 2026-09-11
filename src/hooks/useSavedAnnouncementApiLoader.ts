@@ -11,6 +11,8 @@ const idToPath: Record<string, string> = {
   SN_CLASS_377_V1: '/rolling-stock/bombardier-xstar',
   TFW_TRAINFX_V1: '/rolling-stock/tfw-trainfx',
   TFW_TELEVIC_V1: '/rolling-stock/tfw-televic',
+  FGW_TRAINFX_V1: '/rolling-stock/fgw-trainfx',
+  NORTHERN_TRAINFX_V1: '/rolling-stock/northern-trainfx',
   LNER_AZUMA_V1: '/rolling-stock/lner-azuma',
   AVANTI_WEST_COAST_PENDOLINO_V1: '/rolling-stock/avanti-west-coast-pendolino',
   WMT_CLASS_172_V1: '/rolling-stock/wmt-class-172',

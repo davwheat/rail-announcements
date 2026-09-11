@@ -12,6 +12,27 @@ import Link from 'next/link'
 import Breakpoints from '@data/breakpoints'
 import { Fragment } from 'react'
 
+function Badge({ background, children }: { background: string; children: React.ReactNode }) {
+  return (
+    <span
+      css={{
+        textTransform: 'uppercase',
+        display: 'inline-block',
+        padding: '3px 6px',
+        paddingTop: 5,
+        borderRadius: 4,
+        background,
+        fontSize: '0.75em',
+        lineHeight: 1,
+        transform: 'translateY(-2px)',
+        marginRight: 8,
+      }}
+    >
+      {children}
+    </span>
+  )
+}
+
 // Remember to set up in `useSavedAnnouncementApiLoader`!
 const Systems = [
   {
@@ -20,6 +41,8 @@ const Systems = [
       { title: 'SN/SE Bombardier Xstar', url: '/rolling-stock/bombardier-xstar' },
       { title: 'Class 700/707/717', url: '/rolling-stock/class-700-707-717' },
       { title: 'LNER Azuma', url: '/rolling-stock/lner-azuma' },
+      { title: 'First Great Western TrainFX', url: '/rolling-stock/fgw-trainfx', beta: true },
+      { title: 'Northern TrainFX', url: '/rolling-stock/northern-trainfx', beta: true },
       { title: 'Transport for Wales TrainFX', url: '/rolling-stock/tfw-trainfx' },
       { title: 'Transport for Wales Televic', url: '/rolling-stock/tfw-televic' },
       { title: 'TfL Jubilee Line', url: '/rolling-stock/tfl/jubilee-line' },
@@ -47,7 +70,7 @@ const Systems = [
 
 export default function IndexPage() {
   return (
-    <Layout description="Generate station and on-train announcements for the UK rail network using real audio recordings. Covers rolling stock from Avanti, LNER, Thameslink, TfL, Transport for Wales, and West Midlands Trains, plus station systems from Amey/KeTech and ScotRail.">
+    <Layout description="Generate station and on-train announcements for the UK rail network using real audio recordings. Covers rolling stock from Avanti, First Great Western, LNER, Northern, Thameslink, TfL, Transport for Wales, and West Midlands Trains, plus station systems from Amey/KeTech and ScotRail.">
       <SavedAnnouncementLoader />
 
       <header>
@@ -117,26 +140,8 @@ export default function IndexPage() {
                       to={system.url}
                       title={
                         <>
-                          {(system as any).new && (
-                            <>
-                              <span
-                                css={{
-                                  textTransform: 'uppercase',
-                                  display: 'inline-block',
-                                  padding: '3px 6px',
-                                  paddingTop: 5,
-                                  borderRadius: 4,
-                                  background: 'hsl(204 50% 85% / 1)',
-                                  fontSize: '0.75em',
-                                  lineHeight: 1,
-                                  transform: 'translateY(-2px)',
-                                  marginRight: 8,
-                                }}
-                              >
-                                New!
-                              </span>
-                            </>
-                          )}
+                          {(system as any).new && <Badge background="hsl(204 50% 85% / 1)">New!</Badge>}
+                          {(system as any).beta && <Badge background="hsl(36 80% 85% / 1)">Beta</Badge>}
                           {(system as any).flag && (
                             <img
                               src={(system as any).flag}

@@ -289,6 +289,19 @@ export default abstract class AnnouncementSystem {
     return `${this.AUDIO_CDN}/${customPrefix || this.FILE_PREFIX}/${this.processAudioFileId(fileId).replace(/\./g, '/')}.mp3`
   }
 
+  private livePlayback: { signal: AbortSignal; valid: () => boolean } | null = null
+
+  /** Keeps stale live announcements from starting once their audio has loaded. The live queue
+   *  plays one announcement at a time, so this context never nests. */
+  async withLivePlayback(signal: AbortSignal, valid: () => boolean, play: () => Promise<void>): Promise<void> {
+    this.livePlayback = { signal, valid }
+    try {
+      if (valid()) await play()
+    } finally {
+      this.livePlayback = null
+    }
+  }
+
   /**
    * Plays multiple audio files.
    *
@@ -308,6 +321,9 @@ export default abstract class AnnouncementSystem {
     startDelay: number = 0,
     onPlaybackStart?: () => void,
   ): Promise<void> {
+    const livePlayback = this.livePlayback
+    if (livePlayback && !livePlayback.valid()) return
+
     if (fileIds.length === 0) {
       console.warn('No audio files to play.')
       return
@@ -335,6 +351,11 @@ export default abstract class AnnouncementSystem {
     const crunker = AnnouncementSystem.getCrunker()
     const audio = await this.concatSoundClips(standardisedFileIds, missingAudioMode)
 
+    if (livePlayback && !livePlayback.valid()) {
+      window.__audio = undefined
+      return
+    }
+
     if (audio.numberOfChannels > 1) {
       // This is stereo. We need to mux it to mono.
       audio.copyToChannel(audio.getChannelData(0), 1, 0)
@@ -346,7 +367,10 @@ export default abstract class AnnouncementSystem {
     } else {
       return new Promise<void>(resolve => {
         const { contextResume } = crunker.play(audio, source => {
+          const stop = () => source.stop()
+          livePlayback?.signal.addEventListener('abort', stop, { once: true })
           source.addEventListener('ended', () => {
+            livePlayback?.signal.removeEventListener('abort', stop)
             console.log('[Crunker] Finished playing audio')
             window.__audio = undefined
             resolve()

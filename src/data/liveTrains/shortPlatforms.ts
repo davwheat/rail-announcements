@@ -1,4 +1,11 @@
-import { TrainService } from '../../api-types/get-services-types'
+/** Only railway facts used by the static platform preferences. */
+export interface ShortPlatformTrain {
+  operatorCode: string
+  length: number | null
+  origin: { crs: string }[]
+  destination: { crs: string }[]
+  subsequentLocations: { crs?: string | null }[]
+}
 
 /**
  * Find short platform information for a station stop.
@@ -7,7 +14,7 @@ import { TrainService } from '../../api-types/get-services-types'
  * @param platformNumber Scheduled/actual platform number
  * @param toc TOC code
  */
-export function isShortPlatform(crs: string, platformNumber: string | null, train: TrainService): string | null {
+export function isShortPlatform(crs: string, platformNumber: string | null, train: ShortPlatformTrain): string | null {
   try {
     if (platformNumber === null) return null
 
@@ -56,7 +63,7 @@ const data: Record<
     string,
     Record<
       string,
-      `${'front' | 'middle' | 'rear'}.${number}` | null | ((service: TrainService) => `${'front' | 'middle' | 'rear'}.${number}` | null)
+      `${'front' | 'middle' | 'rear'}.${number}` | null | ((service: ShortPlatformTrain) => `${'front' | 'middle' | 'rear'}.${number}` | null)
     >
   >
 > = {
@@ -2200,7 +2207,7 @@ const data: Record<
 }
 
 function southernTurboElectro(turboLen: `${'front' | 'middle' | 'rear'}.${number}`, electroLen: `${'front' | 'middle' | 'rear'}.${number}`) {
-  return (trainService: TrainService): `${'front' | 'middle' | 'rear'}.${number}` | null => {
+  return (trainService: ShortPlatformTrain): `${'front' | 'middle' | 'rear'}.${number}` | null => {
     const turboStns = ['AFK', 'UCK', 'APD', 'EBT']
 
     if (
@@ -2218,7 +2225,7 @@ function southernTurboElectro(turboLen: `${'front' | 'middle' | 'rear'}.${number
 }
 
 function southeasternHs1(nonHs1: `${'front' | 'middle' | 'rear'}.${number}`, hs1: `${'front' | 'middle' | 'rear'}.${number}`) {
-  return (trainService: TrainService): `${'front' | 'middle' | 'rear'}.${number}` | null => {
+  return (trainService: ShortPlatformTrain): `${'front' | 'middle' | 'rear'}.${number}` | null => {
     const hs1Stations = ['STP', 'EBD', 'SFA', 'ASI', 'AFK']
 
     if (

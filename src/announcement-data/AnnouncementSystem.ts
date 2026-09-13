@@ -291,15 +291,13 @@ export default abstract class AnnouncementSystem {
 
   private livePlayback: { signal: AbortSignal; valid: () => boolean } | null = null
 
-  /** Keeps stale live announcements from starting once their audio has loaded. The live queue
-   *  plays one announcement at a time, so this context never nests. */
-  async withLivePlayback(signal: AbortSignal, valid: () => boolean, play: () => Promise<void>): Promise<void> {
-    this.livePlayback = { signal, valid }
-    try {
-      if (valid()) await play()
-    } finally {
-      this.livePlayback = null
-    }
+  /** Returns a view of this system that abandons its audio once the live announcement goes stale.
+   *  Platforms sharing a voice can announce at the same time, so the context belongs to the view
+   *  rather than to the system every platform shares. */
+  withLivePlayback(signal: AbortSignal, valid: () => boolean): this {
+    const scoped = Object.create(this) as this
+    scoped.livePlayback = { signal, valid }
+    return scoped
   }
 
   /**

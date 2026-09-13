@@ -1,13 +1,17 @@
-import { connectCIS } from './cis'
 import { connectStream, streamUrl, type ConnectionStatus } from './connection'
 import { PlaybackQueue } from './playbackQueue'
-import type { Announcement, AnnouncementType, Ready } from './types'
+import type { Announcement, AnnouncementType, Heartbeat, Ready, Retraction, Revision } from './types'
 
-/** The CIS stream proves itself live by resyncing; announcements can be silent for as long
- *  as the station is quiet, so only a long silence is taken as a dead connection. */
-const ANNOUNCEMENT_IDLE_TIMEOUT = 600_000
+/** Heartbeats fill a quiet station's silence, so silence this long is a dead connection
+ *  rather than an uneventful hour. Matches the service's own pong deadline. */
+const ANNOUNCEMENT_IDLE_TIMEOUT = 75_000
+const HEARTBEAT_SECONDS = '30'
 
-/** CIS validates queued audio; the announcement endpoint alone supplies triggers. */
+type Incoming = Ready | Announcement | Retraction | Revision | Heartbeat
+
+/** The service withdraws and revises the announcements it has sent, so this one stream carries
+ *  everything playback needs. A second connection for the train list would only duplicate the
+ *  projection it is already speaking for. */
 export function connectAnnouncements(
   baseUrl: string,
   crs: string,
@@ -15,58 +19,52 @@ export function connectAnnouncements(
   queue: PlaybackQueue,
   onStatus: (status: ConnectionStatus) => void,
 ): () => void {
-  let stopAnnouncements: (() => void) | undefined
-  const cisUrl = streamUrl(baseUrl, 'cis', crs)
-  cisUrl.searchParams.set('limit', '1000')
-  const announcementUrl = streamUrl(baseUrl, 'announcements', crs)
-  announcementUrl.searchParams.set('type', types.join(','))
-
-  function reset() {
-    stopAnnouncements?.()
-    stopAnnouncements = undefined
+  const url = streamUrl(baseUrl, 'announcements', crs)
+  url.searchParams.set('type', types.join(','))
+  url.searchParams.set('heartbeat', HEARTBEAT_SECONDS)
+  if (types.length === 0) {
     queue.reset()
+    return () => queue.reset()
   }
 
-  const stopCIS = connectCIS(
-    cisUrl,
-    state => {
-      if (!state) {
-        reset()
-        return
-      }
-      queue.updateState(state)
-      if (stopAnnouncements || types.length === 0) return
-      let ready = false
-      stopAnnouncements = connectStream(
-        announcementUrl,
-        message => {
-          const incoming = message as Ready | Announcement
-          if (!['ready', 'announcement'].includes(incoming.type)) throw new Error('Unexpected announcement message')
-          if (incoming.version !== 1 || incoming.station.crs !== crs) throw new Error('Invalid announcement stream')
-          if (incoming.type === 'ready') {
-            queue.reset()
-            ready = incoming.healthy
-            onStatus(ready ? 'live' : 'recovering')
-          } else if (incoming.type === 'announcement' && ready) {
-            if (!incoming.event_id || incoming.movement_id !== incoming.details.id) throw new Error('Invalid announcement')
-            queue.push(incoming)
-          }
-        },
-        () => {
-          ready = false
+  let ready = false
+  return connectStream(
+    url,
+    message => {
+      const incoming = message as Incoming
+      if (incoming.version !== 1) throw new Error('Invalid announcement stream')
+      switch (incoming.type) {
+        case 'heartbeat':
+          return
+        case 'ready':
+          if (incoming.station.crs !== crs) throw new Error('Invalid announcement stream')
+          // Repeated whenever the service's health changes, and each one re-baselines it.
           queue.reset()
-        },
-        onStatus,
-        ANNOUNCEMENT_IDLE_TIMEOUT,
-      )
+          ready = incoming.healthy
+          onStatus(ready ? 'live' : 'recovering')
+          return
+        case 'announcement':
+          if (incoming.station.crs !== crs) throw new Error('Invalid announcement stream')
+          if (!incoming.event_id || incoming.movement_id !== incoming.details.id) throw new Error('Invalid announcement')
+          if (ready) queue.push(incoming)
+          return
+        case 'retraction':
+          if (!incoming.event_id) throw new Error('Invalid retraction')
+          if (ready) queue.retract(incoming.event_id)
+          return
+        case 'revision':
+          if (!incoming.event_id || incoming.movement_id !== incoming.details.id) throw new Error('Invalid revision')
+          if (ready) queue.revise(incoming.event_id, incoming.details)
+          return
+        default:
+          throw new Error('Unexpected announcement message')
+      }
     },
-    status => {
-      if (status !== 'live') onStatus(status)
+    () => {
+      ready = false
+      queue.reset()
     },
+    onStatus,
+    ANNOUNCEMENT_IDLE_TIMEOUT,
   )
-
-  return () => {
-    stopCIS()
-    reset()
-  }
 }

@@ -1,4 +1,4 @@
-import type { Announcement, AnnouncementType, CISState } from './types'
+import type { Announcement, AnnouncementType, Movement } from './types'
 
 const stages: Partial<Record<AnnouncementType, number>> = { next: 1, approaching: 2, standing: 3 }
 
@@ -8,28 +8,31 @@ const PLAYBACK_TIMEOUT = 300_000
 
 interface QueuedAnnouncement {
   announcement: Announcement
-  /** Arrival time, so a CIS frame only judges announcements it could have accounted for. */
-  receivedAt: number
 }
 
 export class PlaybackQueue {
   private pending: QueuedAnnouncement[] = []
   private seen = new Set<string>()
-  private draining = false
+  private playing = new Set<string>()
+  /** In-flight announcements by event, so a retraction can stop the one it names. */
+  private active = new Map<string, AbortController>()
   private session = new AbortController()
-  private state: CISState | null = null
-  private stateAt = 0
 
   constructor(
     private play: (announcement: Announcement, signal: AbortSignal, valid: () => boolean) => Promise<void>,
     private now = Date.now,
     private onError: (error: unknown) => void = console.error,
+    /** The lanes an announcement occupies while it plays. Announcements sharing a lane are
+     *  played in turn; the single default lane keeps the whole station in turn. */
+    private lanes: (announcement: Announcement) => string[] = () => [''],
   ) {}
 
   reset() {
     this.abortSession()
     this.pending = []
     this.seen.clear()
+    this.playing.clear()
+    this.active.clear()
   }
 
   private abortSession() {
@@ -37,51 +40,25 @@ export class PlaybackQueue {
     this.session = new AbortController()
   }
 
-  updateState(state: CISState) {
-    this.state = state
-    this.stateAt = this.now()
-    this.pending = this.pending
-      .filter(entry => this.isValid(entry))
-      .map(entry => {
-        const movement = state.movements.get(entry.announcement.movement_id)
-        if (!movement || !this.supersedes(entry)) return entry
-        return { ...entry, announcement: { ...entry.announcement, details: movement } }
-      })
+  /** The service withdraws an announcement whose train is cancelled, suppressed, replatformed,
+   *  departed or gone. Audio already started is stopped too: a train that will not arrive on
+   *  the platform being announced is worse to finish than to cut short. */
+  retract(eventId: string) {
+    this.pending = this.pending.filter(({ announcement }) => announcement.event_id !== eventId)
+    this.active.get(eventId)?.abort()
   }
 
-  /** The two sockets can deliver the same projection in either order, so a frame that arrived
-   *  before the announcement did neither refutes it nor improves on its details. */
-  private supersedes(entry: QueuedAnnouncement): boolean {
-    return this.state !== null && this.stateAt >= entry.receivedAt
+  /** Replaces the details of an announcement still waiting its turn, so it speaks the current
+   *  time rather than the one that was current when the service triggered it. */
+  revise(eventId: string, details: Movement) {
+    this.pending = this.pending.map(entry =>
+      entry.announcement.event_id === eventId ? { ...entry, announcement: { ...entry.announcement, details } } : entry,
+    )
   }
 
-  private isValid(entry: QueuedAnnouncement): boolean {
-    const { announcement } = entry
-    if (!Number.isFinite(Date.parse(announcement.expires_at)) || Date.parse(announcement.expires_at) <= this.now()) return false
-    const state = this.state
-    if (!state) return true
-    // Whatever the frame holds is authoritative; only missing evidence depends on the ordering.
-    const absenceIsFinal = this.supersedes(entry)
-    if (announcement.announcement_type === 'passing') {
-      const standClear = [...state.overrides.values()].some(
-        override =>
-          override.kind === 'stand_clear' &&
-          Date.parse(override.expires_at) > this.now() &&
-          // A stand clear raised from TD evidence alone carries no movement id.
-          (override.movement_id === announcement.movement_id || announcement.affected_platforms.includes(override.platform)),
-      )
-      return standClear || !absenceIsFinal
-    }
-    const movement = state.movements.get(announcement.movement_id)
-    if (!movement) return !absenceIsFinal
-    if (movement.suppressed || movement.platform.suppressed) return false
-    if (movement.cancelled && announcement.announcement_type !== 'disrupted') return false
-    if (movement.departure.actual && Date.parse(movement.departure.actual) <= this.now()) return false
-    if (movement.td?.event === 'departure' && Date.parse(movement.td.observed_at) <= this.now()) return false
-    // A platform alteration exists because the platforms disagree, and CIS may still hold the old one.
-    if (announcement.announcement_type !== 'platform_alteration' && movement.platform.number !== announcement.details.platform.number)
-      return false
-    return true
+  private isValid({ announcement }: QueuedAnnouncement): boolean {
+    const expiry = Date.parse(announcement.expires_at)
+    return Number.isFinite(expiry) && expiry > this.now()
   }
 
   push(announcement: Announcement) {
@@ -101,47 +78,55 @@ export class PlaybackQueue {
       return stage <= (stages[previous.announcement_type] ?? Infinity)
     })
     if (this.pending.length >= 64) this.pending.shift()
-    this.pending.push({ announcement, receivedAt: this.now() })
-    void this.drain()
+    this.pending.push({ announcement })
+    this.drain()
   }
 
-  private async drain() {
-    if (this.draining) return
-    this.draining = true
-    try {
-      while (this.pending.length) {
-        const entry = this.pending.shift()!
-        const signal = this.session.signal
-        const valid = () => !signal.aborted && this.isValid(entry)
-        if (!valid()) continue
-        try {
-          await this.playBounded(entry.announcement, signal, valid)
-        } catch (error) {
-          if (!signal.aborted) this.onError(error)
-        }
+  /** Starts everything whose lanes are free, leaving the rest in order behind them. */
+  private drain() {
+    for (let index = 0; index < this.pending.length; index++) {
+      const entry = this.pending[index]
+      const lanes = this.lanes(entry.announcement)
+      if (lanes.some(lane => this.playing.has(lane))) continue
+      this.pending.splice(index--, 1)
+
+      const session = this.session
+      const controller = new AbortController()
+      const stopWithSession = () => controller.abort()
+      session.signal.addEventListener('abort', stopWithSession, { once: true })
+      const valid = () => !controller.signal.aborted && this.isValid(entry)
+      if (!valid()) {
+        session.signal.removeEventListener('abort', stopWithSession)
+        continue
       }
-    } finally {
-      this.draining = false
+
+      for (const lane of lanes) this.playing.add(lane)
+      this.active.set(entry.announcement.event_id, controller)
+      void this.playBounded(entry.announcement, controller, valid)
+        .catch(error => {
+          if (!controller.signal.aborted) this.onError(error)
+        })
+        .finally(() => {
+          session.signal.removeEventListener('abort', stopWithSession)
+          if (this.active.get(entry.announcement.event_id) === controller) this.active.delete(entry.announcement.event_id)
+          // A reset has already cleared the lanes, and they may belong to a new session by now.
+          if (this.session === session) for (const lane of lanes) this.playing.delete(lane)
+          this.drain()
+        })
     }
   }
 
-  private playBounded(announcement: Announcement, signal: AbortSignal, valid: () => boolean): Promise<void> {
-    let timer: ReturnType<typeof setTimeout> | undefined
-    let onAbort: (() => void) | undefined
+  private playBounded(announcement: Announcement, controller: AbortController, valid: () => boolean): Promise<void> {
+    const { signal } = controller
+    const timer = setTimeout(() => {
+      this.onError(new Error('Announcement playback timed out'))
+      // Aborting this announcement alone stops its audio and frees its lanes.
+      controller.abort()
+    }, PLAYBACK_TIMEOUT)
     const stalled = new Promise<void>(resolve => {
       if (signal.aborted) return resolve()
-      onAbort = resolve
-      signal.addEventListener('abort', onAbort, { once: true })
-      timer = setTimeout(() => {
-        this.onError(new Error('Announcement playback timed out'))
-        // A fresh session stops the stalled audio and releases the queue for later messages.
-        this.abortSession()
-        resolve()
-      }, PLAYBACK_TIMEOUT)
+      signal.addEventListener('abort', () => resolve(), { once: true })
     })
-    return Promise.race([this.play(announcement, signal, valid), stalled]).finally(() => {
-      clearTimeout(timer)
-      if (onAbort) signal.removeEventListener('abort', onAbort)
-    })
+    return Promise.race([this.play(announcement, signal, valid), stalled]).finally(() => clearTimeout(timer))
   }
 }

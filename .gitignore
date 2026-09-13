@@ -56,6 +56,9 @@ typings/
 # dotenv environment variable files
 .env*
 
+# Public build-time URLs, deliberately committed
+!.env.production
+
 # Next.js
 .next/
 out/

@@ -124,51 +124,6 @@ export interface TDMovement {
   match: 'matched' | 'unmatched' | 'ambiguous'
   classification: 'stopping' | 'passing' | 'non_passenger' | 'non_public' | 'unknown' | 'ambiguous'
 }
-export interface PlatformOverride {
-  id: string
-  kind: 'stand_clear' | 'not_for_public_use'
-  station: Location
-  platform: string
-  movement_id: string | null
-  activates_at: Instant
-  expires_at: Instant
-  reason: string
-  source: string
-}
-export interface Snapshot {
-  version: 1
-  type: 'snapshot'
-  request_id?: string
-  station: Location
-  window: { from: Instant; to: Instant }
-  epoch: string
-  revision: number
-  movements: Movement[]
-  ordering: string[]
-  overrides: PlatformOverride[]
-}
-export interface Update {
-  version: 1
-  type: 'update'
-  epoch: string
-  previous_revision: number
-  revision: number
-  window: Snapshot['window']
-  upserts: Movement[]
-  removals: string[]
-  ordering: string[]
-  override_upserts: PlatformOverride[]
-  override_removals: { id: string; reason: string }[]
-}
-export interface CISState {
-  station: Location
-  epoch: string
-  revision: number
-  window: Snapshot['window']
-  movements: Map<string, Movement>
-  ordering: string[]
-  overrides: Map<string, PlatformOverride>
-}
 export type AnnouncementType = 'next' | 'approaching' | 'standing' | 'disrupted' | 'passing' | 'platform_alteration'
 export interface Announcement {
   version: 1
@@ -190,4 +145,31 @@ export interface Ready {
   station: Location
   created_at: Instant
   healthy: boolean
+}
+export interface Retraction {
+  version: 1
+  type: 'retraction'
+  event_id: string
+  movement_id: string
+  announcement_type: AnnouncementType
+  reason: string
+  created_at: Instant
+  affected_platforms: string[]
+}
+export interface Revision {
+  version: 1
+  type: 'revision'
+  event_id: string
+  movement_id: string
+  announcement_type: AnnouncementType
+  created_at: Instant
+  expires_at: Instant
+  details: Movement
+  affected_platforms: string[]
+}
+/** Liveness only. The announcement stream attests no state, so this carries none. */
+export interface Heartbeat {
+  version: 1
+  type: 'heartbeat'
+  sent_at: Instant
 }

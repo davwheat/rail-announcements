@@ -20,6 +20,13 @@ function stationAudio(location: Location, system: AmeyPhil): string {
   return code
 }
 
+/** The platforms an announcement speaks on. A passing train warns every platform it affects. */
+export function announcementPlatforms(announcement: Announcement): (string | null)[] {
+  return announcement.announcement_type === 'passing'
+    ? announcement.affected_platforms
+    : [announcement.new_platform || announcement.details.platform.number]
+}
+
 export function audioPlatform(platform: string, system: Pick<AmeyPhil, 'PLATFORMS'>): string | null {
   const normalised = platform.toLowerCase()
   if (system.PLATFORMS.includes(normalised)) return normalised

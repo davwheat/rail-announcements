@@ -15,7 +15,7 @@ export function streamUrl(base: string, path: string, crs: string): URL {
 /** Reconnect only to this feed. A disconnect never enables the legacy API. */
 export function connectStream(
   url: URL,
-  onMessage: (message: unknown, socket: WebSocket) => void,
+  onMessage: (message: unknown) => void,
   onReset: () => void,
   onStatus: (status: ConnectionStatus) => void,
   /** Recycle a stream this long without traffic: a middlebox drops an idle connection
@@ -43,7 +43,7 @@ export function connectStream(
         if (typeof event.data !== 'string' || event.data.length > 5_000_000) {
           throw new Error('Invalid stream message')
         }
-        onMessage(JSON.parse(event.data), current)
+        onMessage(JSON.parse(event.data))
         clearTimeout(connectTimeout)
         if (idleTimeout) {
           clearTimeout(idleTimer)

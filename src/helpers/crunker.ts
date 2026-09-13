@@ -59,7 +59,8 @@ export default class Crunker {
   private _mobileUnloaded: boolean = false
   private _scratchBuffer: AudioBuffer | null = null
   private _suspendTimer: ReturnType<typeof setTimeout> | null = null
-  private _isPlaying: boolean = false
+  /** Announcements for different platforms can overlap, so playback is counted, not flagged. */
+  private _playing: number = 0
   private _stateChangeListenerAttached: boolean = false
 
   /**
@@ -181,8 +182,8 @@ export default class Crunker {
    * Attaches a persistent `statechange` listener on the AudioContext that
    * automatically resumes it whenever it becomes `suspended` or `interrupted`
    * (iOS-specific) while audio is still playing. Without this, a mid-playback
-   * suspension (e.g. phone call, screen lock) would leave `_isPlaying` stuck
-   * as `true` and block all future playback.
+   * suspension (e.g. phone call, screen lock) would leave the context suspended
+   * and block all future playback.
    *
    * @internal
    */
@@ -194,7 +195,7 @@ export default class Crunker {
       if (!this._context) return
 
       const state = this._context.state as string
-      if ((state === 'suspended' || state === 'interrupted') && this._isPlaying) {
+      if ((state === 'suspended' || state === 'interrupted') && this._playing > 0) {
         this._context.resume().catch(() => {
           // Resume failed — context may have been closed or the browser refuses.
         })
@@ -216,7 +217,7 @@ export default class Crunker {
     }
 
     // Don't suspend if something is currently playing.
-    if (this._isPlaying) {
+    if (this._playing > 0) {
       return
     }
 
@@ -228,7 +229,7 @@ export default class Crunker {
     this._suspendTimer = setTimeout(() => {
       this._suspendTimer = null
 
-      if (!this._context || this._isPlaying) return
+      if (!this._context || this._playing > 0) return
 
       this._context.suspend()
     }, 30_000)
@@ -518,12 +519,12 @@ export default class Crunker {
 
     source.connect(ctx.destination)
 
-    this._isPlaying = true
+    this._playing++
 
     // Clean up the buffer source when playback ends to prevent iOS memory leaks,
     // and kick off auto-suspend timer.
     source.addEventListener('ended', () => {
-      this._isPlaying = false
+      this._playing = Math.max(0, this._playing - 1)
       this._cleanBuffer(source)
       this._autoSuspend()
     })

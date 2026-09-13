@@ -1,6 +1,6 @@
 import { connectAnnouncements } from '../live/announcements'
 import { PlaybackQueue } from '../live/playbackQueue'
-import { playAnnouncement, audioPlatform } from '../live/playAnnouncement'
+import { playAnnouncement, announcementPlatforms, audioPlatform } from '../live/playAnnouncement'
 import type { Announcement, AnnouncementType as FeedAnnouncementType } from '../live/types'
 import type { ConnectionStatus } from '../live/connection'
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
@@ -446,6 +446,14 @@ const DisplayNames: Record<DisplayType, string> = {
   'blackbox-landscape-lcd': 'Blackbox landscape LCD',
 }
 
+const DataSources = ['websocket', 'original'] as const
+type DataSource = (typeof DataSources)[number]
+
+const DataSourceNames: Record<DataSource, string> = {
+  websocket: 'New (live updates)',
+  original: 'Legacy (polling)',
+}
+
 const ChimeTypeNames: Record<ChimeType | '', string> = {
   '': 'Per-voice default',
   none: 'No chime',
@@ -558,8 +566,8 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
   const [displayType, setDisplayType] = useStateWithLocalStorage<DisplayType>('amey.live-trains.board-type', 'infotec-landscape-dmi', val => {
     return DisplayTypes.includes(val)
   })
-  const [dataSource, setDataSource] = useStateWithLocalStorage<'original' | 'websocket'>('amey.live-trains.data-source', 'original', value =>
-    ['original', 'websocket'].includes(value),
+  const [dataSource, setDataSource] = useStateWithLocalStorage<DataSource>('amey.live-trains.data-source', 'original', value =>
+    DataSources.includes(value),
   )
   const [liveServiceUrl, setLiveServiceUrl] = useStateWithLocalStorage('amey.live-trains.service-url', LOCAL_LIVE_URL)
   const [liveStatus, setLiveStatus] = useState<ConnectionStatus>('connecting')
@@ -586,6 +594,11 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
   )
   const [announceShortPlatformsAfterSplit, setAnnounceShortPlatformsAfterSplit] = useStateWithLocalStorage<boolean>(
     'amey.live-trains.announce-short-platforms-after-split',
+    false,
+    x => x === true || x === false,
+  )
+  const [announcePlatformsConcurrently, setAnnouncePlatformsConcurrently] = useStateWithLocalStorage<boolean>(
+    'amey.live-trains.concurrent-platforms',
     false,
     x => x === true || x === false,
   )
@@ -1394,16 +1407,14 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
 
   const legacyPlaying = useRef(isPlaying)
   legacyPlaying.current = isPlaying
+  const concurrentPlatforms = useRef(announcePlatformsConcurrently)
+  concurrentPlatforms.current = announcePlatformsConcurrently
   const playFeedMessage = useRef<(announcement: Announcement, signal: AbortSignal, valid: () => boolean) => Promise<void>>(async () => {})
   playFeedMessage.current = async (announcement, signal, valid) => {
     // Let an already playing legacy announcement finish when the source changes.
     while (legacyPlaying.current && valid()) await new Promise(resolve => setTimeout(resolve, 100))
     if (!valid() || dataSource !== 'websocket' || !enabledAnnouncements.includes(announcement.announcement_type as AnnouncementType)) return
-    const platforms =
-      announcement.announcement_type === 'passing'
-        ? announcement.affected_platforms
-        : [announcement.new_platform || announcement.details.platform.number]
-    for (const platform of platforms) {
+    for (const platform of announcementPlatforms(announcement)) {
       if (!valid()) return
       if (!platform) {
         addLog(`Skipping ${announcement.event_id}: no platform has been allocated`)
@@ -1418,19 +1429,17 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         continue
       }
       addLog(`Playing ${announcement.announcement_type} for ${announcement.movement_id} (${systemKey})`)
-      await system.withLivePlayback(signal, valid, () =>
-        playAnnouncement(
-          announcement,
-          system,
-          {
-            chime: chimeType,
-            useLegacyTocNames,
-            announceViaPoints,
-            announceShortPlatformsAfterSplit,
-            missingAudioMode,
-          },
-          spokenPlatform,
-        ),
+      await playAnnouncement(
+        announcement,
+        system.withLivePlayback(signal, valid),
+        {
+          chime: chimeType,
+          useLegacyTocNames,
+          announceViaPoints,
+          announceShortPlatformsAfterSplit,
+          missingAudioMode,
+        },
+        spokenPlatform,
       )
     }
   }
@@ -1443,6 +1452,10 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       (announcement, signal, valid) => playFeedMessage.current(announcement, signal, valid),
       Date.now,
       error => addLog(`Announcement skipped: ${error instanceof Error ? error.message : String(error)}`),
+      announcement =>
+        concurrentPlatforms.current
+          ? announcementPlatforms(announcement).map(platform => (platform ? getPlatformForSystemSelection(platform) : ''))
+          : [''],
     )
   }
   const feedTypes = enabledAnnouncements.join(',')
@@ -1504,17 +1517,14 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       >
         <label className="option-select" htmlFor="data-source-select">
           Train data source
-          <select
-            aria-label="Train data source"
+          <Select<Option<DataSource>, false>
             id="data-source-select"
-            value={dataSource}
-            onChange={event => setDataSource(event.target.value as 'original' | 'websocket')}
-          >
-            <option value="original">Original</option>
-            <option value="websocket">Live WebSocket feed</option>
-          </select>
+            value={{ value: dataSource, label: DataSourceNames[dataSource] }}
+            onChange={val => setDataSource(val!!.value)}
+            options={DataSources.map(value => ({ value, label: DataSourceNames[value] }))}
+          />
         </label>
-        {dataSource === 'websocket' && (
+        {dataSource === 'websocket' && process.env.NODE_ENV === 'development' && (
           <label htmlFor="live-service-url">
             Service URL
             <input
@@ -1582,6 +1592,19 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
           />
           Announce short platforms after split?
         </label>
+
+        {dataSource === 'websocket' && (
+          <label htmlFor="concurrent-platforms">
+            <input
+              type="checkbox"
+              name="concurrent-platforms"
+              id="concurrent-platforms"
+              checked={announcePlatformsConcurrently}
+              onChange={e => setAnnouncePlatformsConcurrently(e.target.checked)}
+            />
+            Announce different platforms at the same time?
+          </label>
+        )}
 
         <label htmlFor="chime-type-select" className="option-select">
           Chime

@@ -1,81 +1,21 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { reduceCIS, connectCIS } from '../src/live/cis'
 import { streamUrl } from '../src/live/connection'
 import fixture from './snapshot.json'
-import type { Snapshot, Update } from '../src/live/types'
+import type { Movement } from '../src/live/types'
 
-const snapshot = () => structuredClone(fixture) as Snapshot
-const update = (values: Partial<Update> = {}): Update => ({
-  version: 1,
-  type: 'update',
-  epoch: fixture.epoch,
-  previous_revision: 1,
-  revision: 2,
-  window: fixture.window,
-  upserts: [],
-  removals: [],
-  ordering: fixture.ordering,
-  override_upserts: [],
-  override_removals: [],
-  ...values,
-})
-
-test('snapshot and complete upserts converge without losing server ordering or circular visits', () => {
-  const initial = snapshot()
-  const second = { ...initial.movements[0], id: 'R1/second', location_id: 'second' }
-  const first = { ...initial.movements[0], operator_name: null }
-  const result = reduceCIS(reduceCIS(null, initial), update({ upserts: [first, second], ordering: [second.id, first.id] }))!
-  assert.equal(result.movements.size, 2)
-  assert.equal(result.movements.get(first.id)?.operator_name, null)
-  assert.deepEqual(result.ordering, [second.id, first.id])
-  assert.equal(reduceCIS(result, update()), null)
-  assert.equal(reduceCIS(result, update({ epoch: 'rebuilt', previous_revision: 2 })), null)
-  const authoritative = reduceCIS(result, { ...initial, epoch: 'rebuilt', revision: 1 })!
-  assert.equal(authoritative.movements.size, 1)
-  assert.equal(authoritative.epoch, 'rebuilt')
-})
-
-test('override removals and departure removals survive authoritative resync', () => {
-  const initial = snapshot()
-  const override = {
-    id: 'warning',
-    kind: 'stand_clear' as const,
-    station: initial.station,
-    platform: '2',
-    movement_id: null,
-    activates_at: fixture.window.from,
-    expires_at: fixture.window.to,
-    reason: 'Passing train',
-    source: 'TD',
-  }
-  const withWarning = reduceCIS(reduceCIS(null, initial), update({ override_upserts: [override] }))!
-  assert.equal(withWarning.overrides.size, 1)
-  const cleared = reduceCIS(
-    withWarning,
-    update({
-      previous_revision: 2,
-      revision: 3,
-      removals: initial.ordering,
-      ordering: [],
-      override_removals: [{ id: override.id, reason: 'cleared' }],
-    }),
-  )!
-  assert.equal(cleared.movements.size, 0)
-  assert.equal(cleared.overrides.size, 0)
-  assert.deepEqual(reduceCIS(cleared, { ...initial, revision: 3, movements: [], ordering: [] }), cleared)
-})
+/** The fixture is a station projection; the tests only need the train out of it. */
+const snapshot = () => structuredClone(fixture) as unknown as { movements: Movement[] }
 
 test('WebSocket URLs default cleanly to the local service and support a remote prefix', () => {
-  assert.equal(streamUrl('ws://localhost:8080', 'cis', 'TST').href, 'ws://localhost:8080/v1/cis/live?crs=TST')
+  assert.equal(streamUrl('ws://localhost:8080', 'announcements', 'TST').href, 'ws://localhost:8080/v1/announcements/live?crs=TST')
   assert.equal(streamUrl('https://example.test/darwin/', 'announcements', 'TST').href, 'wss://example.test/darwin/v1/announcements/live?crs=TST')
-  assert.throws(() => streamUrl('file:///tmp', 'cis', 'TST'))
+  assert.throws(() => streamUrl('file:///tmp', 'announcements', 'TST'))
 })
 
 class FakeSocket {
-  static OPEN = 1
   static sockets: FakeSocket[] = []
-  readyState = 1
+  /** Nothing should ever be written to the announcement stream; asserted, not used. */
   sent: string[] = []
   onmessage?: (event: { data: string }) => void
   onclose?: () => void
@@ -90,50 +30,13 @@ class FakeSocket {
     this.onmessage?.({ data: JSON.stringify(value) })
   }
   close() {
-    this.readyState = 3
     this.onclose?.()
   }
 }
 
-test('a revision gap requests one resync; reconnect and cleanup discard previous state', context => {
-  context.mock.timers.enable({ apis: ['setTimeout', 'setInterval'] })
-  const originalSocket = globalThis.WebSocket
-  globalThis.WebSocket = FakeSocket as unknown as typeof WebSocket
-  context.after(() => {
-    globalThis.WebSocket = originalSocket
-  })
-  FakeSocket.sockets = []
-  const views: unknown[] = []
-  const stop = connectCIS(
-    streamUrl('ws://localhost:8080', 'cis', 'TST'),
-    state => views.push(state),
-    () => {},
-  )
-  const socket = FakeSocket.sockets[0]
-  socket.receive(snapshot())
-  socket.receive(update({ previous_revision: 99 }))
-  socket.receive(update({ previous_revision: 99 }))
-  assert.equal(socket.sent.length, 1)
-  assert.equal(views.at(-1), null)
-  socket.receive(snapshot())
-  context.mock.timers.tick(70_000)
-  assert.equal(socket.sent.length, 2)
-  socket.close()
-  assert.equal(views.at(-1), null)
-  context.mock.timers.tick(1000)
-  assert.equal(FakeSocket.sockets.length, 2)
-  FakeSocket.sockets[1].receive({ ...snapshot(), movements: [], ordering: [] })
-  stop()
-  context.mock.timers.tick(120_000)
-  assert.equal(FakeSocket.sockets.length, 2)
-  const count = views.length
-  socket.receive(snapshot())
-  assert.equal(views.length, count)
-})
-
 import { setImmediate } from 'node:timers/promises'
 import { PlaybackQueue } from '../src/live/playbackQueue'
-import { audioPlatform, callingPoints, playAnnouncement, trainOptions } from '../src/live/playAnnouncement'
+import { announcementPlatforms, audioPlatform, callingPoints, playAnnouncement, trainOptions } from '../src/live/playAnnouncement'
 import type { Announcement, AnnouncementType } from '../src/live/types'
 import type AmeyPhil from '../src/announcement-data/systems/stations/AmeyPhil'
 
@@ -371,7 +274,7 @@ test('queue deduplicates, supersedes lower stages and checks expiry immediately 
   assert.ok(!played.includes('expired'))
 })
 
-test('departure, cancellation and reconnect invalidate queued audio and in-flight preparation', async () => {
+test('a retraction discards queued audio and stops the announcement it names', async () => {
   let release!: () => void
   let signal!: AbortSignal
   let valid!: () => boolean
@@ -390,59 +293,133 @@ test('departure, cancellation and reconnect invalidate queued audio and in-fligh
   )
   queue.push(announcement('next', 'busy'))
   queue.push(announcement('next', 'pending'))
-  const state = reduceCIS(null, snapshot())!
-  state.movements.clear()
-  queue.updateState(state)
+  // Withdrawing the one still waiting leaves the one already speaking alone.
+  queue.retract('pending')
+  assert.equal(valid(), true)
+  queue.retract('busy')
   assert.equal(valid(), false)
-  queue.reset()
   assert.equal(signal.aborted, true)
   release()
   await setImmediate()
   assert.deepEqual(played, ['busy'])
-  const cancelled = snapshot()
-  cancelled.movements[0].cancelled = true
-  queue.updateState(reduceCIS(null, cancelled)!)
-  queue.push(announcement('standing'))
+  queue.reset()
+  assert.equal(signal.aborted, true)
+  queue.push(announcement('standing', 'after-reset'))
   await setImmediate()
-  assert.deepEqual(played, ['busy'])
+  assert.deepEqual(played, ['busy', 'after-reset'])
 })
 
-test('CIS judges an announcement created inside the board window, not only one created before it', async () => {
-  const clock = Date.parse('2026-09-13T10:40:00Z')
-  const played: string[] = []
+function onPlatform(platform: string, id: string): Announcement {
+  const message = announcement('next', id)
+  const movementId = `R1/${platform}/${id}`
+  message.movement_id = movementId
+  message.details = { ...message.details, id: movementId, platform: { ...message.details.platform, number: platform } }
+  return message
+}
+
+test('announcements for different platforms play at once, and one platform still plays in turn', async () => {
+  const started: string[] = []
+  const release: Record<string, () => void> = {}
   const queue = new PlaybackQueue(
     async message => {
-      played.push(message.event_id)
+      started.push(message.event_id)
+      await new Promise<void>(resolve => {
+        release[message.event_id] = resolve
+      })
     },
-    () => clock,
+    () => now,
+    console.error,
+    message => [message.details.platform.number || ''],
   )
-  const departed = snapshot()
-  departed.movements[0].departure.actual = '2026-09-13T10:30:00Z'
-  queue.updateState(reduceCIS(null, departed)!)
-  queue.push({ ...announcement('next', 'mid-window'), created_at: '2026-09-13T10:37:00Z', expires_at: '2026-09-13T10:45:00Z' })
+  queue.push(onPlatform('1', 'one'))
+  queue.push(onPlatform('2', 'two'))
+  queue.push(onPlatform('1', 'one-again'))
   await setImmediate()
-  assert.deepEqual(played, [])
+  assert.deepEqual(started, ['one', 'two'])
+  release['one']()
+  await setImmediate()
+  assert.deepEqual(started, ['one', 'two', 'one-again'])
+  queue.reset()
 })
 
-test('a frame that arrived first cannot rule out a movement it never saw', async () => {
-  let clock = now
-  const played: string[] = []
+test('a fast train warning holds every platform it affects', async () => {
+  const started: string[] = []
+  let release!: () => void
   const queue = new PlaybackQueue(
     async message => {
-      played.push(message.event_id)
+      started.push(message.event_id)
+      if (message.event_id === 'fast')
+        await new Promise<void>(resolve => {
+          release = resolve
+        })
     },
-    () => clock,
+    () => now,
+    console.error,
+    message => announcementPlatforms(message).map(platform => platform || ''),
   )
-  const unaware = reduceCIS(null, snapshot())!
-  unaware.movements.clear()
-  queue.updateState(unaware)
-  clock += 1000
-  queue.push(announcement('next', 'ahead-of-cis'))
+  const fast = announcement('passing', 'fast')
+  fast.affected_platforms = ['1', '2']
+  queue.push(fast)
+  queue.push(onPlatform('1', 'waiting'))
   await setImmediate()
-  assert.deepEqual(played, ['ahead-of-cis'])
+  assert.deepEqual(started, ['fast'])
+  release()
+  await setImmediate()
+  assert.deepEqual(started, ['fast', 'waiting'])
+  queue.reset()
 })
 
-test('a stand clear validates a passing announcement by platform when it carries no movement id', async () => {
+test('one shared lane keeps the whole station in turn', async () => {
+  const started: string[] = []
+  let release!: () => void
+  const queue = new PlaybackQueue(
+    async message => {
+      started.push(message.event_id)
+      await new Promise<void>(resolve => {
+        release = resolve
+      })
+    },
+    () => now,
+  )
+  queue.push(onPlatform('1', 'one'))
+  queue.push(onPlatform('2', 'two'))
+  await setImmediate()
+  assert.deepEqual(started, ['one'])
+  release()
+  await setImmediate()
+  assert.deepEqual(started, ['one', 'two'])
+  queue.reset()
+})
+
+test('a revision replaces the details of an announcement still waiting its turn', async () => {
+  let release!: () => void
+  const spoken: Announcement[] = []
+  const queue = new PlaybackQueue(
+    async message => {
+      spoken.push(message)
+      if (message.event_id === 'busy')
+        await new Promise<void>(resolve => {
+          release = resolve
+        })
+    },
+    () => now,
+  )
+  queue.push(announcement('next', 'busy'))
+  queue.push(announcement('next', 'waiting'))
+  const movement = snapshot().movements[0]
+  queue.revise('waiting', { ...movement, departure: { ...movement.departure, estimated: '2026-09-13T10:12:00Z' } })
+  queue.revise('never-sent', movement)
+  release()
+  await setImmediate()
+  assert.deepEqual(
+    spoken.map(message => message.event_id),
+    ['busy', 'waiting'],
+  )
+  assert.equal(spoken[1].details.departure.estimated, '2026-09-13T10:12:00Z')
+  assert.equal(spoken[1].expires_at, announcement('next', 'waiting').expires_at)
+})
+
+test('withdrawing an announcement that was never queued is harmless', async () => {
   const played: string[] = []
   const queue = new PlaybackQueue(
     async message => {
@@ -450,45 +427,10 @@ test('a stand clear validates a passing announcement by platform when it carries
     },
     () => now,
   )
-  const warned = snapshot()
-  warned.overrides = [
-    {
-      id: 'warning',
-      kind: 'stand_clear',
-      station: warned.station,
-      platform: '2',
-      movement_id: null,
-      activates_at: fixture.window.from,
-      expires_at: fixture.window.to,
-      reason: 'Passing train',
-      source: 'TD',
-    },
-  ]
-  queue.updateState(reduceCIS(null, warned)!)
-  queue.push(announcement('passing', 'fast'))
+  queue.retract('never-sent')
+  queue.push(announcement('next', 'live'))
   await setImmediate()
-  queue.updateState(reduceCIS(null, snapshot())!)
-  queue.push(announcement('passing', 'unwarned'))
-  await setImmediate()
-  assert.deepEqual(played, ['fast'])
-})
-
-test('a platform alteration survives CIS still holding the old platform', async () => {
-  const played: string[] = []
-  const queue = new PlaybackQueue(
-    async message => {
-      played.push(message.event_id)
-    },
-    () => now,
-  )
-  queue.updateState(reduceCIS(null, snapshot())!)
-  const moved = announcement('platform_alteration', 'moved')
-  moved.details = { ...moved.details, platform: { ...moved.details.platform, number: '1' } }
-  moved.previous_platform = '2'
-  moved.new_platform = '1'
-  queue.push(moved)
-  await setImmediate()
-  assert.deepEqual(played, ['moved'])
+  assert.deepEqual(played, ['live'])
 })
 
 test('playback that never settles does not wedge the queue for the rest of the session', async () => {
@@ -511,7 +453,7 @@ test('playback that never settles does not wedge the queue for the rest of the s
 
 import { connectAnnouncements } from '../src/live/announcements'
 
-test('announcement connection waits for ready, suppresses unhealthy delivery, and never resyncs announcements', async context => {
+test('one stream carries ready, triggers, withdrawals and heartbeats, and is never answered', async context => {
   context.mock.timers.enable({ apis: ['setTimeout', 'setInterval'] })
   const originalSocket = globalThis.WebSocket
   globalThis.WebSocket = FakeSocket as unknown as typeof WebSocket
@@ -519,28 +461,88 @@ test('announcement connection waits for ready, suppresses unhealthy delivery, an
     globalThis.WebSocket = originalSocket
   })
   FakeSocket.sockets = []
+  let release!: () => void
   const played: string[] = []
   const queue = new PlaybackQueue(
     async message => {
       played.push(message.event_id)
+      if (message.event_id === 'blocker')
+        await new Promise<void>(resolve => {
+          release = resolve
+        })
     },
     () => now,
   )
   const stop = connectAnnouncements('ws://localhost:8080', 'TST', ['next'], queue, () => {})
-  const cis = FakeSocket.sockets[0]
-  cis.receive(snapshot())
-  const events = FakeSocket.sockets[1]
+  // The train list is no longer a second connection: the service withdraws what it sent.
+  assert.equal(FakeSocket.sockets.length, 1)
+  const events = FakeSocket.sockets[0]
+  assert.equal(events.url.pathname, '/v1/announcements/live')
+  assert.equal(events.url.searchParams.get('heartbeat'), '30')
+
   events.receive(announcement('next', 'before-ready'))
   events.receive({ version: 1, type: 'ready', station: fixture.station, healthy: false })
   events.receive(announcement('next', 'unhealthy'))
   assert.deepEqual(played, [])
   events.receive({ version: 1, type: 'ready', station: fixture.station, healthy: true })
-  events.receive(announcement('next', 'new-trigger'))
+
+  events.receive(announcement('next', 'blocker'))
+  events.receive(announcement('next', 'doomed'))
   await setImmediate()
-  assert.deepEqual(played, ['new-trigger'])
+  assert.deepEqual(played, ['blocker'])
+  events.receive({
+    version: 1,
+    type: 'retraction',
+    event_id: 'doomed',
+    movement_id: fixture.movements[0].id,
+    announcement_type: 'next',
+    reason: 'cancelled',
+    created_at: fixture.window.from,
+    affected_platforms: ['2'],
+  })
+  release()
+  await setImmediate()
+  assert.deepEqual(played, ['blocker'])
+
+  // A heartbeat proves liveness and is never replied to.
+  events.receive({ version: 1, type: 'heartbeat', sent_at: fixture.window.from })
   context.mock.timers.tick(70_000)
   assert.equal(events.sent.length, 0)
-  assert.equal(cis.sent.length, 1)
+  stop()
+})
+
+test('a repeated ready re-baselines the queue, so a recovery never replays what it held', async context => {
+  const originalSocket = globalThis.WebSocket
+  globalThis.WebSocket = FakeSocket as unknown as typeof WebSocket
+  context.after(() => {
+    globalThis.WebSocket = originalSocket
+  })
+  FakeSocket.sockets = []
+  const statuses: string[] = []
+  let release!: () => void
+  const played: string[] = []
+  const queue = new PlaybackQueue(
+    async message => {
+      played.push(message.event_id)
+      if (message.event_id === 'blocker')
+        await new Promise<void>(resolve => {
+          release = resolve
+        })
+    },
+    () => now,
+  )
+  const stop = connectAnnouncements('ws://localhost:8080', 'TST', ['next'], queue, status => statuses.push(status))
+  const events = FakeSocket.sockets[0]
+  events.receive({ version: 1, type: 'ready', station: fixture.station, healthy: true })
+  events.receive(announcement('next', 'blocker'))
+  events.receive(announcement('next', 'queued'))
+  await setImmediate()
+  assert.deepEqual(played, ['blocker'])
+  events.receive({ version: 1, type: 'ready', station: fixture.station, healthy: false })
+  release()
+  await setImmediate()
+  assert.deepEqual(played, ['blocker'])
+  assert.deepEqual(statuses.slice(-2), ['live', 'recovering'])
   stop()
 })
 

@@ -14,7 +14,8 @@
     "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,md,less}\"",
     "cf-typegen": "wrangler types --path='./functions/types.d.ts'",
     "serve-audio": "http-server ./audio/ -c-1 --port 8088 --cors",
-    "develop:workers": "wrangler pages dev --port 8787"
+    "develop:workers": "wrangler pages dev --port 8787",
+    "test:live": "node scripts/test-live.mjs"
   },
   "dependencies": {
     "@cfworker/json-schema": "^4.1.1",

@@ -2,7 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Do not run yarn commands. There is no test suite in this project.
+Do not run yarn commands. Run `npm run test:live` for the focused WebSocket reducer, queue, adapter and hydration regression tests. See
+`docs/websocket-data-source.md` for local service and embedded-board configuration.
 
 ## Development Environment
 

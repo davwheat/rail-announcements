@@ -8,7 +8,7 @@ import type { MissingAudioMode } from '../announcement-data/AnnouncementSystem'
 import type { CallingAtPoint } from '../components/CallingAtSelector'
 import { isMindTheGapStation } from '../data/liveTrains/mindTheGap'
 import { isShortPlatform, type ShortPlatformTrain } from '../data/liveTrains/shortPlatforms'
-import type { Announcement, Call, Location, Movement, Portion } from './types'
+import type { Announcement, Call, Endpoint, Location, Movement, Portion } from './types'
 
 export interface VoicePreferences {
   chime: ChimeType | ''
@@ -49,6 +49,16 @@ function hasActivity(activities: string | null, code: string): boolean {
   return false
 }
 
+/**
+ * Where this train goes. An entry with an `assoc_rid` is an endpoint a joining
+ * or dividing portion reaches, so a service dividing at Redhill was announced
+ * to its Gatwick Airport portion instead of to Reigate. The feed leads with the
+ * service's own endpoint, and this lookup does not depend on that order.
+ */
+function ownDestination(movement: Movement): Endpoint {
+  return movement.destinations.find(destination => !destination.assoc_rid) || movement.destinations[0]
+}
+
 function passengerCalls(calls: Call[]): Call[] {
   return calls.filter(call => call.crs && !call.operational && !call.cancelled && !hasActivity(call.activities, 'U'))
 }
@@ -71,7 +81,7 @@ export function callingPoints(movement: Movement, system: AmeyPhil): CallingAtPo
   // at each reversal, including reversals at operational calls.
   let reversed = movement.reverse_formation === true
   const result: CallingAtPoint[] = []
-  const destination = movement.false_destination || movement.destinations[0]
+  const destination = movement.false_destination || ownDestination(movement)
   // The endpoint and the call can name one station by different TIPLOCs.
   const terminus = (call: Call) => call.tpl === destination?.tpl || (!!destination?.crs && call.crs === destination.crs)
   const destinationIndex = movement.calling_points.reduce((last, call, index) => (terminus(call) ? index : last), -1)
@@ -154,13 +164,13 @@ export function trainOptions(
       movement.operator_name || '',
       movement.operator_code || '',
       movement.origins[0]?.crs || '',
-      movement.destinations[0]?.crs || '',
+      ownDestination(movement).crs || '',
       preferences.useLegacyTocNames,
       movement.uid || '',
     ),
     platform,
-    terminatingStationCode: stationAudio(movement.false_destination || movement.destinations[0], system),
-    vias: viaPoints(movement, system, preferences)[0] || [],
+    terminatingStationCode: stationAudio(movement.false_destination || ownDestination(movement), system),
+    vias: viaPoints([ownDestination(movement)], movement, system, preferences)[0] || [],
     callingAt: callingPoints(movement, system),
     firstClassLocation: 'none',
     coaches: movement.coach_count ? `${movement.coach_count} coaches` : 'None',
@@ -176,8 +186,8 @@ export function trainOptions(
   }
 }
 
-function viaPoints(movement: Movement, system: AmeyPhil, preferences: VoicePreferences): CallingAtPoint[][] {
-  return movement.destinations.map(destination =>
+function viaPoints(endpoints: Endpoint[], movement: Movement, system: AmeyPhil, preferences: VoicePreferences): CallingAtPoint[][] {
+  return endpoints.map(destination =>
     !preferences.announceViaPoints
       ? []
       : (destination.via?.locs || []).map(crs => {
@@ -225,7 +235,7 @@ export async function playAnnouncement(
         fromLive: true,
         originStationCode: stationAudio(movement.origins[0], system),
         terminatingStationCode: movement.destinations.map(destination => stationAudio(destination, system)),
-        vias: viaPoints(movement, system, preferences),
+        vias: viaPoints(movement.destinations, movement, system, preferences),
       })
       break
     case 'disrupted': {
@@ -268,7 +278,7 @@ export async function playAnnouncement(
         oldPlatform,
         newPlatform,
         terminatingStationCode: movement.destinations.map(destination => stationAudio(destination, system)),
-        vias: viaPoints(movement, system, preferences),
+        vias: viaPoints(movement.destinations, movement, system, preferences),
       })
       break
   }

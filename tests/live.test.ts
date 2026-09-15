@@ -172,6 +172,28 @@ test('the terminus is never a calling point as well as the destination', () => {
   )
 })
 
+test('a dividing portion is an extra destination, not the one the train is announced to', () => {
+  const movement = snapshot().movements[0]
+  const portion = {
+    ...movement.destinations[0],
+    tpl: 'GTWK',
+    crs: 'GTW',
+    name: 'Gatwick Airport',
+    via: null,
+    assoc_rid: 'associate',
+    assoc_cat: 'VV',
+  }
+  // The feed leads with the service's own destination; a client must not depend on that.
+  movement.destinations = [portion, movement.destinations[0]]
+  const options = trainOptions(movement, voice, preferences, '2')
+  assert.equal(options.terminatingStationCode, 'DST')
+  assert.equal(options.vias[0].crsCode, 'JNC')
+  assert.deepEqual(
+    callingPoints(movement, voice).map(point => point.crsCode),
+    ['JNC'],
+  )
+})
+
 test('a portion that omits its division point contributes no onward calls', () => {
   const movement = snapshot().movements[0]
   movement.portions = [
@@ -443,6 +465,30 @@ test('queue deduplicates, supersedes lower stages and checks expiry immediately 
   clock += 60_000
   queue.push(announcement('next', 'expired'))
   assert.ok(!played.includes('expired'))
+})
+
+test('a disruption is not announced once the train has been announced as approaching', async () => {
+  const played: string[] = []
+  const queue = new PlaybackQueue(
+    async message => {
+      played.push(message.event_id)
+    },
+    () => now,
+  )
+  queue.push(announcement('disrupted', 'delayed'))
+  queue.push(announcement('approaching'))
+  await setImmediate()
+  // Both the one waiting its turn behind the approaching train and the one that arrives later.
+  queue.push(announcement('disrupted', 'delayed-again'))
+  queue.push(announcement('standing'))
+  queue.push(announcement('disrupted', 'cancelled'))
+  await setImmediate()
+  assert.deepEqual(played, ['delayed', 'approaching', 'standing'])
+  // A new session speaks for trains afresh.
+  queue.reset()
+  queue.push(announcement('disrupted', 'delayed-after-reset'))
+  await setImmediate()
+  assert.deepEqual(played, ['delayed', 'approaching', 'standing', 'delayed-after-reset'])
 })
 
 test('a retraction discards queued audio and stops the announcement it names', async () => {

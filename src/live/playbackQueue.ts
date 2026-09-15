@@ -13,6 +13,9 @@ interface QueuedAnnouncement {
 export class PlaybackQueue {
   private pending: QueuedAnnouncement[] = []
   private seen = new Set<string>()
+  /** The furthest stage each movement has been announced at, so a disruption can be weighed
+   *  against what the station has already been told about that train. */
+  private reached = new Map<string, number>()
   private playing = new Set<string>()
   /** In-flight announcements by event, so a retraction can stop the one it names. */
   private active = new Map<string, AbortController>()
@@ -31,6 +34,7 @@ export class PlaybackQueue {
     this.abortSession()
     this.pending = []
     this.seen.clear()
+    this.reached.clear()
     this.playing.clear()
     this.active.clear()
   }
@@ -68,10 +72,20 @@ export class PlaybackQueue {
       Date.parse(announcement.expires_at) <= this.now()
     )
       return
-    this.seen.add(announcement.event_id)
-    if (this.seen.size > 2048) this.seen.delete(this.seen.values().next().value!)
 
     const stage = stages[announcement.announcement_type] || 0
+    const reached = this.reached.get(announcement.movement_id) ?? 0
+    // A train announced as approaching is seconds from its platform. Its delay stopped being
+    // news the moment the station was told to stand back from it.
+    if (announcement.announcement_type === 'disrupted' && reached >= stages.approaching!) return
+
+    this.seen.add(announcement.event_id)
+    if (this.seen.size > 2048) this.seen.delete(this.seen.values().next().value!)
+    if (stage > reached) {
+      this.reached.set(announcement.movement_id, stage)
+      if (this.reached.size > 2048) this.reached.delete(this.reached.keys().next().value!)
+    }
+
     this.pending = this.pending.filter(({ announcement: previous }) => {
       if (previous.movement_id !== announcement.movement_id) return true
       if (announcement.details.cancelled) return !stages[previous.announcement_type]

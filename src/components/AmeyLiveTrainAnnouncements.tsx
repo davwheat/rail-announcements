@@ -4,7 +4,18 @@ import { playAnnouncement, announcementPlatforms, audioPlatform } from '../live/
 import type { Announcement, AnnouncementType as FeedAnnouncementType } from '../live/types'
 import type { ConnectionStatus } from '../live/connection'
 import { useStationPlatforms } from '../live/stationPlatforms'
-import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
+import {
+  comparePlatforms,
+  isPlatformZoneStore,
+  moveToZone,
+  resolveZones,
+  zoneKey,
+  zoneLanes,
+  zonesToSave,
+  type PlatformZoneStore,
+} from '../live/platformZones'
+import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd'
+import { Fragment, useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import crsToStationItemMapper from '@helpers/crsToStationItemMapper'
 import useStateWithLocalStorage from '@hooks/useStateWithLocalStorage'
 import FullscreenIcon from 'mdi-react/FullscreenIcon'
@@ -458,6 +469,12 @@ const BoardLayoutNames: Record<BoardLayout, string> = {
   'per-platform': 'One board per platform',
 }
 
+/** Lines a sub-option up with the text of the checkbox it belongs to. */
+const SUB_OPTION_INDENT = 'calc(1em + 8px)'
+
+const ZONE_PREFIX = 'announcement-zone-'
+const NEW_ZONE = 'new-announcement-zone'
+
 const DataSourceNames: Record<DataSource, string> = {
   websocket: 'New (live updates)',
   original: 'Legacy (polling)',
@@ -618,6 +635,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
   const [boardLayout, setBoardLayout] = useStateWithLocalStorage<BoardLayout>('amey.live-trains.board-layout', 'station', val =>
     BoardLayouts.includes(val),
   )
+  const [savedZones, setSavedZones] = useStateWithLocalStorage<PlatformZoneStore>('amey.live-trains.platform-zones', {}, isPlatformZoneStore)
   const [announceShortPlatformsAfterSplit, setAnnounceShortPlatformsAfterSplit] = useStateWithLocalStorage<boolean>(
     'amey.live-trains.announce-short-platforms-after-split',
     false,
@@ -810,54 +828,34 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
     function visiblePlatforms() {
       return Object.entries(supportedPlatforms)
         .filter(([platform]) => !filteringPlatforms || stationPlatformKeys!.has(platform))
-        .sort(([a], [b]) => {
-          const aInt = parseInt(a)
-          const bInt = parseInt(b)
-
-          if (!isNaN(aInt) && !isNaN(bInt)) {
-            const diff = aInt - bInt
-
-            if (diff !== 0) return diff
-          }
-
-          return a.localeCompare(b)
-        })
+        .sort(([a], [b]) => comparePlatforms(a, b))
     },
     [supportedPlatforms, filteringPlatforms, stationPlatformKeys],
   )
 
   const perPlatformBoards = boardLayout === 'per-platform' && stationPlatforms.status === 'ready'
 
-  function boardLayoutHelpText(): string {
-    if (stationPlatforms.status === 'loading') return 'Looking up the platforms at this station\u2026'
-    if (stationPlatforms.status !== 'ready') return `One board per platform needs a platform list, and ${stationPlatforms.reason}.`
+  /** Zones group the station's own platforms, never the generic list: a zone is a physical
+   *  part of a station, so without the station's platforms there is nothing to group. */
+  const zonePlatforms = useMemo(
+    function zonePlatforms() {
+      if (stationPlatformKeys === null) return []
 
-    const count = stationPlatforms.platforms.length
+      return Object.keys(supportedPlatforms)
+        .filter(platform => stationPlatformKeys.has(platform))
+        .sort(comparePlatforms)
+    },
+    [supportedPlatforms, stationPlatformKeys],
+  )
 
-    if (perPlatformBoards) return `Showing ${count} boards, one for each platform SMART describes at ${selectedCrs}.`
+  const zones = useMemo(() => resolveZones(savedZones[selectedCrs], zonePlatforms), [savedZones, selectedCrs, zonePlatforms])
 
-    return `One board per platform is available for ${selectedCrs}, using the ${count} platforms SMART describes.`
-  }
-
-  function platformFilterHelpText(): string {
-    if (stationPlatforms.status === 'loading') return 'Looking up the platforms at this station\u2026'
-
-    if (stationPlatformKeys === null) {
-      const reason = stationPlatforms.status === 'ready' ? `no voice covers the platforms at ${selectedCrs}` : stationPlatforms.reason
-      return `Every platform is listed, because ${reason}.`
-    }
-
-    if (!filteringPlatforms) return `Listing every platform. ${selectedCrs} has ${stationPlatformKeys.size} of them.`
-
-    // SMART keys a platform by the location code, which a handful of stations
-    // share with a depot or a neighbour, so say whose platforms these might be.
-    const shared =
-      stationPlatforms.status === 'ready' && stationPlatforms.sharedWith.length > 0
-        ? `, which shares its location code with ${pluraliseStrings(...stationPlatforms.sharedWith)}`
-        : ''
-
-    return `Listing the ${visiblePlatforms.length} platforms SMART describes at ${selectedCrs}${shared}.`
-  }
+  const saveZones = useCallback(
+    function saveZones(next: string[][]) {
+      setSavedZones(current => ({ ...current, [selectedCrs]: zonesToSave(next) }))
+    },
+    [setSavedZones, selectedCrs],
+  )
 
   useEffect(() => {
     const key = setInterval(removeOldIds, 1000 * 60)
@@ -1514,6 +1512,10 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
   legacyPlaying.current = isPlaying
   const concurrentPlatforms = useRef(announcePlatformsConcurrently)
   concurrentPlatforms.current = announcePlatformsConcurrently
+  // Read through a ref like the flag above: re-zoning the station must not tear down the
+  // queue that is part way through announcing a train.
+  const lanes = useRef(zoneLanes(zones))
+  lanes.current = zoneLanes(zones)
   const playFeedMessage = useRef<(announcement: Announcement, signal: AbortSignal, valid: () => boolean) => Promise<void>>(async () => {})
   playFeedMessage.current = async (announcement, signal, valid) => {
     // Let an already playing legacy announcement finish when the source changes.
@@ -1560,10 +1562,21 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       (announcement, signal, valid) => playFeedMessage.current(announcement, signal, valid),
       Date.now,
       error => addLog(`Announcement skipped: ${error instanceof Error ? error.message : String(error)}`),
-      announcement =>
-        concurrentPlatforms.current
-          ? announcementPlatforms(announcement).map(platform => (platform ? getPlatformForSystemSelection(platform) : ''))
-          : [''],
+      announcement => {
+        if (!concurrentPlatforms.current) return ['']
+
+        // A platformless announcement holds the whole station, and one warning naming two
+        // platforms of the same zone holds that zone once.
+        const occupied = announcementPlatforms(announcement).map(platform => {
+          if (!platform) return ''
+
+          const key = getPlatformForSystemSelection(platform)
+
+          return lanes.current.get(key) ?? key
+        })
+
+        return [...new Set(occupied)]
+      },
     )
   }
   const feedTypes = enabledAnnouncements.join(',')
@@ -1682,16 +1695,18 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
           Board layout
           <Select<Option<BoardLayout>, false>
             id="board-layout-select"
-            aria-describedby="help-board-layout"
+            aria-describedby={stationPlatforms.status === 'unavailable' ? 'help-board-layout' : undefined}
             value={{ value: boardLayout, label: BoardLayoutNames[boardLayout] }}
             onChange={val => setBoardLayout(val!!.value)}
             options={Object.entries(BoardLayoutNames).map(([value, label]) => ({ value: value as BoardLayout, label }))}
             isOptionDisabled={option => option.value === 'per-platform' && stationPlatforms.status !== 'ready'}
           />
         </label>
-        <p className="helpText" id="help-board-layout">
-          {boardLayoutHelpText()}
-        </p>
+        {stationPlatforms.status === 'unavailable' && (
+          <p className="helpText" id="help-board-layout">
+            We don't know which platforms this station has, so we can't show a board for each one.
+          </p>
+        )}
 
         <label htmlFor="use-legacy-tocs">
           <input
@@ -1739,17 +1754,120 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
           </label>
         )}
 
-        {dataSource === 'websocket' && (
-          <label htmlFor="fast-train-approaching">
-            <input
-              type="checkbox"
-              name="fast-train-approaching"
-              id="fast-train-approaching"
-              checked={announceFastTrainApproaching}
-              onChange={e => setAnnounceFastTrainApproaching(e.target.checked)}
-            />
-            Announce "fast train approaching"?
-          </label>
+        {dataSource === 'websocket' && announcePlatformsConcurrently && (
+          <fieldset
+            css={{
+              border: 'none',
+              minWidth: 0,
+              marginLeft: SUB_OPTION_INDENT,
+              marginTop: 16,
+              marginBottom: 24,
+              padding: 16,
+              background: '#eee',
+            }}
+          >
+            <legend css={{ float: 'left', width: '100%', padding: 0, marginBottom: 8, fontWeight: 'bold' }}>Announcement zones</legend>
+
+            {zonePlatforms.length === 0 ? (
+              <p className="helpText">We don't know which platforms this station has, so each one announces on its own.</p>
+            ) : (
+              <>
+                <p className="helpText">
+                  Platforms in the same zone take turns. Separate zones announce at the same time. Drag a platform onto another to put them in
+                  one zone.
+                </p>
+
+                <DragDropContext
+                  onDragEnd={result => {
+                    if (!result.destination) return
+
+                    const { droppableId, index } = result.destination
+                    // Zones are named by their lowest platform, so a drop resolves to a zone
+                    // rather than to a row that a previous drop may have shifted.
+                    const target =
+                      droppableId === NEW_ZONE ? null : zones.findIndex(zone => zoneKey(zone) === droppableId.slice(ZONE_PREFIX.length))
+
+                    saveZones(moveToZone(zones, result.draggableId, target, index))
+                  }}
+                >
+                  <div css={{ display: 'flex', flexWrap: 'wrap', alignItems: 'stretch', gap: 8, marginTop: 8 }}>
+                    {zones.map(zone => (
+                      <Droppable droppableId={`${ZONE_PREFIX}${zoneKey(zone)}`} direction="horizontal" key={zoneKey(zone)}>
+                        {provided => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.droppableProps}
+                            css={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              // Spacing lives on the chips, never here: a Droppable shifts its
+                              // children by their margins while dragging and cannot see a gap,
+                              // so a gap would be missing from the preview and appear on drop.
+                              padding: '8px 0 8px 8px',
+                              border: '2px solid #000',
+                              background: '#fff',
+                            }}
+                          >
+                            {zone.map((platform, position) => (
+                              <Draggable draggableId={platform} index={position} key={platform}>
+                                {provided => (
+                                  <span
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    {...provided.dragHandleProps}
+                                    aria-label={`Platform ${platform}`}
+                                    css={{
+                                      display: 'inline-block',
+                                      padding: '4px 12px',
+                                      // The gap between chips, and the row's right padding.
+                                      marginRight: 8,
+                                      border: '1px solid #000',
+                                      background: '#eee',
+                                      cursor: 'grab',
+                                      whiteSpace: 'nowrap',
+                                    }}
+                                  >
+                                    {platform}
+                                  </span>
+                                )}
+                              </Draggable>
+                            ))}
+                            {provided.placeholder}
+                          </div>
+                        )}
+                      </Droppable>
+                    ))}
+
+                    <Droppable droppableId={NEW_ZONE} direction="horizontal">
+                      {provided => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.droppableProps}
+                          css={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            padding: '8px 0 8px 8px',
+                            minWidth: 180,
+                            border: '2px dashed #666',
+                            color: '#666',
+                          }}
+                        >
+                          <span css={{ marginRight: 8 }}>Drop here for a zone of its own</span>
+                          {provided.placeholder}
+                        </div>
+                      )}
+                    </Droppable>
+                  </div>
+                </DragDropContext>
+
+                {zones.some(zone => zone.length > 1) && (
+                  <button className="danger" css={{ marginTop: 16 }} onClick={() => saveZones([])}>
+                    <span className="buttonLabel">Give every platform its own zone</span>
+                  </button>
+                )}
+              </>
+            )}
+          </fieldset>
         )}
 
         <label htmlFor="chime-type-select" className="option-select">
@@ -1847,20 +1965,35 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
               [AnnouncementType.Passing, 'Passing train warnings'],
               [AnnouncementType.PlatformAlteration, 'Platform alterations'],
             ].map(([type, label]) => (
-              <label key={type}>
-                <input
-                  type="checkbox"
-                  checked={enabledAnnouncements.includes(type as AnnouncementType)}
-                  onChange={event => {
-                    setEnabledAnnouncements(
-                      event.target.checked
-                        ? [...enabledAnnouncements, type as AnnouncementType]
-                        : enabledAnnouncements.filter(value => value !== type),
-                    )
-                  }}
-                />
-                {label}
-              </label>
+              <Fragment key={type}>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={enabledAnnouncements.includes(type as AnnouncementType)}
+                    onChange={event => {
+                      setEnabledAnnouncements(
+                        event.target.checked
+                          ? [...enabledAnnouncements, type as AnnouncementType]
+                          : enabledAnnouncements.filter(value => value !== type),
+                      )
+                    }}
+                  />
+                  {label}
+                </label>
+
+                {type === AnnouncementType.Passing && (
+                  <label htmlFor="fast-train-approaching" css={{ marginLeft: SUB_OPTION_INDENT }}>
+                    <input
+                      type="checkbox"
+                      name="fast-train-approaching"
+                      id="fast-train-approaching"
+                      checked={announceFastTrainApproaching}
+                      onChange={e => setAnnounceFastTrainApproaching(e.target.checked)}
+                    />
+                    Announce "fast train approaching"?
+                  </label>
+                )}
+              </Fragment>
             ))}
         </fieldset>
 
@@ -1875,16 +2008,12 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
               type="checkbox"
               name="restrict-platforms-to-station"
               id="restrict-platforms-to-station"
-              aria-describedby="help-restrict-platforms-to-station"
               checked={restrictPlatformsToStation}
               disabled={stationPlatformKeys === null}
               onChange={e => setRestrictPlatformsToStation(e.target.checked)}
             />
             Only show this station's platforms
           </label>
-          <p className="helpText" id="help-restrict-platforms-to-station">
-            {platformFilterHelpText()}
-          </p>
 
           <div
             css={{

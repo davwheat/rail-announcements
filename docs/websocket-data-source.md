@@ -31,6 +31,27 @@ By default the station announces one train at a time. Select **Announce differen
 queue: announcements for different platforms then play together, while each platform still plays its own in turn. A fast-train warning holds
 every platform it affects, and platforms that share a voice can still announce at the same time.
 
+### Announcement zones
+
+That setting also reveals **Announcement zones**, where platforms are grouped into the areas that can only speak one at a time. Every platform
+starts in a zone of its own, which is the behaviour described above. Drag a platform onto another to put the two in one zone, or onto **Drop here
+for a zone of its own** to separate it again; the whole chip is the drag handle, so a keyboard works too — tab to a platform, then space, arrow,
+space. **Give every platform its own zone** undoes all the grouping for the station.
+
+Spacing between the platform chips is a margin on each chip, never a `gap` on the row. A `Droppable` shifts its children by their margins while a
+drag is in progress and cannot see the container's `gap`, so a gap is missing from the drag preview and appears all at once on release — the
+chips settle touching each other and then jump apart. Keep the spacing on the chip if this is ever restyled.
+
+A zone sits in the list under its lowest platform, and its platforms stay in the order they were dropped. Both are deliberate: re-sorting the
+members would land a dragged platform somewhere other than where it was dropped, and naming a zone after anything else would move the surviving
+row when two zones merge. Either one shows as the layout jumping the moment the drag is released.
+
+Platforms in one zone take turns; separate zones speak together. A warning naming two platforms of the same zone holds that zone once rather than
+twice, and one naming platforms in two zones holds both, as it always did. Zoning is saved per station on the device, under
+`amey.live-trains.platform-zones`, and only the groupings are stored — a platform the save doesn't name gets a zone of its own, so a station
+whose platforms change never leaves one unqueued. Zones group the station's own platforms, so they need the platform list described below;
+without it every platform announces on its own.
+
 ## Station platform lists
 
 The page reads `GET /v1/platforms?crs=` from the same service, over HTTP rather than WebSocket, whenever the station or service URL changes.
@@ -49,8 +70,8 @@ loading or the service can't supply one. In the legacy polling mode, every board
 
 Anything other than a platform list means _unknown_, and the page narrows nothing: the service returns 404 for a station SMART doesn't describe,
 503 while it's still loading the datasets, and an empty list for a station whose berths carry no platform. In each case the full platform list is
-shown and one board per platform is unavailable, with the reason under the control. About a dozen stations share their location code with a depot
-or a neighbour — Clapham Junction shares one with its carriage sidings — and the service names the others, which the page repeats.
+shown and one board per platform is unavailable. The page says only "We don't know which platforms this station has" — SMART, STANOX and the
+`shared_with` codes mean nothing to someone choosing a voice, so none of them reach the UI.
 
 Existing per-platform voices, chimes, legacy TOC names, missing-audio preference, mind-the-gap and short-platform settings remain available.
 Railway details are adapted directly from the message, including available split portions and via CRS codes. Missing associated-service data does

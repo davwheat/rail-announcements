@@ -955,3 +955,143 @@ test('a platform list is only reported when the service actually describes one',
     assert.equal(result.status, 'unavailable', `${crs} must not be read as a platform list`)
   }
 })
+
+import { comparePlatforms, isPlatformZoneStore, moveToZone, resolveZones, zoneKey, zoneLanes, zonesToSave } from '../src/live/platformZones'
+
+test('every platform starts in a zone of its own, in station order', () => {
+  assert.deepEqual(resolveZones(undefined, ['1', '2', '10']), [['1'], ['2'], ['10']])
+  assert.deepEqual(resolveZones([], ['2', '1']), [['1'], ['2']])
+  assert.deepEqual([...['10', '2', '1', '10a', 'a']].sort(comparePlatforms), ['1', '2', '10', '10a', 'a'])
+})
+
+test('saved merges survive a station whose platform list has moved on', () => {
+  // A platform the station no longer has drops out; one the save never mentioned
+  // still gets its own zone, so a changed list never leaves a platform unqueued.
+  assert.deepEqual(resolveZones([['1', '2', '99']], ['1', '2', '3']), [['1', '2'], ['3']])
+  assert.deepEqual(resolveZones([['3']], ['1', '2', '3']), [['1'], ['2'], ['3']])
+  // A platform named in two saved zones belongs to the first, never to both.
+  assert.deepEqual(
+    resolveZones(
+      [
+        ['1', '2'],
+        ['2', '3'],
+      ],
+      ['1', '2', '3'],
+    ),
+    [['1', '2'], ['3']],
+  )
+})
+
+test('platforms move between zones, and an emptied zone disappears', () => {
+  const zones = [['1'], ['2'], ['3']]
+
+  assert.deepEqual(moveToZone(zones, '2', 0, 1), [['1', '2'], ['3']])
+  // Leaving a shared zone for one of its own.
+  assert.deepEqual(moveToZone([['1', '2'], ['3']], '2', null), [['1'], ['3'], ['2']])
+  // The zone a platform leaves is dropped rather than left empty behind it.
+  assert.deepEqual(moveToZone([['1'], ['2']], '2', 0, 1), [['1', '2']])
+  // Only merges are worth saving; a zone of one is what every platform already gets.
+  assert.deepEqual(zonesToSave([['1', '2'], ['3']]), [['1', '2']])
+})
+
+/** A platform has to stay where it was dropped. Re-sorting it into place reads as the
+ *  chip jumping the instant the drag is released, which is the jank this avoids. */
+test('a dropped platform lands at the position it was dropped, not in sorted order', () => {
+  assert.deepEqual(moveToZone([['2', '3'], ['1']], '1', 0, 0), [['1', '2', '3']])
+  assert.deepEqual(moveToZone([['2', '3'], ['1']], '1', 0, 1), [['2', '1', '3']])
+  assert.deepEqual(moveToZone([['2', '3'], ['1']], '1', 0, 99), [['2', '3', '1']])
+  // Reordering within one zone is a remove and an insert at the post-removal index.
+  assert.deepEqual(moveToZone([['1', '2', '3']], '3', 0, 0), [['3', '1', '2']])
+  // A target that does not resolve must not swallow the platform.
+  assert.deepEqual(moveToZone([['1', '2']], '2', -1), [['1'], ['2']])
+  // Saving and resolving again must not quietly sort those members back.
+  assert.deepEqual(resolveZones([['2', '1', '3']], ['1', '2', '3']), [['2', '1', '3']])
+})
+
+/** A merge that moved the surviving row would shift every row after it, which is the other
+ *  half of the jank: the zone is named and placed by its lowest platform either way. */
+test('a merged zone keeps the place of the earlier of the two', () => {
+  assert.equal(zoneKey(['3', '1', '2']), '1')
+  // Platform 1 joins the zone holding 3: the survivor sits where 1 already was.
+  assert.deepEqual(resolveZones([['3', '1']], ['1', '2', '3', '4']), [['3', '1'], ['2'], ['4']])
+  // ...and a merge between later platforms leaves the earlier ones untouched.
+  assert.deepEqual(resolveZones([['3', '4']], ['1', '2', '3', '4']), [['1'], ['2'], ['3', '4']])
+})
+
+test('platforms sharing a zone share a queue lane, and a lone platform keeps its own', () => {
+  const lanes = zoneLanes([['1', '2'], ['3']])
+
+  assert.equal(lanes.get('1'), lanes.get('2'))
+  assert.notEqual(lanes.get('3'), lanes.get('1'))
+  // The default must reproduce what the station did before zones existed: the lane
+  // of an unmerged platform is the platform itself.
+  assert.equal(zoneLanes([['3']]).get('3'), '3')
+})
+
+test('a stored zone configuration is rejected unless it is a map of platform groups', () => {
+  assert.equal(isPlatformZoneStore({ ECR: [['1', '2']] }), true)
+  assert.equal(isPlatformZoneStore({}), true)
+  for (const bad of [null, [], 'ECR', { ECR: '1' }, { ECR: ['1'] }, { ECR: [[1]] }]) {
+    assert.equal(isPlatformZoneStore(bad), false, `${JSON.stringify(bad)} must be rejected`)
+  }
+})
+
+/** Zones are only a lane mapping, so the queue keeps every rule it already had. */
+test('one zone announces in turn while a separate zone announces at the same time', async () => {
+  const lanes = zoneLanes([['1', '2'], ['3']])
+  const started: string[] = []
+  const release: Record<string, () => void> = {}
+  const queue = new PlaybackQueue(
+    async message => {
+      started.push(message.event_id)
+      await new Promise<void>(resolve => {
+        release[message.event_id] = resolve
+      })
+    },
+    () => now,
+    console.error,
+    message => [...new Set(announcementPlatforms(message).map(platform => (platform ? (lanes.get(platform) ?? platform) : '')))],
+  )
+
+  queue.push(onPlatform('1', 'one'))
+  queue.push(onPlatform('2', 'two'))
+  queue.push(onPlatform('3', 'three'))
+  await setImmediate()
+  // Platform 2 shares a zone with platform 1 and waits; platform 3 does not.
+  assert.deepEqual(started, ['one', 'three'])
+
+  release['one']()
+  await setImmediate()
+  assert.deepEqual(started, ['one', 'three', 'two'])
+  queue.reset()
+})
+
+test('a warning naming two platforms of one zone holds that zone once', async () => {
+  const lanes = zoneLanes([['1', '2']])
+  const started: string[] = []
+  let release!: () => void
+  const queue = new PlaybackQueue(
+    async message => {
+      started.push(message.event_id)
+      if (message.event_id === 'fast')
+        await new Promise<void>(resolve => {
+          release = resolve
+        })
+    },
+    () => now,
+    console.error,
+    message => [...new Set(announcementPlatforms(message).map(platform => (platform ? (lanes.get(platform) ?? platform) : '')))],
+  )
+
+  const fast = announcement('passing', 'fast')
+  fast.affected_platforms = ['1', '2']
+  queue.push(fast)
+  queue.push(onPlatform('2', 'waiting'))
+  await setImmediate()
+  assert.deepEqual(started, ['fast'])
+
+  release()
+  await setImmediate()
+  assert.deepEqual(started, ['fast', 'waiting'])
+  queue.reset()
+})

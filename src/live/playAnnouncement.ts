@@ -1,5 +1,9 @@
 import type AmeyPhil from '../announcement-data/systems/stations/AmeyPhil'
-import type { ChimeType, INextTrainAnnouncementOptions } from '../announcement-data/systems/stations/AmeyPhil'
+import type {
+  ChimeType,
+  IDisruptedTrainAnnouncementOptions,
+  INextTrainAnnouncementOptions,
+} from '../announcement-data/systems/stations/AmeyPhil'
 import type { MissingAudioMode } from '../announcement-data/AnnouncementSystem'
 import type { CallingAtPoint } from '../components/CallingAtSelector'
 import { isMindTheGapStation } from '../data/liveTrains/mindTheGap'
@@ -11,6 +15,8 @@ export interface VoicePreferences {
   useLegacyTocNames: boolean
   announceViaPoints: boolean
   announceShortPlatformsAfterSplit: boolean
+  fastTrainApproaching: boolean
+  daktronicsFanfare: boolean
   missingAudioMode: MissingAudioMode
 }
 
@@ -187,13 +193,15 @@ export async function playAnnouncement(
   system: AmeyPhil,
   preferences: VoicePreferences,
   platform: string,
+  log: (message: string) => void = () => {},
 ): Promise<void> {
   if (announcement.announcement_type === 'passing') {
     await system.playFastTrainAnnouncement({
       chime: preferences.chime || system.DEFAULT_CHIME,
-      daktronicsFanfare: false,
+      daktronicsFanfare: preferences.daktronicsFanfare,
       platform,
-      fastTrainApproaching: true,
+      fastTrainApproaching: preferences.fastTrainApproaching,
+      missingAudioMode: preferences.missingAudioMode,
     })
     return
   }
@@ -228,12 +236,24 @@ export async function playAnnouncement(
           : null
       // Without a delay to count, the generic announcement replaces 'delayed by approximately' and no number.
       const spokenDelay = movement.departure.unknown_delay || delay === null || delay <= 0 ? 'delay' : 'delayedBy'
-      await system.playDisruptedTrainAnnouncement({
+      // The mapping holds finished clip ids. The voice plays those verbatim only in the list form;
+      // a lone string is taken for a reason name and prefixed again into a clip that cannot exist.
+      const reasonAudio = (reason.code && system.DelayCodeMapping[reason.code]?.e) || null
+      const disruption: IDisruptedTrainAnnouncementOptions = {
         ...options,
         disruptionType: movement.cancelled ? 'cancel' : spokenDelay,
         delayTime: String(Math.max(0, delay || 0)),
-        disruptionReason: (reason.code && system.DelayCodeMapping[reason.code]?.e) || '',
-      })
+        disruptionReason: reasonAudio ? (Array.isArray(reasonAudio) ? reasonAudio : [reasonAudio]) : '',
+      }
+      try {
+        await system.playDisruptedTrainAnnouncement(disruption)
+      } catch (error) {
+        // A reason the voice cannot say must not cost the listener the disruption itself, which is
+        // the part they need. Said without it, the announcement is shorter but still true.
+        if (!disruption.disruptionReason.length) throw error
+        log(`Announcing ${announcement.movement_id} without its disruption reason: ${error instanceof Error ? error.message : String(error)}`)
+        await system.playDisruptedTrainAnnouncement({ ...disruption, disruptionReason: '' })
+      }
       break
     }
     case 'platform_alteration':

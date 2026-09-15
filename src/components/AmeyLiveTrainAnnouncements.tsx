@@ -602,6 +602,11 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
     false,
     x => x === true || x === false,
   )
+  const [announceFastTrainApproaching, setAnnounceFastTrainApproaching] = useStateWithLocalStorage<boolean>(
+    'amey.live-trains.fast-train-approaching',
+    true,
+    x => x === true || x === false,
+  )
   const [missingAudioMode, setMissingAudioMode] = useStateWithLocalStorage<MissingAudioMode>(
     'amey.live-trains.missing-audio-mode',
     'skip-service',
@@ -1437,9 +1442,12 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
           useLegacyTocNames,
           announceViaPoints,
           announceShortPlatformsAfterSplit,
+          fastTrainApproaching: announceFastTrainApproaching,
+          daktronicsFanfare: displayType === 'daktronics-data-display-dmi',
           missingAudioMode,
         },
         spokenPlatform,
+        addLog,
       )
     }
   }
@@ -1603,6 +1611,19 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
               onChange={e => setAnnouncePlatformsConcurrently(e.target.checked)}
             />
             Announce different platforms at the same time?
+          </label>
+        )}
+
+        {dataSource === 'websocket' && (
+          <label htmlFor="fast-train-approaching">
+            <input
+              type="checkbox"
+              name="fast-train-approaching"
+              id="fast-train-approaching"
+              checked={announceFastTrainApproaching}
+              onChange={e => setAnnounceFastTrainApproaching(e.target.checked)}
+            />
+            Announce "fast train approaching"?
           </label>
         )}
 

@@ -349,11 +349,21 @@ export default class Crunker {
           buffer = await filepath.arrayBuffer()
         } else {
           buffer = await fetch(filepath).then(response => {
-            if (response.headers.has('Content-Type') && !response.headers.get('Content-Type')!.includes('audio/')) {
+            const mimeType = response.headers.get('Content-Type')?.split(';')[0]
+
+            // Callers decide how to handle a clip that doesn't exist, so a missing one has to be
+            // reported as such. A CDN answers with an HTML error page, which decodeAudioData can
+            // only describe as an unknown content type.
+            if (!response.ok) {
+              throw new Error(`Crunker: Could not fetch audio file; the server responded ${response.status}. (file: "${filepath}")`)
+            }
+            if (mimeType === 'text/html') {
+              throw new Error(`Crunker: Could not fetch audio file; the server returned a web page instead. (file: "${filepath}")`)
+            }
+
+            if (mimeType && !mimeType.includes('audio/')) {
               console.warn(
-                `Crunker: Attempted to fetch an audio file, but its MIME type is \`${
-                  response.headers.get('Content-Type')!.split(';')[0]
-                }\`. We'll try and continue anyway. (file: "${filepath}")`,
+                `Crunker: Attempted to fetch an audio file, but its MIME type is \`${mimeType}\`. We'll try and continue anyway. (file: "${filepath}")`,
               )
             }
 

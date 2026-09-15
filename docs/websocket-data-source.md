@@ -33,9 +33,13 @@ every platform it affects, and platforms that share a voice can still announce a
 
 Existing per-platform voices, chimes, legacy TOC names, missing-audio preference, mind-the-gap and short-platform settings remain available.
 Railway details are adapted directly from the message, including available split portions and via CRS codes. Missing associated-service data does
-not cause a lookup. Passing messages use the selected platform voice's fast-train warning. Platform-alteration messages also have an adapter for
-when the backend begins emitting them. An unsupported platform's audio is skipped rather than substituting another platform number, and a service
-with no allocated platform is skipped for the same reason.
+not cause a lookup. Passing messages use the selected platform voice's fast-train warning. Select **Announce "fast train approaching"?** to end
+that warning with the phrase; it is on by default. Selecting the **Daktronics/Data Display DMI** board type opens the warning with the British
+Rail fanfare. The **Missing audio** preference governs fast-train warnings as it does every other type: a clip the CDN does not hold is reported
+as a missing file, so the selected mode decides whether to substitute, omit or abandon it, and the log names the clip. A disruption reason the
+voice cannot say is an exception: the announcement is said again without the reason rather than lost, and the log says so. Platform-alteration
+messages also have an adapter for when the backend begins emitting them. An unsupported platform's audio is skipped rather than substituting
+another platform number, and a service with no allocated platform is skipped for the same reason.
 
 Production builds read `.env.production`, which sets `NEXT_PUBLIC_LIVE_SERVICE_URL` to `wss://darwinbrowser.com`. Neither variable holds a
 secret, so both are committed. `NEXT_PUBLIC_LIVE_BOARD_URL` points at the raildotmatrix `/board` URL, which requires the matching raildotmatrix

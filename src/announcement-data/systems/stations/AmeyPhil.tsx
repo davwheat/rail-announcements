@@ -68,6 +68,7 @@ interface IFastTrainAnnouncementOptions {
   daktronicsFanfare: boolean
   platform: string
   fastTrainApproaching: boolean
+  missingAudioMode?: MissingAudioMode
 }
 
 export interface ITrainApproachingAnnouncementOptions {
@@ -5230,7 +5231,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       files.push({ id: 'w.fast train approaching', opts: { delayStart: this.BEFORE_SECTION_DELAY } })
     }
 
-    await this.playAudioFiles(files, download)
+    await this.playAudioFiles(files, download, options.missingAudioMode ?? 'skip-service')
   }
 
   async playTrainApproachingAnnouncement(

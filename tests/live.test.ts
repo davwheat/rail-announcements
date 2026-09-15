@@ -37,6 +37,7 @@ class FakeSocket {
 import { setImmediate } from 'node:timers/promises'
 import { PlaybackQueue } from '../src/live/playbackQueue'
 import { announcementPlatforms, audioPlatform, callingPoints, playAnnouncement, trainOptions } from '../src/live/playAnnouncement'
+import AnnouncementSystem, { type MissingAudioMode } from '../src/announcement-data/AnnouncementSystem'
 import type { Announcement, AnnouncementType } from '../src/live/types'
 import type AmeyPhil from '../src/announcement-data/systems/stations/AmeyPhil'
 
@@ -63,6 +64,8 @@ const preferences = {
   useLegacyTocNames: false,
   announceViaPoints: true,
   announceShortPlatformsAfterSplit: true,
+  fastTrainApproaching: true,
+  daktronicsFanfare: false,
   missingAudioMode: 'skip-service' as const,
 }
 const voice = {
@@ -213,6 +216,73 @@ test('a disrupted message with no measurable delay uses the generic delay announ
   assert.equal(spoken[1].delayTime, '15')
 })
 
+test('a disruption reason reaches the voice as finished clip ids, whichever form the mapping holds', async () => {
+  const spoken: Parameters<AmeyPhil['playDisruptedTrainAnnouncement']>[0][] = []
+  const emergencyServices = ['disruption-reason.e.emergency services attending an incident adjacent', 'disruption-reason.e.to the railway line']
+  const system = {
+    ...voice,
+    DelayCodeMapping: {
+      '100': { e: 'disruption-reason.e.a broken down train', m: null, text: '' },
+      '157': { e: emergencyServices, m: null, text: '' },
+    },
+    playDisruptedTrainAnnouncement: async (options: Parameters<AmeyPhil['playDisruptedTrainAnnouncement']>[0]) => {
+      spoken.push(options)
+    },
+  } as unknown as AmeyPhil
+
+  const withReason = async (code: string | null) => {
+    const message = announcement('disrupted', `disrupted-${code}`)
+    message.details.delay_reason = { code, text: null }
+    await playAnnouncement(message, system, preferences, '2')
+  }
+
+  await withReason('100')
+  assert.deepEqual(spoken[0].disruptionReason, ['disruption-reason.e.a broken down train'])
+  await withReason('157')
+  assert.deepEqual(spoken[1].disruptionReason, emergencyServices)
+  await withReason('999')
+  assert.equal(spoken[2].disruptionReason, '')
+  await withReason(null)
+  assert.equal(spoken[3].disruptionReason, '')
+})
+
+test('a reason the voice cannot say costs the reason, not the whole disruption announcement', async () => {
+  const spoken: Parameters<AmeyPhil['playDisruptedTrainAnnouncement']>[0][] = []
+  const logs: string[] = []
+  const missingClip = 'disruption-reason.e.a temporary speed restriction'
+  const system = {
+    ...voice,
+    DelayCodeMapping: { '182': { e: missingClip, m: null, text: '' }, '100': { e: 'disruption-reason.e.a fire', m: null, text: '' } },
+    playDisruptedTrainAnnouncement: async (options: Parameters<AmeyPhil['playDisruptedTrainAnnouncement']>[0]) => {
+      spoken.push(options)
+      if (options.disruptionReason.includes(missingClip)) throw new Error(`Crunker: Could not fetch audio file (file: "${missingClip}")`)
+    },
+  } as unknown as AmeyPhil
+
+  const disrupted = (code: string) => {
+    const message = announcement('disrupted', `disrupted-${code}`)
+    message.details.delay_reason = { code, text: null }
+    return message
+  }
+
+  await playAnnouncement(disrupted('182'), system, preferences, '2', message => logs.push(message))
+  assert.deepEqual(
+    spoken.map(options => options.disruptionReason),
+    [[missingClip], ''],
+  )
+  assert.equal(logs.length, 1)
+  assert.match(logs[0], /without its disruption reason/)
+
+  // A failure with nothing left to drop is the caller's to hear about.
+  const broken = {
+    ...system,
+    playDisruptedTrainAnnouncement: async () => {
+      throw new Error('Audio device unavailable')
+    },
+  } as unknown as AmeyPhil
+  await assert.rejects(() => playAnnouncement(disrupted('100'), broken, preferences, '2'), /Audio device unavailable/)
+})
+
 test('all six message types dispatch to the existing voice handlers without fetching railway data', async context => {
   context.mock.method(globalThis, 'fetch', () => {
     throw new Error('Unexpected train-data fetch')
@@ -244,6 +314,107 @@ test('all six message types dispatch to the existing voice handlers without fetc
     await playAnnouncement({ ...announcement(type), previous_platform: '1', new_platform: '2' }, system, preferences, '2')
   }
   assert.deepEqual(played, types)
+})
+
+test('passing warnings take their spoken words, fanfare and missing-audio handling from the listener preferences', async () => {
+  const spoken: Parameters<AmeyPhil['playFastTrainAnnouncement']>[0][] = []
+  const system = {
+    ...voice,
+    playFastTrainAnnouncement: async (options: Parameters<AmeyPhil['playFastTrainAnnouncement']>[0]) => {
+      spoken.push(options)
+    },
+  } as unknown as AmeyPhil
+  await playAnnouncement(announcement('passing'), system, preferences, '2')
+  assert.equal(spoken[0].fastTrainApproaching, true)
+  assert.equal(spoken[0].daktronicsFanfare, false)
+  assert.equal(spoken[0].missingAudioMode, 'skip-service')
+  const changed = { ...preferences, fastTrainApproaching: false, daktronicsFanfare: true, missingAudioMode: 'play-silence' as const }
+  await playAnnouncement(announcement('passing'), system, changed, '2')
+  assert.equal(spoken[1].fastTrainApproaching, false)
+  assert.equal(spoken[1].daktronicsFanfare, true)
+  assert.equal(spoken[1].missingAudioMode, 'play-silence')
+})
+
+test('every announcement type carries the missing-audio preference down to playback', async () => {
+  const modes: (MissingAudioMode | undefined)[] = []
+  const record = async (options: { missingAudioMode?: MissingAudioMode }) => {
+    modes.push(options.missingAudioMode)
+  }
+  const system = {
+    ...voice,
+    playNextTrainAnnouncement: record,
+    playStandingTrainAnnouncement: record,
+    playTrainApproachingAnnouncement: record,
+    playDisruptedTrainAnnouncement: record,
+    playFastTrainAnnouncement: record,
+    playPlatformAlterationAnnouncement: record,
+  } as unknown as AmeyPhil
+  const types: AnnouncementType[] = ['next', 'approaching', 'standing', 'disrupted', 'passing', 'platform_alteration']
+  for (const type of types) {
+    const message = { ...announcement(type), previous_platform: '1', new_platform: '2' }
+    await playAnnouncement(message, system, { ...preferences, missingAudioMode: 'repeat-last-station' }, '2')
+  }
+  assert.deepEqual(
+    modes,
+    types.map(() => 'repeat-last-station'),
+  )
+})
+
+class TestSystem extends AnnouncementSystem {
+  readonly NAME = 'Test'
+  readonly ID = 'TEST_V1'
+  readonly FILE_PREFIX = 'test'
+  readonly SYSTEM_TYPE = 'station' as const
+}
+
+/** Stands in for the browser's Crunker singleton: a clip the CDN does not hold rejects, as a
+ *  missing file now does, and concatAudio hands back the clips it was given so they can be read. */
+function useFakeCrunker(missing: string[]): () => void {
+  const previous = (globalThis as { window?: unknown }).window
+  ;(globalThis as { window?: unknown }).window = {
+    __crunker: {
+      context: { createBuffer: (_channels: number, length: number) => ({ silence: length }) },
+      fetchAudio: async (...uris: string[]) =>
+        uris.map(uri => {
+          if (missing.some(id => uri.endsWith(`${id.replace(/\./g, '/')}.mp3`))) {
+            throw new Error(`Crunker: Could not fetch audio file; the server responded 404. (file: "${uri}")`)
+          }
+          return { clip: uri }
+        }),
+      concatAudio: (buffers: unknown[]) => buffers,
+    },
+  }
+  return () => {
+    ;(globalThis as { window?: unknown }).window = previous
+  }
+}
+
+test('a missing clip is handled by the selected mode rather than always failing the announcement', async () => {
+  const restore = useFakeCrunker(['station.m.CMS'])
+  try {
+    const system = new TestSystem()
+    const files = [{ id: 'station.m.AAA' }, { id: 'station.m.CMS' }, { id: 'w.fast train approaching' }]
+    const clips = async (mode: MissingAudioMode) =>
+      ((await system.concatSoundClips(files, mode)) as unknown as { clip: string }[]).map(b => b.clip)
+
+    await assert.rejects(() => system.concatSoundClips(files, 'skip-service'), /station\/m\/CMS\.mp3/)
+    assert.deepEqual(await clips('play-silence'), [
+      system.generateAudioFileUrl('station.m.AAA'),
+      system.generateAudioFileUrl('w.fast train approaching'),
+    ])
+    assert.deepEqual(await clips('repeat-last-station'), [
+      system.generateAudioFileUrl('station.m.AAA'),
+      system.generateAudioFileUrl('station.m.AAA'),
+      system.generateAudioFileUrl('w.fast train approaching'),
+    ])
+    assert.deepEqual(await clips('repeat-last'), [
+      system.generateAudioFileUrl('station.m.AAA'),
+      system.generateAudioFileUrl('station.m.AAA'),
+      system.generateAudioFileUrl('w.fast train approaching'),
+    ])
+  } finally {
+    restore()
+  }
 })
 
 test('queue deduplicates, supersedes lower stages and checks expiry immediately before playback', async () => {

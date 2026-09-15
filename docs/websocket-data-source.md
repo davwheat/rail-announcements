@@ -31,6 +31,27 @@ By default the station announces one train at a time. Select **Announce differen
 queue: announcements for different platforms then play together, while each platform still plays its own in turn. A fast-train warning holds
 every platform it affects, and platforms that share a voice can still announce at the same time.
 
+## Station platform lists
+
+The page reads `GET /v1/platforms?crs=` from the same service, over HTTP rather than WebSocket, whenever the station or service URL changes.
+Darwin Browser answers it from Network Rail's SMART berth-stepping data, which maps every berth a train describer can report a train into, so it
+lists the platforms a station has rather than only the ones a train is due at. This request runs in both data-source modes, and the settings are
+saved on the device.
+
+**Only show this station's platforms** narrows the per-platform voice list to that station: East Croydon shows six platforms instead of the full
+seventy-seven. It's on by default. The bulk buttons — "Use _voice_ on all platforms", "Randomise (on)" and "All off" — act on the platforms
+shown, so they configure the station in front of you. A voice already set on a hidden platform stays set, and a train that arrives there still
+announces with it.
+
+**Board layout** chooses between one board for the whole station and one board per platform. Per-platform boards render a grid of boards, one for
+each platform SMART describes, each filtered to its own platform. The option needs a platform list, so it stays unavailable while the list is
+loading or the service can't supply one. In the legacy polling mode, every board on the page receives the service data.
+
+Anything other than a platform list means _unknown_, and the page narrows nothing: the service returns 404 for a station SMART doesn't describe,
+503 while it's still loading the datasets, and an empty list for a station whose berths carry no platform. In each case the full platform list is
+shown and one board per platform is unavailable, with the reason under the control. About a dozen stations share their location code with a depot
+or a neighbour — Clapham Junction shares one with its carriage sidings — and the service names the others, which the page repeats.
+
 Existing per-platform voices, chimes, legacy TOC names, missing-audio preference, mind-the-gap and short-platform settings remain available.
 Railway details are adapted directly from the message, including available split portions and via CRS codes. Missing associated-service data does
 not cause a lookup. Passing messages use the selected platform voice's fast-train warning. Select **Announce "fast train approaching"?** to end

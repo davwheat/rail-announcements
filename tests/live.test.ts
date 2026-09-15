@@ -914,3 +914,44 @@ test('a saved WebSocket preference produces the same initial markup as the serve
   const firstClientMarkup = renderToString(element)
   assert.equal(firstClientMarkup, serverMarkup)
 })
+
+import { fetchStationPlatforms, platformsUrl } from '../src/live/stationPlatforms'
+
+test('platform list URLs follow the live service host over HTTP', () => {
+  assert.equal(platformsUrl('ws://localhost:8080', 'TST').href, 'http://localhost:8080/v1/platforms?crs=TST')
+  assert.equal(platformsUrl('wss://example.test/darwin/', 'TST').href, 'https://example.test/darwin/v1/platforms?crs=TST')
+  assert.equal(platformsUrl('https://example.test', 'TST').href, 'https://example.test/v1/platforms?crs=TST')
+  assert.throws(() => platformsUrl('file:///tmp', 'TST'))
+})
+
+/** Every answer that isn't a platform list means "unknown", so a caller narrows nothing.
+ *  Treating any of these as "this station has no platforms" would hide every platform. */
+test('a platform list is only reported when the service actually describes one', async context => {
+  const responses: Record<string, { status: number; body?: unknown }> = {
+    ready: { status: 200, body: { crs: 'TST', name: 'Test', tiplocs: ['TEST'], stanox: ['123'], platforms: ['1', '2'] } },
+    shared: { status: 200, body: { crs: 'TST', tiplocs: [], stanox: [], platforms: ['1'], shared_with: ['XTS'] } },
+    empty: { status: 200, body: { crs: 'TST', tiplocs: [], stanox: [], platforms: [] } },
+    missing: { status: 404 },
+    warming: { status: 503 },
+  }
+  const original = globalThis.fetch
+  Object.defineProperty(globalThis, 'fetch', {
+    configurable: true,
+    value: async (url: URL) => {
+      const { status, body } = responses[url.searchParams.get('crs')!]
+      return { ok: status === 200, status, json: async () => body }
+    },
+  })
+  context.after(() => Object.defineProperty(globalThis, 'fetch', { configurable: true, value: original }))
+
+  const ready = await fetchStationPlatforms('wss://example.test', 'ready')
+  assert.deepEqual(ready, { status: 'ready', platforms: ['1', '2'], name: 'Test', sharedWith: [] })
+
+  const shared = await fetchStationPlatforms('wss://example.test', 'shared')
+  assert.deepEqual(shared, { status: 'ready', platforms: ['1'], name: undefined, sharedWith: ['XTS'] })
+
+  for (const crs of ['empty', 'missing', 'warming']) {
+    const result = await fetchStationPlatforms('wss://example.test', crs)
+    assert.equal(result.status, 'unavailable', `${crs} must not be read as a platform list`)
+  }
+})

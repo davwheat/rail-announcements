@@ -3,6 +3,7 @@ import { PlaybackQueue } from '../live/playbackQueue'
 import { playAnnouncement, announcementPlatforms, audioPlatform } from '../live/playAnnouncement'
 import type { Announcement, AnnouncementType as FeedAnnouncementType } from '../live/types'
 import type { ConnectionStatus } from '../live/connection'
+import { useStationPlatforms } from '../live/stationPlatforms'
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import crsToStationItemMapper from '@helpers/crsToStationItemMapper'
 import useStateWithLocalStorage from '@hooks/useStateWithLocalStorage'
@@ -449,6 +450,14 @@ const DisplayNames: Record<DisplayType, string> = {
 const DataSources = ['websocket', 'original'] as const
 type DataSource = (typeof DataSources)[number]
 
+const BoardLayouts = ['station', 'per-platform'] as const
+type BoardLayout = (typeof BoardLayouts)[number]
+
+const BoardLayoutNames: Record<BoardLayout, string> = {
+  station: 'One board for the station',
+  'per-platform': 'One board per platform',
+}
+
 const DataSourceNames: Record<DataSource, string> = {
   websocket: 'New (live updates)',
   original: 'Legacy (polling)',
@@ -476,8 +485,17 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
   systems,
   supportedPlatforms,
 }: LiveTrainAnnouncementsProps<SystemKeys>) {
-  const iframeRef = useRef<HTMLIFrameElement>(null)
+  // Per-platform layouts render a board each, so the legacy data source has to
+  // reach every one of them, not just the first.
+  const boardFrames = useRef(new Map<string, HTMLIFrameElement>())
   const [iframeReady, setIframeReady] = useState(false)
+  const registerBoardFrame = useCallback(function registerBoardFrame(id: string, frame: HTMLIFrameElement | null) {
+    if (frame) {
+      boardFrames.current.set(id, frame)
+    } else {
+      boardFrames.current.delete(id)
+    }
+  }, [])
   const systemKeys = Object.keys(systems) as SystemKeys[]
 
   const perSystemSupportedStations: Record<string, Option[]> = useMemo(
@@ -591,6 +609,14 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
     'amey.live-trains.show-unconfirmed-platforms',
     false,
     x => x === true || x === false,
+  )
+  const [restrictPlatformsToStation, setRestrictPlatformsToStation] = useStateWithLocalStorage<boolean>(
+    'amey.live-trains.restrict-platforms-to-station',
+    true,
+    x => x === true || x === false,
+  )
+  const [boardLayout, setBoardLayout] = useStateWithLocalStorage<BoardLayout>('amey.live-trains.board-layout', 'station', val =>
+    BoardLayouts.includes(val),
   )
   const [announceShortPlatformsAfterSplit, setAnnounceShortPlatformsAfterSplit] = useStateWithLocalStorage<boolean>(
     'amey.live-trains.announce-short-platforms-after-split',
@@ -758,6 +784,80 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       return dataPlatform
     }
   }, [])
+
+  const stationPlatforms = useStationPlatforms(liveServiceUrl, selectedCrs)
+
+  /** The station's SMART platforms, as keys into `supportedPlatforms`. Null when SMART
+   *  says nothing about this station, which must narrow nothing. */
+  const stationPlatformKeys = useMemo(
+    function stationPlatformKeys() {
+      if (stationPlatforms.status !== 'ready') return null
+
+      const keys = new Set(stationPlatforms.platforms.map(getPlatformForSystemSelection))
+      const known = Object.keys(supportedPlatforms).filter(platform => keys.has(platform))
+
+      // A station whose platforms no voice covers would otherwise leave an empty
+      // list and no way back to it.
+      return known.length > 0 ? new Set(known) : null
+    },
+    [stationPlatforms, supportedPlatforms, getPlatformForSystemSelection],
+  )
+
+  const filteringPlatforms = restrictPlatformsToStation && stationPlatformKeys !== null
+
+  /** Platforms offered for a voice, in station order. */
+  const visiblePlatforms = useMemo(
+    function visiblePlatforms() {
+      return Object.entries(supportedPlatforms)
+        .filter(([platform]) => !filteringPlatforms || stationPlatformKeys!.has(platform))
+        .sort(([a], [b]) => {
+          const aInt = parseInt(a)
+          const bInt = parseInt(b)
+
+          if (!isNaN(aInt) && !isNaN(bInt)) {
+            const diff = aInt - bInt
+
+            if (diff !== 0) return diff
+          }
+
+          return a.localeCompare(b)
+        })
+    },
+    [supportedPlatforms, filteringPlatforms, stationPlatformKeys],
+  )
+
+  const perPlatformBoards = boardLayout === 'per-platform' && stationPlatforms.status === 'ready'
+
+  function boardLayoutHelpText(): string {
+    if (stationPlatforms.status === 'loading') return 'Looking up the platforms at this station\u2026'
+    if (stationPlatforms.status !== 'ready') return `One board per platform needs a platform list, and ${stationPlatforms.reason}.`
+
+    const count = stationPlatforms.platforms.length
+
+    if (perPlatformBoards) return `Showing ${count} boards, one for each platform SMART describes at ${selectedCrs}.`
+
+    return `One board per platform is available for ${selectedCrs}, using the ${count} platforms SMART describes.`
+  }
+
+  function platformFilterHelpText(): string {
+    if (stationPlatforms.status === 'loading') return 'Looking up the platforms at this station\u2026'
+
+    if (stationPlatformKeys === null) {
+      const reason = stationPlatforms.status === 'ready' ? `no voice covers the platforms at ${selectedCrs}` : stationPlatforms.reason
+      return `Every platform is listed, because ${reason}.`
+    }
+
+    if (!filteringPlatforms) return `Listing every platform. ${selectedCrs} has ${stationPlatformKeys.size} of them.`
+
+    // SMART keys a platform by the location code, which a handful of stations
+    // share with a depot or a neighbour, so say whose platforms these might be.
+    const shared =
+      stationPlatforms.status === 'ready' && stationPlatforms.sharedWith.length > 0
+        ? `, which shares its location code with ${pluraliseStrings(...stationPlatforms.sharedWith)}`
+        : ''
+
+    return `Listing the ${visiblePlatforms.length} platforms SMART describes at ${selectedCrs}${shared}.`
+  }
 
   useEffect(() => {
     const key = setInterval(removeOldIds, 1000 * 60)
@@ -1180,10 +1280,10 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
           if (abortController.signal.aborted) return
           services = data.trainServices
 
-          // Send data to iframe
-          if (iframeReady && iframeRef.current) {
-            console.log('Sending service information to iframe')
-            iframeRef.current.contentWindow?.postMessage(data, RDM_BASE_URL_ORIGIN)
+          // Send data to every board on the page
+          if (iframeReady) {
+            console.log(`Sending service information to ${boardFrames.current.size} board(s)`)
+            boardFrames.current.forEach(frame => frame.contentWindow?.postMessage(data, RDM_BASE_URL_ORIGIN))
           }
         } catch {
           addLog("Couldn't parse JSON from API")
@@ -1487,30 +1587,40 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
     // Per-platform voices are read at play time, so changing one must not disturb the feed.
   }, [hasEnabledFeature, dataSource, liveServiceUrl, selectedCrs, feedTypes])
 
-  const iframeQueryParams = new URLSearchParams({
-    station: selectedCrs,
-    dataSource,
-    ...(dataSource === 'websocket' ? { liveServiceUrl } : {}),
-    noBg: '1',
-    hideSettings: '1',
-    'from-railannouncements.co.uk': '1',
-  })
-
-  if (useLegacyTocNames) {
-    iframeQueryParams.append('useLegacyTocNames', '1')
-  }
-
-  if (showUnconfirmedPlatforms) {
-    iframeQueryParams.append('showUnconfirmedPlatforms', '1')
-  }
-
-  if (Object.values(systemKeyForPlatform).every(system => system === null)) iframeQueryParams.append('platform', '__none__')
-
-  Object.entries(systemKeyForPlatform)
-    .filter(([_, system]) => system !== null)
-    .forEach(([p]) => {
-      iframeQueryParams.append('platform', p)
+  /** Builds one board's URL. `platform` gives that platform its own board; without it the
+   *  board covers the station, showing the platforms that have a voice. */
+  function boardUrl(platform?: string): string {
+    const params = new URLSearchParams({
+      station: selectedCrs,
+      dataSource,
+      ...(dataSource === 'websocket' ? { liveServiceUrl } : {}),
+      noBg: '1',
+      hideSettings: '1',
+      'from-railannouncements.co.uk': '1',
     })
+
+    if (useLegacyTocNames) {
+      params.append('useLegacyTocNames', '1')
+    }
+
+    if (showUnconfirmedPlatforms) {
+      params.append('showUnconfirmedPlatforms', '1')
+    }
+
+    if (platform !== undefined) {
+      params.append('platform', platform)
+    } else {
+      if (Object.values(systemKeyForPlatform).every(system => system === null)) params.append('platform', '__none__')
+
+      Object.entries(systemKeyForPlatform)
+        .filter(([_, system]) => system !== null)
+        .forEach(([p]) => {
+          params.append('platform', p)
+        })
+    }
+
+    return `${dataSource === 'websocket' ? LIVE_BOARD_URL : RDM_BASE_URL}/${displayType}?${params}`
+  }
 
   return (
     <div css={{ width: '100%' }}>
@@ -1567,6 +1677,21 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
             options={Object.entries(DisplayNames).map(([value, label]) => ({ value: value as DisplayType, label }))}
           />
         </label>
+
+        <label htmlFor="board-layout-select" className="option-select">
+          Board layout
+          <Select<Option<BoardLayout>, false>
+            id="board-layout-select"
+            aria-describedby="help-board-layout"
+            value={{ value: boardLayout, label: BoardLayoutNames[boardLayout] }}
+            onChange={val => setBoardLayout(val!!.value)}
+            options={Object.entries(BoardLayoutNames).map(([value, label]) => ({ value: value as BoardLayout, label }))}
+            isOptionDisabled={option => option.value === 'per-platform' && stationPlatforms.status !== 'ready'}
+          />
+        </label>
+        <p className="helpText" id="help-board-layout">
+          {boardLayoutHelpText()}
+        </p>
 
         <label htmlFor="use-legacy-tocs">
           <input
@@ -1745,6 +1870,22 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
             width: '100%',
           }}
         >
+          <label htmlFor="restrict-platforms-to-station">
+            <input
+              type="checkbox"
+              name="restrict-platforms-to-station"
+              id="restrict-platforms-to-station"
+              aria-describedby="help-restrict-platforms-to-station"
+              checked={restrictPlatformsToStation}
+              disabled={stationPlatformKeys === null}
+              onChange={e => setRestrictPlatformsToStation(e.target.checked)}
+            />
+            Only show this station's platforms
+          </label>
+          <p className="helpText" id="help-restrict-platforms-to-station">
+            {platformFilterHelpText()}
+          </p>
+
           <div
             css={{
               display: 'flex',
@@ -1752,6 +1893,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
               alignItems: 'stretch',
               gap: 8,
               marginBottom: 16,
+              marginTop: 16,
             }}
           >
             {systemKeys.map(systemKey => {
@@ -1759,9 +1901,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
                 <button
                   key={systemKey}
                   onClick={() => {
-                    const platformsSupportedBySystem = Object.entries(supportedPlatforms)
-                      .filter(([_, keys]) => keys.includes(systemKey))
-                      .map(([key]) => key)
+                    const platformsSupportedBySystem = visiblePlatforms.filter(([_, keys]) => keys.includes(systemKey)).map(([key]) => key)
 
                     dispatchSystemKeyForPlatform({ platforms: platformsSupportedBySystem, systemKey })
                   }}
@@ -1777,7 +1917,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
               onClick={() => {
                 const platforms: Record<string, SystemKeys> = {}
 
-                for (const [p, keys] of Object.entries(supportedPlatforms)) {
+                for (const [p, keys] of visiblePlatforms) {
                   platforms[p] = keys[Math.floor(Math.random() * keys.length)]
                 }
 
@@ -1796,7 +1936,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
               key="__off"
               className="danger"
               onClick={() => {
-                dispatchSystemKeyForPlatform({ platforms: Object.keys(supportedPlatforms), systemKey: null })
+                dispatchSystemKeyForPlatform({ platforms: visiblePlatforms.map(([platform]) => platform), systemKey: null })
               }}
             >
               <span className="buttonLabel">All off</span>
@@ -1874,105 +2014,92 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
                 },
               }}
             >
-              {Object.entries(supportedPlatforms)
-                .sort(([a], [b]) => {
-                  const aInt = parseInt(a)
-                  const bInt = parseInt(b)
+              {visiblePlatforms.map(([platform, systems]) => {
+                return (
+                  <fieldset
+                    css={{
+                      appearance: 'none',
+                      padding: 0,
+                      margin: 0,
+                      border: 'none',
+                      minInlineSize: 'min-content',
 
-                  if (!isNaN(aInt) && !isNaN(bInt)) {
-                    const diff = aInt - bInt
-
-                    if (diff !== 0) return diff
-                  }
-
-                  return a.localeCompare(b)
-                })
-                .map(([platform, systems]) => {
-                  return (
-                    <fieldset
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      paddingLeft: 16,
+                      paddingRight: 16,
+                    }}
+                    key={platform}
+                  >
+                    <legend
                       css={{
                         appearance: 'none',
+                        display: 'inline-block',
                         padding: 0,
                         margin: 0,
-                        border: 'none',
-                        minInlineSize: 'min-content',
-
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 8,
-                        paddingLeft: 16,
-                        paddingRight: 16,
+                        float: 'left',
+                        width: '150px',
+                        fontWeight: 'bold',
                       }}
-                      key={platform}
                     >
-                      <legend
-                        css={{
-                          appearance: 'none',
-                          display: 'inline-block',
-                          padding: 0,
-                          margin: 0,
-                          float: 'left',
-                          width: '150px',
-                          fontWeight: 'bold',
-                        }}
-                      >
-                        Platform {platform}
-                      </legend>
+                      Platform {platform}
+                    </legend>
 
-                      <label
-                        key={`platform-system-select-${platform}-none`}
-                        htmlFor={`platform-system-select-${platform}-none`}
-                        css={{
-                          display: 'flex',
-                          whiteSpace: 'nowrap',
-                          alignItems: 'center',
-                          fontWeight: 'normal',
+                    <label
+                      key={`platform-system-select-${platform}-none`}
+                      htmlFor={`platform-system-select-${platform}-none`}
+                      css={{
+                        display: 'flex',
+                        whiteSpace: 'nowrap',
+                        alignItems: 'center',
+                        fontWeight: 'normal',
 
-                          '&:has([disabled])': {
-                            color: '#666',
+                        '&:has([disabled])': {
+                          color: '#666',
 
-                            '&, & input': {
-                              cursor: 'not-allowed',
-                            },
+                          '&, & input': {
+                            cursor: 'not-allowed',
                           },
+                        },
+                      }}
+                    >
+                      None
+                      <input
+                        type="radio"
+                        name={`platform-system-select-${platform}`}
+                        id={`platform-system-select-${platform}-none`}
+                        checked={systemKeyForPlatform[platform] === null}
+                        onChange={() => {
+                          dispatchSystemKeyForPlatform({ platforms: [platform], systemKey: null })
                         }}
-                      >
-                        None
-                        <input
-                          type="radio"
-                          name={`platform-system-select-${platform}`}
-                          id={`platform-system-select-${platform}-none`}
-                          checked={systemKeyForPlatform[platform] === null}
-                          onChange={() => {
-                            dispatchSystemKeyForPlatform({ platforms: [platform], systemKey: null })
-                          }}
-                        />
-                      </label>
+                      />
+                    </label>
 
-                      {systemKeys.map(systemKey => {
-                        return (
-                          <label
-                            key={`platform-system-select-${platform}-${systemKey}`}
-                            htmlFor={`platform-system-select-${platform}-${systemKey}`}
-                          >
-                            {systemKey}
+                    {systemKeys.map(systemKey => {
+                      return (
+                        <label
+                          key={`platform-system-select-${platform}-${systemKey}`}
+                          htmlFor={`platform-system-select-${platform}-${systemKey}`}
+                        >
+                          {systemKey}
 
-                            <input
-                              type="radio"
-                              name={`platform-system-select-${platform}`}
-                              id={`platform-system-select-${platform}-${systemKey}`}
-                              disabled={!systems.includes(systemKey as any)}
-                              checked={systemKeyForPlatform[platform] === systemKey}
-                              onChange={() => {
-                                dispatchSystemKeyForPlatform({ platforms: [platform], systemKey: systemKey })
-                              }}
-                            />
-                          </label>
-                        )
-                      })}
-                    </fieldset>
-                  )
-                })}
+                          <input
+                            type="radio"
+                            name={`platform-system-select-${platform}`}
+                            id={`platform-system-select-${platform}-${systemKey}`}
+                            disabled={!systems.includes(systemKey as any)}
+                            checked={systemKeyForPlatform[platform] === systemKey}
+                            onChange={() => {
+                              dispatchSystemKeyForPlatform({ platforms: [platform], systemKey: systemKey })
+                            }}
+                          />
+                        </label>
+                      )
+                    })}
+                  </fieldset>
+                )
+              })}
             </div>
           </details>
         </fieldset>
@@ -2081,24 +2208,58 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
           </button>
 
           <FullScreen enabled={isFullscreen} onChange={setFullscreen}>
-            <iframe
-              ref={iframeRef}
-              onLoad={() => {
-                console.log('Marking iframe ready for data')
-                setIframeReady(true)
-              }}
-              css={{
-                border: 'none',
-                width: '100%',
-                height: 400,
+            {perPlatformBoards ? (
+              <div
+                css={{
+                  display: 'grid',
+                  gap: 16,
+                  gridTemplateColumns: 'minmax(0, 1fr)',
 
-                ':fullscreen &': {
-                  height: '100%',
-                },
-              }}
-              key={`${dataSource}:${selectedCrs}:${liveServiceUrl}`}
-              src={`${dataSource === 'websocket' ? LIVE_BOARD_URL : RDM_BASE_URL}/${displayType}?${iframeQueryParams}`}
-            />
+                  [Breakpoints.downTo.desktopLarge]: {
+                    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                  },
+                }}
+              >
+                {stationPlatforms.platforms.map(platform => (
+                  <section key={platform}>
+                    <h3 css={{ marginBottom: 8 }}>Platform {platform}</h3>
+
+                    <iframe
+                      ref={frame => registerBoardFrame(platform, frame)}
+                      title={`Departure board for platform ${platform}`}
+                      onLoad={() => setIframeReady(true)}
+                      css={{
+                        border: 'none',
+                        width: '100%',
+                        height: 400,
+                      }}
+                      key={`${dataSource}:${selectedCrs}:${liveServiceUrl}:${platform}`}
+                      src={boardUrl(platform)}
+                    />
+                  </section>
+                ))}
+              </div>
+            ) : (
+              <iframe
+                ref={frame => registerBoardFrame('__station', frame)}
+                title={`Departure board for ${selectedCrs}`}
+                onLoad={() => {
+                  console.log('Marking iframe ready for data')
+                  setIframeReady(true)
+                }}
+                css={{
+                  border: 'none',
+                  width: '100%',
+                  height: 400,
+
+                  ':fullscreen &': {
+                    height: '100%',
+                  },
+                }}
+                key={`${dataSource}:${selectedCrs}:${liveServiceUrl}`}
+                src={boardUrl()}
+              />
+            )}
           </FullScreen>
 
           <div id="resume-audio-container" />

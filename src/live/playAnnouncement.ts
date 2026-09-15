@@ -1,7 +1,7 @@
 import type AmeyPhil from '../announcement-data/systems/stations/AmeyPhil'
 import type {
   ChimeType,
-  IDisruptedTrainAnnouncementOptions,
+  ILiveDisruptedTrainAnnouncementOptions,
   INextTrainAnnouncementOptions,
 } from '../announcement-data/systems/stations/AmeyPhil'
 import type { MissingAudioMode } from '../announcement-data/AnnouncementSystem'
@@ -59,6 +59,34 @@ function ownDestination(movement: Movement): Endpoint {
   return movement.destinations.find(destination => !destination.assoc_rid) || movement.destinations[0]
 }
 
+/**
+ * The endpoints of the portions running today. An associate the feed knows nothing about is
+ * described by no station at all, so announcing it would fail on a train nobody is travelling on.
+ */
+function runningPortions(movement: Movement, endpoints: Endpoint[]): Endpoint[] {
+  const running = new Set(movement.portions.filter(portion => portion.available && !portion.cancelled).map(portion => portion.rid))
+  return endpoints.filter(endpoint => endpoint.assoc_rid && running.has(endpoint.assoc_rid))
+}
+
+/** The station this train is announced to, which is a false destination wherever it has one. */
+function announcedDestination(movement: Movement): Endpoint {
+  const own = ownDestination(movement)
+  // A false destination stands in for the station the train is announced to, and not for the via
+  // points its real destination supplies.
+  return movement.false_destination ? { ...own, ...movement.false_destination } : own
+}
+
+/** Every station this train is announced to: its own first, then the portions that divide off it. */
+function announcedDestinations(movement: Movement): Endpoint[] {
+  return [announcedDestination(movement), ...runningPortions(movement, movement.destinations)]
+}
+
+/** Every station this train is announced from: its own first, then the portions that joined it. */
+function announcedOrigins(movement: Movement): Endpoint[] {
+  const own = movement.origins.find(origin => !origin.assoc_rid) || movement.origins[0]
+  return [own, ...runningPortions(movement, movement.origins)]
+}
+
 function passengerCalls(calls: Call[]): Call[] {
   return calls.filter(call => call.crs && !call.operational && !call.cancelled && !hasActivity(call.activities, 'U'))
 }
@@ -81,7 +109,7 @@ export function callingPoints(movement: Movement, system: AmeyPhil): CallingAtPo
   // at each reversal, including reversals at operational calls.
   let reversed = movement.reverse_formation === true
   const result: CallingAtPoint[] = []
-  const destination = movement.false_destination || ownDestination(movement)
+  const destination = announcedDestination(movement)
   // The endpoint and the call can name one station by different TIPLOCs.
   const terminus = (call: Call) => call.tpl === destination?.tpl || (!!destination?.crs && call.crs === destination.crs)
   const destinationIndex = movement.calling_points.reduce((last, call, index) => (terminus(call) ? index : last), -1)
@@ -169,8 +197,8 @@ export function trainOptions(
       movement.uid || '',
     ),
     platform,
-    terminatingStationCode: stationAudio(movement.false_destination || ownDestination(movement), system),
-    vias: viaPoints([ownDestination(movement)], movement, system, preferences)[0] || [],
+    terminatingStationCode: stationAudio(announcedDestination(movement), system),
+    vias: viaPoints([announcedDestination(movement)], movement, system, preferences)[0] || [],
     callingAt: callingPoints(movement, system),
     firstClassLocation: 'none',
     coaches: movement.coach_count ? `${movement.coach_count} coaches` : 'None',
@@ -228,16 +256,18 @@ export async function playAnnouncement(
         mindTheGap: isMindTheGapStation(movement.station.crs || '', movement.platform.number),
       })
       break
-    case 'approaching':
+    case 'approaching': {
       if (!movement.origins.length) throw new Error('Origin unavailable')
+      const destinations = announcedDestinations(movement)
       await system.playTrainApproachingAnnouncement({
         ...options,
         fromLive: true,
-        originStationCode: stationAudio(movement.origins[0], system),
-        terminatingStationCode: movement.destinations.map(destination => stationAudio(destination, system)),
-        vias: viaPoints(movement.destinations, movement, system, preferences),
+        originStationCode: announcedOrigins(movement).map(origin => stationAudio(origin, system)),
+        terminatingStationCode: destinations.map(destination => stationAudio(destination, system)),
+        vias: viaPoints(destinations, movement, system, preferences),
       })
       break
+    }
     case 'disrupted': {
       const reason = movement.cancelled ? movement.cancel_reason : movement.delay_reason
       const delay =
@@ -249,8 +279,13 @@ export async function playAnnouncement(
       // The mapping holds finished clip ids. The voice plays those verbatim only in the list form;
       // a lone string is taken for a reason name and prefixed again into a clip that cannot exist.
       const reasonAudio = (reason.code && system.DelayCodeMapping[reason.code]?.e) || null
-      const disruption: IDisruptedTrainAnnouncementOptions = {
+      // Both ends of a dividing service are disrupted by the same delay, so both are announced.
+      const destinations = announcedDestinations(movement)
+      const disruption: ILiveDisruptedTrainAnnouncementOptions = {
         ...options,
+        fromLive: true,
+        terminatingStationCode: destinations.map(destination => stationAudio(destination, system)),
+        vias: viaPoints(destinations, movement, system, preferences),
         disruptionType: movement.cancelled ? 'cancel' : spokenDelay,
         delayTime: String(Math.max(0, delay || 0)),
         disruptionReason: reasonAudio ? (Array.isArray(reasonAudio) ? reasonAudio : [reasonAudio]) : '',
@@ -266,20 +301,22 @@ export async function playAnnouncement(
       }
       break
     }
-    case 'platform_alteration':
+    case 'platform_alteration': {
       if (!announcement.previous_platform || !announcement.new_platform) throw new Error('Platform alteration details unavailable')
       const oldPlatform = audioPlatform(announcement.previous_platform, system)
       const newPlatform = audioPlatform(announcement.new_platform, system)
       if (!oldPlatform || !newPlatform) throw new Error('Platform audio unavailable')
+      const destinations = announcedDestinations(movement)
       await system.playPlatformAlterationAnnouncement({
         ...options,
         fromLive: true,
         announceOldPlatform: true,
         oldPlatform,
         newPlatform,
-        terminatingStationCode: movement.destinations.map(destination => stationAudio(destination, system)),
-        vias: viaPoints(movement.destinations, movement, system, preferences),
+        terminatingStationCode: destinations.map(destination => stationAudio(destination, system)),
+        vias: viaPoints(destinations, movement, system, preferences),
       })
       break
+    }
   }
 }

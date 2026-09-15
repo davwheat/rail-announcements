@@ -38,8 +38,12 @@ import { setImmediate } from 'node:timers/promises'
 import { PlaybackQueue } from '../src/live/playbackQueue'
 import { announcementPlatforms, audioPlatform, callingPoints, playAnnouncement, trainOptions } from '../src/live/playAnnouncement'
 import AnnouncementSystem, { type MissingAudioMode } from '../src/announcement-data/AnnouncementSystem'
-import type { Announcement, AnnouncementType } from '../src/live/types'
+import type { Announcement, AnnouncementType, Portion } from '../src/live/types'
 import type AmeyPhil from '../src/announcement-data/systems/stations/AmeyPhil'
+import type {
+  ILiveDisruptedTrainAnnouncementOptions,
+  ILiveTrainApproachingAnnouncementOptions,
+} from '../src/announcement-data/systems/stations/AmeyPhil'
 
 const now = Date.parse(fixture.window.from)
 function announcement(type: AnnouncementType, id: string = type): Announcement {
@@ -192,6 +196,104 @@ test('a dividing portion is an extra destination, not the one the train is annou
     callingPoints(movement, voice).map(point => point.crsCode),
     ['JNC'],
   )
+})
+
+/** An associated service the feed knows, so its endpoint is a station the train really reaches. */
+function runningPortion(movement: Movement, rid: string, category: string): Portion {
+  return {
+    rid,
+    category,
+    at: movement.calling_points[0],
+    available: true,
+    cancelled: false,
+    headcode: null,
+    mode: null,
+    operator_code: null,
+    operator_name: null,
+    origin: null,
+    destination: null,
+    coach_count: null,
+    position: null,
+    calls: [],
+  }
+}
+
+test('a disrupted service that divides is announced to every destination it reaches', async () => {
+  const spoken: ILiveDisruptedTrainAnnouncementOptions[] = []
+  const system = {
+    ...voice,
+    playDisruptedTrainAnnouncement: async (options: ILiveDisruptedTrainAnnouncementOptions) => {
+      spoken.push(options)
+    },
+  } as unknown as AmeyPhil
+  const message = announcement('disrupted')
+  message.details.portions.push(runningPortion(message.details, 'associate', 'VV'))
+  message.details.destinations.push({
+    ...message.details.destinations[0],
+    tpl: 'GTWK',
+    crs: 'GTW',
+    name: 'Gatwick Airport',
+    via: { text: 'via Redhill', locs: ['RDH'] },
+    assoc_rid: 'associate',
+    assoc_cat: 'VV',
+  })
+  await playAnnouncement(message, system, preferences, '2')
+  assert.deepEqual(spoken[0].terminatingStationCode, ['DST', 'GTW'])
+  assert.deepEqual(
+    spoken[0].vias.map(vias => vias.map(point => point.crsCode)),
+    [['JNC'], ['RDH']],
+  )
+})
+
+test('a false destination is the station every announcement names', async () => {
+  const spoken: ILiveTrainApproachingAnnouncementOptions[] = []
+  const system = {
+    ...voice,
+    playTrainApproachingAnnouncement: async (options: ILiveTrainApproachingAnnouncementOptions) => {
+      spoken.push(options)
+    },
+  } as unknown as AmeyPhil
+  const message = announcement('approaching')
+  message.details.false_destination = { tpl: 'FALSE', crs: 'FLS', name: 'False Destination' }
+  assert.equal(trainOptions(message.details, voice, preferences, '2').terminatingStationCode, 'FLS')
+  await playAnnouncement(message, system, preferences, '2')
+  assert.deepEqual(spoken[0].terminatingStationCode, ['FLS'])
+  // The real destination still supplies the via points; only the station named is false.
+  assert.deepEqual(
+    spoken[0].vias.map(vias => vias.map(point => point.crsCode)),
+    [['JNC']],
+  )
+})
+
+test('a portion the feed cannot describe is not announced as an endpoint', async () => {
+  const spoken: ILiveTrainApproachingAnnouncementOptions[] = []
+  const system = {
+    ...voice,
+    playTrainApproachingAnnouncement: async (options: ILiveTrainApproachingAnnouncementOptions) => {
+      spoken.push(options)
+    },
+  } as unknown as AmeyPhil
+  const message = announcement('approaching')
+  message.details.portions.push({ ...runningPortion(message.details, 'unavailable', 'VV'), available: false })
+  // An unavailable associate reaches no station the feed can name, and has no audio to announce.
+  message.details.destinations.push({ tpl: '', crs: null, name: null, via: null, assoc_rid: 'unavailable', assoc_cat: 'VV' })
+  await playAnnouncement(message, system, preferences, '2')
+  assert.deepEqual(spoken[0].terminatingStationCode, ['DST'])
+})
+
+test('a train that was joined is announced as the service from both of its origins', async () => {
+  const spoken: ILiveTrainApproachingAnnouncementOptions[] = []
+  const system = {
+    ...voice,
+    playTrainApproachingAnnouncement: async (options: ILiveTrainApproachingAnnouncementOptions) => {
+      spoken.push(options)
+    },
+  } as unknown as AmeyPhil
+  const message = announcement('approaching')
+  message.details.portions.push(runningPortion(message.details, 'joiner', 'JJ'))
+  message.details.origins.push({ tpl: 'HORSHAM', crs: 'HRH', name: 'Horsham', via: null, assoc_rid: 'joiner', assoc_cat: 'JJ' })
+  await playAnnouncement(message, system, preferences, '2')
+  assert.deepEqual(spoken[0].originStationCode, ['ORG', 'HRH'])
 })
 
 test('a portion that omits its division point contributes no onward calls', () => {

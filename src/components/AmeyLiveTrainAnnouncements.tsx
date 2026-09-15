@@ -25,7 +25,7 @@ import type { CallingAtPoint } from '@components/CallingAtSelector'
 import type { Option } from '@helpers/createOptionField'
 import type {
   INextTrainAnnouncementOptions,
-  IDisruptedTrainAnnouncementOptions,
+  ILiveDisruptedTrainAnnouncementOptions,
   default as AmeyPhil,
   ILiveTrainApproachingAnnouncementOptions,
   IStandingTrainAnnouncementOptions,
@@ -432,7 +432,7 @@ export interface LiveTrainAnnouncementsProps<SystemKeys extends string> {
   systems: Record<SystemKeys, AmeyPhil>
   supportedPlatforms: Record<string, SystemKeys[]>
   nextTrainHandler: Record<SystemKeys, (options: INextTrainAnnouncementOptions) => Promise<void>>
-  disruptedTrainHandler: Record<SystemKeys, (options: IDisruptedTrainAnnouncementOptions) => Promise<void>>
+  disruptedTrainHandler: Record<SystemKeys, (options: ILiveDisruptedTrainAnnouncementOptions) => Promise<void>>
   approachingTrainHandler: Record<SystemKeys, (options: ILiveTrainApproachingAnnouncementOptions) => Promise<void>>
   standingTrainHandler: Record<SystemKeys, (options: IStandingTrainAnnouncementOptions) => Promise<void>>
 }
@@ -902,7 +902,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         platform: getPlatform(train.platform, systemKey),
         terminatingStationCode: (train.currentDestinations ?? train.destination).map(d => getStation(d, systemKey)),
         vias: vias,
-        originStationCode: getStation(train.origin[0], systemKey),
+        originStationCode: (train.currentOrigins ?? train.origin).map(o => getStation(o, systemKey)),
         fromLive: true,
       }
 
@@ -1050,7 +1050,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         train.uid,
       )
 
-      const [vias] = announceViaPoints
+      const vias = announceViaPoints
         ? getViaPoints(train, systems[systemKey].STATIONS, stationNameToCrsMap, loc => getStation(loc, systemKey))
         : [[]]
 
@@ -1066,14 +1066,14 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         }
       }
 
-      const options: IDisruptedTrainAnnouncementOptions = {
+      const options: ILiveDisruptedTrainAnnouncementOptions = {
         fromLive: true,
         missingAudioMode,
         chime: chimeType || systems[systemKey].DEFAULT_CHIME,
         hour: h === '00' ? '00 - midnight' : h,
         min: m === '00' ? '00 - hundred-hours' : m,
         toc,
-        terminatingStationCode: train.destination[0].crs,
+        terminatingStationCode: (train.currentDestinations ?? train.destination).map(d => getStation(d, systemKey)),
         vias,
         delayTime: delayMins.toString(),
         disruptionType: cancelled ? 'cancel' : unknownDelay || delayMins < 0 ? 'delay' : 'delayedBy',

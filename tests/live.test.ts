@@ -593,7 +593,7 @@ test('a disruption is not announced once the train has been announced as approac
   assert.deepEqual(played, ['delayed', 'approaching', 'standing', 'delayed-after-reset'])
 })
 
-test('a retraction discards queued audio and stops the announcement it names', async () => {
+test('a retraction discards queued audio but lets a speaking announcement finish', async () => {
   let release!: () => void
   let signal!: AbortSignal
   let valid!: () => boolean
@@ -615,14 +615,17 @@ test('a retraction discards queued audio and stops the announcement it names', a
   // Withdrawing the one still waiting leaves the one already speaking alone.
   queue.retract('pending')
   assert.equal(valid(), true)
+  // Withdrawing the one already speaking leaves it alone too: it is heard out rather than cut off.
   queue.retract('busy')
+  assert.equal(valid(), true)
+  assert.equal(signal.aborted, false)
+  // A reset still stops it, because the session it belongs to has gone.
+  queue.reset()
   assert.equal(valid(), false)
   assert.equal(signal.aborted, true)
   release()
   await setImmediate()
   assert.deepEqual(played, ['busy'])
-  queue.reset()
-  assert.equal(signal.aborted, true)
   queue.push(announcement('standing', 'after-reset'))
   await setImmediate()
   assert.deepEqual(played, ['busy', 'after-reset'])
@@ -635,6 +638,103 @@ function onPlatform(platform: string, id: string): Announcement {
   message.details = { ...message.details, id: movementId, platform: { ...message.details.platform, number: platform } }
   return message
 }
+
+function speaking(): { queue: PlaybackQueue; played: string[]; release: () => void; signalOf: (id: string) => AbortSignal } {
+  const played: string[] = []
+  const signals = new Map<string, AbortSignal>()
+  let release!: () => void
+  const held = new Promise<void>(resolve => {
+    release = resolve
+  })
+  const queue = new PlaybackQueue(
+    async (message, signal) => {
+      played.push(message.event_id)
+      signals.set(message.event_id, signal)
+      if (message.event_id.startsWith('held')) await held
+    },
+    () => now,
+  )
+  return { queue, played, release: () => release(), signalOf: id => signals.get(id)! }
+}
+
+function warning(platforms: string[], id: string): Announcement {
+  const message = announcement('passing', id)
+  const movementId = `fast/${id}`
+  message.movement_id = movementId
+  message.details = { ...message.details, id: movementId }
+  message.affected_platforms = platforms
+  return message
+}
+
+test('a platform alteration cuts short the announcement speaking for that train', async () => {
+  const { queue, played, signalOf } = speaking()
+  queue.push(announcement('standing', 'held-standing'))
+  await setImmediate()
+  assert.deepEqual(played, ['held-standing'])
+
+  const alteration = announcement('platform_alteration', 'moved')
+  alteration.previous_platform = '2'
+  alteration.new_platform = '1'
+  queue.push(alteration)
+  // The platform being spoken is now the wrong one, so finishing it would send the platform there.
+  assert.equal(signalOf('held-standing').aborted, true)
+  await setImmediate()
+  assert.deepEqual(played, ['held-standing', 'moved'])
+})
+
+test('a platform alteration for another train waits its turn like anything else', async () => {
+  const { queue, played, release, signalOf } = speaking()
+  queue.push(onPlatform('2', 'held-standing'))
+  await setImmediate()
+
+  const alteration = onPlatform('3', 'moved')
+  alteration.announcement_type = 'platform_alteration'
+  alteration.previous_platform = '2'
+  alteration.new_platform = '3'
+  queue.push(alteration)
+  assert.equal(signalOf('held-standing').aborted, false)
+  assert.deepEqual(played, ['held-standing'])
+  release()
+  await setImmediate()
+  assert.deepEqual(played, ['held-standing', 'moved'])
+})
+
+test('a fast train warning cuts short the disruption information its platform is reading', async () => {
+  const { queue, played, signalOf } = speaking()
+  const disruption = onPlatform('2', 'held-disruption')
+  disruption.announcement_type = 'disrupted'
+  queue.push(disruption)
+  await setImmediate()
+  assert.deepEqual(played, ['held-disruption'])
+
+  queue.push(warning(['2', '3'], 'fast'))
+  // Standing back from a train seconds away outranks the delay the platform is hearing about.
+  assert.equal(signalOf('held-disruption').aborted, true)
+  await setImmediate()
+  assert.deepEqual(played, ['held-disruption', 'fast'])
+})
+
+test('a fast train warning leaves a platform reading anything else, or reading about another platform, alone', async () => {
+  const elsewhere = speaking()
+  const other = onPlatform('4', 'held-disruption')
+  other.announcement_type = 'disrupted'
+  elsewhere.queue.push(other)
+  await setImmediate()
+  elsewhere.queue.push(warning(['2'], 'fast'))
+  assert.equal(elsewhere.signalOf('held-disruption').aborted, false)
+  elsewhere.release()
+  await setImmediate()
+  assert.deepEqual(elsewhere.played, ['held-disruption', 'fast'])
+
+  const standing = speaking()
+  standing.queue.push(onPlatform('2', 'held-standing'))
+  await setImmediate()
+  standing.queue.push(warning(['2'], 'fast'))
+  assert.equal(standing.signalOf('held-standing').aborted, false)
+  standing.release()
+  await setImmediate()
+  assert.deepEqual(standing.played, ['held-standing', 'fast'])
+})
 
 test('announcements for different platforms play at once, and one platform still plays in turn', async () => {
   const started: string[] = []

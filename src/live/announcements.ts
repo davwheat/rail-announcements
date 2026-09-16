@@ -1,4 +1,5 @@
 import { connectStream, streamUrl, type ConnectionStatus } from './connection'
+import { announcementName } from './describe'
 import { PlaybackQueue } from './playbackQueue'
 import type { Announcement, AnnouncementType, Heartbeat, Ready, Retraction, Revision } from './types'
 
@@ -18,14 +19,18 @@ export function connectAnnouncements(
   types: AnnouncementType[],
   queue: PlaybackQueue,
   onStatus: (status: ConnectionStatus) => void,
+  log: (message: string) => void = () => {},
 ): () => void {
   const url = streamUrl(baseUrl, 'announcements', crs)
   url.searchParams.set('type', types.join(','))
   url.searchParams.set('heartbeat', HEARTBEAT_SECONDS)
   if (types.length === 0) {
+    log('No announcement types are selected, so the live feed is not connected')
     queue.reset()
     return () => queue.reset()
   }
+
+  log(`Subscribing to ${crs} for ${types.map(announcementName).join(', ')}`)
 
   let ready = false
   return connectStream(
@@ -42,15 +47,21 @@ export function connectAnnouncements(
           queue.reset()
           ready = incoming.healthy
           onStatus(ready ? 'live' : 'recovering')
+          log(
+            ready
+              ? `${incoming.station.name || crs} is live; announcements start from now`
+              : `${incoming.station.name || crs} is recovering; announcements are paused until the service catches up`,
+          )
           return
         case 'announcement':
           if (incoming.station.crs !== crs) throw new Error('Invalid announcement stream')
           if (!incoming.event_id || incoming.movement_id !== incoming.details.id) throw new Error('Invalid announcement')
           if (ready) queue.push(incoming)
+          else log(`Ignoring a ${announcementName(incoming.announcement_type)} sent while the service is recovering`)
           return
         case 'retraction':
           if (!incoming.event_id) throw new Error('Invalid retraction')
-          if (ready) queue.retract(incoming.event_id)
+          if (ready) queue.retract(incoming.event_id, incoming.reason)
           return
         case 'revision':
           if (!incoming.event_id || incoming.movement_id !== incoming.details.id) throw new Error('Invalid revision')
@@ -66,5 +77,6 @@ export function connectAnnouncements(
     },
     onStatus,
     ANNOUNCEMENT_IDLE_TIMEOUT,
+    log,
   )
 }

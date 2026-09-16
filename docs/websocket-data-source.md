@@ -22,10 +22,12 @@ to the original API.
 
 Connecting establishes a silent baseline. Announcements are deduplicated and queued with a bound of 64 items. Their server expiry is checked on
 receipt, before preparing audio and after loading clips. New standing/approaching messages supersede earlier pending stages. The service
-withdraws an announcement whose train is removed, cancelled, suppressed, replatformed or departed; that discards it from the queue, and stops it
-if it has already started speaking. A revision replaces the details of one still waiting, so it announces the current time. Disconnect, recovery,
-station/source/filter changes clear queued audio; reconnect does not replay it. Source/filter changes also stop audio from the previous WebSocket
-session.
+withdraws an announcement whose train is removed, cancelled, suppressed, replatformed or departed; that discards it from the queue, and an
+announcement that has already started speaking is left to finish, because a half-spoken announcement is heard as a broken station rather than as
+a correction. Only two announcements cut a speaking one short: a platform alteration for the same train, whose platform is now the wrong one to
+send anybody to, and a fast train warning for a platform that is reading disruption information. A revision replaces the details of one still
+waiting, so it announces the current time. Disconnect, recovery, station/source/filter changes clear queued audio; reconnect does not replay it.
+Source/filter changes also stop audio from the previous WebSocket session.
 
 By default the station announces one train at a time. Select **Announce different platforms at the same time?** to give each platform its own
 queue: announcements for different platforms then play together, while each platform still plays its own in turn. A fast-train warning holds

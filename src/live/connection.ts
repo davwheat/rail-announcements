@@ -12,6 +12,12 @@ export function streamUrl(base: string, path: string, crs: string): URL {
   return url
 }
 
+const CONNECT_TIMEOUT = 20_000
+
+function seconds(milliseconds: number): string {
+  return `${Math.round(milliseconds / 1000)}s`
+}
+
 /** Reconnect only to this feed. A disconnect never enables the legacy API. */
 export function connectStream(
   url: URL,
@@ -21,6 +27,7 @@ export function connectStream(
   /** Recycle a stream this long without traffic: a middlebox drops an idle connection
    *  without telling either end, and a stream with no keepalive cannot notice. */
   idleTimeout?: number,
+  log: (message: string) => void = () => {},
 ): () => void {
   let stopped = false
   let socket: WebSocket | undefined
@@ -28,14 +35,31 @@ export function connectStream(
   let connectTimeout: ReturnType<typeof setTimeout> | undefined
   let idleTimer: ReturnType<typeof setTimeout> | undefined
   let attempts = 0
+  /** Why this socket is closing, so the disconnect reads as the fault it was rather than as a bare close. */
+  let closeReason = ''
 
   function connect() {
     if (stopped) return
     onStatus(attempts === 0 ? 'connecting' : 'reconnecting')
+    log(attempts === 0 ? `Connecting to ${url.host}${url.pathname}` : `Reconnecting to ${url.host}${url.pathname} (attempt ${attempts + 1})`)
     const current = new WebSocket(url)
     socket = current
-    connectTimeout = setTimeout(() => current.close(), 20_000)
-    if (idleTimeout) idleTimer = setTimeout(() => current.close(), idleTimeout)
+    closeReason = ''
+    connectTimeout = setTimeout(() => {
+      closeReason = `no reply within ${seconds(CONNECT_TIMEOUT)}`
+      current.close()
+    }, CONNECT_TIMEOUT)
+    if (idleTimeout) {
+      idleTimer = setTimeout(() => {
+        closeReason = `silent for ${seconds(idleTimeout)}`
+        current.close()
+      }, idleTimeout)
+    }
+
+    current.onopen = () => {
+      if (stopped || socket !== current) return
+      log('Connected; waiting for the service to send its baseline')
+    }
 
     current.onmessage = event => {
       if (stopped || socket !== current) return
@@ -47,16 +71,24 @@ export function connectStream(
         clearTimeout(connectTimeout)
         if (idleTimeout) {
           clearTimeout(idleTimer)
-          idleTimer = setTimeout(() => current.close(), idleTimeout)
+          idleTimer = setTimeout(() => {
+            closeReason = `silent for ${seconds(idleTimeout)}`
+            current.close()
+          }, idleTimeout)
         }
         attempts = 0
       } catch (error) {
         console.error('Invalid live feed message', error)
+        log(`Unreadable message from the live feed: ${error instanceof Error ? error.message : String(error)}`)
+        closeReason = 'unreadable message'
         current.close()
       }
     }
 
-    current.onerror = () => current.close()
+    current.onerror = () => {
+      closeReason ||= 'connection error'
+      current.close()
+    }
     current.onclose = () => {
       clearTimeout(connectTimeout)
       clearTimeout(idleTimer)
@@ -64,6 +96,7 @@ export function connectStream(
       onReset()
       onStatus('reconnecting')
       const delay = Math.min(30_000, 1000 * 2 ** attempts++)
+      log(`Live feed disconnected${closeReason ? ` (${closeReason})` : ''}; queued announcements dropped, retrying in ${seconds(delay)}`)
       retry = setTimeout(connect, delay)
     }
   }
@@ -76,5 +109,6 @@ export function connectStream(
     clearTimeout(idleTimer)
     socket?.close()
     onReset()
+    log('Disconnected from the live feed')
   }
 }

@@ -1,6 +1,7 @@
 import { connectAnnouncements } from '../live/announcements'
 import { PlaybackQueue } from '../live/playbackQueue'
 import { playAnnouncement, announcementPlatforms, audioPlatform } from '../live/playAnnouncement'
+import { announcementName, describeAnnouncement, describeMovement } from '../live/describe'
 import type { Announcement, AnnouncementType as FeedAnnouncementType } from '../live/types'
 import type { ConnectionStatus } from '../live/connection'
 import { useStationPlatforms } from '../live/stationPlatforms'
@@ -1519,23 +1520,35 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
   const playFeedMessage = useRef<(announcement: Announcement, signal: AbortSignal, valid: () => boolean) => Promise<void>>(async () => {})
   playFeedMessage.current = async (announcement, signal, valid) => {
     // Let an already playing legacy announcement finish when the source changes.
-    while (legacyPlaying.current && valid()) await new Promise(resolve => setTimeout(resolve, 100))
-    if (!valid() || dataSource !== 'websocket' || !enabledAnnouncements.includes(announcement.announcement_type as AnnouncementType)) return
+    if (legacyPlaying.current && valid()) {
+      addLog(`Waiting for the previous announcement to finish before: ${describeAnnouncement(announcement)}`)
+      while (legacyPlaying.current && valid()) await new Promise(resolve => setTimeout(resolve, 100))
+    }
+    if (!valid() || dataSource !== 'websocket') return
+    if (!enabledAnnouncements.includes(announcement.announcement_type as AnnouncementType)) {
+      addLog(`Skipping the ${describeAnnouncement(announcement)}: that type is switched off`)
+      return
+    }
     for (const platform of announcementPlatforms(announcement)) {
       if (!valid()) return
+      const train = describeMovement(announcement.details)
+      const type = announcementName(announcement.announcement_type)
       if (!platform) {
-        addLog(`Skipping ${announcement.event_id}: no platform has been allocated`)
+        addLog(`Skipping the ${type} for ${train}: no platform has been allocated`)
         continue
       }
       const systemKey = systemKeyForPlatform[getPlatformForSystemSelection(platform)]
-      if (!systemKey) continue
+      if (!systemKey) {
+        addLog(`Skipping the ${type} for ${train}: platform ${platform} has no voice selected`)
+        continue
+      }
       const system = systems[systemKey]
       const spokenPlatform = audioPlatform(platform, system)
       if (spokenPlatform === null) {
-        addLog(`Skipping ${announcement.event_id}: platform ${platform} has no audio`)
+        addLog(`Skipping the ${type} for ${train}: ${systemKey} has no audio for platform ${platform}`)
         continue
       }
-      addLog(`Playing ${announcement.announcement_type} for ${announcement.movement_id} (${systemKey})`)
+      addLog(`Announcing the ${type} for ${train} on platform ${platform} in ${systemKey}`)
       await playAnnouncement(
         announcement,
         system.withLivePlayback(signal, valid),
@@ -1577,6 +1590,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
 
         return [...new Set(occupied)]
       },
+      addLog,
     )
   }
   const feedTypes = enabledAnnouncements.join(',')
@@ -1590,6 +1604,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         feedTypes.split(',').filter(Boolean) as FeedAnnouncementType[],
         queue,
         setLiveStatus,
+        addLog,
       )
     } catch (error) {
       queue.reset()

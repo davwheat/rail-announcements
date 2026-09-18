@@ -585,6 +585,10 @@ const changelog: IChangelogVersion[] = [
       '[Northern] Add TrainFX system covering Northern Rail and Northern Electrics branding',
     ],
   },
+  {
+    date: '2026-09-18',
+    additions: ['[DLR] Add TfL Docklands Light Railway system using recordings from the DLR automatic voice information system'],
+  },
 ]
 
 export default changelog

@@ -1383,3 +1383,27 @@ test('a station without zones takes turns in one zone, and preferences travel wi
   assert.equal(stationStream('http://localhost:8090', 'ECR', null, { '1': null }, ['next'], preferences), null)
   assert.throws(() => stationStream('ws://localhost:8090', 'ECR', null, voices, ['next'], preferences))
 })
+
+test('a whole station in one voice names the voice and not every platform it can say', () => {
+  const everyPlatform = Object.fromEntries(['0', '1', '1a', '2', '13', 'a'].map(platform => [platform, 'AMEY_PHIL_V1']))
+  for (const zones of [null, []]) {
+    const stream = stationStream('https://audio.example', 'ECR', zones, everyPlatform, ['next'], streamPreferences)!
+    const params = new URL(stream.radioUrl).searchParams
+    assert.equal(params.get('voice'), 'AMEY_PHIL_V1')
+    assert.equal(params.has('zone'), false)
+    assert.deepEqual(stream.zones, [])
+  }
+
+  // A silenced platform, a second voice or real zones each need the platforms spelled out.
+  for (const voices of [
+    { ...everyPlatform, '2': null },
+    { ...everyPlatform, '2': 'AMEY_CELIA_V1' },
+  ]) {
+    const params = new URL(stationStream('https://audio.example', 'ECR', null, voices, ['next'], streamPreferences)!.radioUrl).searchParams
+    assert.equal(params.has('voice'), false)
+    assert.equal(params.getAll('zone').length, 1)
+  }
+  const zoned = new URL(stationStream('https://audio.example', 'ECR', [['1', '2']], everyPlatform, ['next'], streamPreferences)!.radioUrl)
+  assert.deepEqual(zoned.searchParams.getAll('zone'), ['1:AMEY_PHIL_V1,2:AMEY_PHIL_V1'])
+  assert.equal(zoned.searchParams.has('voice'), false)
+})

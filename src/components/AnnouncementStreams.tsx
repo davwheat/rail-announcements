@@ -18,13 +18,13 @@ export default function AnnouncementStreams({ stream, log }: { stream: StationSt
   const latestLog = useRef(log)
   latestLog.current = log
 
-  const zones = stream?.zones.map(zone => zone.join(', ')).join(' | ')
+  const zones = stream?.zones.length ? `platforms ${stream.zones.map(zone => zone.join(', ')).join(' | ')}` : 'every platform'
   // Both URLs carry the same query, so either one identifies the stream.
   const identity = stream?.radioUrl
 
   useEffect(() => {
     if (!audio.current || !stream) return
-    latestLog.current(`Playing announcements from the announcement service for platforms ${zones}`)
+    latestLog.current(`Playing announcements from the announcement service for ${zones}`)
     return playStream(stream, audio.current, setStatus, message => latestLog.current(message))
     // Keyed on the URL alone: a new object for the same stream must not restart the audio.
   }, [identity])

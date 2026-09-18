@@ -15,7 +15,8 @@ export interface StreamPreferences {
 }
 
 export interface StationStream {
-  /** The zones that have a voice, each in station order. They speak at the same time. */
+  /** The zones that have a voice, each in station order. They speak at the same time. Empty when
+   *  the stream is the whole station taking turns in one voice. */
   zones: string[][]
   /** The stream as an HLS playlist, which Safari plays itself. */
   playlistUrl: string
@@ -53,7 +54,13 @@ export function stationStream(
   if (groups.length === 0) return null
 
   const params = new URLSearchParams({ crs })
-  for (const platforms of groups) params.append('zone', platforms.map(platform => `${platform}:${voices[platform]}`).join(','))
+  // Without zones the list is every platform a voice can say, which is some eighty entries. When
+  // they all share one voice, naming the voice says the same thing: the service takes a stream
+  // with no zones to be the whole station.
+  const everyVoice = Object.values(voices)
+  const wholeStationVoice = groups.length === 1 && !(zones && zones.length > 0) && everyVoice.every(voice => voice === everyVoice[0])
+  if (wholeStationVoice) params.set('voice', everyVoice[0]!)
+  else for (const platforms of groups) params.append('zone', platforms.map(platform => `${platform}:${voices[platform]}`).join(','))
   params.set('type', [...types].sort().join(','))
   if (preferences.chime) params.set('chime', preferences.chime)
   params.set('vias', String(preferences.announceViaPoints))
@@ -71,7 +78,7 @@ export function stationStream(
     return url.toString()
   }
 
-  return { zones: groups, playlistUrl: endpoint('live.m3u8'), radioUrl: endpoint('live.mp3') }
+  return { zones: wholeStationVoice ? [] : groups, playlistUrl: endpoint('live.m3u8'), radioUrl: endpoint('live.mp3') }
 }
 
 export type StreamStatus = 'connecting' | 'playing' | 'blocked' | 'reconnecting'

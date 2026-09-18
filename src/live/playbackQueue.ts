@@ -1,6 +1,6 @@
 import { announcementName, describeAnnouncement, describeMovement } from './describe'
 import { announcementPlatforms } from './playAnnouncement'
-import type { Announcement, AnnouncementType, Movement } from './types'
+import type { Announcement, AnnouncementAudio, AnnouncementType, Movement } from './types'
 
 const stages: Partial<Record<AnnouncementType, number>> = { next: 1, approaching: 2, standing: 3 }
 
@@ -85,12 +85,14 @@ export class PlaybackQueue {
   }
 
   /** Replaces the details of an announcement still waiting its turn, so it speaks the current
-   *  time rather than the one that was current when the service triggered it. */
-  revise(eventId: string, details: Movement) {
+   *  time rather than the one that was current when the service triggered it. Audio the service
+   *  rendered goes with them: a revision without any leaves the announcement to be generated,
+   *  because what it carried was rendered from the details being replaced. */
+  revise(eventId: string, details: Movement, audio?: AnnouncementAudio) {
     let revised: Announcement | undefined
     this.pending = this.pending.map(entry => {
       if (entry.announcement.event_id !== eventId) return entry
-      revised = { ...entry.announcement, details }
+      revised = { ...entry.announcement, details, audio }
       return { ...entry, announcement: revised }
     })
     if (revised) this.log(`Revised while queued: ${describeAnnouncement(revised)}`)

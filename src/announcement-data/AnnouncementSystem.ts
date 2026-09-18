@@ -346,7 +346,6 @@ export default abstract class AnnouncementSystem {
       }
     }
 
-    const crunker = AnnouncementSystem.getCrunker()
     const audio = await this.concatSoundClips(standardisedFileIds, missingAudioMode)
 
     if (livePlayback && !livePlayback.valid()) {
@@ -354,59 +353,85 @@ export default abstract class AnnouncementSystem {
       return
     }
 
-    if (audio.numberOfChannels > 1) {
-      // This is stereo. We need to mux it to mono.
-      audio.copyToChannel(audio.getChannelData(0), 1, 0)
-    }
-
     if (download) {
+      this.muxToMono(audio)
+      const crunker = AnnouncementSystem.getCrunker()
       crunker.download(crunker.export(audio, 'audio/wav').blob, 'announcement')
       window.__audio = undefined
-    } else {
-      return new Promise<void>(resolve => {
-        const { contextResume } = crunker.play(audio, source => {
-          const stop = () => source.stop()
-          livePlayback?.signal.addEventListener('abort', stop, { once: true })
-          source.addEventListener('ended', () => {
-            livePlayback?.signal.removeEventListener('abort', stop)
-            console.log('[Crunker] Finished playing audio')
-            window.__audio = undefined
-            resolve()
-          })
-        })
+      return
+    }
 
-        contextResume.then(
-          () => onPlaybackStart?.(),
-          () => {},
-        )
+    await this.playBuffer(audio, onPlaybackStart)
+  }
 
-        contextResume.catch(err => {
-          console.error('[Crunker]', err.message)
+  /**
+   * Plays an announcement the live feed supplied already rendered, in place of one assembled
+   * from this voice's clips. It stops with the live announcement it belongs to, as clips do.
+   */
+  async playRenderedAudio(encoded: Uint8Array): Promise<void> {
+    const livePlayback = this.livePlayback
+    if (livePlayback && !livePlayback.valid()) return
 
-          document.getElementById('resume-audio-button')?.remove()
+    // decodeAudioData detaches the buffer it is given, which would empty the announcement's own copy.
+    const copy = encoded.slice().buffer
+    const audio = await AnnouncementSystem.getCrunker().context.decodeAudioData(copy)
+    if (livePlayback && !livePlayback.valid()) return
 
-          const button = document.createElement('button')
-          button.textContent = 'Resume audio'
-          button.id = 'resume-audio-button'
-          button.style.margin = '16px'
-          button.onclick = () => {
-            crunker.context.resume()
-            button.remove()
-          }
+    await this.playBuffer(audio)
+  }
 
-          const container = document.getElementById('resume-audio-container')
-          if (container) container.appendChild(button)
-          else document.body.appendChild(button)
+  private muxToMono(audio: AudioBuffer) {
+    if (audio.numberOfChannels > 1) audio.copyToChannel(audio.getChannelData(0), 1, 0)
+  }
 
-          alert(
-            "Your device or web browser is refusing to let the website play audio.\n\nThis is especially common on iPhones and iPads. We'd recommend you try using a desktop computer or an alternative device.\n\nTry scrolling to and pressing the 'Resume audio' button. If this doesn't help, there's nothing else that we can do. Sorry!",
-          )
+  private playBuffer(audio: AudioBuffer, onPlaybackStart?: () => void): Promise<void> {
+    const livePlayback = this.livePlayback
+    const crunker = AnnouncementSystem.getCrunker()
+    this.muxToMono(audio)
 
-          button.scrollIntoView()
+    return new Promise<void>(resolve => {
+      const { contextResume } = crunker.play(audio, source => {
+        const stop = () => source.stop()
+        livePlayback?.signal.addEventListener('abort', stop, { once: true })
+        source.addEventListener('ended', () => {
+          livePlayback?.signal.removeEventListener('abort', stop)
+          console.log('[Crunker] Finished playing audio')
+          window.__audio = undefined
           resolve()
         })
       })
-    }
+
+      contextResume.then(
+        () => onPlaybackStart?.(),
+        () => {},
+      )
+
+      contextResume.catch(err => {
+        console.error('[Crunker]', err.message)
+
+        document.getElementById('resume-audio-button')?.remove()
+
+        const button = document.createElement('button')
+        button.textContent = 'Resume audio'
+        button.id = 'resume-audio-button'
+        button.style.margin = '16px'
+        button.onclick = () => {
+          crunker.context.resume()
+          button.remove()
+        }
+
+        const container = document.getElementById('resume-audio-container')
+        if (container) container.appendChild(button)
+        else document.body.appendChild(button)
+
+        alert(
+          "Your device or web browser is refusing to let the website play audio.\n\nThis is especially common on iPhones and iPads. We'd recommend you try using a desktop computer or an alternative device.\n\nTry scrolling to and pressing the 'Resume audio' button. If this doesn't help, there's nothing else that we can do. Sorry!",
+        )
+
+        button.scrollIntoView()
+        resolve()
+      })
+    })
   }
 
   async concatSoundClips(files: AudioItemObject[], missingAudioMode: MissingAudioMode = 'skip-service'): Promise<AudioBuffer> {

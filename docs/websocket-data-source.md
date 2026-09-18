@@ -91,5 +91,58 @@ branch to be deployed; point it at a `https://<branch>.raildotmatrix.pages.dev/b
 is only shown in development builds. Existing saved URLs take precedence over new build defaults. Use HTTPS/WSS together for remote hosting;
 local testing uses HTTP/WS.
 
-Run `yarn test:live` for the reducer, reconnect, queue, expiry, withdrawal, revision and voice-adapter regressions. It uses Node's test runner
-and Wrangler's existing esbuild compiler. Run `yarn build` for the production build.
+## Wire format
+
+The streams are Darwin Browser's protocol version 2: every frame is a protobuf message, defined in that repository's
+`proto/darwin/live/v2/live.proto` and described in its `docs/live/protocol.md`. `src/live/wire.ts` decodes each frame into the types in
+`src/live/types.ts`, which the rest of the page reads, so `null` still means unknown there. A text frame means a version 1 service, and the
+connection is closed and retried rather than read. A message this build doesn't know is ignored, and still counts as proof that the connection is
+alive.
+
+`src/live/gen` is generated and `src/live/wire.ts` is shared with the other website, so don't edit either here. To pick up a schema change, run
+`buf generate ../darwin-browser/proto` with Darwin Browser checked out beside this repository, then copy `docs/live/examples/wire.ts`, with its
+type import pointed at `./types`, and the fixtures in `docs/live/fixtures` that `tests/fixtures` holds. Keep the plugin version in `buf.gen.yaml`
+no newer than the `@bufbuild/protobuf` version in `package.json`. The `.pb` fixtures are frames written by the service's own encoder, and the
+tests check that this decoder reads each one as the JSON beside it.
+
+### Audio rendered by the service
+
+An announcement can arrive with audio that the service has already rendered. The page then plays that audio once, in place of assembling the
+announcement from a platform voice's clips, and the queue treats it like any other announcement: it waits its turn, expires, and is withdrawn the
+same way. A revision replaces the audio together with the details. A revision without audio discards the audio that the page holds, and the
+announcement is assembled from the revised details instead.
+
+The service sends audio only to a connection that asks for it with `audio=mp3`, which `connectAnnouncements` does when its `serviceAudio`
+argument is true. Nothing sets it: the service has no renderer, and its audio would replace the voices chosen on the page, so turning it on is a
+setting for the listener to choose.
+
+## Announcements streamed from the announcement service
+
+With **Announcement audio** set to **Streamed from the announcement service**, the page doesn't build announcements. The announcement service
+(`../rail-announcements-backend`) listens to the same feed, builds each announcement from the same recordings, and serves the audio as an HTTP
+Live Stream. The page doesn't open the announcement stream in this mode, and its queue stays empty.
+
+`src/live/audioStreams.ts` asks for one stream for the whole station, and `AnnouncementStreams` plays it through one audio element. The stream's
+URL lists the announcement zones that have a voice. The service lets zones speak over each other and mixes them, and the platforms within a zone
+take turns, which is what the page's own queue does. With zones turned off, or at a station whose platforms aren't known, the whole station takes
+turns. The URL also carries each platform's voice, the announcement types and the preferences, so changing any of them starts a different stream.
+
+One stream and one element is what keeps announcements playing in a background tab: the browser plays a URL by itself, and no script has to keep
+running. Safari plays the service's HLS playlist (`live.m3u8`). Other browsers can't play a playlist without a script that feeds them, and a
+background tab throttles scripts, so they play the same audio as one endless MP3 response (`live.mp3`), the way they play internet radio. A
+listener hears an announcement about two seconds after the service starts it. If the MP3 player falls more than four seconds behind, it skips to
+the newest audio it holds.
+
+Set `NEXT_PUBLIC_ANNOUNCEMENT_SERVICE_URL` to the service's URL. A production build offers the **Announcement audio** setting only when this is
+set, and ignores a saved choice of streamed audio without it, so the page never tries to stream from a service that isn't deployed. In
+development, the **Announcement service URL** setting overrides it, and the default is `http://localhost:8090`.
+
+### Keep the service's copy of the logic in step
+
+The service holds a Go port of `AmeyPhil`, `AmeyCelia`, `src/live/playAnnouncement.ts` and `src/live/playbackQueue.ts`, and this repository is
+the reference for it. `npm run export:backend` runs the real systems over captured movements and generated tab states, and writes the voices'
+tables and the expected clips into `../rail-announcements-backend`, whose tests replay them. After you change how an announcement is worded,
+queued or interrupted, run the export and port the change there. `tests/backend-parity` holds the generator.
+
+Run `yarn test:live` for the decoder, reducer, reconnect, queue, expiry, withdrawal, revision, rendered-audio, stream URL and voice-adapter
+regressions. It uses Node's test runner and Wrangler's existing esbuild compiler. Run `yarn build` for the production build.

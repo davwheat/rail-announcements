@@ -1,14 +1,13 @@
 import { connectStream, streamUrl, type ConnectionStatus } from './connection'
 import { announcementName } from './describe'
 import { PlaybackQueue } from './playbackQueue'
-import type { Announcement, AnnouncementType, Heartbeat, Ready, Retraction, Revision } from './types'
+import type { AnnouncementType } from './types'
+import { PROTOCOL_VERSION } from './wire'
 
 /** Heartbeats fill a quiet station's silence, so silence this long is a dead connection
  *  rather than an uneventful hour. Matches the service's own pong deadline. */
 const ANNOUNCEMENT_IDLE_TIMEOUT = 75_000
 const HEARTBEAT_SECONDS = '30'
-
-type Incoming = Ready | Announcement | Retraction | Revision | Heartbeat
 
 /** The service withdraws and revises the announcements it has sent, so this one stream carries
  *  everything playback needs. A second connection for the train list would only duplicate the
@@ -20,9 +19,13 @@ export function connectAnnouncements(
   queue: PlaybackQueue,
   onStatus: (status: ConnectionStatus) => void,
   log: (message: string) => void = () => {},
+  /** Ask the service for announcements it has rendered itself. Its audio replaces the voices chosen
+   *  on the page, so this has to be the listener's choice, and nothing asks for it yet. */
+  serviceAudio = false,
 ): () => void {
   const url = streamUrl(baseUrl, 'announcements', crs)
   url.searchParams.set('type', types.join(','))
+  if (serviceAudio) url.searchParams.set('audio', 'mp3')
   url.searchParams.set('heartbeat', HEARTBEAT_SECONDS)
   if (types.length === 0) {
     log('No announcement types are selected, so the live feed is not connected')
@@ -35,9 +38,8 @@ export function connectAnnouncements(
   let ready = false
   return connectStream(
     url,
-    message => {
-      const incoming = message as Incoming
-      if (incoming.version !== 1) throw new Error('Invalid announcement stream')
+    incoming => {
+      if (incoming.version !== PROTOCOL_VERSION) throw new Error('Invalid announcement stream')
       switch (incoming.type) {
         case 'heartbeat':
           return
@@ -65,7 +67,7 @@ export function connectAnnouncements(
           return
         case 'revision':
           if (!incoming.event_id || incoming.movement_id !== incoming.details.id) throw new Error('Invalid revision')
-          if (ready) queue.revise(incoming.event_id, incoming.details)
+          if (ready) queue.revise(incoming.event_id, incoming.details, incoming.audio)
           return
         default:
           throw new Error('Unexpected announcement message')

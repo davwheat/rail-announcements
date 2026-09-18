@@ -17,6 +17,7 @@ import TfLJubileeLine from './systems/rolling-stock/TfLJubileeLine'
 import TfLNorthernLine from './systems/rolling-stock/TfLNorthernLine'
 import TfLElizabethLine from './systems/rolling-stock/TfLElizabeth'
 import TfLPiccadillyLine from './systems/rolling-stock/TfLPiccadillyLine'
+import TfLDLR from './systems/rolling-stock/TfLDLR'
 import LnerAzuma from './systems/rolling-stock/LNERAzuma'
 
 import type TrainAnnouncementSystem from './TrainAnnouncementSystem'
@@ -42,7 +43,13 @@ export const AllStationAnnouncementSystems: AnnouncementSystemClass<StationAnnou
   Banedanmark,
 ]
 
-export const AllOtherAnnouncementSystems: AnnouncementSystemClass[] = [TfLJubileeLine, TfLNorthernLine, TfLElizabethLine, TfLPiccadillyLine]
+export const AllOtherAnnouncementSystems: AnnouncementSystemClass[] = [
+  TfLJubileeLine,
+  TfLNorthernLine,
+  TfLElizabethLine,
+  TfLPiccadillyLine,
+  TfLDLR,
+]
 
 export const AllAnnouncementSystems: AnnouncementSystemClass[] = [
   ...AllStationAnnouncementSystems,

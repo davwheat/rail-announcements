@@ -59,7 +59,20 @@ export interface IDisruptedTrainAnnouncementOptions {
   disruptionType: 'delay' | 'delayedBy' | 'cancel'
   disruptionReason: string | string[]
   delayTime: string
-  fromLive?: true
+  missingAudioMode?: MissingAudioMode
+}
+
+export interface ILiveDisruptedTrainAnnouncementOptions {
+  chime: ChimeType
+  hour: string
+  min: string
+  toc: string
+  terminatingStationCode: string[]
+  vias: CallingAtPoint[][]
+  disruptionType: 'delay' | 'delayedBy' | 'cancel'
+  disruptionReason: string | string[]
+  delayTime: string
+  fromLive: true
   missingAudioMode?: MissingAudioMode
 }
 
@@ -68,6 +81,7 @@ interface IFastTrainAnnouncementOptions {
   daktronicsFanfare: boolean
   platform: string
   fastTrainApproaching: boolean
+  missingAudioMode?: MissingAudioMode
 }
 
 export interface ITrainApproachingAnnouncementOptions {
@@ -124,7 +138,7 @@ export interface ILiveTrainApproachingAnnouncementOptions {
   toc: string
   terminatingStationCode: string[]
   vias: CallingAtPoint[][]
-  originStationCode: string
+  originStationCode: string[]
   callingAt?: CallingAtPoint[]
   fromLive: true
   missingAudioMode?: MissingAudioMode
@@ -4187,7 +4201,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
 
     const tStationLength = terminatingStation.length
     terminatingStation.forEach((t, i) => {
-      const viasForThisTerminatingStation = vias[i]
+      const viasForThisTerminatingStation = vias[i] ?? []
       const isEnd = i === tStationLength - 1
 
       if (viasForThisTerminatingStation.length !== 0) {
@@ -5094,25 +5108,47 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     thisStationAudio: 'e.this station-2',
   }
 
-  async playDisruptedTrainAnnouncement(options: IDisruptedTrainAnnouncementOptions, download: boolean = false): Promise<void> {
+  async playDisruptedTrainAnnouncement(
+    options: IDisruptedTrainAnnouncementOptions | ILiveDisruptedTrainAnnouncementOptions,
+    download: boolean = false,
+  ): Promise<void> {
     const files: AudioItem[] = []
 
     const chime = this.getChime(options.chime)
     if (chime) files.push(chime)
 
+    // A cancellation names this station: 'the service from here to ...'.
+    const fromAudio = options.disruptionType === 'cancel' ? [this.disruptionOptions.thisStationAudio] : []
+
     files.push('s.were sorry to announce that the')
-    files.push(
-      ...(await this.getFilesForBasicTrainInfo(
-        options.hour,
-        options.min,
-        options.toc,
-        options.vias.map(s => s.crsCode),
-        options.terminatingStationCode,
-        [],
-        true,
-        options.disruptionType === 'cancel' ? [this.disruptionOptions.thisStationAudio] : [],
-      )),
-    )
+    // This announcement collects no calling points, so the destinations a dividing service reaches
+    // cannot be read out of them as they are elsewhere. Live callers pass every destination instead.
+    if ('fromLive' in options) {
+      files.push(
+        ...(await this.getFilesForBasicTrainInfoLive(
+          options.hour,
+          options.min,
+          options.toc,
+          options.vias.map(l => l.map(v => v.crsCode)),
+          options.terminatingStationCode,
+          true,
+          fromAudio,
+        )),
+      )
+    } else {
+      files.push(
+        ...(await this.getFilesForBasicTrainInfo(
+          options.hour,
+          options.min,
+          options.toc,
+          options.vias.map(s => s.crsCode),
+          options.terminatingStationCode,
+          [],
+          true,
+          fromAudio,
+        )),
+      )
+    }
 
     function getNumber(num: number): string {
       if (num < 10) {
@@ -5200,7 +5236,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         break
     }
 
-    await this.playAudioFiles(files, download, options.missingAudioMode ?? 'skip-service', options.fromLive ? 1000 : 0)
+    await this.playAudioFiles(files, download, options.missingAudioMode ?? 'skip-service', 'fromLive' in options ? 1000 : 0)
   }
 
   async playFastTrainAnnouncement(options: IFastTrainAnnouncementOptions, download: boolean = false): Promise<void> {
@@ -5230,7 +5266,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       files.push({ id: 'w.fast train approaching', opts: { delayStart: this.BEFORE_SECTION_DELAY } })
     }
 
-    await this.playAudioFiles(files, download)
+    await this.playAudioFiles(files, download, options.missingAudioMode ?? 'skip-service')
   }
 
   async playTrainApproachingAnnouncement(
@@ -5283,7 +5319,20 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       )
     }
 
-    files.push({ id: 's.this train is the service from', opts: { delayStart: this.SHORT_DELAY } }, `station.e.${options.originStationCode}`)
+    files.push({ id: 's.this train is the service from', opts: { delayStart: this.SHORT_DELAY } })
+    // A train that was joined started in two places, and both are the service the listener is on.
+    if ('fromLive' in options) {
+      files.push(
+        ...this.pluraliseAudio(options.originStationCode, {
+          prefix: 'station.m.',
+          finalPrefix: 'station.e.',
+          andId: 'm.and',
+          beforeAndDelay: 100,
+        }),
+      )
+    } else {
+      files.push(`station.e.${options.originStationCode}`)
+    }
 
     await this.playAudioFiles(files, download, options.missingAudioMode ?? 'skip-service', 'fromLive' in options ? 1000 : 0)
   }
@@ -6116,7 +6165,6 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         disruptionType: 'delayedBy',
         delayTime: '65',
         disruptionReason: '',
-        fromLive: undefined,
         missingAudioMode: undefined,
       },
       props: {

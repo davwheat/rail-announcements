@@ -84,6 +84,8 @@ export function stationStream(
 export type StreamStatus = 'connecting' | 'playing' | 'blocked' | 'reconnecting'
 
 const RECONNECT_DELAY = 3000
+/** MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED, spelled out because the tests run where MediaError does not exist. */
+const MEDIA_ERR_SRC_NOT_SUPPORTED = 4
 const LATENCY_CHECK_INTERVAL = 10_000
 /** An endless response has no live edge to return to, so every stall leaves the player that much
  *  further behind for good. Past this it skips to the newest audio it holds. */
@@ -94,9 +96,10 @@ const SECONDS_BEHIND_AFTER_SKIP = 1
  * Plays the station's stream through an audio element until the returned function is called.
  *
  * Everything here is the browser's own playback of one URL: no script has to run for the audio
- * to continue, so a background tab whose timers are throttled keeps announcing. Safari plays the
- * playlist, which keeps itself at the live edge. Other browsers cannot play a playlist without a
- * script feeding them, so they take the endless MP3 response, the way they play internet radio.
+ * to continue, so a background tab whose timers are throttled keeps announcing. A browser that
+ * plays HLS itself, which is Safari, takes the playlist, which keeps itself at the live edge.
+ * Other browsers cannot play a playlist without a script feeding them, so they take the endless
+ * MP3 response, the way they play internet radio.
  */
 export function playStream(
   stream: StationStream,
@@ -104,12 +107,15 @@ export function playStream(
   onStatus: (status: StreamStatus) => void,
   log: (message: string) => void = () => {},
 ): () => void {
-  const native = audio.canPlayType('application/vnd.apple.mpegurl') !== ''
+  // A browser's claim to play HLS is only a hint. Firefox can answer "maybe" and then find it has
+  // no decoder, so the playlist is tried first where it is claimed and dropped for good if the
+  // browser then refuses it. The MP3 response plays everywhere.
+  let playlist = audio.canPlayType('application/vnd.apple.mpegurl') !== ''
   let stopped = false
   let retry: ReturnType<typeof setTimeout> | undefined
 
   const start = () => {
-    audio.src = native ? stream.playlistUrl : stream.radioUrl
+    audio.src = playlist ? stream.playlistUrl : stream.radioUrl
     audio.play().then(
       () => {},
       () => {
@@ -129,7 +135,15 @@ export function playStream(
   }
   const onPlaying = () => onStatus('playing')
   const onWaiting = () => onStatus('connecting')
-  const onError = () => reconnect('failed')
+  const onError = () => {
+    if (playlist && audio.error?.code === MEDIA_ERR_SRC_NOT_SUPPORTED) {
+      playlist = false
+      log('This browser cannot play the HLS playlist after all, so it is playing the MP3 stream')
+      if (!stopped) start()
+      return
+    }
+    reconnect('failed')
+  }
   // The service ends a response when the listener falls too far behind, or when it restarts.
   const onEnded = () => reconnect('ended')
   audio.addEventListener('playing', onPlaying)
@@ -138,7 +152,7 @@ export function playStream(
   audio.addEventListener('ended', onEnded)
 
   const latency = setInterval(() => {
-    if (native || audio.paused || audio.buffered.length === 0) return
+    if (playlist || audio.paused || audio.buffered.length === 0) return
     const newest = audio.buffered.end(audio.buffered.length - 1)
     if (newest - audio.currentTime <= MAX_SECONDS_BEHIND) return
     log('The announcement stream fell behind, so it skipped to the present')

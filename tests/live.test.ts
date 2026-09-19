@@ -1407,3 +1407,70 @@ test('a whole station in one voice names the voice and not every platform it can
   assert.deepEqual(zoned.searchParams.getAll('zone'), ['1:AMEY_PHIL_V1,2:AMEY_PHIL_V1'])
   assert.equal(zoned.searchParams.has('voice'), false)
 })
+
+import { playStream, type StationStream, type StreamStatus } from '../src/live/audioStreams'
+
+class FakeAudio extends EventTarget {
+  src = ''
+  paused = true
+  error: { code: number } | null = null
+  buffered = { length: 0, end: () => 0 }
+  currentTime = 0
+  sources: string[] = []
+  constructor(private claimsHls: boolean) {
+    super()
+  }
+  canPlayType(type: string) {
+    return this.claimsHls && type === 'application/vnd.apple.mpegurl' ? 'maybe' : ''
+  }
+  play() {
+    this.sources.push(this.src)
+    this.paused = false
+    return Promise.resolve()
+  }
+  pause() {
+    this.paused = true
+  }
+  removeAttribute() {
+    this.src = ''
+  }
+  load() {}
+  fail(code: number) {
+    this.error = { code }
+    this.dispatchEvent(new Event('error'))
+  }
+}
+
+const bothUrls: StationStream = { zones: [], playlistUrl: 'https://audio.example/live.m3u8', radioUrl: 'https://audio.example/live.mp3' }
+
+test('a browser that claims HLS and then refuses it gets the MP3 stream, for good', () => {
+  const audio = new FakeAudio(true)
+  const statuses: StreamStatus[] = []
+  const logs: string[] = []
+  const stop = playStream(
+    bothUrls,
+    audio as unknown as HTMLAudioElement,
+    status => statuses.push(status),
+    message => logs.push(message),
+  )
+  assert.deepEqual(audio.sources, [bothUrls.playlistUrl])
+
+  // Firefox: "No decoders for requested formats: application/vnd.apple.mpegurl".
+  audio.fail(4)
+  assert.deepEqual(audio.sources, [bothUrls.playlistUrl, bothUrls.radioUrl])
+  assert.equal(logs.length, 1)
+  assert.equal(statuses.includes('reconnecting'), false)
+
+  // A later failure is the MP3 stream's own, so it waits and retries instead of switching again.
+  audio.fail(4)
+  assert.deepEqual(audio.sources, [bothUrls.playlistUrl, bothUrls.radioUrl])
+  assert.equal(statuses.at(-1), 'reconnecting')
+  stop()
+})
+
+test('a browser that does not claim HLS starts on the MP3 stream', () => {
+  const audio = new FakeAudio(false)
+  const stop = playStream(bothUrls, audio as unknown as HTMLAudioElement, () => {})
+  assert.deepEqual(audio.sources, [bothUrls.radioUrl])
+  stop()
+})

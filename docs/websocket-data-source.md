@@ -140,19 +140,28 @@ development, the **Announcement service URL** setting overrides it, and the defa
 ### The same setting, for the rest of the site
 
 **Announcement audio** is one setting for the whole site, held in `serviceAudioState` and also shown as a checkbox in the footer. With it on, a
-tab asks the service to build its announcement: `CustomAnnouncementPane` posts the tab's option state to `POST /v1/announcements`, unchanged, and
-plays or saves the MP3 that comes back. `src/live/announcementService.ts` holds that client.
+tab asks the service to build its announcement: the pane names the tab and its state on `AnnouncementSystem.serviceRequest`, and `playAudioFiles`
+posts them to `POST /v1/announcements` and plays or saves the MP3 in place of the clips it was given. `src/live/announcementService.ts` holds
+that client.
 
-The service is taught one system at a time, and `GET /v1/systems` says which tabs it knows. The page asks once, and builds every other tab itself
-as before, without a request. If the service can't be reached, or refuses the state, the page also builds the announcement itself, so the setting
-never costs a listener the announcement. A download from the service is an MP3, where the page's own is a WAV.
+The player reads the request, rather than the pane calling the service, so that the tab's play handler still runs: the handler is what refuses a
+state it cannot announce, and what keeps the Piccadilly line's passenger information display in step with the audio. Button tabs are built the
+same way, from a state of `{ section, label }` naming the heading the button sits under and the button itself.
+
+Every system registered in `src/announcement-data/AllSystems.ts` is ported, and `GET /v1/systems` says which tabs the service knows. The page
+asks once, and builds a tab the service doesn't know without a request. If the service can't be reached, or refuses the state, the page also
+builds the announcement itself, so the setting never costs a listener the announcement. A download from the service is an MP3, where the page's
+own is a WAV.
 
 ### Keep the service's copy of the logic in step
 
-The service holds a Go port of `AmeyPhil`, `AmeyCelia`, `src/live/playAnnouncement.ts` and `src/live/playbackQueue.ts`, and this repository is
-the reference for it. `npm run export:backend` runs the real systems over captured movements and generated tab states, and writes the voices'
-tables and the expected clips into `../rail-announcements-backend`, whose tests replay them. After you change how an announcement is worded,
-queued or interrupted, run the export and port the change there. `tests/backend-parity` holds the generator.
+The service holds a Go port of every registered system, of `src/live/playAnnouncement.ts` and of `src/live/playbackQueue.ts`, and this repository
+is the reference for all of it. `npm run export:backend` runs every tab of every registered system through its real play handler — over the tab's
+default state, its presets, every value of every dropdown, generated lists for custom options such as calling points, and seeded random mixes —
+and runs the Amey voices over captured movements as well. It writes each system's own data tables, the voices' tables and the expected clips into
+`../rail-announcements-backend`, whose tests replay about 41,000 cases. After you change any system's play handler, or how a live announcement is
+worded, queued or interrupted, run the export and port the change there. `tests/backend-parity` holds the generator: `systems.ts` covers the
+systems, and `generate.ts` the Amey voices, the queue and the data they read.
 
 Run `yarn test:live` for the decoder, reducer, reconnect, queue, expiry, withdrawal, revision, rendered-audio, stream URL and voice-adapter
 regressions. It uses Node's test runner and Wrangler's existing esbuild compiler. Run `yarn build` for the production build.

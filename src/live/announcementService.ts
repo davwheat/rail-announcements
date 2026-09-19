@@ -17,8 +17,9 @@ function endpoint(baseUrl: string, path: string): string {
 const supported = new Map<string, Promise<Map<string, Set<string>>>>()
 
 /**
- * The tabs the service can build, as system ID -> tab IDs. Systems move to the service one at
- * a time, so most tabs are not there, and the page builds those itself as it always has.
+ * The tabs the service can build, as system ID -> tab IDs. What the service knows is asked, not
+ * assumed: a system the website does not register, or one registered since the service was last
+ * deployed, has no port there, and the page builds those tabs itself as it always has.
  *
  * The answer is fetched once for each service URL. A failed fetch is forgotten, so that a
  * service that was down is asked again on the next play.

@@ -28,10 +28,10 @@ import clsx from 'clsx'
 
 import type { AnnouncementState, AnnouncementSystemClass, TabOptions } from '@announcement-data/AnnouncementSystem'
 import type { IPersonalPresetObject } from '@data/db'
-import type AnnouncementSystem from '@announcement-data/AnnouncementSystem'
+import AnnouncementSystem from '@announcement-data/AnnouncementSystem'
 import { RttResponse } from '../../api-types/get-service-rtt-types'
 import ImportStateFromRtt from '@components/ImportStateFromRtt'
-import { ANNOUNCEMENT_SERVICE_AVAILABLE, renderAnnouncement } from '../../live/announcementService'
+import { ANNOUNCEMENT_SERVICE_AVAILABLE } from '../../live/announcementService'
 
 export interface ICustomAnnouncementPreset<State extends AnnouncementState = AnnouncementState> {
   name: string
@@ -133,38 +133,20 @@ function CustomAnnouncementPane({
   const [serviceAudio] = useAtom(serviceAudioState)
 
   /**
-   * Plays or saves the announcement, built by the announcement service when the listener has asked
-   * for that and the service knows this tab. Anything that goes wrong on that route falls back to
-   * building it here, so the setting can never cost the listener the announcement: a refusal
-   * because of the state is one this browser would raise as well, in its own words.
+   * Plays or saves the announcement. The play handler always runs, whatever the listener has asked
+   * for: when the service is to build the audio, the handler's clips are set aside by the player.
    */
   const playOrDownload = React.useCallback(
     async function playOrDownload(download: boolean) {
-      if (serviceAudio && ANNOUNCEMENT_SERVICE_AVAILABLE) {
-        try {
-          const mp3 = await renderAnnouncement(AnnouncementSystemInstance.ID, tabId, optionsState)
+      AnnouncementSystem.serviceRequest = serviceAudio && ANNOUNCEMENT_SERVICE_AVAILABLE ? { tabId, state: optionsState } : null
 
-          if (mp3 && download) {
-            const link = document.createElement('a')
-            link.href = URL.createObjectURL(new Blob([mp3.slice().buffer], { type: 'audio/mpeg' }))
-            link.download = 'announcement.mp3'
-            link.click()
-            URL.revokeObjectURL(link.href)
-            return
-          }
-
-          if (mp3) {
-            await AnnouncementSystemInstance.playRenderedAudio(mp3)
-            return
-          }
-        } catch (err) {
-          console.warn('The announcement service could not build this, so it is being built here:', err)
-        }
+      try {
+        await playHandler(optionsState!!, download || undefined)
+      } finally {
+        AnnouncementSystem.serviceRequest = null
       }
-
-      await playHandler(optionsState!!, download || undefined)
     },
-    [serviceAudio, AnnouncementSystemInstance, tabId, playHandler, optionsState],
+    [serviceAudio, tabId, playHandler, optionsState],
   )
 
   const playAnnouncement = React.useCallback(

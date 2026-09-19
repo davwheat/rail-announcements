@@ -1,4 +1,5 @@
 import Crunker from '../helpers/crunker'
+import { renderAnnouncement } from '../live/announcementService'
 
 import type { ICustomAnnouncementPaneProps } from '@components/PanelPanes/CustomAnnouncementPane'
 import type { ICustomButtonPaneProps } from '@components/PanelPanes/CustomButtonPane'
@@ -196,7 +197,7 @@ export interface CustomAnnouncementTab<
  */
 export interface CustomButtonTab extends AnyCustomAnnouncementTab {
   component: React.ComponentType<ICustomButtonPaneProps>
-  props: Omit<ICustomButtonPaneProps, 'system'>
+  props: Omit<ICustomButtonPaneProps, PaneInjectedProps>
   defaultState?: never
   importStateFromRttService?: never
 }
@@ -265,6 +266,18 @@ export default abstract class AnnouncementSystem {
   private static readonly SAMPLE_RATE = 44100
 
   /**
+   * The tab whose announcement the service is to build, set by a pane just before it runs that tab's
+   * play handler and cleared as soon as the handler is done. A static holds it because
+   * `isPlayingAnnouncementState` lets only one announcement play at a time across the whole site.
+   *
+   * The player reads it rather than the pane calling the service itself, so that the handler always
+   * runs: the handler is what refuses a state it cannot announce, and what keeps anything which must
+   * stay in step with the audio — the Piccadilly line's passenger information display — in step. Only
+   * the clips it chose are set aside, for the service's audio to take their place.
+   */
+  static serviceRequest: { tabId: string; state: unknown } | null = null
+
+  /**
    * Returns the shared Crunker singleton, stored on `window` so
    * the AudioContext, unlock listeners and auto-suspend state
    * persist across the entire page lifecycle.
@@ -327,8 +340,17 @@ export default abstract class AnnouncementSystem {
       return
     }
 
+    const serviceRequest = AnnouncementSystem.serviceRequest
+    // One request is one announcement: a handler which plays twice builds its second part here.
+    AnnouncementSystem.serviceRequest = null
+
     window.__audio = fileIds
     console.info('Playing audio files:', fileIds)
+
+    // A live announcement is never a tab's, and the feed sends it its rendered audio itself.
+    if (serviceRequest && !livePlayback) {
+      if (await this.playServiceAudio(serviceRequest, download, onPlaybackStart)) return
+    }
 
     const standardisedFileIds = fileIds.map(fileId => {
       if (typeof fileId === 'string') {
@@ -378,6 +400,41 @@ export default abstract class AnnouncementSystem {
     if (livePlayback && !livePlayback.valid()) return
 
     await this.playBuffer(audio)
+  }
+
+  /**
+   * Plays or saves the announcement built by the announcement service for the tab a pane set aside,
+   * and reports whether it did. A tab the service does not know, a service which cannot be reached
+   * or refuses the state, and audio which will not decode all report false, leaving the announcement
+   * to be assembled from this voice's clips: the setting can never cost the listener the announcement.
+   */
+  private async playServiceAudio(request: { tabId: string; state: unknown }, download: boolean, onPlaybackStart?: () => void): Promise<boolean> {
+    let mp3: Uint8Array | null
+    let audio: AudioBuffer | null = null
+
+    try {
+      mp3 = await renderAnnouncement(this.ID, request.tabId, request.state)
+      // decodeAudioData detaches the buffer it is given, which would empty the service's own copy.
+      if (mp3 && !download) audio = await AnnouncementSystem.getCrunker().context.decodeAudioData(mp3.slice().buffer)
+    } catch (err) {
+      console.warn('[AnnouncementSystem] The announcement service could not build this announcement, so it is being built here:', err)
+      return false
+    }
+
+    if (!mp3) return false
+
+    if (download) {
+      const link = document.createElement('a')
+      link.href = URL.createObjectURL(new Blob([mp3.slice().buffer], { type: 'audio/mpeg' }))
+      link.download = 'announcement.mp3'
+      link.click()
+      URL.revokeObjectURL(link.href)
+      window.__audio = undefined
+      return true
+    }
+
+    await this.playBuffer(audio!!, onPlaybackStart)
+    return true
   }
 
   private muxToMono(audio: AudioBuffer) {

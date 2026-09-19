@@ -1508,7 +1508,7 @@ test('a tab is built by the announcement service only when the service knows it'
     assert.equal(post.method, 'POST')
     assert.deepEqual(post.body, { system: 'AMEY_PHIL_V1', announcement: 'nextTrain', state })
 
-    // Systems move to the service one at a time, so the rest are left to the browser without a request.
+    // A system or tab the service has not been taught is left to the browser, without a request.
     const before = calls.length
     assert.equal(await renderAnnouncement('AMEY_PHIL_V1', 'announcementButtons', state, 'https://audio.example/base/'), null)
     assert.equal(await renderAnnouncement('SCOTRAIL_V1', 'nextTrain', state, 'https://audio.example/base/'), null)
@@ -1522,5 +1522,74 @@ test('a tab is built by the announcement service only when the service knows it'
     )
   } finally {
     globalThis.fetch = realFetch
+  }
+})
+
+class ServiceAudioSystem extends AnnouncementSystem {
+  readonly NAME = 'Service audio test'
+  readonly ID = 'SERVICE_TEST_V1'
+  readonly FILE_PREFIX = 'test'
+  readonly SYSTEM_TYPE = 'station' as const
+
+  clipsBuilt = 0
+
+  /** Stands in for the CDN: reaching it at all is how the test knows the clips were built here. */
+  async concatSoundClips(): Promise<AudioBuffer> {
+    this.clipsBuilt++
+    return { clips: true } as unknown as AudioBuffer
+  }
+}
+
+test("the player uses the service's audio for the request a pane set aside, and the clips when it cannot", async () => {
+  const played: unknown[] = []
+  let renderStatus = 200
+  const realFetch = globalThis.fetch
+  const previousWindow = (globalThis as { window?: unknown }).window
+  const posted: unknown[] = []
+  ;(globalThis as { window?: unknown }).window = {
+    __crunker: {
+      context: { decodeAudioData: async (buffer: ArrayBuffer) => ({ decoded: buffer.byteLength }) },
+      play: (buffer: unknown, beforePlay: (source: unknown) => void) => {
+        played.push(buffer)
+        beforePlay({ stop: () => {}, addEventListener: (event: string, listener: () => void) => event === 'ended' && listener() })
+        return { contextResume: Promise.resolve() }
+      },
+    },
+  }
+  globalThis.fetch = (async (input: string, init?: RequestInit) => {
+    if (input.endsWith('/v1/systems')) {
+      return new Response(JSON.stringify({ systems: [{ id: 'SERVICE_TEST_V1', announcements: ['nextTrain'] }] }), { status: 200 })
+    }
+    posted.push(JSON.parse(init!.body as string))
+    return renderStatus === 200
+      ? new Response(new Uint8Array([0xff, 0xfb, 7, 7, 7]), { status: 200 })
+      : new Response(JSON.stringify({ error: { message: 'the service fell over' } }), { status: renderStatus })
+  }) as typeof fetch
+
+  try {
+    const system = new ServiceAudioSystem()
+    let displayUpdated = 0
+
+    AnnouncementSystem.serviceRequest = { tabId: 'nextTrain', state: { platform: '2' } }
+    await system.playAudioFiles(['station.m.AAA'], false, 'skip-service', 0, () => displayUpdated++)
+    await setImmediate()
+
+    assert.equal(system.clipsBuilt, 0)
+    assert.deepEqual(played, [{ decoded: 5 }])
+    assert.deepEqual(posted, [{ system: 'SERVICE_TEST_V1', announcement: 'nextTrain', state: { platform: '2' } }])
+    // The handler's callback still runs, so a tab's display stays in step with the service's audio.
+    assert.equal(displayUpdated, 1)
+    // One request is one announcement.
+    assert.equal(AnnouncementSystem.serviceRequest, null)
+
+    renderStatus = 500
+    AnnouncementSystem.serviceRequest = { tabId: 'nextTrain', state: { platform: '2' } }
+    await system.playAudioFiles(['station.m.AAA'])
+    assert.equal(system.clipsBuilt, 1)
+    assert.deepEqual(played.at(-1), { clips: true })
+  } finally {
+    globalThis.fetch = realFetch
+    ;(globalThis as { window?: unknown }).window = previousWindow
+    AnnouncementSystem.serviceRequest = null
   }
 })

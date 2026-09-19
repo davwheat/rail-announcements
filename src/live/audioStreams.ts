@@ -87,10 +87,12 @@ const RECONNECT_DELAY = 3000
 /** MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED, spelled out because the tests run where MediaError does not exist. */
 const MEDIA_ERR_SRC_NOT_SUPPORTED = 4
 const LATENCY_CHECK_INTERVAL = 10_000
-/** An endless response has no live edge to return to, so every stall leaves the player that much
- *  further behind for good. Past this it skips to the newest audio it holds. */
-const MAX_SECONDS_BEHIND = 4
-const SECONDS_BEHIND_AFTER_SKIP = 1
+/** An endless response has no live edge to return to, so every stall or pause leaves the player
+ *  that much further behind for good. Past this it starts the stream again. That drops the audio in
+ *  between, which can be part of an announcement, so a brief stall is not enough. */
+const MAX_SECONDS_BEHIND = 10
+/** The service opens each MP3 response with three seconds of the recent past. */
+const SECONDS_BEHIND_AT_START = 3
 
 /**
  * Plays the station's stream through an audio element until the returned function is called.
@@ -113,8 +115,10 @@ export function playStream(
   let playlist = audio.canPlayType('application/vnd.apple.mpegurl') !== ''
   let stopped = false
   let retry: ReturnType<typeof setTimeout> | undefined
+  let respondedAt: number | undefined
 
   const start = () => {
+    respondedAt = undefined
     audio.src = playlist ? stream.playlistUrl : stream.radioUrl
     audio.play().then(
       () => {},
@@ -146,18 +150,33 @@ export function playStream(
   }
   // The service ends a response when the listener falls too far behind, or when it restarts.
   const onEnded = () => reconnect('ended')
+  const onLoadedMetadata = () => {
+    respondedAt = Date.now()
+  }
+  // The service sends audio as it is made, so a player that never stalled or paused stays as far
+  // behind as the response started. Everything past that is lag. The buffered range cannot show it:
+  // Chrome reads only a couple of seconds ahead and leaves the rest of a backlog in the network
+  // buffers, where no seek reaches it. A new response is the only way back to the present.
+  //
+  // A playlist needs none of this. The service keeps only its last few segments, so a player cannot
+  // fall further behind than those.
+  const catchUp = () => {
+    if (playlist || stopped || audio.paused || respondedAt === undefined) return
+    const behind = SECONDS_BEHIND_AT_START + (Date.now() - respondedAt) / 1000 - audio.currentTime
+    if (behind <= MAX_SECONDS_BEHIND) return
+    log(`The announcement stream was ${Math.round(behind)} seconds behind, so it is starting again from the present`)
+    start()
+  }
   audio.addEventListener('playing', onPlaying)
   audio.addEventListener('waiting', onWaiting)
   audio.addEventListener('error', onError)
   audio.addEventListener('ended', onEnded)
+  audio.addEventListener('loadedmetadata', onLoadedMetadata)
+  // Resuming after a pause, or first playing long after autoplay was refused, would otherwise
+  // announce trains that have already gone until the next check.
+  audio.addEventListener('play', catchUp)
 
-  const latency = setInterval(() => {
-    if (playlist || audio.paused || audio.buffered.length === 0) return
-    const newest = audio.buffered.end(audio.buffered.length - 1)
-    if (newest - audio.currentTime <= MAX_SECONDS_BEHIND) return
-    log('The announcement stream fell behind, so it skipped to the present')
-    audio.currentTime = newest - SECONDS_BEHIND_AFTER_SKIP
-  }, LATENCY_CHECK_INTERVAL)
+  const latency = setInterval(catchUp, LATENCY_CHECK_INTERVAL)
 
   onStatus('connecting')
   start()
@@ -170,6 +189,8 @@ export function playStream(
     audio.removeEventListener('waiting', onWaiting)
     audio.removeEventListener('error', onError)
     audio.removeEventListener('ended', onEnded)
+    audio.removeEventListener('loadedmetadata', onLoadedMetadata)
+    audio.removeEventListener('play', catchUp)
     audio.pause()
     audio.removeAttribute('src')
     audio.load()

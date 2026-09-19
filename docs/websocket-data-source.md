@@ -130,8 +130,13 @@ turns. The URL also carries each platform's voice, the announcement types and th
 One stream and one element is what keeps announcements playing in a background tab: the browser plays a URL by itself, and no script has to keep
 running. Safari plays the service's HLS playlist (`live.m3u8`). Other browsers can't play a playlist without a script that feeds them, and a
 background tab throttles scripts, so they play the same audio as one endless MP3 response (`live.mp3`), the way they play internet radio. A
-listener hears an announcement about two seconds after the service starts it. If the MP3 player falls more than four seconds behind, it skips to
-the newest audio it holds.
+listener hears an announcement about two seconds after the service starts it.
+
+The page works out how far behind the MP3 player is from the clock: the service sends audio as it's made, so the player starts 3 seconds behind
+and falls further behind only by stalling or pausing. The browser's buffered range can't show this lag, because Chrome reads only a couple of
+seconds ahead and leaves the rest of a backlog in the network buffers. When the player is more than 10 seconds behind, the page starts the stream
+again, which drops the audio in between. It checks every 10 seconds, and also when the player starts playing, so a listener who resumes after a
+long pause, or plays the stream long after the browser refused to autoplay it, doesn't hear out-of-date announcements first.
 
 Set `NEXT_PUBLIC_ANNOUNCEMENT_SERVICE_URL` to the service's URL. A production build offers the **Announcement audio** setting only when this is
 set, and ignores a saved choice of streamed audio without it, so the page never tries to stream from a service that isn't deployed. In

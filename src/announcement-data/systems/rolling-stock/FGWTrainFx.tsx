@@ -69,12 +69,12 @@ interface IDividingTrainOptions {
   rearDestinationCode: string
 }
 
-const SENTENCE_GAP = 500
+export const SENTENCE_GAP = 500
 
 /**
  * Station-specific extras, taken from the TrainFX export's auxiliary announcement table.
  */
-const APPROACH_EXTRAS: Record<string, AudioItem[]> = {
+export const APPROACH_EXTRAS: Record<string, AudioItem[]> = {
   TWY: [{ id: 'conjoiners.change here for connecting services to', opts: { delayStart: SENTENCE_GAP } }, 'stations.high.HOT'],
   MAI: [{ id: 'conjoiners.change here for connecting services to', opts: { delayStart: SENTENCE_GAP } }, 'stations.high.MLW'],
   FNN: [{ id: 'messages.do not use the foot crossing when the red light is showing', opts: { delayStart: SENTENCE_GAP } }],
@@ -82,7 +82,7 @@ const APPROACH_EXTRAS: Record<string, AudioItem[]> = {
   BDW: [{ id: 'messages.do not cross the railway line', opts: { delayStart: SENTENCE_GAP } }],
 }
 
-const ARRIVAL_EXTRAS: Record<string, AudioItem[]> = {
+export const ARRIVAL_EXTRAS: Record<string, AudioItem[]> = {
   PAD: [{ id: 'messages.for taxis and buses please follow signage', opts: { delayStart: SENTENCE_GAP } }],
   RDG: [{ id: 'messages.if you are travelling with luggage please use the lifts', opts: { delayStart: SENTENCE_GAP } }],
 }
@@ -91,18 +91,18 @@ const ARRIVAL_EXTRAS: Record<string, AudioItem[]> = {
  * Arriving at these stations repeats the full welcome and security reminder rather than the short welcome.
  * The export lists Reading twice, and only the main line entry is principal, so the full welcome stays optional.
  */
-const PRINCIPAL_STATIONS = ['EAL', 'PAD', 'OXF', 'RDG', 'SLO', 'WOF']
+export const PRINCIPAL_STATIONS = ['EAL', 'PAD', 'OXF', 'RDG', 'SLO', 'WOF']
 
 /**
  * The export's auxiliary table appends the luggage and CCTV messages to every start-of-journey welcome.
  */
-const START_OF_JOURNEY_SAFETY: AudioItem[] = [
+export const START_OF_JOURNEY_SAFETY: AudioItem[] = [
   { id: 'messages.safety information is on posters in the vestibule', opts: { delayStart: SENTENCE_GAP } },
   { id: 'messages.please do not leave any items of luggage unattended', opts: { delayStart: SENTENCE_GAP } },
   { id: 'messages.this train is fitted with cctv', opts: { delayStart: SENTENCE_GAP } },
 ]
 
-const SECURITY_REMINDER: AudioItem[] = [
+export const SECURITY_REMINDER: AudioItem[] = [
   { id: 'messages.please do not leave any items of luggage unattended', opts: { delayStart: SENTENCE_GAP } },
   { id: 'messages.safety information is on posters in the vestibule', opts: { delayStart: SENTENCE_GAP } },
 ]
@@ -116,7 +116,7 @@ const BRAND_OPTIONS: { title: string; value: Brand }[] = [
 /**
  * The GWR rebrand only re-recorded some phrases with the short name, so the rest borrow the full name.
  */
-const SHORT_GWR_PHRASES: BrandPhrase[] = [
+export const SHORT_GWR_PHRASES: BrandPhrase[] = [
   'welcomes you aboard this service from',
   'welcome aboard this service from',
   'thank you for travelling with',

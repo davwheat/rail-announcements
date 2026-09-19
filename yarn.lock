@@ -187,6 +187,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@bufbuild/protobuf@npm:^2.14.1":
+  version: 2.15.0
+  resolution: "@bufbuild/protobuf@npm:2.15.0"
+  checksum: 10/de67f3407da612265b7e597676754aa148655601eb3fb2ba7ad39b80efb3c5006810f59602277937c4e9f8c589997d08082c29e213cafdb79c0f42d85e7a9f58
+  languageName: node
+  linkType: hard
+
 "@cfworker/json-schema@npm:^4.1.1":
   version: 4.1.1
   resolution: "@cfworker/json-schema@npm:4.1.1"
@@ -4105,6 +4112,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "rail-announcements-next@workspace:."
   dependencies:
+    "@bufbuild/protobuf": "npm:^2.14.1"
     "@cfworker/json-schema": "npm:^4.1.1"
     "@cloudflare/workers-types": "npm:^5.20260915.1"
     "@emotion/cache": "npm:^11.14.0"

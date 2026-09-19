@@ -2,7 +2,8 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { streamUrl } from '../src/live/connection'
 import fixture from './snapshot.json'
-import type { Movement } from '../src/live/types'
+import type { Movement, ServerMessage } from '../src/live/types'
+import { encodeServerMessage } from './encode'
 
 /** The fixture is a station projection; the tests only need the train out of it. */
 const snapshot = () => structuredClone(fixture) as unknown as { movements: Movement[] }
@@ -16,18 +17,19 @@ test('WebSocket URLs default cleanly to the local service and support a remote p
 class FakeSocket {
   static sockets: FakeSocket[] = []
   /** Nothing should ever be written to the announcement stream; asserted, not used. */
-  sent: string[] = []
-  onmessage?: (event: { data: string }) => void
+  sent: unknown[] = []
+  binaryType = 'blob'
+  onmessage?: (event: { data: unknown }) => void
   onclose?: () => void
   onerror?: () => void
   constructor(readonly url: URL) {
     FakeSocket.sockets.push(this)
   }
-  send(value: string) {
+  send(value: unknown) {
     this.sent.push(value)
   }
-  receive(value: unknown) {
-    this.onmessage?.({ data: JSON.stringify(value) })
+  receive(value: ServerMessage) {
+    this.onmessage?.({ data: encodeServerMessage(value) })
   }
   close() {
     this.onclose?.()
@@ -49,7 +51,7 @@ const now = Date.parse(fixture.window.from)
 function announcement(type: AnnouncementType, id: string = type): Announcement {
   const movement = snapshot().movements[0]
   return {
-    version: 1,
+    version: 2,
     type: 'announcement',
     event_id: id,
     movement_id: movement.id,
@@ -900,17 +902,17 @@ test('one stream carries ready, triggers, withdrawals and heartbeats, and is nev
   assert.equal(events.url.searchParams.get('heartbeat'), '30')
 
   events.receive(announcement('next', 'before-ready'))
-  events.receive({ version: 1, type: 'ready', station: fixture.station, healthy: false })
+  events.receive({ version: 2, type: 'ready', station: fixture.station, created_at: fixture.window.from, healthy: false })
   events.receive(announcement('next', 'unhealthy'))
   assert.deepEqual(played, [])
-  events.receive({ version: 1, type: 'ready', station: fixture.station, healthy: true })
+  events.receive({ version: 2, type: 'ready', station: fixture.station, created_at: fixture.window.from, healthy: true })
 
   events.receive(announcement('next', 'blocker'))
   events.receive(announcement('next', 'doomed'))
   await setImmediate()
   assert.deepEqual(played, ['blocker'])
   events.receive({
-    version: 1,
+    version: 2,
     type: 'retraction',
     event_id: 'doomed',
     movement_id: fixture.movements[0].id,
@@ -924,7 +926,7 @@ test('one stream carries ready, triggers, withdrawals and heartbeats, and is nev
   assert.deepEqual(played, ['blocker'])
 
   // A heartbeat proves liveness and is never replied to.
-  events.receive({ version: 1, type: 'heartbeat', sent_at: fixture.window.from })
+  events.receive({ version: 2, type: 'heartbeat', sent_at: fixture.window.from })
   context.mock.timers.tick(70_000)
   assert.equal(events.sent.length, 0)
   stop()
@@ -952,12 +954,12 @@ test('a repeated ready re-baselines the queue, so a recovery never replays what 
   )
   const stop = connectAnnouncements('ws://localhost:8080', 'TST', ['next'], queue, status => statuses.push(status))
   const events = FakeSocket.sockets[0]
-  events.receive({ version: 1, type: 'ready', station: fixture.station, healthy: true })
+  events.receive({ version: 2, type: 'ready', station: fixture.station, created_at: fixture.window.from, healthy: true })
   events.receive(announcement('next', 'blocker'))
   events.receive(announcement('next', 'queued'))
   await setImmediate()
   assert.deepEqual(played, ['blocker'])
-  events.receive({ version: 1, type: 'ready', station: fixture.station, healthy: false })
+  events.receive({ version: 2, type: 'ready', station: fixture.station, created_at: fixture.window.from, healthy: false })
   release()
   await setImmediate()
   assert.deepEqual(played, ['blocker'])
@@ -1194,4 +1196,476 @@ test('a warning naming two platforms of one zone holds that zone once', async ()
   await setImmediate()
   assert.deepEqual(started, ['fast', 'waiting'])
   queue.reset()
+})
+
+import { decodeServerMessage } from '../src/live/wire'
+import servicePassing from './fixtures/passing.json'
+import servicePassingFrame from './fixtures/passing.pb'
+import serviceAlteration from './fixtures/platform_alteration.json'
+import serviceAlterationFrame from './fixtures/platform_alteration.pb'
+import serviceUnknownTrain from './fixtures/td_unknown.json'
+import serviceUnknownTrainFrame from './fixtures/td_unknown.pb'
+import serviceAudioFrame from './fixtures/announcement_audio.pb'
+
+// The .pb files are frames darwin-browser's own encoder wrote, and the .json beside each is the
+// message it encoded. Copy both from its docs/live/fixtures when the schema changes.
+test('frames written by the service decode to the messages it encoded', () => {
+  for (const [frame, message] of [
+    [servicePassingFrame, servicePassing],
+    [serviceAlterationFrame, serviceAlteration],
+    [serviceUnknownTrainFrame, serviceUnknownTrain],
+  ] as const) {
+    assert.deepEqual(decodeServerMessage(frame), message)
+  }
+})
+
+test('an announcement can carry the audio the service rendered for it', () => {
+  const decoded = decodeServerMessage(serviceAudioFrame)
+  assert.ok(decoded?.type === 'announcement' && decoded.audio)
+  assert.equal(decoded.audio.codec, 'mp3')
+  assert.deepEqual([...decoded.audio.data], [0xff, 0xfb, 0x90, 0x00])
+  assert.equal(decoded.audio.duration_ms, 12_500)
+
+  const plain = decodeServerMessage(serviceAlterationFrame)
+  assert.ok(plain?.type === 'announcement')
+  assert.equal(plain.audio, undefined, 'without audio the announcement is generated here, as it always was')
+})
+
+test('a revision replaces rendered audio along with the details it was rendered from', async () => {
+  let release!: () => void
+  const spoken: Announcement[] = []
+  const queue = new PlaybackQueue(
+    async message => {
+      spoken.push(message)
+      if (message.event_id === 'busy')
+        await new Promise<void>(resolve => {
+          release = resolve
+        })
+    },
+    () => now,
+  )
+  const rendered = (byte: number) => ({ codec: 'mp3' as const, data: new Uint8Array([byte]), duration_ms: null })
+  const movement = snapshot().movements[0]
+  queue.push(announcement('next', 'busy'))
+  queue.push({ ...announcement('next', 'rerendered'), movement_id: 'R2/a', details: { ...movement, id: 'R2/a' }, audio: rendered(1) })
+  queue.push({ ...announcement('next', 'dropped'), movement_id: 'R3/a', details: { ...movement, id: 'R3/a' }, audio: rendered(1) })
+  queue.revise('rerendered', { ...movement, id: 'R2/a' }, rendered(2))
+  queue.revise('dropped', { ...movement, id: 'R3/a' })
+  release()
+  await setImmediate()
+  await setImmediate()
+  assert.deepEqual(
+    spoken.map(message => [message.event_id, message.audio?.data[0]]),
+    [
+      ['busy', undefined],
+      ['rerendered', 2],
+      ['dropped', undefined],
+    ],
+  )
+})
+
+test('rendered audio is only asked for on request, and a version 1 service is refused', context => {
+  context.mock.timers.enable({ apis: ['setTimeout', 'setInterval'] })
+  const originalSocket = globalThis.WebSocket
+  globalThis.WebSocket = FakeSocket as unknown as typeof WebSocket
+  context.after(() => {
+    globalThis.WebSocket = originalSocket
+  })
+  FakeSocket.sockets = []
+  const queue = new PlaybackQueue(
+    async () => {},
+    () => now,
+  )
+  const logged: string[] = []
+
+  const stopDefault = connectAnnouncements(
+    'ws://localhost:8080',
+    'TST',
+    ['next'],
+    queue,
+    () => {},
+    message => logged.push(message),
+  )
+  assert.equal(FakeSocket.sockets[0].url.searchParams.has('audio'), false)
+  assert.equal(FakeSocket.sockets[0].binaryType, 'arraybuffer')
+  FakeSocket.sockets[0].onmessage?.({ data: JSON.stringify({ version: 1, type: 'ready', station: fixture.station, healthy: true }) })
+  assert.ok(logged.some(message => message.includes('Expected a binary stream message')))
+  stopDefault()
+
+  const stopAudio = connectAnnouncements(
+    'ws://localhost:8080',
+    'TST',
+    ['next'],
+    queue,
+    () => {},
+    () => {},
+    true,
+  )
+  assert.equal(FakeSocket.sockets.at(-1)!.url.searchParams.get('audio'), 'mp3')
+  stopAudio()
+})
+
+import { stationStream, type StreamPreferences } from '../src/live/audioStreams'
+
+const streamPreferences: StreamPreferences = {
+  chime: '',
+  useLegacyTocNames: false,
+  announceViaPoints: true,
+  announceShortPlatformsAfterSplit: false,
+  fastTrainApproaching: false,
+  daktronicsFanfare: false,
+  missingAudioMode: 'skip-service',
+}
+
+test('the station is one stream, with every voiced zone in it', () => {
+  const voices = { '1': 'AMEY_PHIL_V1', '2': 'AMEY_CELIA_V1', '3': null, '10': 'AMEY_PHIL_V1', '4': null, '7': 'AMEY_PHIL_V1' }
+  const stream = stationStream(
+    'https://audio.example/base/',
+    'KGX',
+    [['7'], ['2', '10', '1'], ['3', '4']],
+    voices,
+    ['passing', 'next'],
+    streamPreferences,
+  )!
+
+  // A zone whose platforms are all silent has nothing to say, and zones are listed in station order.
+  assert.deepEqual(stream.zones, [['1', '2', '10'], ['7']])
+  const playlist = new URL(stream.playlistUrl)
+  const radio = new URL(stream.radioUrl)
+  assert.equal(playlist.origin + playlist.pathname, 'https://audio.example/base/v1/streams/live.m3u8')
+  assert.equal(radio.origin + radio.pathname, 'https://audio.example/base/v1/streams/live.mp3')
+  assert.equal(playlist.search, radio.search)
+  assert.equal(playlist.searchParams.get('crs'), 'KGX')
+  assert.deepEqual(playlist.searchParams.getAll('zone'), ['1:AMEY_PHIL_V1,2:AMEY_CELIA_V1,10:AMEY_PHIL_V1', '7:AMEY_PHIL_V1'])
+  assert.equal(playlist.searchParams.has('platform'), false)
+  assert.equal(playlist.searchParams.get('type'), 'next,passing')
+  assert.equal(playlist.searchParams.get('vias'), 'true')
+  for (const unset of ['chime', 'legacy_tocs', 'short_platforms_after_split', 'fast_train_approaching', 'fanfare', 'missing_audio']) {
+    assert.equal(playlist.searchParams.has(unset), false, unset)
+  }
+})
+
+test('a station without zones takes turns in one zone, and preferences travel with it', () => {
+  const voices = { '2': 'AMEY_CELIA_V1', '1': 'AMEY_PHIL_V1', a: null }
+  const preferences: StreamPreferences = {
+    chime: 'three',
+    useLegacyTocNames: true,
+    announceViaPoints: false,
+    announceShortPlatformsAfterSplit: true,
+    fastTrainApproaching: true,
+    daktronicsFanfare: true,
+    missingAudioMode: 'repeat-last',
+  }
+  for (const zones of [null, []]) {
+    const params = new URL(stationStream('http://localhost:8090', 'ECR', zones, voices, ['next'], preferences)!.radioUrl).searchParams
+    assert.deepEqual(params.getAll('zone'), ['1:AMEY_PHIL_V1,2:AMEY_CELIA_V1'])
+    assert.deepEqual(
+      ['chime', 'vias', 'legacy_tocs', 'short_platforms_after_split', 'fast_train_approaching', 'fanfare', 'missing_audio'].map(name =>
+        params.get(name),
+      ),
+      ['three', 'false', 'true', 'true', 'true', 'true', 'repeat-last'],
+    )
+  }
+
+  // The same listener asks for the same URL, which is what lets the service share a stream.
+  assert.equal(
+    stationStream('http://localhost:8090', 'ECR', [['2'], ['1']], voices, ['next', 'passing'], preferences)!.radioUrl,
+    stationStream(
+      'http://localhost:8090',
+      'ECR',
+      [['1'], ['2']],
+      { a: null, '1': 'AMEY_PHIL_V1', '2': 'AMEY_CELIA_V1' },
+      ['passing', 'next'],
+      preferences,
+    )!.radioUrl,
+  )
+  assert.equal(stationStream('http://localhost:8090', 'ECR', null, voices, [], preferences), null)
+  assert.equal(stationStream('http://localhost:8090', 'ECR', null, { '1': null }, ['next'], preferences), null)
+  assert.throws(() => stationStream('ws://localhost:8090', 'ECR', null, voices, ['next'], preferences))
+})
+
+test('a whole station in one voice names the voice and not every platform it can say', () => {
+  const everyPlatform = Object.fromEntries(['0', '1', '1a', '2', '13', 'a'].map(platform => [platform, 'AMEY_PHIL_V1']))
+  for (const zones of [null, []]) {
+    const stream = stationStream('https://audio.example', 'ECR', zones, everyPlatform, ['next'], streamPreferences)!
+    const params = new URL(stream.radioUrl).searchParams
+    assert.equal(params.get('voice'), 'AMEY_PHIL_V1')
+    assert.equal(params.has('zone'), false)
+    assert.deepEqual(stream.zones, [])
+  }
+
+  // A silenced platform, a second voice or real zones each need the platforms spelled out.
+  for (const voices of [
+    { ...everyPlatform, '2': null },
+    { ...everyPlatform, '2': 'AMEY_CELIA_V1' },
+  ]) {
+    const params = new URL(stationStream('https://audio.example', 'ECR', null, voices, ['next'], streamPreferences)!.radioUrl).searchParams
+    assert.equal(params.has('voice'), false)
+    assert.equal(params.getAll('zone').length, 1)
+  }
+  const zoned = new URL(stationStream('https://audio.example', 'ECR', [['1', '2']], everyPlatform, ['next'], streamPreferences)!.radioUrl)
+  assert.deepEqual(zoned.searchParams.getAll('zone'), ['1:AMEY_PHIL_V1,2:AMEY_PHIL_V1'])
+  assert.equal(zoned.searchParams.has('voice'), false)
+})
+
+import { playStream, type StationStream, type StreamStatus } from '../src/live/audioStreams'
+
+class FakeAudio extends EventTarget {
+  src = ''
+  paused = true
+  error: { code: number } | null = null
+  currentTime = 0
+  sources: string[] = []
+  refusesAutoplay = false
+  constructor(private claimsHls: boolean) {
+    super()
+  }
+  canPlayType(type: string) {
+    return this.claimsHls && type === 'application/vnd.apple.mpegurl' ? 'maybe' : ''
+  }
+  play() {
+    this.sources.push(this.src)
+    if (this.refusesAutoplay) return Promise.reject(new DOMException('play() needs a click first', 'NotAllowedError'))
+    this.paused = false
+    return Promise.resolve()
+  }
+  pause() {
+    this.paused = true
+  }
+  respond() {
+    this.dispatchEvent(new Event('loadedmetadata'))
+  }
+  pressPause() {
+    this.paused = true
+    this.dispatchEvent(new Event('pause'))
+  }
+  pressPlay() {
+    this.paused = false
+    this.dispatchEvent(new Event('play'))
+  }
+  removeAttribute() {
+    this.src = ''
+  }
+  load() {}
+  fail(code: number) {
+    this.error = { code }
+    this.dispatchEvent(new Event('error'))
+  }
+}
+
+const bothUrls: StationStream = { zones: [], playlistUrl: 'https://audio.example/live.m3u8', radioUrl: 'https://audio.example/live.mp3' }
+
+test('a browser that claims HLS and then refuses it gets the MP3 stream, for good', () => {
+  const audio = new FakeAudio(true)
+  const statuses: StreamStatus[] = []
+  const logs: string[] = []
+  const stop = playStream(
+    bothUrls,
+    audio as unknown as HTMLAudioElement,
+    status => statuses.push(status),
+    message => logs.push(message),
+  )
+  assert.deepEqual(audio.sources, [bothUrls.playlistUrl])
+
+  // Firefox: "No decoders for requested formats: application/vnd.apple.mpegurl".
+  audio.fail(4)
+  assert.deepEqual(audio.sources, [bothUrls.playlistUrl, bothUrls.radioUrl])
+  assert.equal(logs.length, 1)
+  assert.equal(statuses.includes('reconnecting'), false)
+
+  // A later failure is the MP3 stream's own, so it waits and retries instead of switching again.
+  audio.fail(4)
+  assert.deepEqual(audio.sources, [bothUrls.playlistUrl, bothUrls.radioUrl])
+  assert.equal(statuses.at(-1), 'reconnecting')
+  stop()
+})
+
+test('a browser that does not claim HLS starts on the MP3 stream', () => {
+  const audio = new FakeAudio(false)
+  const stop = playStream(bothUrls, audio as unknown as HTMLAudioElement, () => {})
+  assert.deepEqual(audio.sources, [bothUrls.radioUrl])
+  stop()
+})
+
+test('an MP3 player that falls well behind starts the stream again, but not one that was slow to connect', context => {
+  context.mock.timers.enable({ apis: ['setInterval', 'Date'] })
+  const audio = new FakeAudio(false)
+  const logs: string[] = []
+  const stop = playStream(
+    bothUrls,
+    audio as unknown as HTMLAudioElement,
+    () => {},
+    message => logs.push(message),
+  )
+
+  // A response opens at the present however long it took to arrive.
+  context.mock.timers.tick(8_000)
+  audio.respond()
+  audio.currentTime = 12
+  context.mock.timers.tick(12_000)
+
+  // Starting again would cut into whatever is being said, so a player that has only stalled briefly keeps going.
+  audio.currentTime = 17
+  context.mock.timers.tick(10_000)
+  assert.deepEqual(audio.sources, [bothUrls.radioUrl])
+
+  audio.currentTime = 20
+  context.mock.timers.tick(10_000)
+  assert.deepEqual(audio.sources, [bothUrls.radioUrl, bothUrls.radioUrl])
+  assert.equal(logs.length, 1)
+  stop()
+})
+
+test('a player resumed after a long pause starts the stream again, and after a short one carries on', context => {
+  context.mock.timers.enable({ apis: ['setInterval', 'Date'] })
+  const audio = new FakeAudio(false)
+  const stop = playStream(bothUrls, audio as unknown as HTMLAudioElement, () => {})
+  audio.respond()
+
+  audio.pressPause()
+  context.mock.timers.tick(5_000)
+  audio.pressPlay()
+  assert.deepEqual(audio.sources, [bothUrls.radioUrl])
+
+  audio.pressPause()
+  context.mock.timers.tick(60_000)
+  audio.pressPlay()
+  assert.deepEqual(audio.sources, [bothUrls.radioUrl, bothUrls.radioUrl])
+  stop()
+})
+
+test('a player refused autoplay and clicked much later starts the stream again', async context => {
+  context.mock.timers.enable({ apis: ['setInterval', 'Date'] })
+  const audio = new FakeAudio(false)
+  audio.refusesAutoplay = true
+  const statuses: StreamStatus[] = []
+  const stop = playStream(bothUrls, audio as unknown as HTMLAudioElement, status => statuses.push(status))
+  audio.respond()
+  await Promise.resolve()
+  assert.equal(statuses.at(-1), 'blocked')
+
+  audio.refusesAutoplay = false
+  context.mock.timers.tick(60_000)
+  audio.pressPlay()
+  assert.deepEqual(audio.sources, [bothUrls.radioUrl, bothUrls.radioUrl])
+  stop()
+})
+
+import { renderAnnouncement } from '../src/live/announcementService'
+
+test('a tab is built by the announcement service only when the service knows it', async () => {
+  const calls: { url: string; method: string; body?: any }[] = []
+  let systemsStatus = 200
+  let renderStatus = 200
+  const realFetch = globalThis.fetch
+  globalThis.fetch = (async (input: string, init?: RequestInit) => {
+    calls.push({ url: input, method: init?.method || 'GET', body: init?.body ? JSON.parse(init.body as string) : undefined })
+    if (input.endsWith('/v1/systems')) {
+      return new Response(JSON.stringify({ systems: [{ id: 'AMEY_PHIL_V1', announcements: ['nextTrain'] }] }), { status: systemsStatus })
+    }
+    return renderStatus === 200
+      ? new Response(new Uint8Array([0xff, 0xfb, 1, 2]), { status: 200 })
+      : new Response(JSON.stringify({ error: { code: 'missing_audio', message: 'audio file not found: station/e/ZZZ.mp3' } }), {
+          status: renderStatus,
+        })
+  }) as typeof fetch
+
+  try {
+    // A service that is down is asked again next time, and not remembered as knowing nothing.
+    systemsStatus = 503
+    await assert.rejects(renderAnnouncement('AMEY_PHIL_V1', 'nextTrain', {}, 'https://audio.example/base/'))
+    systemsStatus = 200
+
+    const state = { platform: '2', hour: '07' }
+    const mp3 = await renderAnnouncement('AMEY_PHIL_V1', 'nextTrain', state, 'https://audio.example/base/')
+    assert.deepEqual([...mp3!], [0xff, 0xfb, 1, 2])
+    const post = calls.at(-1)!
+    assert.equal(post.url, 'https://audio.example/base/v1/announcements')
+    assert.equal(post.method, 'POST')
+    assert.deepEqual(post.body, { system: 'AMEY_PHIL_V1', announcement: 'nextTrain', state })
+
+    // A system or tab the service has not been taught is left to the browser, without a request.
+    const before = calls.length
+    assert.equal(await renderAnnouncement('AMEY_PHIL_V1', 'announcementButtons', state, 'https://audio.example/base/'), null)
+    assert.equal(await renderAnnouncement('SCOTRAIL_V1', 'nextTrain', state, 'https://audio.example/base/'), null)
+    assert.equal(calls.length, before)
+    assert.equal(calls.filter(call => call.url.endsWith('/v1/systems')).length, 2)
+
+    renderStatus = 422
+    await assert.rejects(
+      renderAnnouncement('AMEY_PHIL_V1', 'nextTrain', state, 'https://audio.example/base/'),
+      /audio file not found: station\/e\/ZZZ\.mp3/,
+    )
+  } finally {
+    globalThis.fetch = realFetch
+  }
+})
+
+class ServiceAudioSystem extends AnnouncementSystem {
+  readonly NAME = 'Service audio test'
+  readonly ID = 'SERVICE_TEST_V1'
+  readonly FILE_PREFIX = 'test'
+  readonly SYSTEM_TYPE = 'station' as const
+
+  clipsBuilt = 0
+
+  /** Stands in for the CDN: reaching it at all is how the test knows the clips were built here. */
+  async concatSoundClips(): Promise<AudioBuffer> {
+    this.clipsBuilt++
+    return { clips: true } as unknown as AudioBuffer
+  }
+}
+
+test("the player uses the service's audio for the request a pane set aside, and the clips when it cannot", async () => {
+  const played: unknown[] = []
+  let renderStatus = 200
+  const realFetch = globalThis.fetch
+  const previousWindow = (globalThis as { window?: unknown }).window
+  const posted: unknown[] = []
+  ;(globalThis as { window?: unknown }).window = {
+    __crunker: {
+      context: { decodeAudioData: async (buffer: ArrayBuffer) => ({ decoded: buffer.byteLength }) },
+      play: (buffer: unknown, beforePlay: (source: unknown) => void) => {
+        played.push(buffer)
+        beforePlay({ stop: () => {}, addEventListener: (event: string, listener: () => void) => event === 'ended' && listener() })
+        return { contextResume: Promise.resolve() }
+      },
+    },
+  }
+  globalThis.fetch = (async (input: string, init?: RequestInit) => {
+    if (input.endsWith('/v1/systems')) {
+      return new Response(JSON.stringify({ systems: [{ id: 'SERVICE_TEST_V1', announcements: ['nextTrain'] }] }), { status: 200 })
+    }
+    posted.push(JSON.parse(init!.body as string))
+    return renderStatus === 200
+      ? new Response(new Uint8Array([0xff, 0xfb, 7, 7, 7]), { status: 200 })
+      : new Response(JSON.stringify({ error: { message: 'the service fell over' } }), { status: renderStatus })
+  }) as typeof fetch
+
+  try {
+    const system = new ServiceAudioSystem()
+    let displayUpdated = 0
+
+    AnnouncementSystem.serviceRequest = { tabId: 'nextTrain', state: { platform: '2' } }
+    await system.playAudioFiles(['station.m.AAA'], false, 'skip-service', 0, () => displayUpdated++)
+    await setImmediate()
+
+    assert.equal(system.clipsBuilt, 0)
+    assert.deepEqual(played, [{ decoded: 5 }])
+    assert.deepEqual(posted, [{ system: 'SERVICE_TEST_V1', announcement: 'nextTrain', state: { platform: '2' } }])
+    // The handler's callback still runs, so a tab's display stays in step with the service's audio.
+    assert.equal(displayUpdated, 1)
+    // One request is one announcement.
+    assert.equal(AnnouncementSystem.serviceRequest, null)
+
+    renderStatus = 500
+    AnnouncementSystem.serviceRequest = { tabId: 'nextTrain', state: { platform: '2' } }
+    await system.playAudioFiles(['station.m.AAA'])
+    assert.equal(system.clipsBuilt, 1)
+    assert.deepEqual(played.at(-1), { clips: true })
+  } finally {
+    globalThis.fetch = realFetch
+    ;(globalThis as { window?: unknown }).window = previousWindow
+    AnnouncementSystem.serviceRequest = null
+  }
 })

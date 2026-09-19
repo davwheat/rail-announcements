@@ -16,7 +16,9 @@ try {
     bundle: true,
     platform: 'node',
     format: 'cjs',
-    loader: { '.png': 'dataurl', '.svg': 'dataurl' },
+    loader: { '.png': 'dataurl', '.svg': 'dataurl', '.pb': 'binary' },
+    // esbuild's binary loader otherwise emits Uint8Array.fromBase64, which Node does not have yet.
+    target: 'node20',
   })
   const result = spawnSync(process.execPath, ['--test', output], { stdio: 'inherit' })
   process.exitCode = result.status ?? 1

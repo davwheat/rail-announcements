@@ -1,3 +1,15 @@
+type ShortPlatformLength = `${'front' | 'middle' | 'rear'}.${number}`
+
+/**
+ * A length that depends on the train. It names itself so that the table can be exported as data
+ * for the announcement backend, which holds its own copy of each named rule.
+ */
+export interface ShortPlatformRule {
+  (service: ShortPlatformTrain): ShortPlatformLength | null
+  rule: string
+  lengths: ShortPlatformLength[]
+}
+
 /** Only railway facts used by the static platform preferences. */
 export interface ShortPlatformTrain {
   operatorCode: string
@@ -19,7 +31,7 @@ export function isShortPlatform(crs: string, platformNumber: string | null, trai
     if (platformNumber === null) return null
 
     const toc = train.operatorCode
-    const val = data?.[crs]?.[platformNumber.toLowerCase()]?.[toc] || data?.[crs]?.['*']?.[toc]
+    const val = shortPlatformData?.[crs]?.[platformNumber.toLowerCase()]?.[toc] || shortPlatformData?.[crs]?.['*']?.[toc]
 
     let out: string | null = null
 
@@ -57,16 +69,7 @@ export function isShortPlatform(crs: string, platformNumber: string | null, trai
  *
  * A platform named of `*` will be used as a default for all platforms.
  */
-const data: Record<
-  string,
-  Record<
-    string,
-    Record<
-      string,
-      `${'front' | 'middle' | 'rear'}.${number}` | null | ((service: ShortPlatformTrain) => `${'front' | 'middle' | 'rear'}.${number}` | null)
-    >
-  >
-> = {
+export const shortPlatformData: Record<string, Record<string, Record<string, ShortPlatformLength | null | ShortPlatformRule>>> = {
   AGT: {
     '*': {
       SN: 'front.4',
@@ -2206,8 +2209,8 @@ const data: Record<
   },
 }
 
-function southernTurboElectro(turboLen: `${'front' | 'middle' | 'rear'}.${number}`, electroLen: `${'front' | 'middle' | 'rear'}.${number}`) {
-  return (trainService: ShortPlatformTrain): `${'front' | 'middle' | 'rear'}.${number}` | null => {
+function southernTurboElectro(turboLen: ShortPlatformLength, electroLen: ShortPlatformLength): ShortPlatformRule {
+  const rule = (trainService: ShortPlatformTrain): ShortPlatformLength | null => {
     const turboStns = ['AFK', 'UCK', 'APD', 'EBT']
 
     if (
@@ -2222,10 +2225,12 @@ function southernTurboElectro(turboLen: `${'front' | 'middle' | 'rear'}.${number
 
     return electroLen
   }
+
+  return Object.assign(rule, { rule: 'southernTurboElectro', lengths: [turboLen, electroLen] })
 }
 
-function southeasternHs1(nonHs1: `${'front' | 'middle' | 'rear'}.${number}`, hs1: `${'front' | 'middle' | 'rear'}.${number}`) {
-  return (trainService: ShortPlatformTrain): `${'front' | 'middle' | 'rear'}.${number}` | null => {
+function southeasternHs1(nonHs1: ShortPlatformLength, hs1: ShortPlatformLength): ShortPlatformRule {
+  const rule = (trainService: ShortPlatformTrain): ShortPlatformLength | null => {
     const hs1Stations = ['STP', 'EBD', 'SFA', 'ASI', 'AFK']
 
     if (
@@ -2240,4 +2245,6 @@ function southeasternHs1(nonHs1: `${'front' | 'middle' | 'rear'}.${number}`, hs1
 
     return nonHs1
   }
+
+  return Object.assign(rule, { rule: 'southeasternHs1', lengths: [nonHs1, hs1] })
 }

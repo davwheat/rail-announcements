@@ -15,9 +15,11 @@
     "cf-typegen": "wrangler types --path='./functions/types.d.ts'",
     "serve-audio": "http-server ./audio/ -c-1 --port 8088 --cors",
     "develop:workers": "wrangler pages dev --port 8787",
-    "test:live": "node scripts/test-live.mjs"
+    "test:live": "node scripts/test-live.mjs",
+    "export:backend": "node scripts/export-backend.mjs"
   },
   "dependencies": {
+    "@bufbuild/protobuf": "^2.14.1",
     "@cfworker/json-schema": "^4.1.1",
     "@emotion/cache": "^11.14.0",
     "@emotion/react": "^11.14.0",

@@ -1,3 +1,6 @@
+import type { ServerMessage } from './types'
+import { decodeServerMessage } from './wire'
+
 export type ConnectionStatus = 'connecting' | 'live' | 'reconnecting' | 'recovering'
 
 export function streamUrl(base: string, path: string, crs: string): URL {
@@ -13,6 +16,8 @@ export function streamUrl(base: string, path: string, crs: string): URL {
 }
 
 const CONNECT_TIMEOUT = 20_000
+/** Room for an announcement that carries its own rendered audio: several minutes of MP3. */
+const MAX_FRAME_BYTES = 8_000_000
 
 function seconds(milliseconds: number): string {
   return `${Math.round(milliseconds / 1000)}s`
@@ -21,7 +26,7 @@ function seconds(milliseconds: number): string {
 /** Reconnect only to this feed. A disconnect never enables the legacy API. */
 export function connectStream(
   url: URL,
-  onMessage: (message: unknown) => void,
+  onMessage: (message: ServerMessage) => void,
   onReset: () => void,
   onStatus: (status: ConnectionStatus) => void,
   /** Recycle a stream this long without traffic: a middlebox drops an idle connection
@@ -43,6 +48,7 @@ export function connectStream(
     onStatus(attempts === 0 ? 'connecting' : 'reconnecting')
     log(attempts === 0 ? `Connecting to ${url.host}${url.pathname}` : `Reconnecting to ${url.host}${url.pathname} (attempt ${attempts + 1})`)
     const current = new WebSocket(url)
+    current.binaryType = 'arraybuffer'
     socket = current
     closeReason = ''
     connectTimeout = setTimeout(() => {
@@ -64,10 +70,11 @@ export function connectStream(
     current.onmessage = event => {
       if (stopped || socket !== current) return
       try {
-        if (typeof event.data !== 'string' || event.data.length > 5_000_000) {
-          throw new Error('Invalid stream message')
-        }
-        onMessage(JSON.parse(event.data))
+        // Version 2 frames are protobuf. A text frame is a version 1 service, which this build cannot read.
+        if (!(event.data instanceof ArrayBuffer)) throw new Error('Expected a binary stream message')
+        if (event.data.byteLength > MAX_FRAME_BYTES) throw new Error('Stream message is too large')
+        const message = decodeServerMessage(new Uint8Array(event.data))
+        if (message) onMessage(message)
         clearTimeout(connectTimeout)
         if (idleTimeout) {
           clearTimeout(idleTimer)

@@ -1,4 +1,9 @@
 import { connectAnnouncements } from '../live/announcements'
+import { useAtom } from 'jotai'
+import { serviceAudioState } from '../atoms'
+import { ANNOUNCEMENT_SERVICE_AVAILABLE, ANNOUNCEMENT_SERVICE_URL } from '../live/announcementService'
+import { stationStream, type StationStream } from '../live/audioStreams'
+import AnnouncementStreams from './AnnouncementStreams'
 import { PlaybackQueue } from '../live/playbackQueue'
 import { playAnnouncement, announcementPlatforms, audioPlatform } from '../live/playAnnouncement'
 import { announcementName, describeAnnouncement, describeMovement } from '../live/describe'
@@ -476,6 +481,14 @@ const SUB_OPTION_INDENT = 'calc(1em + 8px)'
 const ZONE_PREFIX = 'announcement-zone-'
 const NEW_ZONE = 'new-announcement-zone'
 
+const AudioSources = ['browser', 'service'] as const
+type AudioSource = (typeof AudioSources)[number]
+
+const AudioSourceNames: Record<AudioSource, string> = {
+  browser: 'Built in this browser',
+  service: 'Streamed from the announcement service',
+}
+
 const DataSourceNames: Record<DataSource, string> = {
   websocket: 'New (live updates)',
   original: 'Legacy (polling)',
@@ -606,6 +619,15 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
     DataSources.includes(value),
   )
   const [liveServiceUrl, setLiveServiceUrl] = useStateWithLocalStorage('amey.live-trains.service-url', LOCAL_LIVE_URL)
+  // The footer's setting, shown here as well because this page is where it changes the most.
+  const [serviceAudio, setServiceAudio] = useAtom(serviceAudioState)
+  const audioSource: AudioSource = serviceAudio ? 'service' : 'browser'
+  const [announcementServiceUrl, setAnnouncementServiceUrl] = useStateWithLocalStorage(
+    'amey.live-trains.announcement-service-url',
+    ANNOUNCEMENT_SERVICE_URL,
+  )
+  // A saved choice of streamed audio must not outlive the service it was made for.
+  const streamedAudio = ANNOUNCEMENT_SERVICE_AVAILABLE && dataSource === 'websocket' && audioSource === 'service'
   const [liveStatus, setLiveStatus] = useState<ConnectionStatus>('connecting')
   const [isFullscreen, setFullscreen] = useState(false)
   const [selectedCrs, setSelectedCrs] = useStateWithLocalStorage('amey.live-trains.selected-crs', 'ECR')
@@ -1529,6 +1551,12 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       addLog(`Skipping the ${describeAnnouncement(announcement)}: that type is switched off`)
       return
     }
+    if (announcement.audio) {
+      // Rendered once for every platform it names, in the service's voice rather than a platform's.
+      addLog(`Playing the service's own audio for the ${describeAnnouncement(announcement)}`)
+      await Object.values<AmeyPhil>(systems)[0].withLivePlayback(signal, valid).playRenderedAudio(announcement.audio.data)
+      return
+    }
     for (const platform of announcementPlatforms(announcement)) {
       if (!valid()) return
       const train = describeMovement(announcement.details)
@@ -1595,7 +1623,8 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
   }
   const feedTypes = enabledAnnouncements.join(',')
   useEffect(() => {
-    if (!hasEnabledFeature || dataSource !== 'websocket') return
+    // The announcement service listens to the feed itself when it is the one speaking.
+    if (!hasEnabledFeature || dataSource !== 'websocket' || streamedAudio) return
     const queue = playbackQueue.current!
     try {
       return connectAnnouncements(
@@ -1613,7 +1642,48 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
     }
     return () => queue.reset()
     // Per-platform voices are read at play time, so changing one must not disturb the feed.
-  }, [hasEnabledFeature, dataSource, liveServiceUrl, selectedCrs, feedTypes])
+  }, [hasEnabledFeature, dataSource, streamedAudio, liveServiceUrl, selectedCrs, feedTypes])
+
+  const announcementStream = useMemo<StationStream | null | string>(() => {
+    if (!hasEnabledFeature || !streamedAudio) return null
+    try {
+      return stationStream(
+        announcementServiceUrl,
+        selectedCrs,
+        announcePlatformsConcurrently ? zones : null,
+        Object.fromEntries(Object.entries(systemKeyForPlatform).map(([platform, key]) => [platform, key ? systems[key].ID : null])),
+        feedTypes.split(',').filter(Boolean) as FeedAnnouncementType[],
+        {
+          chime: chimeType,
+          useLegacyTocNames,
+          announceViaPoints,
+          announceShortPlatformsAfterSplit,
+          fastTrainApproaching: announceFastTrainApproaching,
+          daktronicsFanfare: displayType === 'daktronics-data-display-dmi',
+          missingAudioMode,
+        },
+      )
+    } catch (error) {
+      return `Cannot use the announcement service: ${error instanceof Error ? error.message : String(error)}`
+    }
+  }, [
+    hasEnabledFeature,
+    streamedAudio,
+    announcementServiceUrl,
+    selectedCrs,
+    announcePlatformsConcurrently,
+    zones,
+    systemKeyForPlatform,
+    systems,
+    feedTypes,
+    chimeType,
+    useLegacyTocNames,
+    announceViaPoints,
+    announceShortPlatformsAfterSplit,
+    announceFastTrainApproaching,
+    displayType,
+    missingAudioMode,
+  ])
 
   /** Builds one board's URL. `platform` gives that platform its own board; without it the
    *  board covers the station, showing the platforms that have a voice. */
@@ -1678,6 +1748,28 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
               key={liveServiceUrl}
               defaultValue={liveServiceUrl}
               onBlur={event => setLiveServiceUrl(event.target.value.trim())}
+            />
+          </label>
+        )}
+        {dataSource === 'websocket' && ANNOUNCEMENT_SERVICE_AVAILABLE && (
+          <label className="option-select" htmlFor="audio-source-select">
+            Announcement audio
+            <Select<Option<AudioSource>, false>
+              id="audio-source-select"
+              value={{ value: audioSource, label: AudioSourceNames[audioSource] }}
+              onChange={val => setServiceAudio(val!!.value === 'service')}
+              options={AudioSources.map(value => ({ value, label: AudioSourceNames[value] }))}
+            />
+          </label>
+        )}
+        {streamedAudio && process.env.NODE_ENV === 'development' && (
+          <label htmlFor="announcement-service-url">
+            Announcement service URL
+            <input
+              id="announcement-service-url"
+              key={announcementServiceUrl}
+              defaultValue={announcementServiceUrl}
+              onBlur={event => setAnnouncementServiceUrl(event.target.value.trim())}
             />
           </label>
         )}
@@ -2408,7 +2500,13 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
 
           <div id="resume-audio-container" />
 
-          {dataSource === 'websocket' && <p role="status">Live feed: {liveStatus}</p>}
+          {dataSource === 'websocket' && !streamedAudio && <p role="status">Live feed: {liveStatus}</p>}
+          {streamedAudio &&
+            (typeof announcementStream === 'string' ? (
+              <p role="alert">{announcementStream}</p>
+            ) : (
+              <AnnouncementStreams stream={announcementStream} log={addLog} />
+            ))}
           <Logs css={{ marginTop: 16 }} logs={logs} />
 
           <img

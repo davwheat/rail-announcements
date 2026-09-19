@@ -17,6 +17,18 @@ import { isShortPlatform, shortPlatformData, type ShortPlatformTrain } from '../
 import { announcementPlatforms, audioPlatform, playAnnouncement, type VoicePreferences } from '../../src/live/playAnnouncement'
 import type { Announcement, AnnouncementType, Call, Movement, Portion } from '../../src/live/types'
 import { queueCases } from './queue'
+import { exportSystems } from './systems'
+import { AllStationsCrsToNameMap } from '../../src/data/StationManipulators'
+import * as Banedanmark from '../../src/announcement-data/systems/international/denmark/Banedanmark'
+import * as DlrData from '../../src/announcement-data/systems/rolling-stock/TfLDLRData'
+import * as ElizabethLine from '../../src/announcement-data/systems/rolling-stock/TfLElizabeth'
+import * as FGWTrainFx from '../../src/announcement-data/systems/rolling-stock/FGWTrainFx'
+import * as JubileeLine from '../../src/announcement-data/systems/rolling-stock/TfLJubileeLine'
+import * as NorthernLine from '../../src/announcement-data/systems/rolling-stock/TfLNorthernLine'
+import * as NorthernTrainFx from '../../src/announcement-data/systems/rolling-stock/NorthernTrainFx'
+import * as PiccadillyLine from '../../src/announcement-data/systems/rolling-stock/TfLPiccadillyLine'
+import * as PiccadillyLineData from '../../src/announcement-data/systems/rolling-stock/TfLPiccadillyLineData'
+import * as ScotRail from '../../src/announcement-data/systems/stations/ScotRail'
 
 interface Clip {
   id: string
@@ -496,11 +508,31 @@ async function main() {
   const queue = await queueCases(movements)
   writeJson(join(queueTestdata, 'parity-queue.json'), queue)
 
+  // The station names every voice's "no recording for X" message is built from.
+  const sharedData = join(backend, 'internal/systems/shared/data')
+  mkdirSync(sharedData, { recursive: true })
+  const stationNames = Object.keys(AllStationsCrsToNameMap).sort()
+  writeJson(join(sharedData, 'stations.json'), Object.fromEntries(stationNames.map(crs => [crs, AllStationsCrsToNameMap[crs]])))
+
+  // Tables that a system keeps in a module of its own, and not on its class.
+  const systems = await exportSystems(backend, {
+    BANEDANMARK_V1: Banedanmark,
+    FGW_TRAINFX_V1: FGWTrainFx,
+    NORTHERN_TRAINFX_V1: NorthernTrainFx,
+    SCOTRAIL_STN_V1: ScotRail,
+    TFL_DLR_V1: DlrData,
+    TFL_ELIZ_LINE_V1: ElizabethLine,
+    TFL_JUBILEE_LINE_V1: JubileeLine,
+    TFL_NORTHERN_LINE_V1: NorthernLine,
+    TFL_PICCADILLY_LINE_V1: { ...PiccadillyLineData, ...PiccadillyLine },
+  })
+
   const count = (outcomes: Outcome[], key: string) => outcomes.filter(outcome => key in outcome).length
   const outcomes = live.flatMap(entry => entry.platforms.map(platform => platform.outcome as Outcome))
   process.stderr.write(
     `live: ${live.length} cases (${count(outcomes, 'plan')} plans, ${count(outcomes, 'error')} errors, ${count(outcomes, 'silent')} silent)\n` +
-      `state: ${states.length} cases, queue: ${queue.length} scenarios\n`,
+      `state: ${states.length} cases, queue: ${queue.length} scenarios\n` +
+      `systems:\n  ${systems.join('\n  ')}\n`,
   )
 }
 

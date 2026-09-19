@@ -1414,9 +1414,9 @@ class FakeAudio extends EventTarget {
   src = ''
   paused = true
   error: { code: number } | null = null
-  buffered = { length: 0, end: () => 0 }
   currentTime = 0
   sources: string[] = []
+  refusesAutoplay = false
   constructor(private claimsHls: boolean) {
     super()
   }
@@ -1425,11 +1425,23 @@ class FakeAudio extends EventTarget {
   }
   play() {
     this.sources.push(this.src)
+    if (this.refusesAutoplay) return Promise.reject(new DOMException('play() needs a click first', 'NotAllowedError'))
     this.paused = false
     return Promise.resolve()
   }
   pause() {
     this.paused = true
+  }
+  respond() {
+    this.dispatchEvent(new Event('loadedmetadata'))
+  }
+  pressPause() {
+    this.paused = true
+    this.dispatchEvent(new Event('pause'))
+  }
+  pressPlay() {
+    this.paused = false
+    this.dispatchEvent(new Event('play'))
   }
   removeAttribute() {
     this.src = ''
@@ -1472,6 +1484,70 @@ test('a browser that does not claim HLS starts on the MP3 stream', () => {
   const audio = new FakeAudio(false)
   const stop = playStream(bothUrls, audio as unknown as HTMLAudioElement, () => {})
   assert.deepEqual(audio.sources, [bothUrls.radioUrl])
+  stop()
+})
+
+test('an MP3 player that falls well behind starts the stream again, but not one that was slow to connect', context => {
+  context.mock.timers.enable({ apis: ['setInterval', 'Date'] })
+  const audio = new FakeAudio(false)
+  const logs: string[] = []
+  const stop = playStream(
+    bothUrls,
+    audio as unknown as HTMLAudioElement,
+    () => {},
+    message => logs.push(message),
+  )
+
+  // A response opens at the present however long it took to arrive.
+  context.mock.timers.tick(8_000)
+  audio.respond()
+  audio.currentTime = 12
+  context.mock.timers.tick(12_000)
+
+  // Starting again would cut into whatever is being said, so a player that has only stalled briefly keeps going.
+  audio.currentTime = 17
+  context.mock.timers.tick(10_000)
+  assert.deepEqual(audio.sources, [bothUrls.radioUrl])
+
+  audio.currentTime = 20
+  context.mock.timers.tick(10_000)
+  assert.deepEqual(audio.sources, [bothUrls.radioUrl, bothUrls.radioUrl])
+  assert.equal(logs.length, 1)
+  stop()
+})
+
+test('a player resumed after a long pause starts the stream again, and after a short one carries on', context => {
+  context.mock.timers.enable({ apis: ['setInterval', 'Date'] })
+  const audio = new FakeAudio(false)
+  const stop = playStream(bothUrls, audio as unknown as HTMLAudioElement, () => {})
+  audio.respond()
+
+  audio.pressPause()
+  context.mock.timers.tick(5_000)
+  audio.pressPlay()
+  assert.deepEqual(audio.sources, [bothUrls.radioUrl])
+
+  audio.pressPause()
+  context.mock.timers.tick(60_000)
+  audio.pressPlay()
+  assert.deepEqual(audio.sources, [bothUrls.radioUrl, bothUrls.radioUrl])
+  stop()
+})
+
+test('a player refused autoplay and clicked much later starts the stream again', async context => {
+  context.mock.timers.enable({ apis: ['setInterval', 'Date'] })
+  const audio = new FakeAudio(false)
+  audio.refusesAutoplay = true
+  const statuses: StreamStatus[] = []
+  const stop = playStream(bothUrls, audio as unknown as HTMLAudioElement, status => statuses.push(status))
+  audio.respond()
+  await Promise.resolve()
+  assert.equal(statuses.at(-1), 'blocked')
+
+  audio.refusesAutoplay = false
+  context.mock.timers.tick(60_000)
+  audio.pressPlay()
+  assert.deepEqual(audio.sources, [bothUrls.radioUrl, bothUrls.radioUrl])
   stop()
 })
 

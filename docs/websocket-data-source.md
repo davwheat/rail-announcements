@@ -118,9 +118,9 @@ setting for the listener to choose.
 
 ## Announcements streamed from the announcement service
 
-With **Announcement audio** set to **Streamed from the announcement service**, the page doesn't build announcements. The announcement service
-(`../rail-announcements-backend`) listens to the same feed, builds each announcement from the same recordings, and serves the audio as an HTTP
-Live Stream. The page doesn't open the announcement stream in this mode, and its queue stays empty.
+With **Announcement audio** set to **Streamed from the announcement service**, the live trains page doesn't build announcements. The announcement
+service (`../rail-announcements-backend`) listens to the same feed, builds each announcement from the same recordings, and serves the audio as an
+HTTP Live Stream. The page doesn't open the announcement stream in this mode, and its queue stays empty.
 
 `src/live/audioStreams.ts` asks for one stream for the whole station, and `AnnouncementStreams` plays it through one audio element. The stream's
 URL lists the announcement zones that have a voice. The service lets zones speak over each other and mixes them, and the platforms within a zone
@@ -136,6 +136,16 @@ the newest audio it holds.
 Set `NEXT_PUBLIC_ANNOUNCEMENT_SERVICE_URL` to the service's URL. A production build offers the **Announcement audio** setting only when this is
 set, and ignores a saved choice of streamed audio without it, so the page never tries to stream from a service that isn't deployed. In
 development, the **Announcement service URL** setting overrides it, and the default is `http://localhost:8090`.
+
+### The same setting, for the rest of the site
+
+**Announcement audio** is one setting for the whole site, held in `serviceAudioState` and also shown as a checkbox in the footer. With it on, a
+tab asks the service to build its announcement: `CustomAnnouncementPane` posts the tab's option state to `POST /v1/announcements`, unchanged, and
+plays or saves the MP3 that comes back. `src/live/announcementService.ts` holds that client.
+
+The service is taught one system at a time, and `GET /v1/systems` says which tabs it knows. The page asks once, and builds every other tab itself
+as before, without a request. If the service can't be reached, or refuses the state, the page also builds the announcement itself, so the setting
+never costs a listener the announcement. A download from the service is an MP3, where the page's own is a WAV.
 
 ### Keep the service's copy of the logic in step
 

@@ -1,4 +1,7 @@
 import { connectAnnouncements } from '../live/announcements'
+import { useAtom } from 'jotai'
+import { serviceAudioState } from '../atoms'
+import { ANNOUNCEMENT_SERVICE_AVAILABLE, ANNOUNCEMENT_SERVICE_URL } from '../live/announcementService'
 import { stationStream, type StationStream } from '../live/audioStreams'
 import AnnouncementStreams from './AnnouncementStreams'
 import { PlaybackQueue } from '../live/playbackQueue'
@@ -68,10 +71,6 @@ const RDM_BASE_URL = 'https://raildotmatrix.co.uk/board'
 // const RDM_BASE_URL = 'http://localhost:8788/board'
 const LOCAL_LIVE_URL = process.env.NEXT_PUBLIC_LIVE_SERVICE_URL || 'ws://localhost:8080'
 const LIVE_BOARD_URL = process.env.NEXT_PUBLIC_LIVE_BOARD_URL || 'http://localhost:8000/board'
-const ANNOUNCEMENT_SERVICE_URL = process.env.NEXT_PUBLIC_ANNOUNCEMENT_SERVICE_URL || 'http://localhost:8090'
-/** Without a deployed service there is nothing to stream from, so a production build only
- *  offers streamed audio once it has been told where the service is. */
-const ANNOUNCEMENT_SERVICE_AVAILABLE = !!process.env.NEXT_PUBLIC_ANNOUNCEMENT_SERVICE_URL || process.env.NODE_ENV === 'development'
 const RDM_BASE_URL_ORIGIN = new URL(RDM_BASE_URL).origin
 
 function pluraliseStrings(...strings: string[]): string {
@@ -620,9 +619,9 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
     DataSources.includes(value),
   )
   const [liveServiceUrl, setLiveServiceUrl] = useStateWithLocalStorage('amey.live-trains.service-url', LOCAL_LIVE_URL)
-  const [audioSource, setAudioSource] = useStateWithLocalStorage<AudioSource>('amey.live-trains.audio-source', 'browser', value =>
-    AudioSources.includes(value),
-  )
+  // The footer's setting, shown here as well because this page is where it changes the most.
+  const [serviceAudio, setServiceAudio] = useAtom(serviceAudioState)
+  const audioSource: AudioSource = serviceAudio ? 'service' : 'browser'
   const [announcementServiceUrl, setAnnouncementServiceUrl] = useStateWithLocalStorage(
     'amey.live-trains.announcement-service-url',
     ANNOUNCEMENT_SERVICE_URL,
@@ -1758,7 +1757,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
             <Select<Option<AudioSource>, false>
               id="audio-source-select"
               value={{ value: audioSource, label: AudioSourceNames[audioSource] }}
-              onChange={val => setAudioSource(val!!.value)}
+              onChange={val => setServiceAudio(val!!.value === 'service')}
               options={AudioSources.map(value => ({ value, label: AudioSourceNames[value] }))}
             />
           </label>

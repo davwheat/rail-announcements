@@ -1474,3 +1474,53 @@ test('a browser that does not claim HLS starts on the MP3 stream', () => {
   assert.deepEqual(audio.sources, [bothUrls.radioUrl])
   stop()
 })
+
+import { renderAnnouncement } from '../src/live/announcementService'
+
+test('a tab is built by the announcement service only when the service knows it', async () => {
+  const calls: { url: string; method: string; body?: any }[] = []
+  let systemsStatus = 200
+  let renderStatus = 200
+  const realFetch = globalThis.fetch
+  globalThis.fetch = (async (input: string, init?: RequestInit) => {
+    calls.push({ url: input, method: init?.method || 'GET', body: init?.body ? JSON.parse(init.body as string) : undefined })
+    if (input.endsWith('/v1/systems')) {
+      return new Response(JSON.stringify({ systems: [{ id: 'AMEY_PHIL_V1', announcements: ['nextTrain'] }] }), { status: systemsStatus })
+    }
+    return renderStatus === 200
+      ? new Response(new Uint8Array([0xff, 0xfb, 1, 2]), { status: 200 })
+      : new Response(JSON.stringify({ error: { code: 'missing_audio', message: 'audio file not found: station/e/ZZZ.mp3' } }), {
+          status: renderStatus,
+        })
+  }) as typeof fetch
+
+  try {
+    // A service that is down is asked again next time, and not remembered as knowing nothing.
+    systemsStatus = 503
+    await assert.rejects(renderAnnouncement('AMEY_PHIL_V1', 'nextTrain', {}, 'https://audio.example/base/'))
+    systemsStatus = 200
+
+    const state = { platform: '2', hour: '07' }
+    const mp3 = await renderAnnouncement('AMEY_PHIL_V1', 'nextTrain', state, 'https://audio.example/base/')
+    assert.deepEqual([...mp3!], [0xff, 0xfb, 1, 2])
+    const post = calls.at(-1)!
+    assert.equal(post.url, 'https://audio.example/base/v1/announcements')
+    assert.equal(post.method, 'POST')
+    assert.deepEqual(post.body, { system: 'AMEY_PHIL_V1', announcement: 'nextTrain', state })
+
+    // Systems move to the service one at a time, so the rest are left to the browser without a request.
+    const before = calls.length
+    assert.equal(await renderAnnouncement('AMEY_PHIL_V1', 'announcementButtons', state, 'https://audio.example/base/'), null)
+    assert.equal(await renderAnnouncement('SCOTRAIL_V1', 'nextTrain', state, 'https://audio.example/base/'), null)
+    assert.equal(calls.length, before)
+    assert.equal(calls.filter(call => call.url.endsWith('/v1/systems')).length, 2)
+
+    renderStatus = 422
+    await assert.rejects(
+      renderAnnouncement('AMEY_PHIL_V1', 'nextTrain', state, 'https://audio.example/base/'),
+      /audio file not found: station\/e\/ZZZ\.mp3/,
+    )
+  } finally {
+    globalThis.fetch = realFetch
+  }
+})

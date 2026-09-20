@@ -119,8 +119,8 @@ setting for the listener to choose.
 ## Announcements streamed from the announcement service
 
 With **Announcement audio** set to **Streamed from the announcement service**, the live trains page doesn't build announcements. The announcement
-service (`../rail-announcements-backend`) listens to the same feed, builds each announcement from the same recordings, and serves the audio as an
-HTTP Live Stream. The page doesn't open the announcement stream in this mode, and its queue stays empty.
+service (`../rail-announcements-backend`) listens to the same feed, builds each announcement from the same recordings, and serves the audio as a
+live stream. The page doesn't open the announcement stream in this mode, and its queue stays empty.
 
 `src/live/audioStreams.ts` asks for one stream for the whole station, and `AnnouncementStreams` plays it through one audio element. The stream's
 URL lists the announcement zones that have a voice. The service lets zones speak over each other and mixes them, and the platforms within a zone
@@ -128,15 +128,19 @@ take turns, which is what the page's own queue does. With zones turned off, or a
 turns. The URL also carries each platform's voice, the announcement types and the preferences, so changing any of them starts a different stream.
 
 One stream and one element is what keeps announcements playing in a background tab: the browser plays a URL by itself, and no script has to keep
-running. Safari plays the service's HLS playlist (`live.m3u8`). Other browsers can't play a playlist without a script that feeds them, and a
-background tab throttles scripts, so they play the same audio as one endless MP3 response (`live.mp3`), the way they play internet radio. A
-listener hears an announcement about two seconds after the service starts it.
+running. Every browser plays the one endless MP3 response (`live.mp3`), the way it plays internet radio. The service also serves the same audio
+as an HLS playlist, which the page leaves alone: a browser's claim to play HLS is unreliable — Firefox says it can, starts, then fails part-way
+through an announcement for want of a decoder — and a browser that can't play a playlist itself needs a script to feed it segments, which a
+background tab throttles. A listener hears an announcement about two seconds after the service starts it.
 
 The page works out how far behind the MP3 player is from the clock: the service sends audio as it's made, so the player starts 3 seconds behind
 and falls further behind only by stalling or pausing. The browser's buffered range can't show this lag, because Chrome reads only a couple of
 seconds ahead and leaves the rest of a backlog in the network buffers. When the player is more than 10 seconds behind, the page starts the stream
 again, which drops the audio in between. It checks every 10 seconds, and also when the player starts playing, so a listener who resumes after a
-long pause, or plays the stream long after the browser refused to autoplay it, doesn't hear out-of-date announcements first.
+long pause, or plays the stream long after the browser refused to autoplay it, doesn't hear out-of-date announcements first. A player that runs
+dry and stays that way for 4 seconds also starts the stream again, because a browser that runs dry on a live response can wait many seconds for
+audio that never arrives faster than real time. Either way the page starts the stream at most once a minute: a player that's behind again that
+soon needs a deeper buffer or a faster network, which another response doesn't supply.
 
 Set `NEXT_PUBLIC_ANNOUNCEMENT_SERVICE_URL` to the service's URL. A production build offers the **Announcement audio** setting only when this is
 set, and ignores a saved choice of streamed audio without it, so the page never tries to stream from a service that isn't deployed. In

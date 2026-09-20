@@ -1330,18 +1330,15 @@ test('the station is one stream, with every voiced zone in it', () => {
 
   // A zone whose platforms are all silent has nothing to say, and zones are listed in station order.
   assert.deepEqual(stream.zones, [['1', '2', '10'], ['7']])
-  const playlist = new URL(stream.playlistUrl)
   const radio = new URL(stream.radioUrl)
-  assert.equal(playlist.origin + playlist.pathname, 'https://audio.example/base/v1/streams/live.m3u8')
   assert.equal(radio.origin + radio.pathname, 'https://audio.example/base/v1/streams/live.mp3')
-  assert.equal(playlist.search, radio.search)
-  assert.equal(playlist.searchParams.get('crs'), 'KGX')
-  assert.deepEqual(playlist.searchParams.getAll('zone'), ['1:AMEY_PHIL_V1,2:AMEY_CELIA_V1,10:AMEY_PHIL_V1', '7:AMEY_PHIL_V1'])
-  assert.equal(playlist.searchParams.has('platform'), false)
-  assert.equal(playlist.searchParams.get('type'), 'next,passing')
-  assert.equal(playlist.searchParams.get('vias'), 'true')
+  assert.equal(radio.searchParams.get('crs'), 'KGX')
+  assert.deepEqual(radio.searchParams.getAll('zone'), ['1:AMEY_PHIL_V1,2:AMEY_CELIA_V1,10:AMEY_PHIL_V1', '7:AMEY_PHIL_V1'])
+  assert.equal(radio.searchParams.has('platform'), false)
+  assert.equal(radio.searchParams.get('type'), 'next,passing')
+  assert.equal(radio.searchParams.get('vias'), 'true')
   for (const unset of ['chime', 'legacy_tocs', 'short_platforms_after_split', 'fast_train_approaching', 'fanfare', 'missing_audio']) {
-    assert.equal(playlist.searchParams.has(unset), false, unset)
+    assert.equal(radio.searchParams.has(unset), false, unset)
   }
 })
 
@@ -1411,7 +1408,7 @@ test('a whole station in one voice names the voice and not every platform it can
 import { playStream, type StationStream, type StreamStatus } from '../src/live/audioStreams'
 
 class FakeAudio extends EventTarget {
-  src = ''
+  #src = ''
   paused = true
   error: { code: number } | null = null
   currentTime = 0
@@ -1419,6 +1416,15 @@ class FakeAudio extends EventTarget {
   refusesAutoplay = false
   constructor(private claimsHls: boolean) {
     super()
+  }
+  get src() {
+    return this.#src
+  }
+  /** A browser clears the last failure when a new load starts, which is how the player tells a
+   *  response that has yet to answer from one that has already failed. */
+  set src(value: string) {
+    this.#src = value
+    this.error = null
   }
   canPlayType(type: string) {
     return this.claimsHls && type === 'application/vnd.apple.mpegurl' ? 'maybe' : ''
@@ -1451,39 +1457,53 @@ class FakeAudio extends EventTarget {
     this.error = { code }
     this.dispatchEvent(new Event('error'))
   }
+  /** The element has played everything it holds and is waiting for audio, with playback stopped
+   *  where it stood. Firefox stays here for some fifteen seconds. */
+  runDry() {
+    this.dispatchEvent(new Event('waiting'))
+  }
+  finish() {
+    this.dispatchEvent(new Event('ended'))
+  }
+  resume() {
+    this.dispatchEvent(new Event('playing'))
+  }
 }
 
-const bothUrls: StationStream = { zones: [], playlistUrl: 'https://audio.example/live.m3u8', radioUrl: 'https://audio.example/live.mp3' }
+const radioStream: StationStream = { zones: [], radioUrl: 'https://audio.example/live.mp3' }
 
-test('a browser that claims HLS and then refuses it gets the MP3 stream, for good', () => {
+test('a browser that claims it can play HLS is given the MP3 stream like every other', () => {
   const audio = new FakeAudio(true)
-  const statuses: StreamStatus[] = []
-  const logs: string[] = []
-  const stop = playStream(
-    bothUrls,
-    audio as unknown as HTMLAudioElement,
-    status => statuses.push(status),
-    message => logs.push(message),
-  )
-  assert.deepEqual(audio.sources, [bothUrls.playlistUrl])
-
-  // Firefox: "No decoders for requested formats: application/vnd.apple.mpegurl".
-  audio.fail(4)
-  assert.deepEqual(audio.sources, [bothUrls.playlistUrl, bothUrls.radioUrl])
-  assert.equal(logs.length, 1)
-  assert.equal(statuses.includes('reconnecting'), false)
-
-  // A later failure is the MP3 stream's own, so it waits and retries instead of switching again.
-  audio.fail(4)
-  assert.deepEqual(audio.sources, [bothUrls.playlistUrl, bothUrls.radioUrl])
-  assert.equal(statuses.at(-1), 'reconnecting')
+  const stop = playStream(radioStream, audio as unknown as HTMLAudioElement, () => {})
+  assert.deepEqual(audio.sources, [radioStream.radioUrl])
   stop()
 })
 
-test('a browser that does not claim HLS starts on the MP3 stream', () => {
-  const audio = new FakeAudio(false)
-  const stop = playStream(bothUrls, audio as unknown as HTMLAudioElement, () => {})
-  assert.deepEqual(audio.sources, [bothUrls.radioUrl])
+test('a failure of any kind waits and asks for the same MP3 stream again', context => {
+  context.mock.timers.enable({ apis: ['setTimeout', 'setInterval'] })
+  const audio = new FakeAudio(true)
+  const statuses: StreamStatus[] = []
+  const stop = playStream(radioStream, audio as unknown as HTMLAudioElement, status => statuses.push(status))
+
+  // Firefox fails a claimed HLS playlist part-way through with a decode error rather than an
+  // unsupported source, so no error code can be read as "this browser wants something else".
+  for (const code of [3, 4]) {
+    audio.fail(code)
+    assert.equal(statuses.at(-1), 'reconnecting')
+    context.mock.timers.tick(3_000)
+  }
+  assert.deepEqual(audio.sources, [radioStream.radioUrl, radioStream.radioUrl, radioStream.radioUrl])
+  stop()
+})
+
+test('a browser that claims HLS is caught up by the clock like every other', context => {
+  context.mock.timers.enable({ apis: ['setInterval', 'Date'] })
+  const audio = new FakeAudio(true)
+  const stop = playStream(radioStream, audio as unknown as HTMLAudioElement, () => {})
+  audio.respond()
+
+  context.mock.timers.tick(10_000)
+  assert.deepEqual(audio.sources, [radioStream.radioUrl, radioStream.radioUrl])
   stop()
 })
 
@@ -1492,7 +1512,7 @@ test('an MP3 player that falls well behind starts the stream again, but not one 
   const audio = new FakeAudio(false)
   const logs: string[] = []
   const stop = playStream(
-    bothUrls,
+    radioStream,
     audio as unknown as HTMLAudioElement,
     () => {},
     message => logs.push(message),
@@ -1507,11 +1527,11 @@ test('an MP3 player that falls well behind starts the stream again, but not one 
   // Starting again would cut into whatever is being said, so a player that has only stalled briefly keeps going.
   audio.currentTime = 17
   context.mock.timers.tick(10_000)
-  assert.deepEqual(audio.sources, [bothUrls.radioUrl])
+  assert.deepEqual(audio.sources, [radioStream.radioUrl])
 
   audio.currentTime = 20
   context.mock.timers.tick(10_000)
-  assert.deepEqual(audio.sources, [bothUrls.radioUrl, bothUrls.radioUrl])
+  assert.deepEqual(audio.sources, [radioStream.radioUrl, radioStream.radioUrl])
   assert.equal(logs.length, 1)
   stop()
 })
@@ -1519,18 +1539,18 @@ test('an MP3 player that falls well behind starts the stream again, but not one 
 test('a player resumed after a long pause starts the stream again, and after a short one carries on', context => {
   context.mock.timers.enable({ apis: ['setInterval', 'Date'] })
   const audio = new FakeAudio(false)
-  const stop = playStream(bothUrls, audio as unknown as HTMLAudioElement, () => {})
+  const stop = playStream(radioStream, audio as unknown as HTMLAudioElement, () => {})
   audio.respond()
 
   audio.pressPause()
   context.mock.timers.tick(5_000)
   audio.pressPlay()
-  assert.deepEqual(audio.sources, [bothUrls.radioUrl])
+  assert.deepEqual(audio.sources, [radioStream.radioUrl])
 
   audio.pressPause()
   context.mock.timers.tick(60_000)
   audio.pressPlay()
-  assert.deepEqual(audio.sources, [bothUrls.radioUrl, bothUrls.radioUrl])
+  assert.deepEqual(audio.sources, [radioStream.radioUrl, radioStream.radioUrl])
   stop()
 })
 
@@ -1539,7 +1559,7 @@ test('a player refused autoplay and clicked much later starts the stream again',
   const audio = new FakeAudio(false)
   audio.refusesAutoplay = true
   const statuses: StreamStatus[] = []
-  const stop = playStream(bothUrls, audio as unknown as HTMLAudioElement, status => statuses.push(status))
+  const stop = playStream(radioStream, audio as unknown as HTMLAudioElement, status => statuses.push(status))
   audio.respond()
   await Promise.resolve()
   assert.equal(statuses.at(-1), 'blocked')
@@ -1547,7 +1567,158 @@ test('a player refused autoplay and clicked much later starts the stream again',
   audio.refusesAutoplay = false
   context.mock.timers.tick(60_000)
   audio.pressPlay()
-  assert.deepEqual(audio.sources, [bothUrls.radioUrl, bothUrls.radioUrl])
+  assert.deepEqual(audio.sources, [radioStream.radioUrl, radioStream.radioUrl])
+  stop()
+})
+
+test('a player left waiting for audio that cannot arrive in time is started again, and a hiccup is left alone', context => {
+  context.mock.timers.enable({ apis: ['setTimeout', 'setInterval', 'Date'] })
+  const audio = new FakeAudio(false)
+  const logs: string[] = []
+  const stop = playStream(
+    radioStream,
+    audio as unknown as HTMLAudioElement,
+    () => {},
+    message => logs.push(message),
+  )
+
+  // Waiting for a response that has yet to answer is that response loading, however long it takes.
+  audio.runDry()
+  context.mock.timers.tick(5_000)
+  assert.deepEqual(audio.sources, [radioStream.radioUrl])
+
+  audio.respond()
+  audio.resume()
+  audio.runDry()
+  context.mock.timers.tick(3_000)
+  audio.currentTime = 3
+  audio.resume()
+  context.mock.timers.tick(3_000)
+  audio.currentTime = 6
+  assert.deepEqual(audio.sources, [radioStream.radioUrl], 'a stall the browser rides out is not worth dropping audio for')
+
+  audio.runDry()
+  context.mock.timers.tick(4_000)
+  assert.deepEqual(audio.sources, [radioStream.radioUrl, radioStream.radioUrl])
+  assert.deepEqual(logs, ['The announcement stream stalled, so it is starting again from the present'])
+
+  // The stall belonged to the response that was replaced, so it starts the stream once.
+  context.mock.timers.tick(30_000)
+  assert.equal(audio.sources.length, 2)
+  stop()
+})
+
+test('a load the page aborted by starting another is not a failure of the stream', context => {
+  context.mock.timers.enable({ apis: ['setTimeout', 'setInterval', 'Date'] })
+  const audio = new FakeAudio(false)
+  const statuses: StreamStatus[] = []
+  const stop = playStream(radioStream, audio as unknown as HTMLAudioElement, status => statuses.push(status))
+  audio.respond()
+
+  audio.fail(1)
+  context.mock.timers.tick(3_000)
+  assert.equal(statuses.includes('reconnecting'), false)
+  assert.deepEqual(audio.sources, [radioStream.radioUrl])
+
+  // Every other code is the response's own failure, whatever it was.
+  for (const code of [2, 3, 4]) {
+    audio.fail(code)
+    assert.equal(statuses.at(-1), 'reconnecting', `code ${code}`)
+    context.mock.timers.tick(3_000)
+  }
+  assert.equal(audio.sources.length, 4)
+  stop()
+})
+
+test('the end of a load that a restart replaced is not read as the new response ending', context => {
+  context.mock.timers.enable({ apis: ['setTimeout', 'setInterval', 'Date'] })
+  const audio = new FakeAudio(false)
+  const statuses: StreamStatus[] = []
+  const stop = playStream(radioStream, audio as unknown as HTMLAudioElement, status => statuses.push(status))
+
+  audio.respond()
+  context.mock.timers.tick(10_000)
+  assert.deepEqual(audio.sources, [radioStream.radioUrl, radioStream.radioUrl])
+
+  // The browser aborted the response the restart replaced, and reports it as that response ending.
+  audio.finish()
+  assert.equal(statuses.includes('reconnecting'), false)
+  context.mock.timers.tick(3_000)
+  assert.equal(audio.sources.length, 2, 'the response the restart opened must not be thrown away')
+
+  // Once that response has answered, its own end is its own again.
+  audio.respond()
+  audio.finish()
+  assert.equal(statuses.at(-1), 'reconnecting')
+  context.mock.timers.tick(3_000)
+  assert.equal(audio.sources.length, 3)
+  stop()
+})
+
+test('a player that is behind again is left to play rather than started again every lag check', context => {
+  context.mock.timers.enable({ apis: ['setTimeout', 'setInterval', 'Date'] })
+  const audio = new FakeAudio(false)
+  const logs: string[] = []
+  const stop = playStream(
+    radioStream,
+    audio as unknown as HTMLAudioElement,
+    () => {},
+    message => logs.push(message),
+  )
+
+  // currentTime never moves, so every check finds the player further behind than the last.
+  audio.respond()
+  context.mock.timers.tick(10_000)
+  assert.deepEqual(audio.sources, [radioStream.radioUrl, radioStream.radioUrl])
+
+  audio.respond()
+  context.mock.timers.tick(30_000)
+  assert.equal(audio.sources.length, 2, 'a response is not the cause, so a fresh one is not asked for')
+  assert.deepEqual(
+    logs.filter(message => message.includes('left to play')),
+    ['The announcement stream is still behind, so it is being left to play'],
+  )
+
+  // A minute on, the lag is worth one more attempt.
+  context.mock.timers.tick(30_000)
+  assert.equal(audio.sources.length, 3)
+  stop()
+})
+
+test('a failure during the restart backoff still reconnects, because a failure is not a lag', context => {
+  context.mock.timers.enable({ apis: ['setTimeout', 'setInterval', 'Date'] })
+  const audio = new FakeAudio(false)
+  const statuses: StreamStatus[] = []
+  const stop = playStream(radioStream, audio as unknown as HTMLAudioElement, status => statuses.push(status))
+
+  audio.respond()
+  context.mock.timers.tick(10_000)
+  assert.deepEqual(audio.sources, [radioStream.radioUrl, radioStream.radioUrl])
+
+  audio.respond()
+  audio.fail(2)
+  assert.equal(statuses.at(-1), 'reconnecting')
+  context.mock.timers.tick(3_000)
+  assert.equal(audio.sources.length, 3)
+  stop()
+})
+
+test('a stall that starts the stream again drops the reconnect it was waiting on', context => {
+  context.mock.timers.enable({ apis: ['setTimeout', 'setInterval', 'Date'] })
+  const audio = new FakeAudio(false)
+  const stop = playStream(radioStream, audio as unknown as HTMLAudioElement, () => {})
+
+  audio.respond()
+  audio.resume()
+  audio.runDry()
+  context.mock.timers.tick(2_000)
+  audio.fail(2)
+
+  context.mock.timers.tick(2_000)
+  assert.deepEqual(audio.sources, [radioStream.radioUrl, radioStream.radioUrl], 'the stall starts the stream')
+  // The reconnect the failure scheduled would otherwise throw that response away a second later.
+  context.mock.timers.tick(5_000)
+  assert.equal(audio.sources.length, 2)
   stop()
 })
 

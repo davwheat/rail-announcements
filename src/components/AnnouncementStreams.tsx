@@ -19,7 +19,7 @@ export default function AnnouncementStreams({ stream, log }: { stream: StationSt
   latestLog.current = log
 
   const zones = stream?.zones.length ? `platforms ${stream.zones.map(zone => zone.join(', ')).join(' | ')}` : 'every platform'
-  // Both URLs carry the same query, so either one identifies the stream.
+  // The URL carries every choice the stream is built from, so it identifies the stream.
   const identity = stream?.radioUrl
 
   useEffect(() => {

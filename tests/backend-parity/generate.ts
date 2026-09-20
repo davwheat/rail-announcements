@@ -260,7 +260,7 @@ function variations(tabId: string, base: any): any[] {
   }
   if (tabId === 'disruptedTrain') {
     for (const delayTime of ['0', '1', '9', '10', '44', '60', '61', '135']) {
-      for (const disruptionReason of ['', ['disruption-reason.e.a fault on this train']]) {
+      for (const disruptionReason of ['', ['disruption-reason.e.a fault on this train which cannot be rectified']]) {
         out.push({ ...base, disruptionType: 'delayedBy', delayTime, disruptionReason })
       }
     }

@@ -57,8 +57,8 @@ const AVAILABLE_TOCS = [
   'The Blue Pullman',
   'The Bluebell Railway',
   'The Cathedrals Express',
-  'The Cathedrals Express Special Steam Service',
-  'The Cathedrals Express Steam Service',
+  'The Cathedrals Express Special Steam',
+  'The Cathedrals Express Steam',
   'The Spa Valley Railway',
   'The Watercress Line',
   'Transport for London Overground',
@@ -70,8 +70,8 @@ export const INTEGRATED_TOCS = [
   'London North Eastern Railway',
   'Midland Mainline',
   'Strathclyde Metro',
-  'The Cathedrals Express Special Steam Service',
-  'The Cathedrals Express Steam Service',
+  'The Cathedrals Express Special Steam',
+  'The Cathedrals Express Steam',
   'Virgin Trains East Coast',
 ]
 
@@ -962,7 +962,7 @@ export default class ScotRail extends StationAnnouncementSystem {
       )
     }
 
-    files.push(`formation.this train is formed of ${options.coaches} ${options.coaches === '1' ? 'coach' : 'coaches'}`)
+    files.push(`formation.this train is formed of ${options.coaches} ${options.coaches === '1' ? 'coach only' : 'coaches'}`)
 
     await this.playAudioFiles(files, download)
   }

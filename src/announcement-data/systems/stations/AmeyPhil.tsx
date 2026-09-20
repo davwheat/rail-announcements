@@ -173,6 +173,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     platformZeroM: 'm.0',
     // No end inflection
     platformZeroE: 'm.0',
+    // The lettered platforms recorded as "platform a for the".
+    letteredPlatformsWithForThe: ['a', 'b'],
   }
 
   protected readonly callingPointsOptions = {
@@ -609,9 +611,6 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         'Arriva Trains Merseyside',
         'Arriva Trains Northern',
         'Arriva Trains Wales',
-        'Blackheath and Woolwich',
-        'Blackheath and Woolwich Arsenal',
-        'Blackheath and Woolwich Arsenal Line',
         'c2c',
         'c2c Rail',
         'Cardiff Railways',
@@ -620,10 +619,6 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         'Chiltern Line',
         'Chiltern Railway Company',
         'Chiltern Railways',
-        'Chiselhurst and Maidstone East',
-        'Chiselhurst and Maidstone East Line',
-        'Chiselhurst Sevenoaks and Canterbury West',
-        'Chiselhurst Sevenoaks and Canterbury West Line',
         'Connex',
         'Connex Express',
         'Connex Metro',
@@ -695,10 +690,6 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         'London Transport Buses',
         'London Underground',
         'LTS Rail',
-        'Maidstone East and Ashford International Line',
-        'Maidstone East and Ashford Line',
-        'Maidstone East and Canterbury West Line',
-        'Maidstone East and Dover Priory Line',
         'Merseyside Electrics',
         'Midland Mainline',
         'Midland Mainline High Speed Train',
@@ -806,13 +797,12 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         'Great Western Railway Royal Wessex',
         'Great Western Railway St David',
         'Great Western Railway Torbay Express',
-        'intercity charter train',
-        'international',
+        'intercity charter',
         'London Northwestern Railway',
         'mainline',
         'North London Railways',
         'North Western Trains',
-        'Regional Railways charter train',
+        'Regional Railways charter',
         'ScotRail Express',
         'South London Metro',
         'Sussex Scot',
@@ -845,7 +835,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       'a fallen tree on the line',
       'a fatality',
       'a fault on a level crossing',
-      'a fault on a preceding that has now been rectified',
+      'a fault on a preceding train that has now been rectified',
       'a fault on a preceding train',
       'a fault on the train that has now been rectified',
       'a fault on the train',
@@ -986,7 +976,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       'flooding on the line',
       'flooding',
       'fog',
-      'following signal staff instructions',
+      // 'following signal staff instructions',
       'heavy rain',
       'high winds',
       'industrial action',
@@ -4268,7 +4258,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           }
         } else {
           if (len === 1) {
-            files.push(`m.should join the ${pos} coach only`)
+            // No voice has "should join the … coach only" with a middle inflection.
+            files.push(`m.should join the ${pos}`, 'm.coach')
           } else {
             files.push(`e.should join the ${pos} ${len} coaches`)
           }
@@ -4465,7 +4456,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       }),
     )
 
-    const [bPos, bCount] = (dividePoint!!.splitForm ?? 'front.1').split('.').map((x, i) => (i === 1 ? parseInt(x) : x)) as [
+    const [bPos, bCount] = (dividePoint!!.splitForm || 'front.1').split('.').map((x, i) => (i === 1 ? parseInt(x) : x)) as [
       'front' | 'middle' | 'rear' | 'unknown',
       number,
     ]
@@ -4495,7 +4486,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
             portion: { position: bPos, length: null },
           })),
           position: bPos,
-          length: null,
+          // This portion's length comes from the split form, so it's known even when the train's isn't.
+          length: bCount || null,
         },
         splitA: {
           stops: stopsAfterFormationChange.map(p => ({
@@ -4577,9 +4569,15 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     }
   }
 
-  protected readonly splitOptions = {
+  protected readonly splitOptions: {
+    travelInCorrectPartId: string[]
+    travelInAnyPartIds: string[]
+    /** Follows "please note that the rear" when the portion's length isn't known. `null` leaves the note out. */
+    detachesAndTerminatesIds: string[] | null
+  } = {
     travelInCorrectPartId: ['s.please make sure you travel', 'e.in the correct part of this train'],
     travelInAnyPartIds: ['e.may travel in any part of the train'],
+    detachesAndTerminatesIds: ['m.coaches', 'm.will be detached and will terminate at'],
   }
 
   private async getCallingPointsWithBusContinuance(callingPoints: CallingAtPoint[], terminatingStation: string): Promise<AudioItem[]> {
@@ -4690,16 +4688,17 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           ...this.splitOptions.travelInCorrectPartId.slice(1),
         )
 
-        if (splitData.splitB!!.position === 'unknown') {
-          files.push({ id: `s.please note that`, opts: { delayStart: 400 } }, `m.coaches`, `m.will be detached and will terminate at`)
-        } else {
+        if (splitData.splitB!!.position !== 'unknown' && splitData.splitB!!.length !== null) {
           files.push(
             { id: `s.please note that the ${splitData.splitB!!.position}`, opts: { delayStart: 400 } },
             `m.${splitData.splitB!!.length === 1 ? 'coach' : `${splitData.splitB!!.length} coaches`} will detach at`,
+            `station.e.${splitPoint.crsCode}`,
           )
+        } else if (this.splitOptions.detachesAndTerminatesIds) {
+          const noteId =
+            splitData.splitB!!.position === 'unknown' ? 's.please note that' : `s.please note that the ${splitData.splitB!!.position}`
+          files.push({ id: noteId, opts: { delayStart: 400 } }, ...this.splitOptions.detachesAndTerminatesIds, `station.e.${splitPoint.crsCode}`)
         }
-
-        files.push(`station.e.${splitPoint.crsCode}`)
         break
 
       case 'splits':
@@ -4782,7 +4781,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         : [
             ...listStops(Array.from(aPortionStops)),
             ...(splitData.splitA!!.position === 'unknown'
-              ? ['w.please listen for announcements on board the train']
+              ? [this.shortPlatformOptions.unknownLocation]
               : shouldTravelIn(splitData.splitA!!.length, splitData.splitA!!.position)),
           ]
     const bFiles =
@@ -4791,7 +4790,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         : [
             ...listStops(Array.from(bPortionStops)),
             ...(splitData.splitB!!.position === 'unknown'
-              ? ['w.please listen for announcements on board the train']
+              ? [this.shortPlatformOptions.unknownLocation]
               : shouldTravelIn(splitData.splitB!!.length, splitData.splitB!!.position)),
           ]
 
@@ -4855,7 +4854,18 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     return files
   }
 
+  /** Says why a platform can't be spoken: the voice doesn't offer it, and the minute recordings that stand in for 21 and above don't cover it. */
+  private getPlatformProblem(platform: string): string | null {
+    const number = /^\d+$/.test(platform) ? parseInt(platform) : NaN
+    if (this.PLATFORMS.includes(platform.toLowerCase()) || (number >= 21 && number <= 59)) return null
+
+    return `Platform ${platform} is not available with this announcement system.`
+  }
+
   async playNextTrainAnnouncement(options: INextTrainAnnouncementOptions, download: boolean = false): Promise<void> {
+    const platformProblem = this.getPlatformProblem(options.platform)
+    if (platformProblem) return alert(platformProblem)
+
     const files: AudioItem[] = []
 
     const chime = this.getChime(options.chime)
@@ -4868,7 +4878,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
 
       if (options.platform === '0') {
         platFiles.push({ id: this.genericOptions.platform, opts: { delayStart } }, `m.0`, options.isDelayed ? `m.for the delayed` : `m.for the`)
-      } else if (plat <= 12 || ['a', 'b'].includes(options.platform.toLowerCase())) {
+      } else if (plat <= 12 || this.genericOptions.letteredPlatformsWithForThe.includes(options.platform.toLowerCase())) {
         platFiles.push({ id: `s.platform ${options.platform} for the`, opts: { delayStart } })
         if (options.isDelayed) platFiles.push('m.delayed')
       } else if (plat >= 21) {
@@ -4984,6 +4994,9 @@ export default class AmeyPhil extends StationAnnouncementSystem {
   }
 
   async playStandingTrainAnnouncement(options: IStandingTrainAnnouncementOptions, download: boolean = false): Promise<void> {
+    const platformProblem = this.getPlatformProblem(options.platform)
+    if (platformProblem) return alert(platformProblem)
+
     const files: AudioItem[] = []
 
     files.push(`station.m.${options.thisStationCode}`, this.standingOptions.thisIsId, `station.e.${options.thisStationCode}`)
@@ -5240,6 +5253,9 @@ export default class AmeyPhil extends StationAnnouncementSystem {
   }
 
   async playFastTrainAnnouncement(options: IFastTrainAnnouncementOptions, download: boolean = false): Promise<void> {
+    const platformProblem = this.getPlatformProblem(options.platform)
+    if (platformProblem) return alert(platformProblem)
+
     const files: AudioItem[] = []
 
     const chime = this.getChime(options.chime, options.daktronicsFanfare)
@@ -5249,7 +5265,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
 
     const platformAudio = (() => {
       if (options.platform === '0') {
-        return `e.0`
+        return this.genericOptions.platformZeroE
       } else if (isNaN(plat) || plat <= 20) {
         return `platform.e.${options.platform}`
       } else {
@@ -5273,6 +5289,9 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     options: ITrainApproachingAnnouncementOptions | ILiveTrainApproachingAnnouncementOptions,
     download: boolean = false,
   ): Promise<void> {
+    const platformProblem = this.getPlatformProblem(options.platform)
+    if (platformProblem) return alert(platformProblem)
+
     const files: AudioItem[] = []
 
     const chime = this.getChime(options.chime)
@@ -5341,6 +5360,9 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     options: IPlatformAlterationAnnouncementOptions | ILivePlatformAlterationAnnouncementOptions,
     download: boolean = false,
   ): Promise<void> {
+    const platformProblem = this.getPlatformProblem(options.oldPlatform) ?? this.getPlatformProblem(options.newPlatform)
+    if (platformProblem) return alert(platformProblem)
+
     const files: AudioItem[] = []
 
     const chime = this.getChime(options.chime)

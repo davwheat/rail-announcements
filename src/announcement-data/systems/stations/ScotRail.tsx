@@ -6,7 +6,6 @@ import CustomAnnouncementPane, { ICustomAnnouncementPreset } from '@components/P
 import { AllStationsTitleValueMap } from '@data/StationManipulators'
 import { AnyCustomAnnouncementTab, AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
 import type { IAlternativeServicesState } from '@components/AtosDisruptionAlternatives'
-import { platform } from 'os'
 
 interface INextTrainAnnouncementOptions {
   platform: string
@@ -67,7 +66,7 @@ const AVAILABLE_TOCS = [
   'Virgin Trains East Coast',
 ]
 
-const INTEGRATED_TOCS = [
+export const INTEGRATED_TOCS = [
   'London North Eastern Railway',
   'Midland Mainline',
   'Strathclyde Metro',

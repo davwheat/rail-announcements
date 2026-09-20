@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "type": "snapshot",
   "station": {
     "tpl": "TEST",
@@ -160,6 +160,7 @@
         }
       ],
       "portions": [],
+      "arrived_at": null,
       "passed_at": null
     }
   ],

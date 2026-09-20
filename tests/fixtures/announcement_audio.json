@@ -1,0 +1,93 @@
+{
+  "version": 2,
+  "type": "announcement",
+  "event_id": "fixture-audio-1",
+  "movement_id": "202609130001/loc:TEST:ptd:10:03:00",
+  "station": {
+    "tpl": "TEST",
+    "crs": "TST",
+    "name": "Example station"
+  },
+  "announcement_type": "platform_alteration",
+  "created_at": "2026-09-13T10:00:00Z",
+  "expires_at": "2026-09-13T10:01:00Z",
+  "details": {
+    "id": "202609130001/loc:TEST:ptd:10:03:00",
+    "rid": "202609130001",
+    "location_id": "loc:TEST:ptd:10:03:00",
+    "station": {
+      "tpl": "TEST",
+      "crs": "TST",
+      "name": "Example station"
+    },
+    "kind": "departure",
+    "uid": "C12345",
+    "headcode": "5A01",
+    "operator_code": "GW",
+    "operator_name": "Great Western Railway",
+    "mode": "train",
+    "passenger": true,
+    "operational": false,
+    "arrival": {
+      "planned": null,
+      "estimated": null,
+      "actual": null,
+      "unknown_delay": false
+    },
+    "departure": {
+      "planned": "2026-09-13T10:03:00Z",
+      "estimated": null,
+      "actual": null,
+      "unknown_delay": false
+    },
+    "passing": {
+      "planned": null,
+      "estimated": null,
+      "actual": null,
+      "unknown_delay": false
+    },
+    "platform": {
+      "number": "2",
+      "confirmed": true,
+      "suppressed": false,
+      "source": "CIS"
+    },
+    "suppressed": false,
+    "cancelled": false,
+    "cancel_reason": {
+      "code": null,
+      "text": null
+    },
+    "delay_reason": {
+      "code": null,
+      "text": null
+    },
+    "coach_count": null,
+    "loading_percent": null,
+    "loading_category": null,
+    "formation": null,
+    "coach_loading": null,
+    "coaches": null,
+    "reverse_formation": null,
+    "detach_front": null,
+    "activities": null,
+    "false_destination": null,
+    "origins": [],
+    "destinations": [],
+    "calling_points": [],
+    "portions": [],
+    "arrived_at": null,
+    "passed_at": null
+  },
+  "affected_platforms": [
+    "1",
+    "2"
+  ],
+  "previous_platform": "1",
+  "new_platform": "2",
+  "audio": {
+    "codec": "mp3",
+    "data": "//uQAA==",
+    "duration": 12500000000
+  }
+}

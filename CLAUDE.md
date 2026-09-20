@@ -5,6 +5,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Do not run yarn commands. Run `npm run test:live` for the focused WebSocket reducer, queue, adapter and hydration regression tests. See
 `docs/websocket-data-source.md` for local service and embedded-board configuration.
 
+`../rail-announcements-backend` holds a Go port of every system registered in `src/announcement-data/AllSystems.ts`, of the live announcement
+logic and of the playback queue, tested against this repository's output. After changing any system's play handler,
+`src/live/playAnnouncement.ts`, `src/live/playbackQueue.ts` or the tables they read, run `npm run export:backend` and port the change there. The
+export covers a system as soon as it's registered.
+
 ## Development Environment
 
 Three services are needed for full local development: the Next.js dev server on port 3000, an HTTP server for audio files on port 8088 (the dev

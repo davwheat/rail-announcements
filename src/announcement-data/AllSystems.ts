@@ -7,8 +7,6 @@ import NorthernTrainFx from './systems/rolling-stock/NorthernTrainFx'
 
 import AmeyPhil from './systems/stations/AmeyPhil'
 import AmeyCelia from './systems/stations/AmeyCelia'
-// import AtosMatt from './systems/stations/AtosMatt'
-// import AtosAnne from './systems/stations/AtosAnne'
 import ScotRail from './systems/stations/ScotRail'
 
 import Banedanmark from './systems/international/denmark/Banedanmark'
@@ -34,14 +32,7 @@ export const AllTrainAnnouncementSystems: AnnouncementSystemClass<TrainAnnouncem
   NorthernTrainFx,
 ]
 
-export const AllStationAnnouncementSystems: AnnouncementSystemClass<StationAnnouncementSystem>[] = [
-  // AtosMatt,
-  // AtosAnne,
-  AmeyPhil,
-  AmeyCelia,
-  ScotRail,
-  Banedanmark,
-]
+export const AllStationAnnouncementSystems: AnnouncementSystemClass<StationAnnouncementSystem>[] = [AmeyPhil, AmeyCelia, ScotRail, Banedanmark]
 
 export const AllOtherAnnouncementSystems: AnnouncementSystemClass[] = [
   TfLJubileeLine,

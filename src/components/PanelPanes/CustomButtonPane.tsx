@@ -6,22 +6,29 @@ import PlayIcon from 'mdi-react/PlayIcon'
 
 import { addBreadcrumb } from '@sentry/react'
 
+import { useAtom } from 'jotai'
+import { serviceAudioState } from '@atoms/index'
+
 import type { AnnouncementSystemClass, CustomAnnouncementButton } from '@announcement-data/AnnouncementSystem'
-import type AnnouncementSystem from '@announcement-data/AnnouncementSystem'
+import AnnouncementSystem from '@announcement-data/AnnouncementSystem'
+import { ANNOUNCEMENT_SERVICE_AVAILABLE } from '../../live/announcementService'
+
 export interface ICustomButtonPaneProps {
   buttons?: CustomAnnouncementButton[]
   buttonSections?: Record<string, CustomAnnouncementButton[]>
   system: AnnouncementSystemClass
+  tabId: string
 }
 
-function CustomButtonPane({ system, buttons, buttonSections }: ICustomButtonPaneProps) {
+function CustomButtonPane({ system, tabId, buttons, buttonSections }: ICustomButtonPaneProps) {
   const [playError, setPlayError] = useState<Error | null>(null)
 
   const AnnouncementSystemInstance: AnnouncementSystem = useMemo(() => new system(), [system])
 
   const [isDisabled, setIsDisabled] = useIsPlayingAnnouncement()
+  const [serviceAudio] = useAtom(serviceAudioState)
 
-  function createClickHandler(handler: () => Promise<void>, label: string, type: 'play' | 'download'): () => Promise<void> {
+  function createClickHandler(handler: () => Promise<void>, section: string, label: string, type: 'play' | 'download'): () => Promise<void> {
     return async () => {
       if (isDisabled) return
       setIsDisabled(true)
@@ -35,9 +42,16 @@ function CustomButtonPane({ system, buttons, buttonSections }: ICustomButtonPane
         },
       })
 
+      // A button has no option state of its own, so the service knows one by the section it sits
+      // under and its label.
+      AnnouncementSystem.serviceRequest = serviceAudio && ANNOUNCEMENT_SERVICE_AVAILABLE ? { tabId, state: { section, label } } : null
+
       try {
         await handler()
-      } catch (err) {}
+      } catch (err) {
+      } finally {
+        AnnouncementSystem.serviceRequest = null
+      }
 
       setIsDisabled(false)
     }
@@ -105,7 +119,7 @@ function CustomButtonPane({ system, buttons, buttonSections }: ICustomButtonPane
                   <div key={btn.label} className="buttonGroup">
                     <button
                       onClick={() =>
-                        createClickHandler(play, btn.label, 'play')().catch(e => {
+                        createClickHandler(play, sectionName, btn.label, 'play')().catch(e => {
                           setPlayError(e)
                         })
                       }
@@ -117,7 +131,7 @@ function CustomButtonPane({ system, buttons, buttonSections }: ICustomButtonPane
                     </button>
                     <button
                       onClick={() =>
-                        createClickHandler(download, btn.label, 'download')().catch(e => {
+                        createClickHandler(download, sectionName, btn.label, 'download')().catch(e => {
                           setPlayError(e)
                         })
                       }

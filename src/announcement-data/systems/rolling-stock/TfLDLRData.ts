@@ -34,7 +34,7 @@ export const Clips = {
   mindTheGap: 'misc.mind the gap please',
 } as const
 
-const Interchange = {
+export const Interchange = {
   jubilee: 'interchange.change for london underground jubilee line',
   jubileeAndLocalBus: 'interchange.change for london underground jubilee line and local bus services',
   jubileeElizabethGreenwichLewisham:
@@ -55,7 +55,7 @@ const Interchange = {
   forTowardsBecktonViaStairs: 'interchange.for stations towards beckton cross via the stairs to platform 1',
 } as const
 
-const ElizabethLineEra = {
+export const ElizabethLineEra = {
   jubileeElizabeth: 'emma.change for london underground jubilee line and elizabeth line',
   jubileeElizabethBankTowerGateway: 'emma.change for london underground jubilee line elizabeth line and stations towards bank and tower gateway',
   jubileeElizabethStratford: 'emma.change for london underground jubilee line and elizabeth line and stations towards stratford',
@@ -216,9 +216,9 @@ export const AllDestinations: IDlrDestination[] = AllStations.flatMap(stn => [
 // Stratford's two DLR stations share a name but not tracks: the terminus of the line from Poplar, and
 // the through platforms on the Stratford International branch. They're separate nodes so that no
 // route runs from one line onto the other.
-const STRATFORD_LOW_LEVEL = 'Stratford (low level)'
+export const STRATFORD_LOW_LEVEL = 'Stratford (low level)'
 
-const Lines: string[][] = [
+export const Lines: string[][] = [
   ['Bank', 'Shadwell'],
   ['Tower Gateway', 'Shadwell', 'Limehouse', 'Westferry', 'Poplar'],
   ['Westferry', 'West India Quay'],
@@ -254,7 +254,7 @@ interface IOneWayLink {
 // Trains from Limehouse towards Canary Wharf use the diveunder, which has no platform at West India
 // Quay. Trains the other way still call there, and a train from Poplar can't reach the diveunder
 // without reversing.
-const OneWayLinks: IOneWayLink[] = [{ from: 'Westferry', to: 'Canary Wharf', arrivingFrom: 'Limehouse' }]
+export const OneWayLinks: IOneWayLink[] = [{ from: 'Westferry', to: 'Canary Wharf', arrivingFrom: 'Limehouse' }]
 
 const Links = new Map<string, string[]>()
 

@@ -6,3 +6,4 @@ functions/.wrangler
 next-env.d.ts
 src/live/gen
 tests/fixtures
+CLAUDE.md

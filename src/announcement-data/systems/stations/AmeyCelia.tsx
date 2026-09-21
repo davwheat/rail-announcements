@@ -3,6 +3,7 @@ import DelayCodeMapping from './DarwinDelayCodes_Female1.json'
 import NamedServices from './named-services.json'
 
 import type { CustomAnnouncementButton } from '@announcement-data/AnnouncementSystem'
+import type { HelpPointVoice } from '../../../live/announcementService'
 
 type Writeable<T> = { -readonly [P in keyof T]: T[P] }
 
@@ -46,6 +47,10 @@ export default class AmeyCelia extends AmeyPhil {
 
   get DEFAULT_CHIME(): ChimeType {
     return 'three'
+  }
+
+  protected get HELP_POINT_VOICE(): HelpPointVoice {
+    return 'celia'
   }
 
   get PLATFORMS() {

@@ -162,6 +162,23 @@ asks once, and builds a tab the service doesn't know without a request. If the s
 builds the announcement itself, so the setting never costs a listener the announcement. A download from the service is an MP3, where the page's
 own is a WAV.
 
+### The Help point tab
+
+The Phil Sayer and Celia Drummond system pages have a **Help point** tab, which draws the yellow information point found on station platforms.
+Pressing its button asks the service for `GET /v1/help-points/CRS?voice=phil` or `voice=celia`, and the response is an MP3 of the station's
+departure board, spoken from live running information. `renderHelpPoint` in `src/live/announcementService.ts` makes the request, and
+`src/components/PanelPanes/HelpPointPane.tsx` plays the MP3 through `playRenderedAudio`, the way that the page plays any audio the service
+renders.
+
+The tab builds nothing itself and has no play handler. The wording lives only in the service, in `internal/helppoint`, so
+`npm run export:backend` has no cases for the tab and there is nothing to port. A production build registers the tab only when
+`NEXT_PUBLIC_ANNOUNCEMENT_SERVICE_URL` is set, because the tab has nothing to say without the service.
+
+The station list is the voice's own, and the chosen station is saved on the device under `help-point.selected-crs`. While the service reads the
+board and while the announcement plays, the button ignores presses, as the button on a platform does. A board that the service can't read still
+plays: the service answers with a spoken apology. The tab shows a message of its own only when the service can't be reached, or when the live
+feed has no such station.
+
 ### Keep the service's copy of the logic in step
 
 The service holds a Go port of every registered system, of `src/live/playAnnouncement.ts` and of `src/live/playbackQueue.ts`, and this repository

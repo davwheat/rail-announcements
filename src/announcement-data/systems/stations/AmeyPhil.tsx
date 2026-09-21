@@ -4,6 +4,8 @@ import StationAnnouncementSystem from '@announcement-data/StationAnnouncementSys
 import CallingAtSelector, { CallingAtPoint, ICallingAtSelectorProps } from '@components/CallingAtSelector'
 import CustomAnnouncementPane, { ICustomAnnouncementPreset } from '@components/PanelPanes/CustomAnnouncementPane'
 import CustomButtonPane from '@components/PanelPanes/CustomButtonPane'
+import HelpPointPane from '@components/PanelPanes/HelpPointPane'
+import { ANNOUNCEMENT_SERVICE_AVAILABLE, type HelpPointVoice } from '../../../live/announcementService'
 import { getStationByCrs } from '@data/StationManipulators'
 import crsToStationItemMapper, { stationItemCompleter } from '@helpers/crsToStationItemMapper'
 import {
@@ -200,6 +202,11 @@ export default class AmeyPhil extends StationAnnouncementSystem {
 
   get DEFAULT_CHIME(): ChimeType {
     return 'four'
+  }
+
+  // A getter, because the tab table reads it before a subclass's own fields are set.
+  protected get HELP_POINT_VOICE(): HelpPointVoice {
+    return 'phil'
   }
 
   protected get announcementPresets(): Readonly<{
@@ -6471,6 +6478,19 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         buttonSections: this.getAnnouncementButtons(),
       },
     } satisfies CustomButtonTab,
+    // The announcement service speaks the board, so the tab has nothing to offer without it.
+    ...(ANNOUNCEMENT_SERVICE_AVAILABLE
+      ? {
+          helpPoint: {
+            name: 'Help point',
+            component: HelpPointPane,
+            props: {
+              voice: this.HELP_POINT_VOICE,
+              stations: this.STATIONS_AS_ITEMS.filter(station => station.value.length === 3),
+            },
+          },
+        }
+      : {}),
   }
 
   private coachCountFromRtt(passengerVehicleCount: number | undefined): string | null {

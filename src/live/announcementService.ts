@@ -68,3 +68,28 @@ export async function renderAnnouncement(
   }
   return new Uint8Array(await response.arrayBuffer())
 }
+
+export type HelpPointVoice = 'phil' | 'celia'
+
+/** Reading the board and rendering eight trains takes the service up to a minute. */
+const HELP_POINT_TIMEOUT = 60_000
+
+/**
+ * Asks the service for the MP3 of a station's live departure board, spoken the way the button on
+ * a platform help point speaks it. A board that cannot be read still resolves, to the service's
+ * spoken apology. Rejects with the service's error code on `code` when it refuses the station,
+ * and with the fault when it cannot be reached.
+ */
+export async function renderHelpPoint(crs: string, voice: HelpPointVoice, baseUrl: string = ANNOUNCEMENT_SERVICE_URL): Promise<Uint8Array> {
+  const url = new URL(endpoint(baseUrl, `/v1/help-points/${encodeURIComponent(crs)}`))
+  url.searchParams.set('voice', voice)
+
+  const response = await fetch(url, { signal: AbortSignal.timeout(HELP_POINT_TIMEOUT) })
+  if (!response.ok) {
+    const problem = await response.json().catch(() => null)
+    throw Object.assign(new Error(problem?.error?.message || `The announcement service answered ${response.status}`), {
+      code: problem?.error?.code as string | undefined,
+    })
+  }
+  return new Uint8Array(await response.arrayBuffer())
+}

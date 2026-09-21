@@ -589,6 +589,10 @@ const changelog: IChangelogVersion[] = [
     date: '2026-09-18',
     additions: ['[DLR] Add TfL Docklands Light Railway system using recordings from the DLR automatic voice information system'],
   },
+  {
+    date: '2026-09-21',
+    additions: ["[Amey Phil & Celia] Add a Help point tab, which speaks a station's live departure board at the press of a button"],
+  },
 ]
 
 export default changelog

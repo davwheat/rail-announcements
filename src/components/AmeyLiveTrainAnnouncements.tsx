@@ -71,7 +71,6 @@ const RDM_BASE_URL = 'https://raildotmatrix.co.uk/board'
 // const RDM_BASE_URL = 'http://localhost:8788/board'
 const LOCAL_LIVE_URL = process.env.NEXT_PUBLIC_LIVE_SERVICE_URL || 'ws://localhost:8080'
 const LIVE_BOARD_URL = process.env.NEXT_PUBLIC_LIVE_BOARD_URL || 'http://localhost:8000/board'
-const RDM_BASE_URL_ORIGIN = new URL(RDM_BASE_URL).origin
 
 function pluraliseStrings(...strings: string[]): string {
   if (strings.length === 1) return strings[0]
@@ -516,17 +515,6 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
   systems,
   supportedPlatforms,
 }: LiveTrainAnnouncementsProps<SystemKeys>) {
-  // Per-platform layouts render a board each, so the legacy data source has to
-  // reach every one of them, not just the first.
-  const boardFrames = useRef(new Map<string, HTMLIFrameElement>())
-  const [iframeReady, setIframeReady] = useState(false)
-  const registerBoardFrame = useCallback(function registerBoardFrame(id: string, frame: HTMLIFrameElement | null) {
-    if (frame) {
-      boardFrames.current.set(id, frame)
-    } else {
-      boardFrames.current.delete(id)
-    }
-  }, [])
   const systemKeys = Object.keys(systems) as SystemKeys[]
 
   const perSystemSupportedStations: Record<string, Option[]> = useMemo(
@@ -1270,12 +1258,6 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         return
       }
 
-      if (!iframeReady) {
-        addLog('Departure board iframe not ready; waiting...')
-        console.log('[Live Trains] Departure board iframe not ready; waiting...')
-        return
-      }
-
       addLog('Checking for new services')
       console.log('[Live Trains] Checking for new services')
 
@@ -1300,12 +1282,6 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
           const data: StaffServicesResponse = await resp.json()
           if (abortController.signal.aborted) return
           services = data.trainServices
-
-          // Send data to every board on the page
-          if (iframeReady) {
-            console.log(`Sending service information to ${boardFrames.current.size} board(s)`)
-            boardFrames.current.forEach(frame => frame.contentWindow?.postMessage(data, RDM_BASE_URL_ORIGIN))
-          }
         } catch {
           addLog("Couldn't parse JSON from API")
           console.warn("[Live Trains] Couldn't parse JSON from API")
@@ -1507,7 +1483,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       addLog('--------------------------------------')
     }
 
-    const refreshInterval = setInterval(checkAndPlay, iframeReady ? 40_000 : 1000)
+    const refreshInterval = setInterval(checkAndPlay, 40_000)
     checkAndPlay()
 
     return () => {
@@ -1528,7 +1504,6 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
     announceNextTrain,
     addLog,
     enabledAnnouncements,
-    iframeReady,
   ])
 
   const legacyPlaying = useRef(isPlaying)
@@ -2461,9 +2436,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
                     <h3 css={{ marginBottom: 8 }}>Platform {platform}</h3>
 
                     <iframe
-                      ref={frame => registerBoardFrame(platform, frame)}
                       title={`Departure board for platform ${platform}`}
-                      onLoad={() => setIframeReady(true)}
                       css={{
                         border: 'none',
                         width: '100%',
@@ -2477,12 +2450,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
               </div>
             ) : (
               <iframe
-                ref={frame => registerBoardFrame('__station', frame)}
                 title={`Departure board for ${selectedCrs}`}
-                onLoad={() => {
-                  console.log('Marking iframe ready for data')
-                  setIframeReady(true)
-                }}
                 css={{
                   border: 'none',
                   width: '100%',

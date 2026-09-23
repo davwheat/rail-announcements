@@ -61,6 +61,9 @@ export interface Coach {
   toilet_type: string | null
   toilet_status: string | null
   loading_percent: number | null
+  accessible: boolean | null
+  cycle_spaces: boolean | null
+  food: boolean | null
 }
 export interface Movement {
   /** Present when a current Darwin TrainOrder unambiguously identifies this movement. */
@@ -139,6 +142,15 @@ export interface PlatformOverride {
   reason: string
   source: string
 }
+export interface NRCCMessage {
+  id: string
+  /** Original HTML from the feed; sanitise or convert to plain text before displaying. */
+  text: string
+  category: string
+  severity: string
+  suppress: boolean
+  updated_at: Instant
+}
 export interface Snapshot {
   version: 2
   type: 'snapshot'
@@ -150,6 +162,7 @@ export interface Snapshot {
   movements: Movement[]
   ordering: string[]
   overrides: PlatformOverride[]
+  nrcc_messages: NRCCMessage[]
 }
 export interface Update {
   version: 2
@@ -163,6 +176,8 @@ export interface Update {
   ordering: string[]
   override_upserts: PlatformOverride[]
   override_removals: { id: string; reason: string }[]
+  /** Full replacement on every update; an empty list clears the notices. */
+  nrcc_messages: NRCCMessage[]
 }
 /** The CIS stream attests its state. The announcement stream has none, so there only `sent_at` is set. */
 export interface Heartbeat {
@@ -181,6 +196,7 @@ export interface CISState {
   movements: Map<string, Movement>
   ordering: string[]
   overrides: Map<string, PlatformOverride>
+  nrcc_messages: NRCCMessage[]
 }
 export type AnnouncementType = 'next' | 'approaching' | 'standing' | 'disrupted' | 'passing' | 'platform_alteration'
 export interface Announcement {

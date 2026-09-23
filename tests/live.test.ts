@@ -1840,3 +1840,47 @@ test("the player uses the service's audio for the request a pane set aside, and 
     AnnouncementSystem.serviceRequest = null
   }
 })
+
+import nrccSnapshot from './fixtures/nrcc_snapshot.json'
+import nrccSnapshotFrame from './fixtures/nrcc_snapshot.pb'
+import nrccUpdate from './fixtures/nrcc_update.json'
+import nrccUpdateFrame from './fixtures/nrcc_update.pb'
+import nrccClear from './fixtures/nrcc_clear.json'
+import nrccClearFrame from './fixtures/nrcc_clear.pb'
+
+test('the updated protocol preserves station notices and an empty withdrawal list', () => {
+  for (const [frame, message] of [
+    [nrccSnapshotFrame, nrccSnapshot],
+    [nrccUpdateFrame, nrccUpdate],
+    [nrccClearFrame, nrccClear],
+  ] as const) {
+    assert.deepEqual(decodeServerMessage(frame), { nrcc_messages: [], ...message })
+  }
+})
+
+test('coach facility flags retain unknown, true and false on announcements and revisions', () => {
+  const original = announcement('next')
+  original.details.coaches = [null, true, false].map((facility, i) => ({
+    number: String(i),
+    class: null,
+    toilet_type: null,
+    toilet_status: null,
+    loading_percent: null,
+    accessible: facility,
+    cycle_spaces: facility,
+    food: facility,
+  }))
+  assert.deepEqual(decodeServerMessage(new Uint8Array(encodeServerMessage(original))), original)
+  const changed = {
+    version: 2 as const,
+    type: 'revision' as const,
+    event_id: original.event_id,
+    movement_id: original.movement_id,
+    announcement_type: original.announcement_type,
+    created_at: original.created_at,
+    expires_at: original.expires_at,
+    details: original.details,
+    affected_platforms: original.affected_platforms,
+  }
+  assert.deepEqual(decodeServerMessage(new Uint8Array(encodeServerMessage(changed))), changed)
+})

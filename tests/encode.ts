@@ -110,6 +110,9 @@ function movement(value: Movement): MessageInitShape<typeof pb.MovementSchema> {
             toiletType: known(coach.toilet_type),
             toiletStatus: known(coach.toilet_status),
             loadingPercent: known(coach.loading_percent),
+            accessible: known(coach.accessible),
+            cycleSpaces: known(coach.cycle_spaces),
+            food: known(coach.food),
           })),
         }
       : undefined,
@@ -208,6 +211,7 @@ function payload(message: ServerMessage): MessageInitShape<typeof pb.ServerMessa
           movements: message.movements.map(movement),
           ordering: message.ordering,
           overrides: message.overrides.map(override),
+          nrccMessages: message.nrcc_messages.map(notice => ({ ...notice, updatedAt: time(notice.updated_at) })),
         },
       }
     case 'update':
@@ -223,6 +227,7 @@ function payload(message: ServerMessage): MessageInitShape<typeof pb.ServerMessa
           ordering: message.ordering,
           overrideUpserts: message.override_upserts.map(override),
           overrideRemovals: message.override_removals,
+          nrccMessages: message.nrcc_messages.map(notice => ({ ...notice, updatedAt: time(notice.updated_at) })),
         },
       }
     case 'heartbeat':

@@ -10,6 +10,7 @@ import type {
   Instant,
   Location,
   Movement,
+  NRCCMessage,
   Platform,
   PlatformOverride,
   Portion,
@@ -204,6 +205,9 @@ function movement(value: pb.Movement | undefined): Movement {
         toilet_type: coach.toiletType ?? null,
         toilet_status: coach.toiletStatus ?? null,
         loading_percent: coach.loadingPercent ?? null,
+        accessible: coach.accessible ?? null,
+        cycle_spaces: coach.cycleSpaces ?? null,
+        food: coach.food ?? null,
       })) ?? null,
     formation: value.formation ?? null,
     coach_loading: value.coachLoading ?? null,
@@ -227,6 +231,17 @@ function movement(value: pb.Movement | undefined): Movement {
   }
   if (value.td) decoded.td = td(value.td)
   return decoded
+}
+
+function nrccMessage(value: pb.NrccMessage): NRCCMessage {
+  return {
+    id: value.id,
+    text: value.text,
+    category: value.category,
+    severity: value.severity,
+    suppress: value.suppress,
+    updated_at: instant(value.updatedAt),
+  }
 }
 
 function override(value: pb.PlatformOverride): PlatformOverride {
@@ -281,6 +296,7 @@ export function decodeServerMessage(frame: Uint8Array): ServerMessage | null {
         movements: value.movements.map(movement),
         ordering: value.ordering,
         overrides: value.overrides.map(override),
+        nrcc_messages: value.nrccMessages.map(nrccMessage),
       }
       if (value.requestId !== undefined) snapshot.request_id = value.requestId
       return snapshot
@@ -299,6 +315,7 @@ export function decodeServerMessage(frame: Uint8Array): ServerMessage | null {
         ordering: value.ordering,
         override_upserts: value.overrideUpserts.map(override),
         override_removals: value.overrideRemovals.map(({ id, reason }) => ({ id, reason })),
+        nrcc_messages: value.nrccMessages.map(nrccMessage),
       }
     }
     case 'heartbeat': {

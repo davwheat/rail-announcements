@@ -105,6 +105,11 @@ type import pointed at `./types`, and the fixtures in `docs/live/fixtures` that 
 no newer than the `@bufbuild/protobuf` version in `package.json`. The `.pb` fixtures are frames written by the service's own encoder, and the
 tests check that this decoder reads each one as the JSON beside it.
 
+Coach details preserve the optional `accessible` and `cycle_spaces` flags added by Darwin Browser's Gemini allocation rules, plus the `food` flag
+reserved for future catering data. Unset means unknown; these fields do not change which announcement is played. The decoder also retains NRCC
+station notices on CIS snapshots and updates, including an empty list when notices are withdrawn. Notice text remains the original HTML and is
+not rendered or announced automatically.
+
 ### Audio rendered by the service
 
 An announcement can arrive with audio that the service has already rendered. The page then plays that audio once, in place of assembling the

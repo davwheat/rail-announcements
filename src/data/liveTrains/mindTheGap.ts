@@ -9,7 +9,7 @@ export function isMindTheGapStation(crs: string, platformNumber: string | null):
  *
  * Mapped by CRS -> Platform
  */
-const MindTheGapStations: Record<string, string[]> = {
+export const MindTheGapStations: Record<string, string[]> = {
   WVF: ['1', '2'],
   LWS: ['1', '2', '3', '4', '5'],
 }

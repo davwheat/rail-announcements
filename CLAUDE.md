@@ -2,7 +2,13 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Do not run yarn commands. There is no test suite in this project.
+Do not run yarn commands. Run `npm run test:live` for the focused WebSocket reducer, queue, adapter and hydration regression tests. See
+`docs/websocket-data-source.md` for local service and embedded-board configuration.
+
+`../rail-announcements-backend` holds a Go port of every system registered in `src/announcement-data/AllSystems.ts`, of the live announcement
+logic and of the playback queue, tested against this repository's output. After changing any system's play handler,
+`src/live/playAnnouncement.ts`, `src/live/playbackQueue.ts` or the tables they read, run `npm run export:backend` and port the change there. The
+export covers a system as soon as it's registered.
 
 ## Development Environment
 
@@ -236,3 +242,16 @@ window.__audioDrivers // Record<systemId, AnnouncementSystem class> for all trai
 ```
 
 These are typed in `src/index.d.ts`.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in
+`node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root)
+before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff
+only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "type": "update",
+  "epoch": "nrcc-1",
+  "previous_revision": 2,
+  "revision": 3,
+  "window": {"from": "2026-09-22T10:02:00Z", "to": "2026-09-22T11:02:00Z"},
+  "upserts": [],
+  "removals": [],
+  "ordering": [],
+  "override_upserts": [],
+  "override_removals": []
+}

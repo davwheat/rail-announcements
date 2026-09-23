@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "type": "snapshot",
+  "station": {"tpl": "KNGX", "crs": "KGX", "name": "London Kings Cross"},
+  "window": {"from": "2026-09-22T10:00:00Z", "to": "2026-09-22T11:00:00Z"},
+  "epoch": "nrcc-1",
+  "revision": 1,
+  "movements": [],
+  "ordering": [],
+  "overrides": [],
+  "nrcc_messages": [{
+    "id": "12",
+    "text": "<p>The lift is out&nbsp;of service.</p><a href=\"https://example.com\">Details</a>",
+    "category": "Station",
+    "severity": "2",
+    "suppress": false,
+    "updated_at": "2026-09-22T09:00:00Z"
+  }]
+}

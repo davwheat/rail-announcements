@@ -1,4 +1,27 @@
-import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
+import { connectAnnouncements } from '../live/announcements'
+import { useAtom } from 'jotai'
+import { serviceAudioState } from '../atoms'
+import { ANNOUNCEMENT_SERVICE_AVAILABLE, ANNOUNCEMENT_SERVICE_URL } from '../live/announcementService'
+import { stationStream, type StationStream } from '../live/audioStreams'
+import AnnouncementStreams from './AnnouncementStreams'
+import { PlaybackQueue } from '../live/playbackQueue'
+import { playAnnouncement, announcementPlatforms, audioPlatform } from '../live/playAnnouncement'
+import { announcementName, describeAnnouncement, describeMovement } from '../live/describe'
+import type { Announcement, AnnouncementType as FeedAnnouncementType } from '../live/types'
+import type { ConnectionStatus } from '../live/connection'
+import { useStationPlatforms } from '../live/stationPlatforms'
+import {
+  comparePlatforms,
+  isPlatformZoneStore,
+  moveToZone,
+  resolveZones,
+  zoneKey,
+  zoneLanes,
+  zonesToSave,
+  type PlatformZoneStore,
+} from '../live/platformZones'
+import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd'
+import { Fragment, useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import crsToStationItemMapper from '@helpers/crsToStationItemMapper'
 import useStateWithLocalStorage from '@hooks/useStateWithLocalStorage'
 import FullscreenIcon from 'mdi-react/FullscreenIcon'
@@ -20,7 +43,7 @@ import type { CallingAtPoint } from '@components/CallingAtSelector'
 import type { Option } from '@helpers/createOptionField'
 import type {
   INextTrainAnnouncementOptions,
-  IDisruptedTrainAnnouncementOptions,
+  ILiveDisruptedTrainAnnouncementOptions,
   default as AmeyPhil,
   ILiveTrainApproachingAnnouncementOptions,
   IStandingTrainAnnouncementOptions,
@@ -46,7 +69,8 @@ dayjs.tz.setDefault('Europe/London')
 const MIN_TIME_TO_ANNOUNCE = 4
 const RDM_BASE_URL = 'https://raildotmatrix.co.uk/board'
 // const RDM_BASE_URL = 'http://localhost:8788/board'
-const RDM_BASE_URL_ORIGIN = new URL(RDM_BASE_URL).origin
+const LOCAL_LIVE_URL = process.env.NEXT_PUBLIC_LIVE_SERVICE_URL || 'ws://localhost:8080'
+const LIVE_BOARD_URL = process.env.NEXT_PUBLIC_LIVE_BOARD_URL || 'http://localhost:8000/board'
 
 function pluraliseStrings(...strings: string[]): string {
   if (strings.length === 1) return strings[0]
@@ -417,13 +441,15 @@ enum AnnouncementType {
   Approaching = 'approaching',
   Standing = 'standing',
   Disrupted = 'disrupted',
+  Passing = 'passing',
+  PlatformAlteration = 'platform_alteration',
 }
 
 export interface LiveTrainAnnouncementsProps<SystemKeys extends string> {
   systems: Record<SystemKeys, AmeyPhil>
   supportedPlatforms: Record<string, SystemKeys[]>
   nextTrainHandler: Record<SystemKeys, (options: INextTrainAnnouncementOptions) => Promise<void>>
-  disruptedTrainHandler: Record<SystemKeys, (options: IDisruptedTrainAnnouncementOptions) => Promise<void>>
+  disruptedTrainHandler: Record<SystemKeys, (options: ILiveDisruptedTrainAnnouncementOptions) => Promise<void>>
   approachingTrainHandler: Record<SystemKeys, (options: ILiveTrainApproachingAnnouncementOptions) => Promise<void>>
   standingTrainHandler: Record<SystemKeys, (options: IStandingTrainAnnouncementOptions) => Promise<void>>
 }
@@ -435,6 +461,36 @@ const DisplayNames: Record<DisplayType, string> = {
   'infotec-landscape-dmi': 'Infotec landscape DMI',
   'daktronics-data-display-dmi': 'Daktronics/Data Display DMI',
   'blackbox-landscape-lcd': 'Blackbox landscape LCD',
+}
+
+const DataSources = ['websocket', 'original'] as const
+type DataSource = (typeof DataSources)[number]
+
+const BoardLayouts = ['station', 'per-platform'] as const
+type BoardLayout = (typeof BoardLayouts)[number]
+
+const BoardLayoutNames: Record<BoardLayout, string> = {
+  station: 'One board for the station',
+  'per-platform': 'One board per platform',
+}
+
+/** Lines a sub-option up with the text of the checkbox it belongs to. */
+const SUB_OPTION_INDENT = 'calc(1em + 8px)'
+
+const ZONE_PREFIX = 'announcement-zone-'
+const NEW_ZONE = 'new-announcement-zone'
+
+const AudioSources = ['browser', 'service'] as const
+type AudioSource = (typeof AudioSources)[number]
+
+const AudioSourceNames: Record<AudioSource, string> = {
+  browser: 'Built in this browser',
+  service: 'Streamed from the announcement service',
+}
+
+const DataSourceNames: Record<DataSource, string> = {
+  websocket: 'New (live updates)',
+  original: 'Legacy (polling)',
 }
 
 const ChimeTypeNames: Record<ChimeType | '', string> = {
@@ -459,8 +515,6 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
   systems,
   supportedPlatforms,
 }: LiveTrainAnnouncementsProps<SystemKeys>) {
-  const iframeRef = useRef<HTMLIFrameElement>(null)
-  const [iframeReady, setIframeReady] = useState(false)
   const systemKeys = Object.keys(systems) as SystemKeys[]
 
   const perSystemSupportedStations: Record<string, Option[]> = useMemo(
@@ -549,6 +603,20 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
   const [displayType, setDisplayType] = useStateWithLocalStorage<DisplayType>('amey.live-trains.board-type', 'infotec-landscape-dmi', val => {
     return DisplayTypes.includes(val)
   })
+  const [dataSource, setDataSource] = useStateWithLocalStorage<DataSource>('amey.live-trains.data-source', 'original', value =>
+    DataSources.includes(value),
+  )
+  const [liveServiceUrl, setLiveServiceUrl] = useStateWithLocalStorage('amey.live-trains.service-url', LOCAL_LIVE_URL)
+  // The footer's setting, shown here as well because this page is where it changes the most.
+  const [serviceAudio, setServiceAudio] = useAtom(serviceAudioState)
+  const audioSource: AudioSource = serviceAudio ? 'service' : 'browser'
+  const [announcementServiceUrl, setAnnouncementServiceUrl] = useStateWithLocalStorage(
+    'amey.live-trains.announcement-service-url',
+    ANNOUNCEMENT_SERVICE_URL,
+  )
+  // A saved choice of streamed audio must not outlive the service it was made for.
+  const streamedAudio = ANNOUNCEMENT_SERVICE_AVAILABLE && dataSource === 'websocket' && audioSource === 'service'
+  const [liveStatus, setLiveStatus] = useState<ConnectionStatus>('connecting')
   const [isFullscreen, setFullscreen] = useState(false)
   const [selectedCrs, setSelectedCrs] = useStateWithLocalStorage('amey.live-trains.selected-crs', 'ECR')
   const [chimeType, setChimeType] = useStateWithLocalStorage<ChimeType | ''>('amey.live-trains.chime-type', '', val =>
@@ -570,9 +638,28 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
     false,
     x => x === true || x === false,
   )
+  const [restrictPlatformsToStation, setRestrictPlatformsToStation] = useStateWithLocalStorage<boolean>(
+    'amey.live-trains.restrict-platforms-to-station',
+    true,
+    x => x === true || x === false,
+  )
+  const [boardLayout, setBoardLayout] = useStateWithLocalStorage<BoardLayout>('amey.live-trains.board-layout', 'station', val =>
+    BoardLayouts.includes(val),
+  )
+  const [savedZones, setSavedZones] = useStateWithLocalStorage<PlatformZoneStore>('amey.live-trains.platform-zones', {}, isPlatformZoneStore)
   const [announceShortPlatformsAfterSplit, setAnnounceShortPlatformsAfterSplit] = useStateWithLocalStorage<boolean>(
     'amey.live-trains.announce-short-platforms-after-split',
     false,
+    x => x === true || x === false,
+  )
+  const [announcePlatformsConcurrently, setAnnouncePlatformsConcurrently] = useStateWithLocalStorage<boolean>(
+    'amey.live-trains.concurrent-platforms',
+    false,
+    x => x === true || x === false,
+  )
+  const [announceFastTrainApproaching, setAnnounceFastTrainApproaching] = useStateWithLocalStorage<boolean>(
+    'amey.live-trains.fast-train-approaching',
+    true,
     x => x === true || x === false,
   )
   const [missingAudioMode, setMissingAudioMode] = useStateWithLocalStorage<MissingAudioMode>(
@@ -605,6 +692,8 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
     AnnouncementType.Approaching,
     AnnouncementType.Disrupted,
     AnnouncementType.Standing,
+    AnnouncementType.Passing,
+    AnnouncementType.PlatformAlteration,
   ])
 
   // Array of log messages using useReducer
@@ -724,6 +813,60 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       return dataPlatform
     }
   }, [])
+
+  const stationPlatforms = useStationPlatforms(liveServiceUrl, selectedCrs)
+
+  /** The station's SMART platforms, as keys into `supportedPlatforms`. Null when SMART
+   *  says nothing about this station, which must narrow nothing. */
+  const stationPlatformKeys = useMemo(
+    function stationPlatformKeys() {
+      if (stationPlatforms.status !== 'ready') return null
+
+      const keys = new Set(stationPlatforms.platforms.map(getPlatformForSystemSelection))
+      const known = Object.keys(supportedPlatforms).filter(platform => keys.has(platform))
+
+      // A station whose platforms no voice covers would otherwise leave an empty
+      // list and no way back to it.
+      return known.length > 0 ? new Set(known) : null
+    },
+    [stationPlatforms, supportedPlatforms, getPlatformForSystemSelection],
+  )
+
+  const filteringPlatforms = restrictPlatformsToStation && stationPlatformKeys !== null
+
+  /** Platforms offered for a voice, in station order. */
+  const visiblePlatforms = useMemo(
+    function visiblePlatforms() {
+      return Object.entries(supportedPlatforms)
+        .filter(([platform]) => !filteringPlatforms || stationPlatformKeys!.has(platform))
+        .sort(([a], [b]) => comparePlatforms(a, b))
+    },
+    [supportedPlatforms, filteringPlatforms, stationPlatformKeys],
+  )
+
+  const perPlatformBoards = boardLayout === 'per-platform' && stationPlatforms.status === 'ready'
+
+  /** Zones group the station's own platforms, never the generic list: a zone is a physical
+   *  part of a station, so without the station's platforms there is nothing to group. */
+  const zonePlatforms = useMemo(
+    function zonePlatforms() {
+      if (stationPlatformKeys === null) return []
+
+      return Object.keys(supportedPlatforms)
+        .filter(platform => stationPlatformKeys.has(platform))
+        .sort(comparePlatforms)
+    },
+    [supportedPlatforms, stationPlatformKeys],
+  )
+
+  const zones = useMemo(() => resolveZones(savedZones[selectedCrs], zonePlatforms), [savedZones, selectedCrs, zonePlatforms])
+
+  const saveZones = useCallback(
+    function saveZones(next: string[][]) {
+      setSavedZones(current => ({ ...current, [selectedCrs]: zonesToSave(next) }))
+    },
+    [setSavedZones, selectedCrs],
+  )
 
   useEffect(() => {
     const key = setInterval(removeOldIds, 1000 * 60)
@@ -868,7 +1011,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         platform: getPlatform(train.platform, systemKey),
         terminatingStationCode: (train.currentDestinations ?? train.destination).map(d => getStation(d, systemKey)),
         vias: vias,
-        originStationCode: getStation(train.origin[0], systemKey),
+        originStationCode: (train.currentOrigins ?? train.origin).map(o => getStation(o, systemKey)),
         fromLive: true,
       }
 
@@ -1016,7 +1159,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         train.uid,
       )
 
-      const [vias] = announceViaPoints
+      const vias = announceViaPoints
         ? getViaPoints(train, systems[systemKey].STATIONS, stationNameToCrsMap, loc => getStation(loc, systemKey))
         : [[]]
 
@@ -1032,14 +1175,14 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         }
       }
 
-      const options: IDisruptedTrainAnnouncementOptions = {
+      const options: ILiveDisruptedTrainAnnouncementOptions = {
         fromLive: true,
         missingAudioMode,
         chime: chimeType || systems[systemKey].DEFAULT_CHIME,
         hour: h === '00' ? '00 - midnight' : h,
         min: m === '00' ? '00 - hundred-hours' : m,
         toc,
-        terminatingStationCode: train.destination[0].crs,
+        terminatingStationCode: (train.currentDestinations ?? train.destination).map(d => getStation(d, systemKey)),
         vias,
         delayTime: delayMins.toString(),
         disruptionType: cancelled ? 'cancel' : unknownDelay || delayMins < 0 ? 'delay' : 'delayedBy',
@@ -1104,7 +1247,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
   )
 
   useEffect(() => {
-    if (!hasEnabledFeature) return
+    if (!hasEnabledFeature || dataSource !== 'original') return
 
     const abortController = new AbortController()
 
@@ -1112,12 +1255,6 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       if (isPlaying) {
         addLog('Still playing an announcement; skipping this check')
         console.log('[Live Trains] Still playing an announcement; skipping this check')
-        return
-      }
-
-      if (!iframeReady) {
-        addLog('Departure board iframe not ready; waiting...')
-        console.log('[Live Trains] Departure board iframe not ready; waiting...')
         return
       }
 
@@ -1133,7 +1270,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       params.set('timeWindow', '40')
 
       try {
-        const resp = await fetch(`/api/get-services?${params}`)
+        const resp = await fetch(`/api/get-services?${params}`, { signal: abortController.signal })
 
         if (!resp.ok) {
           addLog("Couldn't fetch data from API")
@@ -1143,13 +1280,8 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
 
         try {
           const data: StaffServicesResponse = await resp.json()
+          if (abortController.signal.aborted) return
           services = data.trainServices
-
-          // Send data to iframe
-          if (iframeReady && iframeRef.current) {
-            console.log('Sending service information to iframe')
-            iframeRef.current.contentWindow?.postMessage(data, RDM_BASE_URL_ORIGIN)
-          }
         } catch {
           addLog("Couldn't parse JSON from API")
           console.warn("[Live Trains] Couldn't parse JSON from API")
@@ -1351,7 +1483,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       addLog('--------------------------------------')
     }
 
-    const refreshInterval = setInterval(checkAndPlay, iframeReady ? 40_000 : 1000)
+    const refreshInterval = setInterval(checkAndPlay, 40_000)
     checkAndPlay()
 
     return () => {
@@ -1361,6 +1493,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
     }
   }, [
     hasEnabledFeature,
+    dataSource,
     nextTrainAnnounced,
     disruptedTrainAnnounced,
     markNextTrainAnnounced,
@@ -1371,29 +1504,196 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
     announceNextTrain,
     addLog,
     enabledAnnouncements,
-    iframeReady,
   ])
 
-  const iframeQueryParams = new URLSearchParams({
-    station: selectedCrs,
-    noBg: '1',
-    hideSettings: '1',
-    'from-railannouncements.co.uk': '1',
-  })
-
-  if (useLegacyTocNames) {
-    iframeQueryParams.append('useLegacyTocNames', '1')
+  const legacyPlaying = useRef(isPlaying)
+  legacyPlaying.current = isPlaying
+  const concurrentPlatforms = useRef(announcePlatformsConcurrently)
+  concurrentPlatforms.current = announcePlatformsConcurrently
+  // Read through a ref like the flag above: re-zoning the station must not tear down the
+  // queue that is part way through announcing a train.
+  const lanes = useRef(zoneLanes(zones))
+  lanes.current = zoneLanes(zones)
+  const playFeedMessage = useRef<(announcement: Announcement, signal: AbortSignal, valid: () => boolean) => Promise<void>>(async () => {})
+  playFeedMessage.current = async (announcement, signal, valid) => {
+    // Let an already playing legacy announcement finish when the source changes.
+    if (legacyPlaying.current && valid()) {
+      addLog(`Waiting for the previous announcement to finish before: ${describeAnnouncement(announcement)}`)
+      while (legacyPlaying.current && valid()) await new Promise(resolve => setTimeout(resolve, 100))
+    }
+    if (!valid() || dataSource !== 'websocket') return
+    if (!enabledAnnouncements.includes(announcement.announcement_type as AnnouncementType)) {
+      addLog(`Skipping the ${describeAnnouncement(announcement)}: that type is switched off`)
+      return
+    }
+    if (announcement.audio) {
+      // Rendered once for every platform it names, in the service's voice rather than a platform's.
+      addLog(`Playing the service's own audio for the ${describeAnnouncement(announcement)}`)
+      await Object.values<AmeyPhil>(systems)[0].withLivePlayback(signal, valid).playRenderedAudio(announcement.audio.data)
+      return
+    }
+    for (const platform of announcementPlatforms(announcement)) {
+      if (!valid()) return
+      const train = describeMovement(announcement.details)
+      const type = announcementName(announcement.announcement_type)
+      if (!platform) {
+        addLog(`Skipping the ${type} for ${train}: no platform has been allocated`)
+        continue
+      }
+      const systemKey = systemKeyForPlatform[getPlatformForSystemSelection(platform)]
+      if (!systemKey) {
+        addLog(`Skipping the ${type} for ${train}: platform ${platform} has no voice selected`)
+        continue
+      }
+      const system = systems[systemKey]
+      const spokenPlatform = audioPlatform(platform, system)
+      if (spokenPlatform === null) {
+        addLog(`Skipping the ${type} for ${train}: ${systemKey} has no audio for platform ${platform}`)
+        continue
+      }
+      addLog(`Announcing the ${type} for ${train} on platform ${platform} in ${systemKey}`)
+      await playAnnouncement(
+        announcement,
+        system.withLivePlayback(signal, valid),
+        {
+          chime: chimeType,
+          useLegacyTocNames,
+          announceViaPoints,
+          announceShortPlatformsAfterSplit,
+          fastTrainApproaching: announceFastTrainApproaching,
+          daktronicsFanfare: displayType === 'daktronics-data-display-dmi',
+          missingAudioMode,
+        },
+        spokenPlatform,
+        addLog,
+      )
+    }
   }
 
-  if (showUnconfirmedPlatforms) {
-    iframeQueryParams.append('showUnconfirmedPlatforms', '1')
-  }
+  // Keep one queue across effect restarts so a source/station change cannot
+  // overlap an announcement that is still finishing its audio download.
+  const playbackQueue = useRef<PlaybackQueue | null>(null)
+  if (!playbackQueue.current) {
+    playbackQueue.current = new PlaybackQueue(
+      (announcement, signal, valid) => playFeedMessage.current(announcement, signal, valid),
+      Date.now,
+      error => addLog(`Announcement skipped: ${error instanceof Error ? error.message : String(error)}`),
+      announcement => {
+        if (!concurrentPlatforms.current) return ['']
 
-  Object.entries(systemKeyForPlatform)
-    .filter(([_, system]) => system !== null)
-    .forEach(([p]) => {
-      iframeQueryParams.append('platform', p)
+        // A platformless announcement holds the whole station, and one warning naming two
+        // platforms of the same zone holds that zone once.
+        const occupied = announcementPlatforms(announcement).map(platform => {
+          if (!platform) return ''
+
+          const key = getPlatformForSystemSelection(platform)
+
+          return lanes.current.get(key) ?? key
+        })
+
+        return [...new Set(occupied)]
+      },
+      addLog,
+    )
+  }
+  const feedTypes = enabledAnnouncements.join(',')
+  useEffect(() => {
+    // The announcement service listens to the feed itself when it is the one speaking.
+    if (!hasEnabledFeature || dataSource !== 'websocket' || streamedAudio) return
+    const queue = playbackQueue.current!
+    try {
+      return connectAnnouncements(
+        liveServiceUrl,
+        selectedCrs,
+        feedTypes.split(',').filter(Boolean) as FeedAnnouncementType[],
+        queue,
+        setLiveStatus,
+        addLog,
+      )
+    } catch (error) {
+      queue.reset()
+      setLiveStatus('reconnecting')
+      addLog(`Cannot connect to the live service: ${String(error)}`)
+    }
+    return () => queue.reset()
+    // Per-platform voices are read at play time, so changing one must not disturb the feed.
+  }, [hasEnabledFeature, dataSource, streamedAudio, liveServiceUrl, selectedCrs, feedTypes])
+
+  const announcementStream = useMemo<StationStream | null | string>(() => {
+    if (!hasEnabledFeature || !streamedAudio) return null
+    try {
+      return stationStream(
+        announcementServiceUrl,
+        selectedCrs,
+        announcePlatformsConcurrently ? zones : null,
+        Object.fromEntries(Object.entries(systemKeyForPlatform).map(([platform, key]) => [platform, key ? systems[key].ID : null])),
+        feedTypes.split(',').filter(Boolean) as FeedAnnouncementType[],
+        {
+          chime: chimeType,
+          useLegacyTocNames,
+          announceViaPoints,
+          announceShortPlatformsAfterSplit,
+          fastTrainApproaching: announceFastTrainApproaching,
+          daktronicsFanfare: displayType === 'daktronics-data-display-dmi',
+          missingAudioMode,
+        },
+      )
+    } catch (error) {
+      return `Cannot use the announcement service: ${error instanceof Error ? error.message : String(error)}`
+    }
+  }, [
+    hasEnabledFeature,
+    streamedAudio,
+    announcementServiceUrl,
+    selectedCrs,
+    announcePlatformsConcurrently,
+    zones,
+    systemKeyForPlatform,
+    systems,
+    feedTypes,
+    chimeType,
+    useLegacyTocNames,
+    announceViaPoints,
+    announceShortPlatformsAfterSplit,
+    announceFastTrainApproaching,
+    displayType,
+    missingAudioMode,
+  ])
+
+  /** Builds one board's URL. `platform` gives that platform its own board; without it the
+   *  board covers the station, showing the platforms that have a voice. */
+  function boardUrl(platform?: string): string {
+    const params = new URLSearchParams({
+      station: selectedCrs,
+      dataSource,
+      ...(dataSource === 'websocket' ? { liveServiceUrl } : {}),
+      noBg: '1',
+      hideSettings: '1',
+      'from-railannouncements.co.uk': '1',
     })
+
+    if (useLegacyTocNames) {
+      params.append('useLegacyTocNames', '1')
+    }
+
+    if (showUnconfirmedPlatforms) {
+      params.append('showUnconfirmedPlatforms', '1')
+    }
+
+    if (platform !== undefined) {
+      params.append('platform', platform)
+    } else {
+      if (Object.values(systemKeyForPlatform).every(system => system === null)) params.append('platform', '__none__')
+
+      Object.entries(systemKeyForPlatform)
+        .filter(([_, system]) => system !== null)
+        .forEach(([p]) => {
+          params.append('platform', p)
+        })
+    }
+
+    return `${dataSource === 'websocket' ? LIVE_BOARD_URL : RDM_BASE_URL}/${displayType}?${params}`
+  }
 
   return (
     <div css={{ width: '100%' }}>
@@ -1406,6 +1706,48 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
           </div>
         }
       >
+        <label className="option-select" htmlFor="data-source-select">
+          Train data source
+          <Select<Option<DataSource>, false>
+            id="data-source-select"
+            value={{ value: dataSource, label: DataSourceNames[dataSource] }}
+            onChange={val => setDataSource(val!!.value)}
+            options={DataSources.map(value => ({ value, label: DataSourceNames[value] }))}
+          />
+        </label>
+        {dataSource === 'websocket' && process.env.NODE_ENV === 'development' && (
+          <label htmlFor="live-service-url">
+            Service URL
+            <input
+              id="live-service-url"
+              key={liveServiceUrl}
+              defaultValue={liveServiceUrl}
+              onBlur={event => setLiveServiceUrl(event.target.value.trim())}
+            />
+          </label>
+        )}
+        {dataSource === 'websocket' && ANNOUNCEMENT_SERVICE_AVAILABLE && (
+          <label className="option-select" htmlFor="audio-source-select">
+            Announcement audio
+            <Select<Option<AudioSource>, false>
+              id="audio-source-select"
+              value={{ value: audioSource, label: AudioSourceNames[audioSource] }}
+              onChange={val => setServiceAudio(val!!.value === 'service')}
+              options={AudioSources.map(value => ({ value, label: AudioSourceNames[value] }))}
+            />
+          </label>
+        )}
+        {streamedAudio && process.env.NODE_ENV === 'development' && (
+          <label htmlFor="announcement-service-url">
+            Announcement service URL
+            <input
+              id="announcement-service-url"
+              key={announcementServiceUrl}
+              defaultValue={announcementServiceUrl}
+              onBlur={event => setAnnouncementServiceUrl(event.target.value.trim())}
+            />
+          </label>
+        )}
         <label className="option-select" htmlFor="station-select">
           Station
           <Select<Option, false>
@@ -1430,6 +1772,23 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
             options={Object.entries(DisplayNames).map(([value, label]) => ({ value: value as DisplayType, label }))}
           />
         </label>
+
+        <label htmlFor="board-layout-select" className="option-select">
+          Board layout
+          <Select<Option<BoardLayout>, false>
+            id="board-layout-select"
+            aria-describedby={stationPlatforms.status === 'unavailable' ? 'help-board-layout' : undefined}
+            value={{ value: boardLayout, label: BoardLayoutNames[boardLayout] }}
+            onChange={val => setBoardLayout(val!!.value)}
+            options={Object.entries(BoardLayoutNames).map(([value, label]) => ({ value: value as BoardLayout, label }))}
+            isOptionDisabled={option => option.value === 'per-platform' && stationPlatforms.status !== 'ready'}
+          />
+        </label>
+        {stationPlatforms.status === 'unavailable' && (
+          <p className="helpText" id="help-board-layout">
+            We don't know which platforms this station has, so we can't show a board for each one.
+          </p>
+        )}
 
         <label htmlFor="use-legacy-tocs">
           <input
@@ -1463,6 +1822,135 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
           />
           Announce short platforms after split?
         </label>
+
+        {dataSource === 'websocket' && (
+          <label htmlFor="concurrent-platforms">
+            <input
+              type="checkbox"
+              name="concurrent-platforms"
+              id="concurrent-platforms"
+              checked={announcePlatformsConcurrently}
+              onChange={e => setAnnouncePlatformsConcurrently(e.target.checked)}
+            />
+            Announce different platforms at the same time?
+          </label>
+        )}
+
+        {dataSource === 'websocket' && announcePlatformsConcurrently && (
+          <fieldset
+            css={{
+              border: 'none',
+              minWidth: 0,
+              marginLeft: SUB_OPTION_INDENT,
+              marginTop: 16,
+              marginBottom: 24,
+              padding: 16,
+              background: '#eee',
+            }}
+          >
+            <legend css={{ float: 'left', width: '100%', padding: 0, marginBottom: 8, fontWeight: 'bold' }}>Announcement zones</legend>
+
+            {zonePlatforms.length === 0 ? (
+              <p className="helpText">We don't know which platforms this station has, so each one announces on its own.</p>
+            ) : (
+              <>
+                <p className="helpText">
+                  Platforms in the same zone take turns. Separate zones announce at the same time. Drag a platform onto another to put them in
+                  one zone.
+                </p>
+
+                <DragDropContext
+                  onDragEnd={result => {
+                    if (!result.destination) return
+
+                    const { droppableId, index } = result.destination
+                    // Zones are named by their lowest platform, so a drop resolves to a zone
+                    // rather than to a row that a previous drop may have shifted.
+                    const target =
+                      droppableId === NEW_ZONE ? null : zones.findIndex(zone => zoneKey(zone) === droppableId.slice(ZONE_PREFIX.length))
+
+                    saveZones(moveToZone(zones, result.draggableId, target, index))
+                  }}
+                >
+                  <div css={{ display: 'flex', flexWrap: 'wrap', alignItems: 'stretch', gap: 8, marginTop: 8 }}>
+                    {zones.map(zone => (
+                      <Droppable droppableId={`${ZONE_PREFIX}${zoneKey(zone)}`} direction="horizontal" key={zoneKey(zone)}>
+                        {provided => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.droppableProps}
+                            css={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              // Spacing lives on the chips, never here: a Droppable shifts its
+                              // children by their margins while dragging and cannot see a gap,
+                              // so a gap would be missing from the preview and appear on drop.
+                              padding: '8px 0 8px 8px',
+                              border: '2px solid #000',
+                              background: '#fff',
+                            }}
+                          >
+                            {zone.map((platform, position) => (
+                              <Draggable draggableId={platform} index={position} key={platform}>
+                                {provided => (
+                                  <span
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    {...provided.dragHandleProps}
+                                    aria-label={`Platform ${platform}`}
+                                    css={{
+                                      display: 'inline-block',
+                                      padding: '4px 12px',
+                                      // The gap between chips, and the row's right padding.
+                                      marginRight: 8,
+                                      border: '1px solid #000',
+                                      background: '#eee',
+                                      cursor: 'grab',
+                                      whiteSpace: 'nowrap',
+                                    }}
+                                  >
+                                    {platform}
+                                  </span>
+                                )}
+                              </Draggable>
+                            ))}
+                            {provided.placeholder}
+                          </div>
+                        )}
+                      </Droppable>
+                    ))}
+
+                    <Droppable droppableId={NEW_ZONE} direction="horizontal">
+                      {provided => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.droppableProps}
+                          css={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            padding: '8px 0 8px 8px',
+                            minWidth: 180,
+                            border: '2px dashed #666',
+                            color: '#666',
+                          }}
+                        >
+                          <span css={{ marginRight: 8 }}>Drop here for a zone of its own</span>
+                          {provided.placeholder}
+                        </div>
+                      )}
+                    </Droppable>
+                  </div>
+                </DragDropContext>
+
+                {zones.some(zone => zone.length > 1) && (
+                  <button className="danger" css={{ marginTop: 16 }} onClick={() => saveZones([])}>
+                    <span className="buttonLabel">Give every platform its own zone</span>
+                  </button>
+                )}
+              </>
+            )}
+          </fieldset>
+        )}
 
         <label htmlFor="chime-type-select" className="option-select">
           Chime
@@ -1554,6 +2042,41 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
             />
             Delays and cancellations
           </label>
+          {dataSource === 'websocket' &&
+            [
+              [AnnouncementType.Passing, 'Passing train warnings'],
+              [AnnouncementType.PlatformAlteration, 'Platform alterations'],
+            ].map(([type, label]) => (
+              <Fragment key={type}>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={enabledAnnouncements.includes(type as AnnouncementType)}
+                    onChange={event => {
+                      setEnabledAnnouncements(
+                        event.target.checked
+                          ? [...enabledAnnouncements, type as AnnouncementType]
+                          : enabledAnnouncements.filter(value => value !== type),
+                      )
+                    }}
+                  />
+                  {label}
+                </label>
+
+                {type === AnnouncementType.Passing && (
+                  <label htmlFor="fast-train-approaching" css={{ marginLeft: SUB_OPTION_INDENT }}>
+                    <input
+                      type="checkbox"
+                      name="fast-train-approaching"
+                      id="fast-train-approaching"
+                      checked={announceFastTrainApproaching}
+                      onChange={e => setAnnounceFastTrainApproaching(e.target.checked)}
+                    />
+                    Announce "fast train approaching"?
+                  </label>
+                )}
+              </Fragment>
+            ))}
         </fieldset>
 
         <fieldset
@@ -1562,6 +2085,18 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
             width: '100%',
           }}
         >
+          <label htmlFor="restrict-platforms-to-station">
+            <input
+              type="checkbox"
+              name="restrict-platforms-to-station"
+              id="restrict-platforms-to-station"
+              checked={restrictPlatformsToStation}
+              disabled={stationPlatformKeys === null}
+              onChange={e => setRestrictPlatformsToStation(e.target.checked)}
+            />
+            Only show this station's platforms
+          </label>
+
           <div
             css={{
               display: 'flex',
@@ -1569,6 +2104,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
               alignItems: 'stretch',
               gap: 8,
               marginBottom: 16,
+              marginTop: 16,
             }}
           >
             {systemKeys.map(systemKey => {
@@ -1576,9 +2112,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
                 <button
                   key={systemKey}
                   onClick={() => {
-                    const platformsSupportedBySystem = Object.entries(supportedPlatforms)
-                      .filter(([_, keys]) => keys.includes(systemKey))
-                      .map(([key]) => key)
+                    const platformsSupportedBySystem = visiblePlatforms.filter(([_, keys]) => keys.includes(systemKey)).map(([key]) => key)
 
                     dispatchSystemKeyForPlatform({ platforms: platformsSupportedBySystem, systemKey })
                   }}
@@ -1594,7 +2128,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
               onClick={() => {
                 const platforms: Record<string, SystemKeys> = {}
 
-                for (const [p, keys] of Object.entries(supportedPlatforms)) {
+                for (const [p, keys] of visiblePlatforms) {
                   platforms[p] = keys[Math.floor(Math.random() * keys.length)]
                 }
 
@@ -1613,7 +2147,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
               key="__off"
               className="danger"
               onClick={() => {
-                dispatchSystemKeyForPlatform({ platforms: Object.keys(supportedPlatforms), systemKey: null })
+                dispatchSystemKeyForPlatform({ platforms: visiblePlatforms.map(([platform]) => platform), systemKey: null })
               }}
             >
               <span className="buttonLabel">All off</span>
@@ -1691,105 +2225,92 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
                 },
               }}
             >
-              {Object.entries(supportedPlatforms)
-                .sort(([a], [b]) => {
-                  const aInt = parseInt(a)
-                  const bInt = parseInt(b)
+              {visiblePlatforms.map(([platform, systems]) => {
+                return (
+                  <fieldset
+                    css={{
+                      appearance: 'none',
+                      padding: 0,
+                      margin: 0,
+                      border: 'none',
+                      minInlineSize: 'min-content',
 
-                  if (!isNaN(aInt) && !isNaN(bInt)) {
-                    const diff = aInt - bInt
-
-                    if (diff !== 0) return diff
-                  }
-
-                  return a.localeCompare(b)
-                })
-                .map(([platform, systems]) => {
-                  return (
-                    <fieldset
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      paddingLeft: 16,
+                      paddingRight: 16,
+                    }}
+                    key={platform}
+                  >
+                    <legend
                       css={{
                         appearance: 'none',
+                        display: 'inline-block',
                         padding: 0,
                         margin: 0,
-                        border: 'none',
-                        minInlineSize: 'min-content',
-
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 8,
-                        paddingLeft: 16,
-                        paddingRight: 16,
+                        float: 'left',
+                        width: '150px',
+                        fontWeight: 'bold',
                       }}
-                      key={platform}
                     >
-                      <legend
-                        css={{
-                          appearance: 'none',
-                          display: 'inline-block',
-                          padding: 0,
-                          margin: 0,
-                          float: 'left',
-                          width: '150px',
-                          fontWeight: 'bold',
-                        }}
-                      >
-                        Platform {platform}
-                      </legend>
+                      Platform {platform}
+                    </legend>
 
-                      <label
-                        key={`platform-system-select-${platform}-none`}
-                        htmlFor={`platform-system-select-${platform}-none`}
-                        css={{
-                          display: 'flex',
-                          whiteSpace: 'nowrap',
-                          alignItems: 'center',
-                          fontWeight: 'normal',
+                    <label
+                      key={`platform-system-select-${platform}-none`}
+                      htmlFor={`platform-system-select-${platform}-none`}
+                      css={{
+                        display: 'flex',
+                        whiteSpace: 'nowrap',
+                        alignItems: 'center',
+                        fontWeight: 'normal',
 
-                          '&:has([disabled])': {
-                            color: '#666',
+                        '&:has([disabled])': {
+                          color: '#666',
 
-                            '&, & input': {
-                              cursor: 'not-allowed',
-                            },
+                          '&, & input': {
+                            cursor: 'not-allowed',
                           },
+                        },
+                      }}
+                    >
+                      None
+                      <input
+                        type="radio"
+                        name={`platform-system-select-${platform}`}
+                        id={`platform-system-select-${platform}-none`}
+                        checked={systemKeyForPlatform[platform] === null}
+                        onChange={() => {
+                          dispatchSystemKeyForPlatform({ platforms: [platform], systemKey: null })
                         }}
-                      >
-                        None
-                        <input
-                          type="radio"
-                          name={`platform-system-select-${platform}`}
-                          id={`platform-system-select-${platform}-none`}
-                          checked={systemKeyForPlatform[platform] === null}
-                          onChange={() => {
-                            dispatchSystemKeyForPlatform({ platforms: [platform], systemKey: null })
-                          }}
-                        />
-                      </label>
+                      />
+                    </label>
 
-                      {systemKeys.map(systemKey => {
-                        return (
-                          <label
-                            key={`platform-system-select-${platform}-${systemKey}`}
-                            htmlFor={`platform-system-select-${platform}-${systemKey}`}
-                          >
-                            {systemKey}
+                    {systemKeys.map(systemKey => {
+                      return (
+                        <label
+                          key={`platform-system-select-${platform}-${systemKey}`}
+                          htmlFor={`platform-system-select-${platform}-${systemKey}`}
+                        >
+                          {systemKey}
 
-                            <input
-                              type="radio"
-                              name={`platform-system-select-${platform}`}
-                              id={`platform-system-select-${platform}-${systemKey}`}
-                              disabled={!systems.includes(systemKey as any)}
-                              checked={systemKeyForPlatform[platform] === systemKey}
-                              onChange={() => {
-                                dispatchSystemKeyForPlatform({ platforms: [platform], systemKey: systemKey })
-                              }}
-                            />
-                          </label>
-                        )
-                      })}
-                    </fieldset>
-                  )
-                })}
+                          <input
+                            type="radio"
+                            name={`platform-system-select-${platform}`}
+                            id={`platform-system-select-${platform}-${systemKey}`}
+                            disabled={!systems.includes(systemKey as any)}
+                            checked={systemKeyForPlatform[platform] === systemKey}
+                            onChange={() => {
+                              dispatchSystemKeyForPlatform({ platforms: [platform], systemKey: systemKey })
+                            }}
+                          />
+                        </label>
+                      )
+                    })}
+                  </fieldset>
+                )
+              })}
             </div>
           </details>
         </fieldset>
@@ -1814,20 +2335,31 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
         This is a beta feature, and isn't complete or fully functional. Please report any issues you face{' '}
         <a href="https://github.com/davwheat/rail-announcements/issues">on GitHub</a>.
       </p>
-      <p css={{ margin: '16px 0' }}>
-        This page will auto-announce all departures in the next {MIN_TIME_TO_ANNOUNCE} minutes from the selected station. Departures outside this
-        timeframe will appear on the board below, but won't be announced until closer to the time.
-      </p>
-      <p css={{ margin: '16px 0' }}>At the moment, we also won't announce services which:</p>
-      <ul className="list" css={{ margin: '16px 16px' }}>
-        <li>have no platform allocated in data feeds (common at larger stations, even at the time of departure)</li>
-        <li>have already been announced by the system in the last hour (only affects services which suddenly get delayed)</li>
-        <li>are terminating at the selected station</li>
-      </ul>
-      <p>
-        We also can't handle most short platforms and various other features as this information isn't contained within the open data provided by
-        National Rail.
-      </p>
+      <NoSSR>
+        {dataSource === 'websocket' ? (
+          <p>
+            Announcements follow new triggers from the live feed. Connecting starts silently; expired messages are skipped. All train details and
+            platform warnings come from the feed.
+          </p>
+        ) : (
+          <>
+            <p css={{ margin: '16px 0' }}>
+              This page will auto-announce all departures in the next {MIN_TIME_TO_ANNOUNCE} minutes from the selected station. Departures
+              outside this timeframe will appear on the board below, but won't be announced until closer to the time.
+            </p>
+            <p css={{ margin: '16px 0' }}>At the moment, we also won't announce services which:</p>
+            <ul className="list" css={{ margin: '16px 16px' }}>
+              <li>have no platform allocated in data feeds (common at larger stations, even at the time of departure)</li>
+              <li>have already been announced by the system in the last hour (only affects services which suddenly get delayed)</li>
+              <li>are terminating at the selected station</li>
+            </ul>
+            <p>
+              We also can't handle most short platforms and various other features as this information isn't contained within the open data
+              provided by National Rail.
+            </p>
+          </>
+        )}
+      </NoSSR>
 
       <div
         css={{
@@ -1856,31 +2388,16 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       </div>
 
       {!hasEnabledFeature ? (
-        <NoSSR
-          fallback={
-            <button
-              css={{
-                display: 'flex',
-                alignItems: 'center',
-                marginBottom: 0,
-              }}
-              disabled
-            >
-              Start live trains
-            </button>
-          }
+        <button
+          css={{
+            display: 'flex',
+            alignItems: 'center',
+            marginBottom: 0,
+          }}
+          onClick={() => setHasEnabledFeature(true)}
         >
-          <button
-            css={{
-              display: 'flex',
-              alignItems: 'center',
-              marginBottom: 0,
-            }}
-            onClick={() => setHasEnabledFeature(true)}
-          >
-            Start live trains
-          </button>
-        </NoSSR>
+          Start live trains
+        </button>
       ) : (
         <>
           <button
@@ -1902,27 +2419,62 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
           </button>
 
           <FullScreen enabled={isFullscreen} onChange={setFullscreen}>
-            <iframe
-              ref={iframeRef}
-              onLoad={() => {
-                console.log('Marking iframe ready for data')
-                setIframeReady(true)
-              }}
-              css={{
-                border: 'none',
-                width: '100%',
-                height: 400,
+            {perPlatformBoards ? (
+              <div
+                css={{
+                  display: 'grid',
+                  gap: 16,
+                  gridTemplateColumns: 'minmax(0, 1fr)',
 
-                ':fullscreen &': {
-                  height: '100%',
-                },
-              }}
-              src={`${RDM_BASE_URL}/${displayType}?${iframeQueryParams}`}
-            />
+                  [Breakpoints.downTo.desktopLarge]: {
+                    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                  },
+                }}
+              >
+                {stationPlatforms.platforms.map(platform => (
+                  <section key={platform}>
+                    <h3 css={{ marginBottom: 8 }}>Platform {platform}</h3>
+
+                    <iframe
+                      title={`Departure board for platform ${platform}`}
+                      css={{
+                        border: 'none',
+                        width: '100%',
+                        height: 400,
+                      }}
+                      key={`${dataSource}:${selectedCrs}:${liveServiceUrl}:${platform}`}
+                      src={boardUrl(platform)}
+                    />
+                  </section>
+                ))}
+              </div>
+            ) : (
+              <iframe
+                title={`Departure board for ${selectedCrs}`}
+                css={{
+                  border: 'none',
+                  width: '100%',
+                  height: 400,
+
+                  ':fullscreen &': {
+                    height: '100%',
+                  },
+                }}
+                key={`${dataSource}:${selectedCrs}:${liveServiceUrl}`}
+                src={boardUrl()}
+              />
+            )}
           </FullScreen>
 
           <div id="resume-audio-container" />
 
+          {dataSource === 'websocket' && !streamedAudio && <p role="status">Live feed: {liveStatus}</p>}
+          {streamedAudio &&
+            (typeof announcementStream === 'string' ? (
+              <p role="alert">{announcementStream}</p>
+            ) : (
+              <AnnouncementStreams stream={announcementStream} log={addLog} />
+            ))}
           <Logs css={{ marginTop: 16 }} logs={logs} />
 
           <img

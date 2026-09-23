@@ -1,0 +1,111 @@
+{
+  "version": 2,
+  "type": "announcement",
+  "event_id": "td/example/passing",
+  "movement_id": "td/example",
+  "station": {
+    "tpl": "TEST",
+    "crs": "TST",
+    "name": "Example station"
+  },
+  "announcement_type": "passing",
+  "created_at": "2026-09-13T10:00:00Z",
+  "expires_at": "2026-09-13T10:01:00Z",
+  "details": {
+    "id": "td/example",
+    "rid": "",
+    "location_id": "",
+    "station": {
+      "tpl": "TEST",
+      "crs": "TST",
+      "name": "Example station"
+    },
+    "kind": "unknown",
+    "uid": null,
+    "headcode": "5A01",
+    "operator_code": null,
+    "operator_name": null,
+    "mode": "train",
+    "passenger": false,
+    "operational": false,
+    "arrival": {
+      "planned": null,
+      "estimated": null,
+      "actual": null,
+      "unknown_delay": false
+    },
+    "departure": {
+      "planned": null,
+      "estimated": null,
+      "actual": null,
+      "unknown_delay": false
+    },
+    "passing": {
+      "planned": null,
+      "estimated": null,
+      "actual": null,
+      "unknown_delay": false
+    },
+    "platform": {
+      "number": null,
+      "confirmed": null,
+      "suppressed": null,
+      "source": null
+    },
+    "suppressed": false,
+    "cancelled": false,
+    "cancel_reason": {
+      "code": null,
+      "text": null
+    },
+    "delay_reason": {
+      "code": null,
+      "text": null
+    },
+    "coach_count": null,
+    "loading_percent": null,
+    "loading_category": null,
+    "formation": null,
+    "coach_loading": null,
+    "coaches": [],
+    "reverse_formation": null,
+    "detach_front": null,
+    "activities": null,
+    "false_destination": null,
+    "origins": [],
+    "destinations": [],
+    "calling_points": [],
+    "portions": [],
+    "arrived_at": null,
+    "passed_at": null,
+    "td": {
+      "id": "td/example",
+      "area": "AA",
+      "description": "5A01",
+      "from": "0001",
+      "to": "0002",
+      "stanox": "123",
+      "crs": "TST",
+      "tiplocs": [
+        "TEST"
+      ],
+      "name": "Example station",
+      "platform": "2",
+      "event": "arrival",
+      "step": "B",
+      "direction": "up",
+      "from_line": "",
+      "to_line": "",
+      "observed_at": "2026-09-13T10:00:00Z",
+      "reported_at": "2026-09-13T10:00:20Z",
+      "expires_at": "2026-09-13T10:05:00Z",
+      "match": "unmatched",
+      "classification": "unknown"
+    }
+  },
+  "affected_platforms": [
+    "2"
+  ],
+  "previous_platform": null,
+  "new_platform": null
+}

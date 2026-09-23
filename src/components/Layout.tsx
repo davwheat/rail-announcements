@@ -3,12 +3,36 @@ import React from 'react'
 import SEO from './SEO'
 import Crunker from '../helpers/crunker'
 
+import { useAtom } from 'jotai'
 import { SnackbarProvider } from 'notistack'
+
+import { serviceAudioState } from '../atoms'
+import { ANNOUNCEMENT_SERVICE_AVAILABLE } from '../live/announcementService'
+import NoSSR from './NoSSR'
 
 interface Props {
   description?: string
   title?: string
   children: React.ReactNode
+}
+
+/** Rendered only in the browser: the setting lives in local storage, which the server cannot see. */
+const ServiceAudioToggle: React.FC = () => {
+  const [serviceAudio, setServiceAudio] = useAtom(serviceAudioState)
+
+  return (
+    <p>
+      <label htmlFor="service-audio">
+        <input type="checkbox" id="service-audio" checked={serviceAudio} onChange={event => setServiceAudio(event.target.checked)} /> Build
+        announcement audio on our server (beta)
+      </label>
+      <br />
+      <small>
+        Announcements are put together by our server and sent to you as one piece of audio, where it knows how. Everything else is still built in
+        your browser.
+      </small>
+    </p>
+  )
 }
 
 const NoWebAudioBanner: React.FC = () => {
@@ -74,6 +98,11 @@ const Layout: React.FC<Props> = ({ children, title, description }) => {
           },
         }}
       >
+        {ANNOUNCEMENT_SERVICE_AVAILABLE && (
+          <NoSSR>
+            <ServiceAudioToggle />
+          </NoSSR>
+        )}
         <p>
           Made with love by{' '}
           <a href="https://davwheat.dev/" target="_blank">

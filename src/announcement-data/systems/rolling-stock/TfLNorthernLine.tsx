@@ -8,7 +8,7 @@ interface IDestination {
   viaCharingCross?: boolean
 }
 
-const ThisStationData: ThisStationItem[] = [
+export const ThisStationData: ThisStationItem[] = [
   {
     station: 'Angel',
     branch: null,
@@ -480,7 +480,7 @@ interface NextStationItem {
   onlyTerminates?: boolean
 }
 
-const NextStationData: NextStationItem[] = [
+export const NextStationData: NextStationItem[] = [
   { label: 'Angel' },
   {
     label: 'Archway',

@@ -3,6 +3,7 @@ import DelayCodeMapping from './DarwinDelayCodes_Female1.json'
 import NamedServices from './named-services.json'
 
 import type { CustomAnnouncementButton } from '@announcement-data/AnnouncementSystem'
+import type { HelpPointVoice } from '../../../live/announcementService'
 
 type Writeable<T> = { -readonly [P in keyof T]: T[P] }
 
@@ -24,6 +25,7 @@ export default class AmeyCelia extends AmeyPhil {
     platform: 's.platform-2',
     platformZeroM: 'm.0',
     platformZeroE: 'e.0',
+    letteredPlatformsWithForThe: [] as string[],
   }
 
   protected readonly callingPointsOptions = {
@@ -45,6 +47,10 @@ export default class AmeyCelia extends AmeyPhil {
 
   get DEFAULT_CHIME(): ChimeType {
     return 'three'
+  }
+
+  protected get HELP_POINT_VOICE(): HelpPointVoice {
+    return 'celia'
   }
 
   get PLATFORMS() {
@@ -101,7 +107,6 @@ export default class AmeyCelia extends AmeyPhil {
         'First Great Western Merchant Venturer',
         'First Great Western Motorail',
         'First Great Western Night Riviera',
-        'First Great Western Pembroke Coast Express',
         'First Great Western Red Dragon',
         'First Great Western Royal Duchy',
         'First Great Western Royal Wessex',
@@ -120,7 +125,6 @@ export default class AmeyCelia extends AmeyPhil {
         'Great Western',
         'Great Western Railway',
         'Greater Anglia',
-        'Heathrow Express',
         'Holidaymaker',
         'Holidaymaker Express',
         'Hull Trains',
@@ -132,7 +136,6 @@ export default class AmeyCelia extends AmeyPhil {
         'London Overground',
         'London Transport Buses',
         'London Underground',
-        'Midland Mainline',
         'Midland Mainline High Speed Train',
         'Midland Mainline Turbostar',
         'Mystery Excursion',
@@ -149,13 +152,11 @@ export default class AmeyCelia extends AmeyPhil {
         'Orient Express',
         'private charter train',
         'race special',
-        'racecourse special',
         'ramblers special',
         'relief',
         'return charter train',
         'rugby special',
         'ScotRail',
-        'ScotRail Railways',
         'Silverlink County',
         'Silverlink Metro',
         'South Central',
@@ -176,7 +177,6 @@ export default class AmeyCelia extends AmeyPhil {
         'Thameslink',
         'Thameslink City Flier',
         'Thameslink City Metro',
-        'The Mid Hants Steam Railway',
         // 'The Swanage Railway',
         'The Yorkshire Pullman',
         'Tramlink',
@@ -194,13 +194,11 @@ export default class AmeyCelia extends AmeyPhil {
         'Virgin Trains Dorset Scot',
         'Virgin Trains Midland Scot',
         'Virgin Trains Pines Express',
-        'Virgin Trains Sussex Scot',
         'Virgin Trains Wessex Scot',
         'Virgin Voyager',
         // https://en.wikipedia.org/wiki/Venice-Simplon_Orient_Express
         'VSOE Pullman',
         'WAGN',
-        'Wales and Borders',
         'Wales and West',
         'Wales and West Alphaline',
         'Wales and West Weymouth Sand and Cycle Explorer',
@@ -225,7 +223,9 @@ export default class AmeyCelia extends AmeyPhil {
         'Cardiff Railways',
         'Channel Tunnel Rail Link',
         'Chiltern Railway Company',
+        'Croydon Tramlink',
         'Eurostar',
+        'First Great Western Pembroke Coast Express',
         'Govia',
         'Great North Eastern Railway',
         'Great Western Railway Atlantic Coast Express',
@@ -235,7 +235,6 @@ export default class AmeyCelia extends AmeyPhil {
         'Great Western Railway Cheltenham Spa Express',
         'Great Western Railway Cornish Riviera',
         'Great Western Railway Devon Belle',
-        'Great Western Railway Devon Express',
         'Great Western Railway Golden Hind',
         'Great Western Railway Hibernian',
         'Great Western Railway High Speed',
@@ -249,16 +248,22 @@ export default class AmeyCelia extends AmeyPhil {
         'Great Western Railway Royal Wessex',
         'Great Western Railway St David',
         'Great Western Railway Torbay Express',
+        'Heathrow Express',
         'Island Line',
         'LTS Rail',
         'Merseyside Electrics',
+        'Midland Mainline',
         'Network Southeast',
         'North London Railways',
+        'racecourse special',
+        'ScotRail Railways',
         'South Central Trains',
         'steam special',
         'Transport for Wales',
-        'Wessex',
+        'Virgin Trains Sussex Scot',
         'Virgin Trains the Sussex Scot',
+        'Wales and Borders',
+        'Wessex',
         'West Anglia Great Northern Railway',
         'West Coast Railway Company',
       ],
@@ -285,7 +290,7 @@ export default class AmeyCelia extends AmeyPhil {
       'a fallen tree on the line',
       'a fatality',
       'a fault on a level crossing',
-      'a fault on a preceding that has now been rectified',
+      'a fault on a preceding train that has now been rectified',
       'a fault on a preceding train',
       'a fault on the train',
       'a fault on the train that has now been rectified',
@@ -424,7 +429,7 @@ export default class AmeyCelia extends AmeyPhil {
       'no driver available',
       'objects being thrown onto the line',
       'objects on the line',
-      'on the preceding train',
+      // 'on the preceding train',
       'operational problems',
       'overcrowding',
       'overcrowding caused by the',
@@ -3308,6 +3313,8 @@ export default class AmeyCelia extends AmeyPhil {
   protected readonly splitOptions = {
     travelInCorrectPartId: ['s.please make sure you travel', 'e.in the correct part of this train'],
     travelInAnyPartIds: ['e.may travel in any part of the train-2'],
+    // Celia has no "will be detached and will terminate at".
+    detachesAndTerminatesIds: null,
   }
 
   protected readonly disruptionOptions = {

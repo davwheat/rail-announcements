@@ -26,6 +26,7 @@ export interface Endpoint extends Location {
   via: { text: string; locs: string[] } | null
   assoc_rid: string | null
   assoc_cat: string | null
+  planned_departure?: Instant
 }
 export interface Call extends Location {
   id: string

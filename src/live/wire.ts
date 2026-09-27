@@ -106,6 +106,7 @@ function endpoint(value: pb.Endpoint): Endpoint {
     via: value.via ? { text: value.via.text, locs: value.via.locs } : null,
     assoc_rid: value.assocRid ?? null,
     assoc_cat: value.assocCat ?? null,
+    ...(value.plannedDeparture ? { planned_departure: instant(value.plannedDeparture) } : {}),
   }
 }
 

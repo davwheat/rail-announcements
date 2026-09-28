@@ -4147,7 +4147,7 @@ __metadata:
     react-select: "npm:^5.10.2"
     sass: "npm:^1.104.1"
     typescript: "npm:^7.0.2"
-    uk-railway-stations: "npm:^1.11.1"
+    uk-railway-stations: "npm:^1.12.0"
     use-html-dialog: "npm:^0.2.1"
     uuid: "npm:^14.0.2"
     wrangler: "npm:^4.132.0"
@@ -5006,10 +5006,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"uk-railway-stations@npm:^1.11.1":
-  version: 1.11.1
-  resolution: "uk-railway-stations@npm:1.11.1"
-  checksum: 10/4701d9ecc58c11c646914394b6db7e961dd81f01a418cc137961192c6778a2c4dc1bbc56538179a9b990807abf8a22f56701d65053a6de4361a0c6d45f329ca1
+"uk-railway-stations@npm:^1.12.0":
+  version: 1.12.0
+  resolution: "uk-railway-stations@npm:1.12.0"
+  checksum: 10/027919da4fc6d05fc4e115c2ae52eed889f594a5d1531ed9501cf842e09f6c2f67d12dadc7153c80012463608be7f4969903a97fc81bb860b88b74f4cccc4491
   languageName: node
   linkType: hard
 

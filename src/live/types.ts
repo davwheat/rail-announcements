@@ -54,6 +54,10 @@ export interface Portion {
   available: boolean
   coach_count: number | null
   position: string | null
+  /**
+   * The associated service's calling points, sent only for a dividing portion (`VV`) and for a rail
+   * replacement bus continuation (`NP` or `LK` with mode `bus`). Empty for every other portion.
+   */
   calls: Call[]
 }
 export interface Coach {

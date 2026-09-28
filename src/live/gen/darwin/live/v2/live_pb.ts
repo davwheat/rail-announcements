@@ -1072,6 +1072,11 @@ export type Portion = Message<"darwin.live.v2.Portion"> & {
   position?: string | undefined;
 
   /**
+   * The associated service's calling points, carried only for a dividing
+   * portion (category VV) and for a rail replacement bus continuation
+   * (category NP or LK with mode BUS). Every other portion has none: a joining
+   * portion or next working is shown by its other fields.
+   *
    * @generated from field: repeated darwin.live.v2.Call calls = 14;
    */
   calls: Call[];

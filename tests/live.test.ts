@@ -260,10 +260,24 @@ test('a false destination is the station every announcement names', async () => 
   assert.equal(trainOptions(message.details, voice, preferences, '2').terminatingStationCode, 'FLS')
   await playAnnouncement(message, system, preferences, '2')
   assert.deepEqual(spoken[0].terminatingStationCode, ['FLS'])
-  // The real destination still supplies the via points; only the station named is false.
+  // The feed's via points lie on the route to the real destination, so none are announced.
   assert.deepEqual(
     spoken[0].vias.map(vias => vias.map(point => point.crsCode)),
-    [['JNC']],
+    [[]],
+  )
+  assert.deepEqual(trainOptions(message.details, voice, preferences, '2').vias, [])
+})
+
+test('calling points end at the first call at a false destination on a circular route', () => {
+  const movement = snapshot().movements[0]
+  const [junction, destination] = movement.calling_points
+  const midway = { ...junction, id: 'midway', tpl: 'MIDWAY', crs: 'MID', name: 'Midway' }
+  // The train calls at the false destination twice on its way to the real one.
+  movement.calling_points = [midway, junction, destination, { ...junction, id: 'again' }]
+  movement.false_destination = { tpl: junction.tpl, crs: junction.crs, name: junction.name }
+  assert.deepEqual(
+    callingPoints(movement, voice).map(point => point.crsCode),
+    ['MID'],
   )
 })
 

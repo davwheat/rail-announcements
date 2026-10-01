@@ -71,9 +71,8 @@ function runningPortions(movement: Movement, endpoints: Endpoint[]): Endpoint[] 
 /** The station this train is announced to, which is a false destination wherever it has one. */
 function announcedDestination(movement: Movement): Endpoint {
   const own = ownDestination(movement)
-  // A false destination stands in for the station the train is announced to, and not for the via
-  // points its real destination supplies.
-  return movement.false_destination ? { ...own, ...movement.false_destination } : own
+  // The feed's via points lie on the route to the real destination, so a false destination has none.
+  return movement.false_destination ? { ...own, ...movement.false_destination, via: null } : own
 }
 
 /** Every station this train is announced to: its own first, then the portions that divide off it. */
@@ -112,7 +111,11 @@ export function callingPoints(movement: Movement, system: AmeyPhil): CallingAtPo
   const destination = announcedDestination(movement)
   // The endpoint and the call can name one station by different TIPLOCs.
   const terminus = (call: Call) => call.tpl === destination?.tpl || (!!destination?.crs && call.crs === destination.crs)
-  const destinationIndex = movement.calling_points.reduce((last, call, index) => (terminus(call) ? index : last), -1)
+  // A train on a circular route calls at a false destination again on its way to the real one, so
+  // the calling points end at the first call there. The real destination is the last call at it.
+  const destinationIndex = movement.false_destination
+    ? movement.calling_points.findIndex(terminus)
+    : movement.calling_points.reduce((last, call, index) => (terminus(call) ? index : last), -1)
   for (const [index, call] of movement.calling_points.entries()) {
     if (hasActivity(call.activities, 'RM')) reversed = !reversed
     const terminates = index === destinationIndex

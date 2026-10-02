@@ -1,0 +1,413 @@
+{
+  "version": 2,
+  "type": "snapshot",
+  "station": {
+    "tpl": "WNCHSTR",
+    "crs": "WIN",
+    "name": "Winchester"
+  },
+  "window": {
+    "from": "2026-09-29T20:30:00Z",
+    "to": "2026-09-29T22:30:00Z"
+  },
+  "epoch": "fixture-epoch",
+  "revision": 1,
+  "movements": [
+    {
+      "id": "202609297680557/wnchstr",
+      "rid": "202609297680557",
+      "location_id": "wnchstr",
+      "station": {
+        "tpl": "WNCHSTR",
+        "crs": "WIN",
+        "name": "Winchester"
+      },
+      "kind": "stop",
+      "uid": "L80557",
+      "headcode": "2B77",
+      "operator_code": "SW",
+      "operator_name": "South Western Railway",
+      "mode": "train",
+      "passenger": true,
+      "operational": false,
+      "arrival": {
+        "planned": "2026-09-29T20:58:00Z",
+        "estimated": null,
+        "actual": null,
+        "unknown_delay": false
+      },
+      "departure": {
+        "planned": "2026-09-29T20:59:00Z",
+        "estimated": "2026-09-29T20:59:00Z",
+        "actual": null,
+        "unknown_delay": false
+      },
+      "passing": {
+        "planned": null,
+        "estimated": null,
+        "actual": null,
+        "unknown_delay": false
+      },
+      "platform": {
+        "number": "2",
+        "confirmed": true,
+        "suppressed": false,
+        "source": "CIS"
+      },
+      "suppressed": false,
+      "cancelled": false,
+      "cancel_reason": {
+        "code": null,
+        "text": null
+      },
+      "delay_reason": {
+        "code": null,
+        "text": null
+      },
+      "coach_count": 10,
+      "loading_percent": null,
+      "loading_category": null,
+      "formation": null,
+      "coach_loading": null,
+      "coaches": null,
+      "reverse_formation": null,
+      "detach_front": null,
+      "activities": null,
+      "false_destination": null,
+      "origins": [
+        {
+          "tpl": "WATRLMN",
+          "crs": "WAT",
+          "name": "London Waterloo",
+          "via": null,
+          "assoc_rid": null,
+          "assoc_cat": null,
+          "planned_departure": "2026-09-29T19:35:00Z"
+        }
+      ],
+      "destinations": [
+        {
+          "tpl": "SOTON",
+          "crs": "SOU",
+          "name": "Southampton Central",
+          "via": null,
+          "assoc_rid": null,
+          "assoc_cat": null
+        }
+      ],
+      "calling_points": [
+        {
+          "id": "elgh",
+          "tpl": "ELGH",
+          "crs": "ESL",
+          "name": "Eastleigh",
+          "arrival": {
+            "planned": "2026-09-29T21:08:00Z",
+            "estimated": null,
+            "actual": null,
+            "unknown_delay": false
+          },
+          "departure": {
+            "planned": "2026-09-29T21:09:00Z",
+            "estimated": null,
+            "actual": null,
+            "unknown_delay": false
+          },
+          "platform": {
+            "number": "2",
+            "confirmed": null,
+            "suppressed": null,
+            "source": null
+          },
+          "cancelled": false,
+          "activities": null,
+          "operational": false,
+          "detach_front": null,
+          "false_destination": null,
+          "coach_count": null
+        },
+        {
+          "id": "soton",
+          "tpl": "SOTON",
+          "crs": "SOU",
+          "name": "Southampton Central",
+          "arrival": {
+            "planned": "2026-09-29T21:25:00Z",
+            "estimated": null,
+            "actual": null,
+            "unknown_delay": false
+          },
+          "departure": {
+            "planned": null,
+            "estimated": null,
+            "actual": null,
+            "unknown_delay": false
+          },
+          "platform": {
+            "number": "4",
+            "confirmed": null,
+            "suppressed": null,
+            "source": null
+          },
+          "cancelled": false,
+          "activities": null,
+          "operational": false,
+          "detach_front": null,
+          "false_destination": null,
+          "coach_count": null
+        }
+      ],
+      "portions": [
+        {
+          "headcode": "0B00",
+          "mode": "bus",
+          "operator_code": "SW",
+          "operator_name": "South Western Railway",
+          "origin": {
+            "tpl": "SOTON",
+            "crs": "SOU",
+            "name": "Southampton Central"
+          },
+          "destination": {
+            "tpl": "BOMO",
+            "crs": "BMH",
+            "name": "Bournemouth"
+          },
+          "rid": "202609298105041",
+          "category": "LK",
+          "at": {
+            "tpl": "SOTON",
+            "crs": "SOU",
+            "name": "Southampton Central"
+          },
+          "cancelled": false,
+          "available": true,
+          "coach_count": null,
+          "position": null,
+          "calls": [
+            {
+              "id": "soton",
+              "tpl": "SOTON",
+              "crs": "SOU",
+              "name": "Southampton Central",
+              "arrival": {
+                "planned": null,
+                "estimated": null,
+                "actual": null,
+                "unknown_delay": false
+              },
+              "departure": {
+                "planned": "2026-09-29T21:35:00Z",
+                "estimated": null,
+                "actual": null,
+                "unknown_delay": false
+              },
+              "platform": {
+                "number": null,
+                "confirmed": null,
+                "suppressed": null,
+                "source": null
+              },
+              "cancelled": false,
+              "activities": null,
+              "operational": false,
+              "detach_front": null,
+              "false_destination": null,
+              "coach_count": null
+            },
+            {
+              "id": "bknhrst",
+              "tpl": "BKNHRST",
+              "crs": "BCU",
+              "name": "Brockenhurst",
+              "arrival": {
+                "planned": "2026-09-29T22:05:00Z",
+                "estimated": null,
+                "actual": null,
+                "unknown_delay": false
+              },
+              "departure": {
+                "planned": "2026-09-29T22:06:00Z",
+                "estimated": null,
+                "actual": null,
+                "unknown_delay": false
+              },
+              "platform": {
+                "number": null,
+                "confirmed": null,
+                "suppressed": null,
+                "source": null
+              },
+              "cancelled": false,
+              "activities": null,
+              "operational": false,
+              "detach_front": null,
+              "false_destination": null,
+              "coach_count": null
+            },
+            {
+              "id": "bomo",
+              "tpl": "BOMO",
+              "crs": "BMH",
+              "name": "Bournemouth",
+              "arrival": {
+                "planned": "2026-09-29T22:45:00Z",
+                "estimated": null,
+                "actual": null,
+                "unknown_delay": false
+              },
+              "departure": {
+                "planned": null,
+                "estimated": null,
+                "actual": null,
+                "unknown_delay": false
+              },
+              "platform": {
+                "number": null,
+                "confirmed": null,
+                "suppressed": null,
+                "source": null
+              },
+              "cancelled": false,
+              "activities": null,
+              "operational": false,
+              "detach_front": null,
+              "false_destination": null,
+              "coach_count": null
+            }
+          ],
+          "main": true,
+          "links": [
+            {
+              "headcode": "1W99",
+              "mode": null,
+              "operator_code": "SW",
+              "operator_name": "South Western Railway",
+              "origin": {
+                "tpl": "BOMO",
+                "crs": "BMH",
+                "name": "Bournemouth"
+              },
+              "destination": {
+                "tpl": "WEYMTH",
+                "crs": "WEY",
+                "name": "Weymouth"
+              },
+              "rid": "202609297681204",
+              "category": "LK",
+              "at": {
+                "tpl": "BOMO",
+                "crs": "BMH",
+                "name": "Bournemouth"
+              },
+              "cancelled": false,
+              "available": true,
+              "coach_count": null,
+              "position": null,
+              "calls": [
+                {
+                  "id": "bomo",
+                  "tpl": "BOMO",
+                  "crs": "BMH",
+                  "name": "Bournemouth",
+                  "arrival": {
+                    "planned": null,
+                    "estimated": null,
+                    "actual": null,
+                    "unknown_delay": false
+                  },
+                  "departure": {
+                    "planned": "2026-09-29T22:55:00Z",
+                    "estimated": null,
+                    "actual": null,
+                    "unknown_delay": false
+                  },
+                  "platform": {
+                    "number": "3",
+                    "confirmed": null,
+                    "suppressed": null,
+                    "source": null
+                  },
+                  "cancelled": false,
+                  "activities": null,
+                  "operational": false,
+                  "detach_front": null,
+                  "false_destination": null,
+                  "coach_count": null
+                },
+                {
+                  "id": "poole",
+                  "tpl": "POOLE",
+                  "crs": "POO",
+                  "name": "Poole",
+                  "arrival": {
+                    "planned": "2026-09-29T23:06:00Z",
+                    "estimated": null,
+                    "actual": null,
+                    "unknown_delay": false
+                  },
+                  "departure": {
+                    "planned": "2026-09-29T23:07:00Z",
+                    "estimated": null,
+                    "actual": null,
+                    "unknown_delay": false
+                  },
+                  "platform": {
+                    "number": null,
+                    "confirmed": null,
+                    "suppressed": null,
+                    "source": null
+                  },
+                  "cancelled": false,
+                  "activities": null,
+                  "operational": false,
+                  "detach_front": null,
+                  "false_destination": null,
+                  "coach_count": null
+                },
+                {
+                  "id": "weymth",
+                  "tpl": "WEYMTH",
+                  "crs": "WEY",
+                  "name": "Weymouth",
+                  "arrival": {
+                    "planned": "2026-09-29T23:48:00Z",
+                    "estimated": null,
+                    "actual": null,
+                    "unknown_delay": false
+                  },
+                  "departure": {
+                    "planned": null,
+                    "estimated": null,
+                    "actual": null,
+                    "unknown_delay": false
+                  },
+                  "platform": {
+                    "number": null,
+                    "confirmed": null,
+                    "suppressed": null,
+                    "source": null
+                  },
+                  "cancelled": false,
+                  "activities": null,
+                  "operational": false,
+                  "detach_front": null,
+                  "false_destination": null,
+                  "coach_count": null
+                }
+              ],
+              "main": true,
+              "links": []
+            }
+          ]
+        }
+      ],
+      "arrived_at": null,
+      "passed_at": null
+    }
+  ],
+  "ordering": [
+    "202609297680557/wnchstr"
+  ],
+  "overrides": []
+}

@@ -38,7 +38,8 @@ function applyDivisions(point: CallingAtPointWithRttDetail, loc: RttLocation): v
 
   const div = loc.divisions[0]
   point.splitType = div.callingPoints.length > 0 ? 'splits' : 'splitTerminates'
-  point.splitForm = `${div.position}.${div.vehicleCount ?? 1}`
+  // Without a length, the voice names only the end of the train that the portion is at.
+  point.splitForm = div.vehicleCount ? `${div.position}.${div.vehicleCount}` : div.position
   point.splitCallingPoints = div.callingPoints.filter(cp => cp.crs).map(cp => stationItemCompleter(cp.crs!))
   point.divisionInfo = divisionInfoString(loc)
 }

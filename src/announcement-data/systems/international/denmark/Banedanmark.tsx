@@ -24,15 +24,15 @@ import Destinations from './banedanmarkDestinations.json'
  */
 
 /** Delay (ms) inserted before each section for natural pacing. */
-const SECTION_DELAY = 225
+export const SECTION_DELAY = 225
 /** Gap (ms) after the spoken train time, before the track (or the destination, in English). */
-const AFTER_TIME_DELAY = 200
+export const AFTER_TIME_DELAY = 200
 /** Smaller gap (ms) before the closing clip that follows the track (e.g. the countdown). */
-const AFTER_TRACK_DELAY = 120
+export const AFTER_TRACK_DELAY = 120
 /** Delay (ms) before switching from the Danish half to the English half. */
-const LANGUAGE_DELAY = 1_000
+export const LANGUAGE_DELAY = 1_000
 /** Small gap (ms) between destinations when more than one is listed. */
-const BETWEEN_DESTINATION_DELAY = 100
+export const BETWEEN_DESTINATION_DELAY = 100
 
 /** Platforms ("spor"/"track") that have recorded audio, in display order. */
 const TRACKS: string[] = [...Array.from({ length: 27 }, (_, i) => `${i}`), '1a', '1b', '1c', '2a', '2b', '2c', '3a', '3b', '3c'].sort((a, b) =>
@@ -49,7 +49,7 @@ interface ICountdownOption {
 }
 
 /** "Om ca. X minutter" / "in approx. X min" countdown options. */
-const COUNTDOWNS: ICountdownOption[] = [
+export const COUNTDOWNS: ICountdownOption[] = [
   { value: 'moment', title: 'Om et øjeblik / In a moment', da: 'oejeblik', en: 'amoment' },
   { value: 'few', title: 'Om få minutter / In a few minutes', da: 'faaminutter', en: 'fewminutes' },
   ...[
@@ -86,7 +86,7 @@ interface IDisruptionOption {
 }
 
 /** Disruption clips played in place of the countdown. */
-const DISRUPTIONS: IDisruptionOption[] = [
+export const DISRUPTIONS: IDisruptionOption[] = [
   { value: 'awaitstime', title: 'Afventer tid / Awaiting a departure time', da: 'awaitstime', en: 'awaitstime' },
   { value: 'cancelled', title: 'Er desværre aflyst / Has been cancelled', da: 'canceled', en: 'canceled' },
 ]
@@ -113,7 +113,7 @@ interface IDisruptionOptions extends IBaseAnnouncementOptions {
 
 const MAX_DESTINATIONS = 3
 /** Track value meaning "platform not yet known" — plays the bare "kører"/"departs" clip. */
-const UNKNOWN_TRACK = 'unknown'
+export const UNKNOWN_TRACK = 'unknown'
 
 const HOURS: string[] = Array.from({ length: 24 }, (_, i) => `${i}`)
 const MINUTES: string[] = Array.from({ length: 60 }, (_, i) => `${i}`.padStart(2, '0'))

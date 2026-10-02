@@ -52,7 +52,7 @@ interface StationInfo {
   exitFor: ExitForOption[]
 }
 
-const AllStationFiles = {
+export const AllStationFiles = {
   b: [
     'ABW',
     'AML',
@@ -619,7 +619,7 @@ function createNormalStation(
   }
 }
 
-const AllStations: StationInfo[] = [
+export const AllStations: StationInfo[] = [
   createNormalStation('ABW', ['National Rail services']),
   createNormalStation('ACC'),
   createNormalStation('AHD'),

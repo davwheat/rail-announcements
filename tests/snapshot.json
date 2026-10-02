@@ -1,0 +1,169 @@
+{
+  "version": 2,
+  "type": "snapshot",
+  "station": {
+    "tpl": "TEST",
+    "crs": "TST",
+    "name": "Example station"
+  },
+  "window": {
+    "from": "2026-09-13T10:00:00Z",
+    "to": "2026-09-13T12:00:00Z"
+  },
+  "epoch": "fixture-epoch",
+  "revision": 1,
+  "movements": [
+    {
+      "id": "R1/first",
+      "rid": "R1",
+      "location_id": "first",
+      "station": {
+        "tpl": "TEST",
+        "crs": "TST",
+        "name": "Example station"
+      },
+      "kind": "stop",
+      "uid": "C12345",
+      "headcode": "5A01",
+      "operator_code": "GW",
+      "operator_name": "Great Western Railway",
+      "mode": "train",
+      "passenger": true,
+      "operational": false,
+      "arrival": {
+        "planned": null,
+        "estimated": null,
+        "actual": null,
+        "unknown_delay": false
+      },
+      "departure": {
+        "planned": "2026-09-13T10:05:00Z",
+        "estimated": "2026-09-13T10:10:00Z",
+        "actual": null,
+        "unknown_delay": false
+      },
+      "passing": {
+        "planned": "2026-09-13T10:03:00Z",
+        "estimated": null,
+        "actual": null,
+        "unknown_delay": false
+      },
+      "platform": {
+        "number": "2",
+        "confirmed": true,
+        "suppressed": false,
+        "source": "CIS"
+      },
+      "suppressed": false,
+      "cancelled": false,
+      "cancel_reason": {
+        "code": null,
+        "text": null
+      },
+      "delay_reason": {
+        "code": null,
+        "text": null
+      },
+      "coach_count": 8,
+      "loading_percent": 80,
+      "loading_category": null,
+      "formation": null,
+      "coach_loading": null,
+      "coaches": null,
+      "reverse_formation": null,
+      "detach_front": null,
+      "activities": null,
+      "false_destination": null,
+      "origins": [
+        {
+          "tpl": "START",
+          "crs": "ORG",
+          "name": "Origin from feed",
+          "via": null,
+          "assoc_rid": null,
+          "assoc_cat": null
+        }
+      ],
+      "destinations": [
+        {
+          "tpl": "DEST",
+          "crs": "DST",
+          "name": "Destination from feed",
+          "via": {
+            "text": "via Junction",
+            "locs": ["JNC"]
+          },
+          "assoc_rid": null,
+          "assoc_cat": null
+        }
+      ],
+      "calling_points": [
+        {
+          "id": "junction",
+          "tpl": "JUNCTION",
+          "crs": "JNC",
+          "name": "Junction from feed",
+          "arrival": {
+            "planned": null,
+            "estimated": null,
+            "actual": null,
+            "unknown_delay": false
+          },
+          "departure": {
+            "planned": "2026-09-13T10:05:00Z",
+            "estimated": "2026-09-13T10:10:00Z",
+            "actual": null,
+            "unknown_delay": false
+          },
+          "platform": {
+            "number": "2",
+            "confirmed": true,
+            "suppressed": false,
+            "source": "CIS"
+          },
+          "cancelled": false,
+          "activities": "R",
+          "operational": false,
+          "detach_front": false,
+          "false_destination": null,
+          "coach_count": 8
+        },
+        {
+          "id": "destination",
+          "tpl": "DEST",
+          "crs": "DST",
+          "name": "Destination from feed",
+          "arrival": {
+            "planned": null,
+            "estimated": null,
+            "actual": null,
+            "unknown_delay": false
+          },
+          "departure": {
+            "planned": "2026-09-13T10:05:00Z",
+            "estimated": "2026-09-13T10:10:00Z",
+            "actual": null,
+            "unknown_delay": false
+          },
+          "platform": {
+            "number": "2",
+            "confirmed": true,
+            "suppressed": false,
+            "source": "CIS"
+          },
+          "cancelled": false,
+          "activities": "R",
+          "operational": false,
+          "detach_front": false,
+          "false_destination": null,
+          "coach_count": 8
+        }
+      ],
+      "portions": [],
+      "arrived_at": null,
+      "passed_at": null
+    }
+  ],
+  "ordering": ["R1/first"],
+  "overrides": []
+}

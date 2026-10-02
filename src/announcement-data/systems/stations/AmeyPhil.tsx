@@ -3916,6 +3916,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       { value: 'rear.10', title: 'Rear 10 coaches' },
       { value: 'rear.11', title: 'Rear 11 coaches' },
       { value: 'rear.12', title: 'Rear 12 coaches' },
+      { value: 'front', title: 'Front coaches (length unknown)' },
+      { value: 'rear', title: 'Rear coaches (length unknown)' },
     ]
   }
 
@@ -4115,11 +4117,11 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     const dividesAt = callingPoints.find(s => s.splitType === 'splitTerminates' || s.splitType === 'splits')
 
     if (dividesAt && (dividesAt.splitCallingPoints?.length ?? 0) > 0) {
+      const lastStop = (points: CallingAtPoint[]) => points[points.length - 1].crsCode
       const allDestinations = [
         terminatingStation,
-        dividesAt.splitType === 'splitTerminates'
-          ? dividesAt.crsCode
-          : dividesAt.splitCallingPoints!![dividesAt.splitCallingPoints!!.length - 1].crsCode,
+        dividesAt.splitType === 'splitTerminates' ? dividesAt.crsCode : lastStop(dividesAt.splitCallingPoints!!),
+        ...(dividesAt.furtherSplits ?? []).filter(split => split.splitCallingPoints.length).map(split => lastStop(split.splitCallingPoints)),
       ]
 
       files.push(
@@ -4237,7 +4239,10 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     const unknownPositionSnippet = this.shortPlatformOptions.unknownLocation
 
     const splitData = this.getSplitInfo(callingPoints, terminatingStation, overallLength)
-    const allStops = splitData.stopsUpToSplit.concat(splitData.splitA?.stops ?? []).concat(splitData.splitB?.stops ?? [])
+    const allStops = splitData.stopsUpToSplit
+      .concat(splitData.splitA?.stops ?? [])
+      .concat(splitData.splitB?.stops ?? [])
+      .concat(splitData.further.flatMap(portion => portion.stops))
 
     function shortDataToAudio(shortData: string, stopData: SplitInfoStop['portion']): AudioItem[] {
       const files: AudioItem[] = []
@@ -4255,7 +4260,8 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           }
         }
       } else if (announceAfterSplit) {
-        if (pos === 'unknown') {
+        // The coaches to join can't be placed within a portion whose own place in the train isn't known.
+        if (pos === 'unknown' || stopData.position === 'unknown') {
           files.push(unknownPositionSnippet)
         } else if (stopData.position === pos) {
           if (len === 1) {
@@ -4363,7 +4369,10 @@ export default class AmeyPhil extends StationAnnouncementSystem {
     const files: AudioItem[] = []
 
     const splitData = this.getSplitInfo(callingPoints, terminatingStation, overallLength)
-    const allStops = splitData.stopsUpToSplit.concat(splitData.splitA?.stops ?? []).concat(splitData.splitB?.stops ?? [])
+    const allStops = splitData.stopsUpToSplit
+      .concat(splitData.splitA?.stops ?? [])
+      .concat(splitData.splitB?.stops ?? [])
+      .concat(splitData.further.flatMap(portion => portion.stops))
 
     const reqStops = new Set(allStops.filter(s => s.requestStop).map(s => s.crsCode))
     if (reqStops.size === 0) return []
@@ -4419,6 +4428,12 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       position: 'front' | 'middle' | 'rear' | 'unknown'
       length: number | null
     } | null
+    /** The portions that divide off beyond the first, which only the live feed describes. */
+    further: {
+      stops: SplitInfoStop[]
+      position: 'front' | 'middle' | 'rear' | 'unknown'
+      length: number | null
+    }[]
   } {
     // If there are no splits, return an empty array
     if (callingPoints.every(p => p.splitType === 'none' || p.splitType === undefined)) {
@@ -4432,6 +4447,7 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         })),
         splitA: null,
         splitB: null,
+        further: [],
       }
     }
 
@@ -4463,14 +4479,20 @@ export default class AmeyPhil extends StationAnnouncementSystem {
       }),
     )
 
-    const [bPos, bCount] = (dividePoint!!.splitForm || 'front.1').split('.').map((x, i) => (i === 1 ? parseInt(x) : x)) as [
-      'front' | 'middle' | 'rear' | 'unknown',
-      number,
-    ]
-    const aPos = bPos === 'front' ? 'rear' : 'front'
-    const aCount = !overallLength ? null : Math.min(Math.max(1, overallLength - bCount), 12)
+    const readForm = (form: string) =>
+      form.split('.').map((x, i) => (i === 1 ? parseInt(x) : x)) as ['front' | 'middle' | 'rear' | 'unknown', number]
+    const [bPos, bCount] = readForm(dividePoint!!.splitForm || 'front.1')
+    const furtherSplits = (dividePoint!!.furtherSplits ?? []).map(split => {
+      const [position, count] = readForm(split.splitForm)
+      return { position, count, points: split.splitCallingPoints }
+    })
+    // The rest of the train is at an end that no portion dividing off is at, wherever those are known to be.
+    const taken = [bPos, ...furtherSplits.map(split => split.position)]
+    const aPos = taken.includes('unknown') ? 'unknown' : !taken.includes('front') ? 'front' : !taken.includes('rear') ? 'rear' : 'middle'
+    const dividingCount = furtherSplits.reduce((sum, split) => sum + split.count, bCount)
+    const aCount = !overallLength ? null : Math.min(Math.max(1, overallLength - dividingCount), 12)
 
-    const missingLengthData = !overallLength || !bCount || !aCount
+    const missingLengthData = !overallLength || !dividingCount || !aCount || furtherSplits.some(split => !split.count)
 
     console.log({ missingLengthData, overallLength, bPos, bCount, aPos, aCount })
 
@@ -4506,7 +4528,23 @@ export default class AmeyPhil extends StationAnnouncementSystem {
           position: aPos,
           length: null,
         },
+        further: furtherSplits.map(split => ({
+          stops: split.points.map(p => ({
+            crsCode: p.crsCode,
+            shortPlatform: p.shortPlatform ? 'unknown' : '',
+            requestStop: p.requestStop ?? false,
+            portion: { position: split.position, length: null },
+          })),
+          position: split.position,
+          length: split.count || null,
+        })),
       }
+    }
+
+    // A platform that is at least as long as a portion isn't a short platform for that portion.
+    const fitsPortion = (shortPlatform: string | undefined, portionLength: number) => {
+      const [shortPortion, shortLength] = (shortPlatform || '.').split('.')
+      return shortPortion && shortLength && !(parseInt(shortLength) >= portionLength) ? `${shortPortion}.${shortLength}` : ''
     }
 
     console.log('Got split formation length data :)')
@@ -4524,55 +4562,35 @@ export default class AmeyPhil extends StationAnnouncementSystem {
         stops:
           dividePoint!!.splitType === 'splitTerminates'
             ? []
-            : (dividePoint!!.splitCallingPoints ?? []).map(p => {
-                let [shortPortion, shortLength] = (p.shortPlatform || '.').split('.')
-
-                if (shortPortion && shortLength) {
-                  const shortLengthNum = parseInt(shortLength)
-                  // If the short length is greater than or equal to the length of the portion, it's not a short platform for this portion of the train
-                  if (shortLengthNum >= bCount) {
-                    shortPortion = ''
-                    shortLength = ''
-                  }
-                }
-
-                const shortPlatform = shortPortion && shortLength ? `${shortPortion}.${shortLength}` : ''
-
-                return {
-                  crsCode: p.crsCode,
-                  shortPlatform,
-                  requestStop: p.requestStop ?? false,
-                  portion: { position: bPos as 'front' | 'middle' | 'rear', length: bCount },
-                }
-              }),
+            : (dividePoint!!.splitCallingPoints ?? []).map(p => ({
+                crsCode: p.crsCode,
+                shortPlatform: fitsPortion(p.shortPlatform, bCount),
+                requestStop: p.requestStop ?? false,
+                portion: { position: bPos as 'front' | 'middle' | 'rear', length: bCount },
+              })),
         position: bPos as 'front' | 'middle' | 'rear',
         length: bCount,
       },
       splitA: {
-        stops: stopsAfterFormationChange.map(p => {
-          let [shortPortion, shortLength] = (p.shortPlatform || '.').split('.')
-
-          if (shortPortion && shortLength) {
-            const shortLengthNum = parseInt(shortLength)
-            // If the short length is greater than or equal to the length of the portion, it's not a short platform for this portion of the train
-            if (shortLengthNum >= aCount) {
-              shortPortion = ''
-              shortLength = ''
-            }
-          }
-
-          const shortPlatform = shortPortion && shortLength ? `${shortPortion}.${shortLength}` : ''
-
-          return {
-            crsCode: p.crsCode,
-            shortPlatform,
-            requestStop: p.requestStop ?? false,
-            portion: { position: aPos, length: aCount },
-          }
-        }),
+        stops: stopsAfterFormationChange.map(p => ({
+          crsCode: p.crsCode,
+          shortPlatform: fitsPortion(p.shortPlatform, aCount),
+          requestStop: p.requestStop ?? false,
+          portion: { position: aPos, length: aCount },
+        })),
         position: aPos,
         length: aCount,
       },
+      further: furtherSplits.map(split => ({
+        stops: split.points.map(p => ({
+          crsCode: p.crsCode,
+          shortPlatform: fitsPortion(p.shortPlatform, split.count),
+          requestStop: p.requestStop ?? false,
+          portion: { position: split.position, length: split.count },
+        })),
+        position: split.position,
+        length: split.count,
+      })),
     }
   }
 
@@ -4801,10 +4819,20 @@ export default class AmeyPhil extends StationAnnouncementSystem {
               : shouldTravelIn(splitData.splitB!!.length, splitData.splitB!!.position)),
           ]
 
-    if (splitData.splitA!!.position === 'front') {
-      files.push(...aFiles, ...bFiles)
-    } else {
+    if (splitData.splitA!!.position === 'rear') {
       files.push(...bFiles, ...aFiles)
+    } else {
+      files.push(...aFiles, ...bFiles)
+    }
+
+    for (const portion of splitData.further) {
+      const stops = portion.stops.map(s => s.crsCode)
+      if (stops[0] === splitPoint.crsCode) stops.shift()
+      if (stops.length === 0) continue
+      files.push(
+        ...listStops(stops),
+        ...(portion.position === 'unknown' ? [this.shortPlatformOptions.unknownLocation] : shouldTravelIn(portion.length, portion.position)),
+      )
     }
 
     switch (splitData.divideType) {

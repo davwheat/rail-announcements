@@ -39,6 +39,22 @@ export interface Call extends Location {
   detach_front: boolean | null
   false_destination: Location | null
   coach_count: number | null
+  /** The coaches that leave or join the train at this call. Absent when none do, or when nothing says. */
+  formation_change?: FormationChange
+}
+/**
+ * How a train's formation changes at a call while it stays one service: coaches left behind there, or coaches
+ * coupled on. A portion that divides off or joins as a service of its own is a `Portion` instead.
+ */
+export interface FormationChange {
+  detached: FormationPart | null
+  attached: FormationPart | null
+}
+export interface FormationPart {
+  /** How many passenger coaches, or null when unknown. */
+  coaches: number | null
+  /** The end of the train, as it arrives, that coaches which leave are at: `front` or `rear`. Null for coaches that join. */
+  position: string | null
 }
 export interface Portion {
   headcode: string | null
@@ -53,12 +69,27 @@ export interface Portion {
   cancelled: boolean
   available: boolean
   coach_count: number | null
+  /**
+   * The end of the movement's train, as it arrives at the division, that a dividing portion is at: `front` or
+   * `rear`. Null where the service can't tell.
+   */
   position: string | null
   /**
-   * The associated service's calling points, sent only for a dividing portion (`VV`) and for a rail
-   * replacement bus continuation (`NP` or `LK` with mode `bus`). Empty for every other portion.
+   * The associated service's calling points, sent only for a dividing portion (`VV`), for the train that the
+   * movement's service joins (`JJ` where `main` is false), for a link that passengers continue on (`LK`, unless
+   * `main` is false) and for a bus next working (`NP` with mode `bus`). Empty for every other portion.
    */
   calls: Call[]
+  /**
+   * Whether the service that holds this association is its main service. Passengers leave the main service of a
+   * link (`LK`) for the associated one, so true means that they continue on this portion. The main service of a
+   * join (`JJ`) is the train that is joined, and of a division (`VV`) the train that divides, so false means that
+   * the movement's service is the portion that joins or divides off. Null when Darwin hasn't said which end is
+   * which.
+   */
+  main: boolean | null
+  /** The links this portion's own service hands its passengers to, each with its own in turn. Sent only on a link. */
+  links: Portion[]
 }
 export interface Coach {
   number: string
@@ -73,6 +104,8 @@ export interface Coach {
 export interface Movement {
   /** Present when a current Darwin TrainOrder unambiguously identifies this movement. */
   train_order?: { position: number; platform: string; updated_at: Instant }
+  /** The coaches that leave or join the train at this station. */
+  formation_change?: FormationChange
   /** TD evidence is separate from Darwin forecasts. An unmatched train has rid === ''. */
   td?: TDMovement
   id: string

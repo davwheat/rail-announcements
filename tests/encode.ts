@@ -9,6 +9,7 @@ import type {
   Location,
   Movement,
   PlatformOverride,
+  Portion,
   ServerMessage,
   Times,
 } from '../src/live/types'
@@ -75,7 +76,36 @@ const call = (value: Call) => ({
   detachFront: known(value.detach_front),
   falseDestination: value.false_destination ? location(value.false_destination) : undefined,
   coachCount: known(value.coach_count),
+  formationChange: formationChange(value.formation_change),
 })
+
+const formationChange = (value: Call['formation_change']) => {
+  if (!value) return undefined
+  const part = (part: NonNullable<Call['formation_change']>['detached']) =>
+    part ? { coaches: known(part.coaches), position: known(part.position) } : undefined
+  return { detached: part(value.detached), attached: part(value.attached) }
+}
+
+function portion(value: Portion): MessageInitShape<typeof pb.PortionSchema> {
+  return {
+    headcode: known(value.headcode),
+    mode: value.mode ? modes[value.mode] : pb.TransportMode.UNSPECIFIED,
+    operatorCode: known(value.operator_code),
+    operatorName: known(value.operator_name),
+    origin: value.origin ? location(value.origin) : undefined,
+    destination: value.destination ? location(value.destination) : undefined,
+    rid: value.rid,
+    category: value.category,
+    at: location(value.at),
+    cancelled: value.cancelled,
+    available: value.available,
+    coachCount: known(value.coach_count),
+    position: known(value.position),
+    calls: value.calls.map(call),
+    main: known(value.main),
+    links: value.links.map(portion),
+  }
+}
 
 function movement(value: Movement): MessageInitShape<typeof pb.MovementSchema> {
   return {
@@ -122,25 +152,11 @@ function movement(value: Movement): MessageInitShape<typeof pb.MovementSchema> {
     detachFront: known(value.detach_front),
     activities: known(value.activities),
     falseDestination: value.false_destination ? location(value.false_destination) : undefined,
+    formationChange: formationChange(value.formation_change),
     origins: value.origins.map(endpoint),
     destinations: value.destinations.map(endpoint),
     callingPoints: value.calling_points.map(call),
-    portions: value.portions.map(portion => ({
-      headcode: known(portion.headcode),
-      mode: portion.mode ? modes[portion.mode] : pb.TransportMode.UNSPECIFIED,
-      operatorCode: known(portion.operator_code),
-      operatorName: known(portion.operator_name),
-      origin: portion.origin ? location(portion.origin) : undefined,
-      destination: portion.destination ? location(portion.destination) : undefined,
-      rid: portion.rid,
-      category: portion.category,
-      at: location(portion.at),
-      cancelled: portion.cancelled,
-      available: portion.available,
-      coachCount: known(portion.coach_count),
-      position: known(portion.position),
-      calls: portion.calls.map(call),
-    })),
+    portions: value.portions.map(portion),
     arrivedAt: time(value.arrived_at),
     passedAt: time(value.passed_at),
     trainOrder: value.train_order

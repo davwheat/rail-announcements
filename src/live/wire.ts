@@ -7,6 +7,7 @@ import type {
   AnnouncementType,
   Call,
   Endpoint,
+  FormationChange,
   Instant,
   Location,
   Movement,
@@ -123,7 +124,13 @@ function call(value: pb.Call): Call {
     detach_front: value.detachFront ?? null,
     false_destination: value.falseDestination ? location(value.falseDestination) : null,
     coach_count: value.coachCount ?? null,
+    ...(value.formationChange ? { formation_change: formationChange(value.formationChange) } : {}),
   }
+}
+
+function formationChange(value: pb.FormationChange): FormationChange {
+  const part = (value: pb.FormationPart | undefined) => (value ? { coaches: value.coaches ?? null, position: value.position ?? null } : null)
+  return { detached: part(value.detached), attached: part(value.attached) }
 }
 
 function portion(value: pb.Portion): Portion {
@@ -142,6 +149,8 @@ function portion(value: pb.Portion): Portion {
     coach_count: value.coachCount ?? null,
     position: value.position ?? null,
     calls: value.calls.map(call),
+    main: value.main ?? null,
+    links: value.links.map(portion),
   }
 }
 
@@ -223,6 +232,7 @@ function movement(value: pb.Movement | undefined): Movement {
     arrived_at: optionalInstant(value.arrivedAt),
     passed_at: optionalInstant(value.passedAt),
   }
+  if (value.formationChange) decoded.formation_change = formationChange(value.formationChange)
   if (value.trainOrder) {
     decoded.train_order = {
       position: value.trainOrder.position,

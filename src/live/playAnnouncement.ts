@@ -62,22 +62,114 @@ function ownDestination(movement: Movement): Endpoint {
 /**
  * The endpoints of the portions running today. An associate the feed knows nothing about is
  * described by no station at all, so announcing it would fail on a train nobody is travelling on.
+ * A portion that divides off with nowhere left to call takes nobody anywhere either, though the
+ * feed lists its destination for as long as the division stands.
  */
 function runningPortions(movement: Movement, endpoints: Endpoint[]): Endpoint[] {
-  const running = new Set(movement.portions.filter(portion => portion.available && !portion.cancelled).map(portion => portion.rid))
+  const running = new Set(
+    movement.portions
+      .filter(portion => portion.available && !portion.cancelled && (portion.category !== 'VV' || dividedCalls(portion).length))
+      .map(portion => portion.rid),
+  )
   return endpoints.filter(endpoint => endpoint.assoc_rid && running.has(endpoint.assoc_rid))
 }
 
-/** The station this train is announced to, which is a false destination wherever it has one. */
-function announcedDestination(movement: Movement): Endpoint {
-  const own = ownDestination(movement)
-  // The feed's via points lie on the route to the real destination, so a false destination has none.
-  return movement.false_destination ? { ...own, ...movement.false_destination, via: null } : own
+/** An endpoint, a link and a call can each name one station by a different TIPLOC. */
+const sameStation = (a: Location, b: Location) => a.tpl === b.tpl || (!!a.crs && a.crs === b.crs)
+
+/** A call the service makes, as opposed to one that is cancelled or that passengers can't use. */
+const running = (call: Call) => !call.cancelled && !call.operational
+
+/**
+ * The portion that takes a service's passengers on from the call where it ends. Darwin links two services to make
+ * one journey of them, most often a train and the rail replacement bus that finishes its route, and a bus recorded
+ * as a train's next working means the same. A link anywhere else on the route is a change that the service runs on
+ * past, so it's left alone. `main` is false on the service the passengers came from.
+ *
+ * A portion that joins another train ends where it joins, and its passengers stay on board, so the train it joins
+ * takes them on as well. There `main` is false on the portion that joins, and the join can be a call that
+ * passengers can't use.
+ */
+function onwardLink(portions: Portion[], calls: Call[]): { link: Portion; from: number; calls: Call[] } | null {
+  let ends = calls.length - 1
+  while (ends >= 0 && calls[ends].cancelled) ends--
+  let leaves = ends
+  while (leaves >= 0 && !running(calls[leaves])) leaves--
+  for (const link of portions) {
+    if (!link.available || link.cancelled) continue
+    const joins = link.category === 'JJ' && link.main !== true
+    if (!joins && link.main === false) continue
+    if (!joins && link.category !== 'LK' && !(link.category === 'NP' && link.mode === 'bus')) continue
+    const from = joins ? ends : leaves
+    if (from < 0 || !sameStation(link.at, calls[from])) continue
+    const meets = link.calls.findIndex(call => sameStation(call, link.at))
+    const onward = meets === -1 ? [] : link.calls.slice(meets + 1)
+    // A linked service that runs nowhere from here takes nobody on.
+    if (onward.some(running)) return { link, from, calls: onward }
+  }
+  return null
 }
 
-/** Every station this train is announced to: its own first, then the portions that divide off it. */
+interface Journey {
+  /** The movement's own calls on the journey. */
+  calls: Call[]
+  /**
+   * The services linked on from the last of those, in order, each with its calls on the journey and what the feed
+   * sends of its own associations. For a train that a portion joined, those include the portions that divide from
+   * it afterwards.
+   */
+  links: { calls: Call[]; bus: boolean; portions: Portion[] }[]
+  /** Where the last linked service goes, or null when nothing is linked. */
+  destination: Location | null
+}
+
+/**
+ * The journey that passengers make from here. A service linked to another where it ends is announced as one
+ * through service, and so is each service linked on from that one: a train, a bus, and then a train. A portion
+ * that joins another train is announced in the same way, as a through service to where that train goes.
+ */
+function linkedJourney(movement: Movement): Journey {
+  const journey: Journey = { calls: movement.calling_points, links: [], destination: null }
+  // A false destination is the station Darwin tells an announcement to name, so no link is followed past it.
+  if (movement.false_destination) return journey
+  let onward = onwardLink(movement.portions, movement.calling_points)
+  if (onward) journey.calls = movement.calling_points.slice(0, onward.from + 1)
+  while (onward) {
+    const { link, calls } = onward
+    onward = onwardLink(link.links, calls)
+    journey.links.push({ calls: onward ? calls.slice(0, onward.from + 1) : calls, bus: link.mode === 'bus', portions: link.links })
+    journey.destination = link.destination || calls[calls.length - 1]
+  }
+  return journey
+}
+
+/**
+ * The station this train is announced to: a false destination wherever it has one, or else the destination of the
+ * last service linked on from it.
+ */
+function announcedDestination(movement: Movement): Endpoint {
+  const own = ownDestination(movement)
+  const named = movement.false_destination || linkedJourney(movement).destination
+  // The feed's via points lie on the route to the train's own destination, so another one has none.
+  return named ? { ...own, tpl: named.tpl, crs: named.crs, name: named.name, via: null } : own
+}
+
+/**
+ * Every station this train is announced to: its own first, then the portions that divide off it. The feed lists
+ * the destinations of the movement's own portions. Those of a train that it joins come with that train.
+ */
 function announcedDestinations(movement: Movement): Endpoint[] {
-  return [announcedDestination(movement), ...runningPortions(movement, movement.destinations)]
+  const joined = linkedJourney(movement).links.flatMap(link =>
+    link.portions.flatMap((portion): Endpoint[] => {
+      const reached =
+        portion.category === 'VV' && portion.available && !portion.cancelled && link.calls.some(call => call.tpl === portion.at.tpl)
+      const calls = reached ? dividedCalls(portion) : []
+      if (!calls.length) return []
+      const { tpl, crs, name } = portion.destination || calls[calls.length - 1]
+      return [{ tpl, crs, name, via: null, assoc_rid: portion.rid, assoc_cat: portion.category }]
+    }),
+  )
+  return [announcedDestination(movement), ...runningPortions(movement, movement.destinations), ...joined]
 }
 
 /** Every station this train is announced from: its own first, then the portions that joined it. */
@@ -86,14 +178,73 @@ function announcedOrigins(movement: Movement): Endpoint[] {
   return [own, ...runningPortions(movement, movement.origins)]
 }
 
+/**
+ * A call where the train only takes passengers up, which isn't one it takes anybody to. Darwin can list `U` beside
+ * `D` or `T`, and passengers can alight there.
+ */
+function pickUpOnly(activities: string | null): boolean {
+  return hasActivity(activities, 'U') && !hasActivity(activities, 'D') && !hasActivity(activities, 'T')
+}
+
 function passengerCalls(calls: Call[]): Call[] {
-  return calls.filter(call => call.crs && !call.operational && !call.cancelled && !hasActivity(call.activities, 'U'))
+  return calls.filter(call => call.crs && !call.operational && !call.cancelled && !pickUpOnly(call.activities))
 }
 
 function onwardCalls(portion: Portion): Call[] {
   const start = portion.calls.findIndex(call => call.tpl === portion.at.tpl || (!!call.crs && call.crs === portion.at.crs))
   // Without the division point, nothing says which of these calls are still ahead of the train.
   return start === -1 ? [] : portion.calls.slice(start)
+}
+
+/** The stations a portion takes passengers to once it has divided off. */
+function dividedCalls(portion: Portion): Call[] {
+  return passengerCalls(onwardCalls(portion)).filter(stop => stop.tpl !== portion.at.tpl)
+}
+
+/** The portions that divide from a train at a call, and that passengers can still travel in. */
+function divisionsAt(call: Call, portions: Portion[]): Portion[] {
+  // A portion with nowhere left to call isn't one the voice can send anybody to.
+  return portions.filter(
+    portion =>
+      portion.at.tpl === call.tpl && portion.available && !portion.cancelled && portion.category === 'VV' && dividedCalls(portion).length,
+  )
+}
+
+type Split = Pick<CallingAtPoint, 'splitType' | 'splitForm' | 'splitCallingPoints' | 'furtherSplits'>
+
+/**
+ * What the voice says of a call where part of the train leaves it: the portions that divide off there, or else the
+ * coaches that the train leaves behind while it runs on as the same service, which go no further.
+ *
+ * The feed names the end of the train as it arrives at the call. `turned` is whether the train reverses an odd
+ * number of times on the way there, which makes that the other end as the train stands at this station.
+ */
+function splitAt(call: Call, divides: Portion[], turned: boolean, system: AmeyPhil): Split {
+  const end = (position: string) => (!turned ? position : position === 'front' ? 'rear' : position === 'rear' ? 'front' : position)
+  // The voice can say which end a part is at without saying how long it is.
+  const form = (position: string, coaches: number | null) =>
+    !['front', 'rear', 'middle'].includes(position) ? 'unknown' : coaches ? `${end(position)}.${coaches}` : end(position)
+
+  if (divides.length) {
+    const [split, ...further] = divides.map(portion => {
+      // Darwin says only which end of the train stock detaches from, which can't tell two portions apart.
+      const darwin = divides.length > 1 || call.detach_front === null ? 'unknown' : call.detach_front ? 'front' : 'rear'
+      return {
+        splitForm: form(portion.position || darwin, portion.coach_count),
+        splitCallingPoints: dividedCalls(portion).map(stop => ({
+          crsCode: stationAudio(stop, system),
+          name: stop.name || '',
+          randomId: stop.id,
+          requestStop: hasActivity(stop.activities, 'R'),
+        })),
+      }
+    })
+    return { splitType: 'splits', ...split, ...(further.length ? { furtherSplits: further } : {}) }
+  }
+
+  const detached = passengerCalls([call]).length ? call.formation_change?.detached : null
+  if (!detached) return {}
+  return { splitType: 'splitTerminates', splitForm: form(detached.position || 'unknown', detached.coaches), splitCallingPoints: [] }
 }
 
 export function callingPoints(movement: Movement, system: AmeyPhil): CallingAtPoint[] {
@@ -111,61 +262,94 @@ export function callingPoints(movement: Movement, system: AmeyPhil): CallingAtPo
   const destination = announcedDestination(movement)
   // The endpoint and the call can name one station by different TIPLOCs.
   const terminus = (call: Call) => call.tpl === destination?.tpl || (!!destination?.crs && call.crs === destination.crs)
+  const journey = linkedJourney(movement)
+  // The journey ends on the last service that runs it.
+  const lastLeg = journey.links.length ? journey.links[journey.links.length - 1].calls : journey.calls
   // A train on a circular route calls at a false destination again on its way to the real one, so
   // the calling points end at the first call there. The real destination is the last call at it.
   const destinationIndex = movement.false_destination
-    ? movement.calling_points.findIndex(terminus)
-    : movement.calling_points.reduce((last, call, index) => (terminus(call) ? index : last), -1)
-  for (const [index, call] of movement.calling_points.entries()) {
-    if (hasActivity(call.activities, 'RM')) reversed = !reversed
-    const terminates = index === destinationIndex
-    if (passengerCalls([call]).length === 0) {
+    ? lastLeg.findIndex(terminus)
+    : lastLeg.reduce((last, call, index) => (terminus(call) ? index : last), -1)
+  let turned = false
+  for (const [index, call] of journey.calls.entries()) {
+    const arrivesTurned = turned
+    if (hasActivity(call.activities, 'RM')) {
+      reversed = !reversed
+      turned = !turned
+    }
+    const terminates = journey.calls === lastLeg && index === destinationIndex
+    const portions = movement.portions.filter(portion => portion.at.tpl === call.tpl && portion.available && !portion.cancelled)
+    const divides = divisionsAt(call, movement.portions)
+    // A train can divide at a station where it sets nobody down, as a sleeper does. The voice names the station
+    // where the train divides, so that call is kept, as it is for the original data source.
+    const dividesOnly = divides.length > 0 && !!call.crs && !call.cancelled
+    if (passengerCalls([call]).length === 0 && !dividesOnly) {
       if (terminates) break
       continue
     }
-    const portions = movement.portions.filter(portion => portion.at.tpl === call.tpl && portion.available && !portion.cancelled)
     if (terminates && portions.length === 0) break
     let shortPlatform = isShortPlatform(call.crs!, call.platform.number, { ...train, length: call.coach_count ?? train.length })
     if (reversed && shortPlatform) {
       shortPlatform = shortPlatform.startsWith('front') ? shortPlatform.replace('front', 'rear') : shortPlatform.replace('rear', 'front')
     }
-    const point: CallingAtPoint = {
+    // The terminus is spoken as the destination, so it joins the calling points only as the station where a
+    // portion divides off and carries on.
+    if (terminates && !divides.length) break
+    result.push({
       crsCode: stationAudio(call, system),
       name: call.name || '',
       randomId: call.id,
       requestStop: hasActivity(call.activities, 'R'),
       shortPlatform: shortPlatform || undefined,
-    }
-    const divide = portions.find(portion => portion.category === 'VV')
-    if (divide) {
-      point.splitType = 'splits'
-      const position = divide.position || (call.detach_front === null ? 'unknown' : call.detach_front ? 'front' : 'rear')
-      point.splitForm = divide.coach_count && ['front', 'rear', 'middle'].includes(position) ? `${position}.${divide.coach_count}` : 'unknown'
-      point.splitCallingPoints = passengerCalls(onwardCalls(divide))
-        .filter(stop => stop.tpl !== call.tpl)
-        .map(stop => ({
-          crsCode: stationAudio(stop, system),
-          name: stop.name || '',
-          randomId: stop.id,
-          requestStop: hasActivity(stop.activities, 'R'),
-        }))
-    }
-    // The terminus is spoken as the destination, so it never joins the calling points as well.
-    if (!terminates) result.push(point)
-    const continuation = portions.find(portion => ['NP', 'LK'].includes(portion.category) && portion.mode === 'bus')
-    if (continuation) {
-      point.continuesAsRrbAfterHere = true
-      result.push(
-        ...passengerCalls(onwardCalls(continuation))
-          .filter(stop => stop.tpl !== call.tpl && !terminus(stop))
-          .map(stop => ({
-            crsCode: stationAudio(stop, system),
-            name: stop.name || '',
-            randomId: stop.id,
-          })),
-      )
-    }
+      ...splitAt(call, divides, arrivesTurned, system),
+    })
     if (terminates) break
+  }
+
+  let onBus = movement.mode === 'bus'
+  let leg = journey.calls
+  for (const link of journey.links) {
+    // One service hands over to the next at the last call it makes. The voice says once where the train gives
+    // way to a replacement bus, and once where a train takes over again.
+    const handover = result[result.length - 1]
+    if (handover?.randomId === leg[leg.length - 1].id) {
+      const byBus = result.some(point => point.continuesAsRrbAfterHere)
+      if (link.bus && !onBus && !byBus) handover.continuesAsRrbAfterHere = true
+      if (!link.bus && onBus && byBus && !result.some(point => point.continuesAsTrainAfterHere)) handover.continuesAsTrainAfterHere = true
+    }
+    // The ends of another train are its own.
+    turned = false
+    for (const [index, call] of link.calls.entries()) {
+      if (link.calls === lastLeg && index === destinationIndex) break
+      const arrivesTurned = turned
+      if (hasActivity(call.activities, 'RM')) turned = !turned
+      // A train that this one joined can divide later on, as the train's own journey can.
+      const divides = divisionsAt(call, link.portions)
+      if (passengerCalls([call]).length === 0 && !(divides.length > 0 && !!call.crs && !call.cancelled)) continue
+      result.push({
+        crsCode: stationAudio(call, system),
+        name: call.name || '',
+        randomId: call.id,
+        requestStop: hasActivity(call.activities, 'R'),
+        ...splitAt(call, divides, arrivesTurned, system),
+      })
+    }
+    onBus = link.bus
+    leg = link.calls
+  }
+
+  // The voice describes one division. A portion that divides off further along is announced with it, at an end
+  // of the train that only the crew can say. Coaches left behind further along than that aren't announced.
+  const [first, ...later] = result.filter(point => point.splitType)
+  for (const point of later) {
+    if (point.splitType === 'splits') {
+      const splits = [{ splitCallingPoints: point.splitCallingPoints || [] }, ...(point.furtherSplits || [])]
+      first.furtherSplits = [...(first.furtherSplits || []), ...splits.map(split => ({ ...split, splitForm: 'unknown' }))]
+    }
+    delete point.splitType
+    delete point.splitForm
+    delete point.splitCallingPoints
+    delete point.furtherSplits
   }
   return result
 }
@@ -207,8 +391,9 @@ export function trainOptions(
     coaches: movement.coach_count ? `${movement.coach_count} coaches` : 'None',
     serviceLoading: loading !== null && loading > 70 ? 'full and standing' : 'none',
     announceShortPlatformsAfterSplit: preferences.announceShortPlatformsAfterSplit,
-    notCallingAtStations: movement.calling_points
-      .filter(call => call.crs && !call.operational && call.cancelled && !hasActivity(call.activities, 'U'))
+    // A linked service makes the calls that the train has cancelled beyond the link.
+    notCallingAtStations: linkedJourney(movement)
+      .calls.filter(call => call.crs && !call.operational && call.cancelled && !pickUpOnly(call.activities))
       .map(call => ({
         crsCode: stationAudio(call, system),
         name: call.name || '',

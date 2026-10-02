@@ -445,7 +445,9 @@ export default class BombardierXstar extends TrainAnnouncementSystem {
         break
     }
 
-    if (remainingStops.length > 1) {
+    // A lone remaining stop is the terminus, which has just been named, unless the train divides: then it's the
+    // station where the train divides, which nothing else names.
+    if (remainingStops.length > 1 || options.dividesEnRoute) {
       files.push('calling at')
       files.push(...this.pluraliseAudio(remainingStops, { beforeAndDelay: 75 }))
     }

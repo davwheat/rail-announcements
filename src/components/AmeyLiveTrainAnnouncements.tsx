@@ -118,6 +118,30 @@ function getServiceLoadingFromFormation(formation: any): ServiceLoading {
   return 'none'
 }
 
+type Association = NonNullable<TrainService['subsequentLocations'][number]['associations']>[number]
+
+/**
+ * A call where the train only takes passengers up, which isn't one it takes anybody to. Darwin can list `U` beside
+ * `D` or `T`, where passengers can alight as well.
+ */
+function pickUpOnly(activities: string[] | undefined): boolean {
+  return !!activities && activities.includes('U') && !activities.includes('D') && !activities.includes('T')
+}
+
+/** The stations a dividing portion takes passengers to. */
+function portionStops(association: Association) {
+  return (association.service?.locations ?? []).filter(s => s.crs && !s.isCancelled && !s.isOperational && !s.isPass)
+}
+
+/**
+ * A portion that divides off and takes passengers somewhere. The lookup of an associated service can fail, and a
+ * portion can have every call cancelled: the voice has nothing to say of either, and refuses a division without
+ * calling points, which used to cost the listener the whole announcement.
+ */
+function dividesOff(association: Association): boolean {
+  return association.category === AssociationCategory.Divide && portionStops(association).length > 0
+}
+
 function getCallingPoints(train: TrainService, getStation: (location: TimingLocation | EndPointLocation) => string): CallingAtPoint[] {
   const mainReversalMap: Record<string, boolean[]> = {}
   let rev = false
@@ -133,13 +157,13 @@ function getCallingPoints(train: TrainService, getStation: (location: TimingLoca
       return false
     }
     // Force the calling point if the train divides here
-    if (s.associations?.filter(a => a.category === AssociationCategory.Divide).length) return true
+    if (s.associations?.some(dividesOff)) return true
     if (s.isCancelled || s.isOperational || s.isPass) {
       mainReversalMap[s.tiploc].shift()
       return false
     }
     // Ignore pick-up only
-    if (s.activities?.includes('U')) {
+    if (pickUpOnly(s.activities)) {
       mainReversalMap[s.tiploc].shift()
       return false
     }
@@ -182,21 +206,19 @@ function getCallingPoints(train: TrainService, getStation: (location: TimingLoca
         shortPlatform: shortPlatform || undefined,
       }
 
-      p.associations
-        ?.filter(a => a.category === AssociationCategory.Divide)
-        .forEach(a => {
-          // We have a dividing service
-          stop.splitType = 'splits'
-          const len = a.service!!.locations[0].length
-          stop.splitForm = reversedHere ? `front.${len}` : `rear.${len}`
-          stop.splitCallingPoints = a
-            .service!!.locations.filter(s => {
-              if (!s.crs) return false
-              if (s.isCancelled || s.isOperational || s.isPass) return false
-              return true
-            })
-            .map(l => ({ crsCode: l.crs!!, name: l.locationName, randomId: '', requestStop: p.activities?.includes('R') }))
-        })
+      p.associations?.filter(dividesOff).forEach(a => {
+        // We have a dividing service
+        stop.splitType = 'splits'
+        const len = a.service!!.locations[0].length
+        const end = reversedHere ? 'front' : 'rear'
+        stop.splitForm = len ? `${end}.${len}` : end
+        stop.splitCallingPoints = portionStops(a).map(l => ({
+          crsCode: l.crs!!,
+          name: l.locationName,
+          randomId: '',
+          requestStop: l.activities?.includes('R'),
+        }))
+      })
 
       if (i === callingPoints.length - 1 && p.associations?.some(a => a.category === AssociationCategory.LinkedTo && a.trainid === '0B00')) {
         // Bus continuation. These are used by some TOCs for engineering work.
@@ -297,7 +319,7 @@ function getCancelledCallingPoints(train: TrainService, getStation: (location: T
     if (!s.crs) return false
     if (!s.isCancelled || s.isOperational || s.isPass) return false
     // Ignore pick-up only
-    if (s.activities?.includes('U')) return false
+    if (pickUpOnly(s.activities)) return false
     return true
   })
 
@@ -317,7 +339,7 @@ function getCancelledCallingPoints(train: TrainService, getStation: (location: T
       ]
 
       p.associations
-        ?.filter(a => a.category === AssociationCategory.Divide)
+        ?.filter(a => a.category === AssociationCategory.Divide && a.service)
         .forEach(a => {
           // We have a dividing service
           stops.push(
@@ -326,7 +348,7 @@ function getCancelledCallingPoints(train: TrainService, getStation: (location: T
                 if (!s.crs) return false
                 if (!s.isCancelled || s.isOperational || s.isPass) return false
                 // Ignore pick-up only
-                if (s.activities?.includes('U')) return false
+                if (pickUpOnly(s.activities)) return false
                 return true
               })
               .map(l => ({ crsCode: l.crs!! })),

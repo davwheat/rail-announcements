@@ -85,6 +85,40 @@ voice cannot say is an exception: the announcement is said again without the rea
 messages also have an adapter for when the backend begins emitting them. An unsupported platform's audio is skipped rather than substituting
 another platform number, and a service with no allocated platform is skipped for the same reason.
 
+A service that links to another where it ends is announced as one through service. Darwin links (`LK`) two services to make one journey of them,
+most often a train and the rail replacement bus that finishes its route. The announcement names the last linked service's destination, without
+via points, and lists each linked service's calling points after the train's own. It follows the links of each linked service in turn, so a train
+that links to a bus that links to a train is one announcement. Where a train hands over to a bus, the voice says that the train terminates there
+and that a replacement bus continues, and where a train takes over again it says that the train restarts. The voice has one recording of each, so
+a second bus or a second restart on the same journey is listed without one. A train linked to another train is announced as one train.
+
+A link is followed only at the last call that the service makes, so a link elsewhere on the route changes nothing, and calls that the train has
+cancelled beyond the link are left to the linked service and aren't announced as cancelled. The chain stops at a link that is cancelled, whose
+service the feed doesn't have, or whose service makes no further calls. No link is followed from a train with a false destination, because that
+destination is what Darwin tells an announcement to name. A portion with `main` set to `false` is the service the passengers came from, and a bus
+recorded as a train's next working (`NP`) is read as a link.
+
+A portion that joins another train (`JJ`, with `main` set to `false`) is announced in the same way before it reaches the join: as one service to
+the destination of the train it joins, with that train's calling points after its own. The join can be a call that passengers can't use.
+
+A train that divides is announced with every portion that passengers can still travel in. A portion that is cancelled, that the feed doesn't
+have, or that has no calls left to make is neither a division nor a destination. The voice names the station where the train divides, so that
+station is a calling point even where the train sets nobody down, as at a sleeper's division, and even where the train's own journey ends there.
+A train that a portion joins can go on to divide: that division is announced too, with its destination.
+
+A portion is at the end of the train that the feed gives as its `position`, or else the end that Darwin's `detach_front` gives. Both name the end
+as the train arrives at the division, so the ends are swapped for each reversal (activity `RM`) that the train makes on the way there. The voice
+says which end without a length when the feed has none. Where two portions divide off, or nothing says which end, the voice asks customers for
+every portion to listen for announcements on the train. The voice describes one division: a portion that divides off further along is announced
+with the first, at an unknown end of the train.
+
+A train can also leave coaches behind while it runs on as the same service, which the feed reports on the call's `formation_change`. The voice
+announces that as a train that divides at that station, where the coaches are detached and terminate, and tells customers for the stations beyond
+to travel in the other part of the train.
+
+A call where the train only takes passengers up (activity `U`) isn't a calling point, because the train takes nobody there. A call that also has
+`D` or `T` is one, as on a sleeper.
+
 Production builds read `.env.production`, which sets `NEXT_PUBLIC_LIVE_SERVICE_URL` to `wss://darwinbrowser.com`. Neither variable holds a
 secret, so both are committed. `NEXT_PUBLIC_LIVE_BOARD_URL` points at the raildotmatrix `/board` URL, which requires the matching raildotmatrix
 branch to be deployed; point it at a `https://<branch>.raildotmatrix.pages.dev/board` preview to test before that branch merges. **Service URL**

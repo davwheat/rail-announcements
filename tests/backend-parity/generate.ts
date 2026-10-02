@@ -180,37 +180,264 @@ function announcementsFor(movement: Movement, index: number, reasonCodes: string
     out.push(announce('next', amended), announce('standing', amended))
   }
 
-  const bus = withBusContinuation(movement)
-  if (bus) out.push(announce('next', bus), announce('standing', bus))
+  const linkedJourneys: [TransportMode[], string][] = [
+    [['bus'], 'LK'],
+    [['bus', 'train'], 'LK'],
+    [['train'], 'LK'],
+    [['bus'], 'NP'],
+    [['train', 'bus', 'train', 'bus'], 'LK'],
+  ]
+  for (const [variant, [modes, category]] of linkedJourneys.entries()) {
+    const linked = withLinks(movement, modes, category, index % 2 === 1)
+    if (!linked) continue
+    out.push(announce('next', linked))
+    if (index % linkedJourneys.length === variant) {
+      out.push(announce('standing', linked), announce('approaching', linked), announce('disrupted', linked))
+    }
+  }
+
+  // A portion that joins another train, with each way the feed can describe the join.
+  const joins: [boolean, boolean | null][] = [
+    [false, false],
+    [true, false],
+    [false, null],
+    [false, true],
+  ]
+  const joining = withJoin(movement, ...joins[index % joins.length])
+  if (joining) out.push(announce('next', joining), announce(index % 2 ? 'approaching' : 'standing', joining))
+
+  const dividing = withDivisions(movement, index % divisionVariants)
+  if (dividing) out.push(announce('next', dividing), announce(index % 2 ? 'standing' : 'approaching', dividing))
+
+  const detaching = withDetachment(movement, index % detachmentVariants)
+  if (detaching) out.push(announce('next', detaching), announce('standing', detaching))
+
+  // Calls where passengers can board, with and without being able to alight as well.
+  const boarding = clone(movement)
+  const boardingStops = passengerStops(boarding.calling_points)
+  if (boardingStops.length >= 3) {
+    boarding.calling_points[boardingStops[0]].activities = 'D U'
+    boarding.calling_points[boardingStops[1]].activities = 'U'
+    out.push(announce('next', boarding))
+  }
 
   return out
 }
 
-function withBusContinuation(movement: Movement): Movement | null {
-  if (movement.portions.length) return null
-  const stops = movement.calling_points.filter(call => call.crs && !call.operational && !call.cancelled)
-  if (stops.length < 4) return null
-  const bus = clone(movement)
-  const at = stops[stops.length - 3]
-  const onward: Call[] = clone(stops.slice(-3))
-  const portion: Portion = {
-    headcode: null,
-    mode: 'bus',
-    operator_code: movement.operator_code,
-    operator_name: movement.operator_name,
-    origin: null,
-    destination: null,
-    rid: `${movement.rid}-bus`,
-    category: 'NP',
-    at: { tpl: at.tpl, crs: at.crs, name: at.name },
-    cancelled: false,
-    available: true,
-    coach_count: null,
-    position: null,
-    calls: onward,
+const place = (call: Call) => ({ tpl: call.tpl, crs: call.crs, name: call.name })
+const passengerStops = (calls: Call[]) => calls.flatMap((call, index) => (call.crs && !call.operational && !call.cancelled ? [index] : []))
+const associate = (movement: Movement, rid: string, values: Partial<Portion>): Portion => ({
+  headcode: null,
+  mode: 'train',
+  operator_code: movement.operator_code,
+  operator_name: movement.operator_name,
+  origin: null,
+  destination: null,
+  rid,
+  category: 'VV',
+  at: movement.station,
+  cancelled: false,
+  available: true,
+  coach_count: null,
+  position: null,
+  calls: [],
+  main: true,
+  links: [],
+  ...values,
+})
+
+/**
+ * The movement as a portion that joins another train halfway along its route, where that train runs the rest of
+ * it. The join can be a call that passengers can't use, and `main` is what the feed says of the train joined.
+ */
+function withJoin(movement: Movement, operational: boolean, main: boolean | null): Movement | null {
+  const calls = movement.calling_points
+  const stops = passengerStops(calls)
+  if (stops.length < 3 || movement.false_destination) return null
+  const join = stops[Math.floor(stops.length / 2)]
+  const own = movement.destinations.find(destination => !destination.assoc_rid) || movement.destinations[0]
+
+  const joining = clone(movement)
+  joining.calling_points = joining.calling_points.slice(0, join + 1)
+  joining.calling_points[join].operational = operational
+  joining.destinations = [{ ...place(calls[join]), via: null, assoc_rid: null, assoc_cat: null }]
+  // Some of the trains joined go on to divide, at the stop after the join and to the stop where the journey began.
+  const after = stops[Math.floor(stops.length / 2) + 1]
+  const divides = main === false && after !== undefined && after !== stops[stops.length - 1]
+  joining.portions.push(
+    associate(movement, `${movement.rid}-joined`, {
+      category: 'JJ',
+      at: place(calls[join]),
+      main,
+      destination: own ? { tpl: own.tpl, crs: own.crs, name: own.name } : null,
+      calls: clone(calls.slice(join)),
+      links: divides
+        ? [
+            associate(movement, `${movement.rid}-joined-portion`, {
+              at: place(calls[after]),
+              destination: place(calls[stops[0]]),
+              coach_count: 4,
+              position: operational ? 'front' : null,
+              calls: clone([calls[after], calls[stops[0]]]),
+            }),
+          ]
+        : [],
+    }),
+  )
+  return joining
+}
+
+const detachmentVariants = 5
+
+/**
+ * The movement leaving coaches behind at its second stop while it runs on as the same service: with and without a
+ * length and an end for them, and with a reversal on the way there, which swaps the ends.
+ */
+function withDetachment(movement: Movement, variant: number): Movement | null {
+  const stops = passengerStops(movement.calling_points)
+  if (stops.length < 4 || movement.false_destination || movement.portions.some(portion => portion.category === 'VV')) return null
+  const detaching = clone(movement)
+  const [first, at] = [detaching.calling_points[stops[0]], detaching.calling_points[stops[1]]]
+  const detached = [
+    { coaches: 4, position: 'rear' },
+    { coaches: 4, position: 'front' },
+    { coaches: null, position: 'rear' },
+    { coaches: 2, position: null },
+    { coaches: 4, position: 'front' },
+  ][variant]
+  at.formation_change = { detached, attached: null }
+  // The train reverses out of the stop where it leaves the coaches, or of the stop before.
+  if (variant === 1) at.activities = `${at.activities || 'T '}RM`
+  if (variant === 4) first.activities = `${first.activities || 'T '}RM`
+  return detaching
+}
+
+const divisionVariants = 10
+
+/**
+ * The movement with a portion dividing off it, in each way that changes what the voice says: the end and length
+ * that the feed gives the portion, a division where the train sets nobody down, a second portion at the same
+ * station or further along, a portion with nowhere left to call, and a division where the train itself ends.
+ */
+function withDivisions(movement: Movement, variant: number): Movement | null {
+  const calls = movement.calling_points
+  const stops = passengerStops(calls)
+  if (stops.length < 5 || movement.false_destination || movement.portions.some(portion => portion.category === 'VV')) return null
+  const dividing = clone(movement)
+  const divide = (rid: string, at: number, to: number, values: Partial<Portion> = {}) => {
+    const portion = associate(movement, `${movement.rid}-${rid}`, {
+      at: place(calls[at]),
+      destination: place(calls[to]),
+      calls: clone([calls[at], calls[to]]),
+      ...values,
+    })
+    dividing.portions.push(portion)
+    dividing.destinations.push({ ...place(calls[to]), via: null, assoc_rid: portion.rid, assoc_cat: 'VV' })
+    return portion
   }
-  bus.portions = [portion]
-  return bus
+  const [at, further, penultimate, last] = [stops[1], stops[2], stops[stops.length - 2], stops[stops.length - 1]]
+  const split = dividing.calling_points[at]
+
+  switch (variant) {
+    case 0:
+      split.detach_front = false
+      divide('portion', at, penultimate, { coach_count: 4 })
+      break
+    case 1:
+      split.detach_front = true
+      divide('portion', at, penultimate)
+      break
+    case 2:
+      split.detach_front = null
+      divide('portion', at, penultimate, { coach_count: 4 })
+      break
+    case 3:
+      split.operational = true
+      divide('portion', at, penultimate, { coach_count: 2 }).calls[0].operational = true
+      break
+    case 4:
+      divide('portion', at, penultimate, { coach_count: 4 })
+      divide('second', at, further, { coach_count: 2, position: movement.coach_count ? 'middle' : null })
+      break
+    case 5:
+      divide('portion', at, penultimate, { coach_count: 4 }).calls[1].cancelled = true
+      break
+    case 6:
+      divide('portion', last, stops[0], { coach_count: 4 })
+      break
+    case 7:
+      split.detach_front = false
+      divide('portion', at, penultimate, { coach_count: 4 })
+      divide('later', further, stops[stops.length - 3], { coach_count: 2 })
+      break
+    case 8:
+      // The feed's own position outranks Darwin's default.
+      split.detach_front = false
+      divide('portion', at, penultimate, { coach_count: 4, position: 'front' })
+      break
+    case 9: {
+      // A reversal on the way to the division swaps the ends.
+      const first = dividing.calling_points[stops[0]]
+      first.activities = `${first.activities || 'T '}RM`
+      divide('portion', at, penultimate, { coach_count: 4, position: 'rear' })
+      break
+    }
+  }
+  return dividing
+}
+
+type TransportMode = NonNullable<Portion['mode']>
+
+/**
+ * The movement with the end of its route run by services linked on from it, one for each mode, as Darwin sends a
+ * train that a replacement bus finishes for. The train either ends at the first link, or is cut short there with
+ * its later calls cancelled.
+ */
+function withLinks(movement: Movement, modes: TransportMode[], category: string, cutShort: boolean): Movement | null {
+  const calls = movement.calling_points
+  const stops = calls.flatMap((call, index) => (call.crs && !call.operational && !call.cancelled ? [index] : []))
+  if (stops.length < modes.length + 2) return null
+  // Each service runs an equal share of the stops, and hands over at the last of its own.
+  const handovers = modes.map((_, leg) => stops[Math.floor(((leg + 1) * stops.length) / (modes.length + 1)) - 1])
+  const own = movement.destinations.find(destination => !destination.assoc_rid) || movement.destinations[0]
+
+  let links: Portion[] = []
+  for (let leg = modes.length - 1; leg >= 0; leg--) {
+    const last = leg === modes.length - 1
+    const until = last ? calls.length : handovers[leg + 1] + 1
+    links = [
+      {
+        headcode: null,
+        // The feed leaves a train's mode unset when Darwin gave the service no status.
+        mode: modes[leg] === 'train' && leg % 2 ? null : modes[leg],
+        operator_code: movement.operator_code,
+        operator_name: movement.operator_name,
+        origin: place(calls[handovers[leg]]),
+        destination: last && own ? { tpl: own.tpl, crs: own.crs, name: own.name } : place(calls[until - 1]),
+        rid: `${movement.rid}-link-${leg}`,
+        category: leg === 0 ? category : 'LK',
+        at: place(calls[handovers[leg]]),
+        cancelled: false,
+        available: true,
+        coach_count: null,
+        position: null,
+        calls: clone(calls.slice(handovers[leg], until)),
+        main: leg % 3 === 2 ? null : true,
+        links,
+      },
+    ]
+  }
+
+  const linked = clone(movement)
+  linked.portions.push(...links)
+  if (cutShort) {
+    for (const call of linked.calling_points.slice(handovers[0] + 1)) call.cancelled = true
+  } else {
+    linked.calling_points = linked.calling_points.slice(0, handovers[0] + 1)
+    const ends = { ...place(calls[handovers[0]]), via: null, assoc_rid: null, assoc_cat: null }
+    linked.destinations = [ends, ...linked.destinations.filter(destination => destination.assoc_rid)]
+  }
+  return linked
 }
 
 async function liveCases(movements: Movement[]) {
@@ -270,7 +497,7 @@ function variations(tabId: string, base: any): any[] {
 
   const portionCalls = [point('LWS', { shortPlatform: 'front.4' }), point('SEF', { requestStop: true }), point('EBN')]
   for (const splitType of ['splits', 'splitTerminates']) {
-    for (const splitForm of ['front.4', 'rear.1', 'rear.8', 'front.12', 'middle.2', 'unknown', undefined, '']) {
+    for (const splitForm of ['front.4', 'rear.1', 'rear.8', 'front.12', 'middle.2', 'unknown', 'unknown.4', 'front', 'rear', undefined, '']) {
       for (const coaches of ['8 coaches', 'None', '12 coaches', '1 coach']) {
         for (const announceShortPlatformsAfterSplit of [false, true]) {
           out.push({
@@ -292,6 +519,36 @@ function variations(tabId: string, base: any): any[] {
     }
   }
   out.push({ ...base, callingAt: [point('HHE', { splitType: 'splits', splitForm: 'front.4', splitCallingPoints: [] })] })
+  // Only the live feed describes more than one portion dividing off.
+  for (const [splitForm, ...furtherForms] of [
+    ['rear.4', 'middle.2'],
+    ['unknown', 'unknown'],
+    ['front.2', 'unknown'],
+    ['rear.4', 'middle.2', 'unknown'],
+    ['rear', 'middle'],
+  ]) {
+    for (const coaches of ['12 coaches', 'None']) {
+      out.push({
+        ...base,
+        coaches,
+        announceShortPlatformsAfterSplit: true,
+        terminatingStationCode: 'LIT',
+        callingAt: [
+          point('ECR'),
+          point('HHE', {
+            splitType: 'splits',
+            splitForm,
+            splitCallingPoints: portionCalls,
+            furtherSplits: furtherForms.map((form, further) => ({
+              splitForm: form,
+              splitCallingPoints: further ? [] : [point('BTN', { requestStop: true }), point('SSE', { shortPlatform: 'front.3' })],
+            })),
+          }),
+          point('HOV', { shortPlatform: 'front.1' }),
+        ],
+      })
+    }
+  }
   out.push({
     ...base,
     callingAt: [point('HHE', { splitType: 'splits', splitForm: 'front.4', splitCallingPoints: [point('HHE'), point('LWS')] })],
@@ -498,6 +755,10 @@ async function main() {
   writeJson(join(data, 'named-services.json'), NamedServices)
 
   const movements: Movement[] = JSON.parse(gunzipSync(readFileSync(join(testdata, 'movements.json.gz'))).toString())
+  // The movements were captured before a portion carried its direction and its links.
+  for (const movement of movements) {
+    for (const portion of movement.portions) Object.assign(portion, { main: portion.main ?? null, links: portion.links ?? [] })
+  }
   const live = await liveCases(movements)
   writeJson(join(testdata, 'parity-live.json.gz'), live, true)
   const states = await stateCases()

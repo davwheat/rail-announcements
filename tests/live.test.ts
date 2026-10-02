@@ -40,7 +40,8 @@ import { setImmediate } from 'node:timers/promises'
 import { PlaybackQueue } from '../src/live/playbackQueue'
 import { announcementPlatforms, audioPlatform, callingPoints, playAnnouncement, trainOptions } from '../src/live/playAnnouncement'
 import AnnouncementSystem, { type MissingAudioMode } from '../src/announcement-data/AnnouncementSystem'
-import type { Announcement, AnnouncementType, Portion } from '../src/live/types'
+import type { Announcement, AnnouncementType, Call, Portion, Snapshot } from '../src/live/types'
+import type { CallingAtPoint } from '../src/components/CallingAtSelector'
 import type AmeyPhil from '../src/announcement-data/systems/stations/AmeyPhil'
 import type {
   ILiveDisruptedTrainAnnouncementOptions,
@@ -116,6 +117,8 @@ test('split data is optional and never causes associated-service requests', () =
       coach_count: null,
       position: null,
       calls: [],
+      main: null,
+      links: [],
     },
   ]
   assert.equal(callingPoints(movement, voice)[0].splitType, undefined)
@@ -164,6 +167,8 @@ test('the terminus is never a calling point as well as the destination', () => {
       coach_count: 4,
       position: 'rear',
       calls: dividing.calling_points,
+      main: true,
+      links: [],
     },
   ]
   assert.deepEqual(
@@ -200,12 +205,27 @@ test('a dividing portion is an extra destination, not the one the train is annou
   )
 })
 
-/** An associated service the feed knows, so its endpoint is a station the train really reaches. */
+const namedCall = (template: Call, id: string, tpl: string, crs: string, name: string): Call => ({
+  ...template,
+  id,
+  tpl,
+  crs,
+  name,
+  operational: false,
+  cancelled: false,
+  activities: null,
+})
+
+/**
+ * An associated service the feed knows, so its endpoint is a station the train really reaches. A portion that
+ * divides off carries its calls from the division.
+ */
 function runningPortion(movement: Movement, rid: string, category: string): Portion {
+  const at = movement.calling_points[0]
   return {
     rid,
     category,
-    at: movement.calling_points[0],
+    at,
     available: true,
     cancelled: false,
     headcode: null,
@@ -216,7 +236,12 @@ function runningPortion(movement: Movement, rid: string, category: string): Port
     destination: null,
     coach_count: null,
     position: null,
-    calls: [],
+    calls:
+      category === 'VV'
+        ? [at, namedCall(at, `${rid}-halt`, 'HALT', 'HLT', 'Branch halt'), namedCall(at, `${rid}-end`, 'BRANCH', 'BRN', 'Branch terminus')]
+        : [],
+    main: null,
+    links: [],
   }
 }
 
@@ -312,29 +337,461 @@ test('a train that was joined is announced as the service from both of its origi
   assert.deepEqual(spoken[0].originStationCode, ['ORG', 'HRH'])
 })
 
-test('a portion that omits its division point contributes no onward calls', () => {
+test('a portion with nowhere left to call is neither a division nor a destination', async () => {
+  const spoken: ILiveTrainApproachingAnnouncementOptions[] = []
+  const system = {
+    ...voice,
+    playTrainApproachingAnnouncement: async (options: ILiveTrainApproachingAnnouncementOptions) => {
+      spoken.push(options)
+    },
+  } as unknown as AmeyPhil
+  const dividing = (edit: (portion: Portion) => void = () => {}) => {
+    const message = announcement('approaching')
+    const portion = runningPortion(message.details, 'associate', 'VV')
+    edit(portion)
+    message.details.portions.push(portion)
+    message.details.destinations.push({ tpl: 'BRANCH', crs: 'BRN', name: 'Branch terminus', via: null, assoc_rid: 'associate', assoc_cat: 'VV' })
+    return message
+  }
+  const announced = async (message: Announcement) => {
+    spoken.length = 0
+    await playAnnouncement(message, system, preferences, '2')
+    return { destinations: spoken[0].terminatingStationCode, split: callingPoints(message.details, voice)[0].splitType }
+  }
+
+  assert.deepEqual(await announced(dividing()), { destinations: ['DST', 'BRN'], split: 'splits' })
+  // The voice refuses a division that sends nobody anywhere, which cost the listener the whole announcement.
+  const undivided = { destinations: ['DST'], split: undefined }
+  assert.deepEqual(await announced(dividing(portion => portion.calls.slice(1).forEach(call => (call.cancelled = true)))), undivided)
+  assert.deepEqual(await announced(dividing(portion => portion.calls.slice(1).forEach(call => (call.operational = true)))), undivided)
+  // Without the division point, nothing says which of the portion's calls are still ahead of the train.
+  assert.deepEqual(await announced(dividing(portion => portion.calls.shift())), undivided)
+})
+
+test('a division at a call nobody can use is still announced, at the station where it happens', () => {
   const movement = snapshot().movements[0]
+  movement.portions = [{ ...runningPortion(movement, 'associate', 'VV'), coach_count: 4 }]
+  movement.calling_points[0].operational = true
+  movement.portions[0].calls[0] = { ...movement.portions[0].calls[0], operational: true }
+  const [divide, ...rest] = callingPoints(movement, voice)
+  assert.equal(divide.crsCode, 'JNC')
+  assert.equal(divide.splitType, 'splits')
+  assert.deepEqual(
+    divide.splitCallingPoints?.map(point => point.crsCode),
+    ['HLT', 'BRN'],
+  )
+  assert.deepEqual(rest, [])
+
+  // A call kept only for a division is dropped again when the division no longer happens.
+  movement.portions[0].cancelled = true
+  assert.deepEqual(callingPoints(movement, voice), [])
+})
+
+test('the voice is told which end a portion is at even when its length is unknown', () => {
+  const split = (edit: (movement: Movement) => void) => {
+    const movement = snapshot().movements[0]
+    movement.portions = [runningPortion(movement, 'associate', 'VV')]
+    edit(movement)
+    return callingPoints(movement, voice)[0].splitForm
+  }
+  assert.equal(
+    split(movement => (movement.calling_points[0].detach_front = false)),
+    'rear',
+  )
+  assert.equal(
+    split(movement => (movement.calling_points[0].detach_front = true)),
+    'front',
+  )
+  assert.equal(
+    split(movement => {
+      movement.calling_points[0].detach_front = true
+      movement.portions[0].coach_count = 4
+    }),
+    'front.4',
+  )
+  assert.equal(
+    split(movement => {
+      movement.calling_points[0].detach_front = null
+      movement.portions[0].coach_count = 4
+    }),
+    'unknown',
+  )
+})
+
+test('every portion that divides off is announced, as one division', () => {
+  const movement = snapshot().movements[0]
+  const second: Portion = { ...runningPortion(movement, 'second', 'VV'), coach_count: 2 }
+  second.calls = [second.calls[0], namedCall(second.calls[0], 'second-end', 'OTHER', 'OTH', 'Other terminus')]
+  movement.portions = [{ ...runningPortion(movement, 'first', 'VV'), coach_count: 4 }, second]
+  movement.calling_points[0].detach_front = false
+  const [divide] = callingPoints(movement, voice)
+  // Darwin says which end stock detaches from, which can't tell two portions apart.
+  assert.equal(divide.splitForm, 'unknown')
+  assert.deepEqual(
+    divide.splitCallingPoints?.map(point => point.crsCode),
+    ['HLT', 'BRN'],
+  )
+  assert.deepEqual(
+    divide.furtherSplits?.map(split => [split.splitForm, ...split.splitCallingPoints.map(point => point.crsCode)]),
+    [['unknown', 'OTH']],
+  )
+
+  movement.portions[0].position = 'rear'
+  second.position = 'middle'
+  const [placed] = callingPoints(movement, voice)
+  assert.deepEqual([placed.splitForm, placed.furtherSplits?.[0].splitForm], ['rear.4', 'middle.2'])
+})
+
+test('a portion that divides off further along is announced with the first division', () => {
+  const movement = snapshot().movements[0]
+  const end = movement.calling_points[1]
+  movement.calling_points.splice(1, 0, namedCall(end, 'later', 'LATER', 'LTR', 'Later junction'))
+  const later: Portion = { ...runningPortion(movement, 'later', 'VV'), at: movement.calling_points[1], coach_count: 2 }
+  later.calls = [movement.calling_points[1], namedCall(end, 'later-end', 'OTHER', 'OTH', 'Other terminus')]
+  movement.portions = [{ ...runningPortion(movement, 'first', 'VV'), coach_count: 4 }, later]
+  movement.calling_points[0].detach_front = false
+  const points = callingPoints(movement, voice)
+  assert.deepEqual(
+    points.map(point => [point.crsCode, point.splitType]),
+    [
+      ['JNC', 'splits'],
+      ['LTR', undefined],
+    ],
+  )
+  assert.equal(points[0].splitForm, 'rear.4')
+  assert.deepEqual(
+    points[0].furtherSplits?.map(split => [split.splitForm, ...split.splitCallingPoints.map(point => point.crsCode)]),
+    [['unknown', 'OTH']],
+  )
+})
+
+test('a train that ends where a portion divides off and carries on names that station as the division', () => {
+  const movement = snapshot().movements[0]
+  const terminus = movement.calling_points[1]
+  movement.portions = [{ ...runningPortion(movement, 'onward', 'VV'), at: terminus, coach_count: 4 }]
+  movement.portions[0].calls[0] = terminus
+  const points = callingPoints(movement, voice)
+  assert.deepEqual(
+    points.map(point => [point.crsCode, point.splitType]),
+    [
+      ['JNC', undefined],
+      ['DST', 'splits'],
+    ],
+  )
+  assert.deepEqual(
+    points[1].splitCallingPoints?.map(point => point.crsCode),
+    ['HLT', 'BRN'],
+  )
+})
+
+test('a call where passengers can also alight is a calling point, whatever else Darwin lists for it', () => {
+  const calls = (activities: string) => {
+    const movement = snapshot().movements[0]
+    movement.calling_points[0].activities = activities
+    return callingPoints(movement, voice).map(point => point.crsCode)
+  }
+  assert.deepEqual(calls('U'), [], 'a call to take passengers up only')
+  assert.deepEqual(calls('D U'), ['JNC'], 'set down and take up, as on a sleeper')
+  assert.deepEqual(calls('T U'), ['JNC'])
+  assert.deepEqual(calls('D'), ['JNC'])
+})
+
+test('a portion is at the end the feed gives, as the train stands at this station', () => {
+  const split = (edit: (movement: Movement) => void) => {
+    const movement = snapshot().movements[0]
+    movement.portions = [{ ...runningPortion(movement, 'associate', 'VV'), coach_count: 4, position: 'front' }]
+    edit(movement)
+    return callingPoints(movement, voice).find(point => point.splitType)?.splitForm
+  }
+  assert.equal(
+    split(() => {}),
+    'front.4',
+  )
+  assert.equal(
+    split(movement => (movement.calling_points[0].detach_front = false)),
+    'front.4',
+    "the feed's position outranks Darwin's default",
+  )
+  assert.equal(
+    split(movement => (movement.calling_points[0].activities = 'T RM')),
+    'front.4',
+    'a reversal at the division itself',
+  )
+  assert.equal(
+    split(movement =>
+      movement.calling_points.unshift({ ...namedCall(movement.calling_points[0], 'turn', 'TURN', 'TRN', 'Turning point'), activities: 'T RM' }),
+    ),
+    'rear.4',
+    'a reversal on the way to the division swaps the ends',
+  )
+})
+
+test('coaches that a train leaves behind are announced as a division that terminates there', () => {
+  const left = (edit: (movement: Movement) => void = () => {}) => {
+    const movement = snapshot().movements[0]
+    movement.calling_points[0].formation_change = { detached: { coaches: 4, position: 'front' }, attached: null }
+    edit(movement)
+    const [point] = callingPoints(movement, voice)
+    return [point?.splitType, point?.splitForm, point?.splitCallingPoints]
+  }
+  assert.deepEqual(left(), ['splitTerminates', 'front.4', []])
+  assert.deepEqual(
+    left(movement => (movement.calling_points[0].formation_change!.detached!.coaches = null)),
+    ['splitTerminates', 'front', []],
+    'a length nobody knows',
+  )
+  assert.deepEqual(
+    left(movement => (movement.calling_points[0].formation_change!.detached!.position = null)),
+    ['splitTerminates', 'unknown', []],
+    'an end nobody knows',
+  )
+  assert.deepEqual(
+    left(movement => (movement.calling_points[0].formation_change = { detached: null, attached: { coaches: 4, position: null } })),
+    [undefined, undefined, undefined],
+    'coaches that join',
+  )
+  assert.deepEqual(
+    left(movement => (movement.calling_points[0].operational = true)),
+    [undefined, undefined, undefined],
+    "a call that passengers can't use",
+  )
+  // A portion that divides off there is what leaves, and the voice describes one division.
+  const dividing = snapshot().movements[0]
+  dividing.portions = [{ ...runningPortion(dividing, 'associate', 'VV'), coach_count: 4 }]
+  dividing.calling_points[0].formation_change = { detached: { coaches: 4, position: 'rear' }, attached: null }
+  assert.equal(callingPoints(dividing, voice)[0].splitType, 'splits')
+})
+
+test("a joined train's own divisions are announced, with their destinations", async () => {
+  const spoken: ILiveTrainApproachingAnnouncementOptions[] = []
+  const system = {
+    ...voice,
+    playTrainApproachingAnnouncement: async (options: ILiveTrainApproachingAnnouncementOptions) => {
+      spoken.push(options)
+    },
+  } as unknown as AmeyPhil
+  const message = announcement('approaching')
+  const movement = message.details
+  const join = movement.calling_points[1]
+  const after = namedCall(join, 'm2', 'AFTER', 'AFT', 'After the join')
+  const branch: Portion = {
+    ...runningPortion(movement, 'branch', 'VV'),
+    at: after,
+    coach_count: 4,
+    position: 'rear',
+    destination: { tpl: 'BRANCH', crs: 'BRN', name: 'Branch terminus' },
+    calls: [after, namedCall(join, 'b1', 'BRANCH', 'BRN', 'Branch terminus')],
+  }
   movement.portions = [
     {
-      rid: 'associate',
-      category: 'VV',
-      at: movement.calling_points[0],
-      available: true,
-      cancelled: false,
-      headcode: null,
-      mode: null,
-      operator_code: null,
-      operator_name: null,
-      origin: null,
-      destination: null,
-      coach_count: 4,
-      position: 'rear',
-      calls: [movement.calling_points[1]],
+      ...runningPortion(movement, 'main', 'JJ'),
+      at: join,
+      main: false,
+      destination: { tpl: 'THROUGH', crs: 'THR', name: 'Through terminus' },
+      calls: [
+        namedCall(join, 'm1', join.tpl, 'DST', 'Destination from feed'),
+        after,
+        namedCall(join, 'm3', 'THROUGH', 'THR', 'Through terminus'),
+      ],
+      links: [branch],
     },
   ]
-  const split = callingPoints(movement, voice)[0]
-  assert.equal(split.splitType, 'splits')
-  assert.deepEqual(split.splitCallingPoints, [])
+  const points = callingPoints(movement, voice)
+  assert.deepEqual(
+    points.map(point => [point.crsCode, point.splitType, point.splitForm]),
+    [
+      ['JNC', undefined, undefined],
+      ['DST', undefined, undefined],
+      ['AFT', 'splits', 'rear.4'],
+    ],
+  )
+  assert.deepEqual(
+    points[2].splitCallingPoints?.map(point => point.crsCode),
+    ['BRN'],
+  )
+  await playAnnouncement(message, system, preferences, '2')
+  assert.deepEqual(spoken[0].terminatingStationCode, ['THR', 'BRN'])
+})
+
+test('a portion that joins another train is announced as a through service of that train', () => {
+  const joining = (edit: (movement: Movement, main: Portion) => void = () => {}) => {
+    const movement = snapshot().movements[0]
+    const join = movement.calling_points[1]
+    const main: Portion = {
+      ...runningPortion(movement, 'main', 'JJ'),
+      at: join,
+      main: false,
+      destination: { tpl: 'THROUGH', crs: 'THR', name: 'Through terminus' },
+      calls: [
+        namedCall(join, 'm0', 'ELSEWHERE', 'ELS', 'Elsewhere'),
+        namedCall(join, 'm1', join.tpl, 'DST', 'Destination from feed'),
+        namedCall(join, 'm2', 'AFTER', 'AFT', 'After the join'),
+        namedCall(join, 'm3', 'THROUGH', 'THR', 'Through terminus'),
+      ],
+    }
+    movement.portions = [main]
+    edit(movement, main)
+    const options = trainOptions(movement, voice, preferences, '2')
+    return [options.terminatingStationCode, ...options.vias.map(via => `via ${via.crsCode}`), '|', ...options.callingAt.map(spokenPoint)]
+  }
+  const own = ['DST', 'via JNC', '|', 'JNC']
+  const through = ['THR', '|', 'JNC', 'DST', 'AFT']
+
+  assert.deepEqual(joining(), through)
+  assert.deepEqual(
+    joining((_, main) => (main.main = null)),
+    through,
+    'a join that Darwin gave no direction',
+  )
+  assert.deepEqual(
+    joining(movement => (movement.calling_points[1].operational = true)),
+    ['THR', '|', 'JNC', 'AFT'],
+    "a join at a call that passengers can't use",
+  )
+  assert.deepEqual(
+    joining((_, main) => (main.main = true)),
+    own,
+    'the train that is joined',
+  )
+  assert.deepEqual(
+    joining((_, main) => (main.cancelled = true)),
+    own,
+    'a cancelled join',
+  )
+  assert.deepEqual(
+    joining((_, main) => (main.available = false)),
+    own,
+    'a train the feed knows nothing about',
+  )
+  assert.deepEqual(
+    joining((movement, main) => (main.at = movement.calling_points[0])),
+    own,
+    'a join at a call the train runs on past',
+  )
+})
+
+import serviceLinkedSnapshot from './fixtures/linked_snapshot.json'
+import serviceLinkedSnapshotFrame from './fixtures/linked_snapshot.pb'
+
+/** A train from Winchester that ends at Southampton Central, where a bus links on to Bournemouth, where a train links on to Weymouth. */
+const linkedTrain = () => structuredClone((decodeServerMessage(serviceLinkedSnapshotFrame) as Snapshot).movements[0])
+const spokenPoint = (point: CallingAtPoint) =>
+  point.crsCode + (point.continuesAsRrbAfterHere ? ' then a bus' : '') + (point.continuesAsTrainAfterHere ? ' then a train' : '')
+
+test('the linked fixture decodes to the snapshot the service encoded', () => {
+  assert.deepEqual(decodeServerMessage(serviceLinkedSnapshotFrame), { nrcc_messages: [], ...serviceLinkedSnapshot })
+})
+
+test('a train linked to a bus that links to a train is announced as one service, naming each change', async () => {
+  const movement = linkedTrain()
+  const options = trainOptions(movement, voice, preferences, '2')
+  assert.equal(options.terminatingStationCode, 'WEY')
+  assert.deepEqual(options.vias, [])
+  assert.deepEqual(options.callingAt.map(spokenPoint), ['ESL', 'SOU then a bus', 'BCU', 'BMH then a train', 'POO'])
+
+  const spoken: ILiveDisruptedTrainAnnouncementOptions[] = []
+  const system = {
+    ...voice,
+    playDisruptedTrainAnnouncement: async (disrupted: ILiveDisruptedTrainAnnouncementOptions) => {
+      spoken.push(disrupted)
+    },
+  } as unknown as AmeyPhil
+  await playAnnouncement({ ...announcement('disrupted'), details: movement }, system, preferences, '2')
+  assert.deepEqual(spoken[0].terminatingStationCode, ['WEY'])
+})
+
+test('a train linked to a bus ends its calling points where the bus does', () => {
+  const movement = linkedTrain()
+  movement.portions[0].links = []
+  const options = trainOptions(movement, voice, preferences, '2')
+  assert.equal(options.terminatingStationCode, 'BMH')
+  assert.deepEqual(options.callingAt.map(spokenPoint), ['ESL', 'SOU then a bus', 'BCU'])
+
+  // A bus recorded as the train's next working is the same journey.
+  movement.portions[0].category = 'NP'
+  assert.deepEqual(callingPoints(movement, voice).map(spokenPoint), ['ESL', 'SOU then a bus', 'BCU'])
+  movement.portions[0].mode = 'train'
+  assert.deepEqual(callingPoints(movement, voice).map(spokenPoint), ['ESL'])
+})
+
+test('a train linked to another train is announced as one train', () => {
+  const movement = linkedTrain()
+  const [bus] = movement.portions
+  bus.mode = null
+  bus.calls[1].activities = 'R '
+  assert.deepEqual(callingPoints(movement, voice).map(spokenPoint), ['ESL', 'SOU', 'BCU', 'BMH', 'POO'])
+  assert.deepEqual(
+    callingPoints(movement, voice).map(point => point.requestStop),
+    [false, false, true, false, false],
+  )
+})
+
+test('a link is followed only where the train ends, and only while each linked service runs', () => {
+  const change = (edit: (bus: Portion, movement: Movement) => void) => {
+    const movement = linkedTrain()
+    edit(movement.portions[0], movement)
+    return [trainOptions(movement, voice, preferences, '2').terminatingStationCode, ...callingPoints(movement, voice).map(spokenPoint)]
+  }
+  const own = ['SOU', 'ESL']
+  const toBournemouth = ['BMH', 'ESL', 'SOU then a bus', 'BCU']
+  assert.deepEqual(
+    change(bus => (bus.cancelled = true)),
+    own,
+    'a cancelled link',
+  )
+  assert.deepEqual(
+    change(bus => (bus.available = false)),
+    own,
+    'a linked service the feed knows nothing about',
+  )
+  assert.deepEqual(
+    change(bus => (bus.main = false)),
+    own,
+    'the service these passengers came from',
+  )
+  assert.deepEqual(
+    change(bus => bus.calls.slice(1).forEach(call => (call.cancelled = true))),
+    own,
+    'a bus that runs nowhere',
+  )
+  assert.deepEqual(
+    change((bus, movement) => (bus.at = movement.calling_points[0])),
+    own,
+    'a link at a call the train runs on past',
+  )
+  assert.deepEqual(
+    change(bus => (bus.links[0].cancelled = true)),
+    toBournemouth,
+    'a cancelled onward link',
+  )
+  assert.deepEqual(
+    change(bus => (bus.links[0].available = false)),
+    toBournemouth,
+    'an onward service the feed knows nothing about',
+  )
+  assert.deepEqual(
+    change((bus, movement) => (movement.false_destination = movement.calling_points[1])),
+    own,
+    'a false destination',
+  )
+})
+
+test('a train cut short at the link leaves its cancelled calls to the linked service', () => {
+  const movement = linkedTrain()
+  const [bus] = movement.portions
+  bus.links = []
+  // The train was booked through to Bournemouth, and the bus runs the part it no longer does.
+  movement.calling_points.push(...bus.calls.slice(1).map(call => ({ ...call, id: `own-${call.id}`, cancelled: true })))
+  movement.calling_points[0].cancelled = true
+  movement.destinations = [{ ...bus.calls[2], via: { text: 'via Brockenhurst', locs: ['BCU'] }, assoc_rid: null, assoc_cat: null }]
+  const options = trainOptions(movement, voice, preferences, '2')
+  assert.equal(options.terminatingStationCode, 'BMH')
+  assert.deepEqual(options.vias, [])
+  assert.deepEqual(options.callingAt.map(spokenPoint), ['SOU then a bus', 'BCU'])
+  assert.deepEqual(
+    options.notCallingAtStations.map(point => point.crsCode),
+    ['ESL'],
+  )
 })
 
 test('a disrupted message with no measurable delay uses the generic delay announcement', async () => {

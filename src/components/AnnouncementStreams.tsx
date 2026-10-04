@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 
-import { playStream, type StationStream, type StreamStatus } from '../live/audioStreams'
+import { askServiceToTrim, playStream, type StationStream, type StreamStatus } from '../live/audioStreams'
 
 const StatusNames: Record<StreamStatus, string> = {
   connecting: 'connecting',
@@ -25,7 +25,7 @@ export default function AnnouncementStreams({ stream, log }: { stream: StationSt
   useEffect(() => {
     if (!audio.current || !stream) return
     latestLog.current(`Playing announcements from the announcement service for ${zones}`)
-    return playStream(stream, audio.current, setStatus, message => latestLog.current(message))
+    return playStream(stream, audio.current, setStatus, message => latestLog.current(message), askServiceToTrim)
     // Keyed on the URL alone: a new object for the same stream must not restart the audio.
   }, [identity])
 

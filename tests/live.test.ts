@@ -1876,11 +1876,12 @@ test('a whole station in one voice names the voice and not every platform it can
   assert.equal(zoned.searchParams.has('voice'), false)
 })
 
-import { playStream, type StationStream, type StreamStatus } from '../src/live/audioStreams'
+import { askServiceToTrim, playStream, type StationStream, type StreamStatus, type Trimming } from '../src/live/audioStreams'
 
 class FakeAudio extends EventTarget {
   #src = ''
   paused = true
+  ended = false
   error: { code: number } | null = null
   currentTime = 0
   sources: string[] = []
@@ -1896,6 +1897,7 @@ class FakeAudio extends EventTarget {
   set src(value: string) {
     this.#src = value
     this.error = null
+    this.ended = false
   }
   canPlayType(type: string) {
     return this.claimsHls && type === 'application/vnd.apple.mpegurl' ? 'maybe' : ''
@@ -1928,12 +1930,31 @@ class FakeAudio extends EventTarget {
     this.error = { code }
     this.dispatchEvent(new Event('error'))
   }
+  /** A load that fails before it answers, as Chrome reports it: the element is left paused, and
+   *  says so after the error. */
+  failToLoad(code: number) {
+    this.error = { code }
+    this.paused = true
+    this.dispatchEvent(new Event('error'))
+    this.dispatchEvent(new Event('pause'))
+  }
+  /** The error of a load that the page has since replaced. The new load cleared the element's
+   *  error as it began, so the event arrives with none to show. */
+  reportReplacedLoadFailing() {
+    this.dispatchEvent(new Event('error'))
+  }
   /** The element has played everything it holds and is waiting for audio, with playback stopped
    *  where it stood. Firefox stays here for some fifteen seconds. */
   runDry() {
     this.dispatchEvent(new Event('waiting'))
   }
+  /** A browser pauses an element that has played to the end of its response, and says so first. */
   finish() {
+    this.ended = true
+    if (!this.paused) {
+      this.paused = true
+      this.dispatchEvent(new Event('pause'))
+    }
     this.dispatchEvent(new Event('ended'))
   }
   resume() {
@@ -2021,6 +2042,31 @@ test('a player resumed after a long pause starts the stream again, and after a s
   audio.pressPause()
   context.mock.timers.tick(60_000)
   audio.pressPlay()
+  assert.deepEqual(audio.sources, [radioStream.radioUrl, radioStream.radioUrl])
+  stop()
+})
+
+test('a player that the device pauses says so, so that the listener can press play', context => {
+  context.mock.timers.enable({ apis: ['setTimeout', 'setInterval', 'Date'] })
+  const audio = new FakeAudio(false)
+  const statuses: StreamStatus[] = []
+  const stop = playStream(radioStream, audio as unknown as HTMLAudioElement, status => statuses.push(status))
+  audio.respond()
+  audio.resume()
+  assert.equal(statuses.at(-1), 'playing')
+
+  // A call comes in, or the headphones come out. The page has nothing else to learn this from.
+  audio.pressPause()
+  assert.equal(statuses.at(-1), 'blocked')
+  audio.pressPlay()
+  audio.resume()
+  assert.equal(statuses.at(-1), 'playing')
+
+  // A response that ends pauses the element as well, and that is the stream reconnecting.
+  audio.finish()
+  assert.equal(statuses.at(-1), 'reconnecting')
+  assert.equal(statuses.filter(status => status === 'blocked').length, 1)
+  context.mock.timers.tick(3_000)
   assert.deepEqual(audio.sources, [radioStream.radioUrl, radioStream.radioUrl])
   stop()
 })
@@ -2126,6 +2172,60 @@ test('the end of a load that a restart replaced is not read as the new response 
   stop()
 })
 
+test('a stream that fails as soon as a stall starts it again is asked for again', context => {
+  context.mock.timers.enable({ apis: ['setTimeout', 'setInterval', 'Date'] })
+  const audio = new FakeAudio(false)
+  const statuses: StreamStatus[] = []
+  const stop = playStream(radioStream, audio as unknown as HTMLAudioElement, status => statuses.push(status))
+
+  // The network drops: the player runs dry, and the stall starts the stream again.
+  audio.respond()
+  audio.resume()
+  audio.runDry()
+  context.mock.timers.tick(4_000)
+  assert.deepEqual(audio.sources, [radioStream.radioUrl, radioStream.radioUrl])
+
+  // With no network the new load fails at once, well inside the time a replaced load has to
+  // report itself. It is the new load's own failure, and nothing else would ever ask again.
+  audio.failToLoad(4)
+  assert.equal(statuses.at(-1), 'reconnecting')
+  context.mock.timers.tick(3_000)
+  assert.equal(audio.sources.length, 3)
+
+  // The network is still away, and so is the next attempt.
+  audio.failToLoad(4)
+  context.mock.timers.tick(3_000)
+  assert.equal(audio.sources.length, 4)
+  assert.equal(statuses.includes('blocked'), false, 'a failed load is not the listener pausing')
+  stop()
+})
+
+test('the failure of a load that a restart replaced is not read as the new response failing', context => {
+  context.mock.timers.enable({ apis: ['setTimeout', 'setInterval', 'Date'] })
+  const audio = new FakeAudio(false)
+  const statuses: StreamStatus[] = []
+  const stop = playStream(radioStream, audio as unknown as HTMLAudioElement, status => statuses.push(status))
+
+  audio.respond()
+  context.mock.timers.tick(10_000)
+  assert.deepEqual(audio.sources, [radioStream.radioUrl, radioStream.radioUrl])
+
+  audio.reportReplacedLoadFailing()
+  assert.equal(statuses.includes('reconnecting'), false)
+  context.mock.timers.tick(3_000)
+  assert.equal(audio.sources.length, 2, 'the response the restart opened must not be thrown away')
+
+  // If the new load had failed after all, the element holds the error and is paused, and the
+  // lag check is what notices.
+  audio.error = { code: 2 }
+  audio.paused = true
+  context.mock.timers.tick(10_000)
+  assert.equal(statuses.at(-1), 'reconnecting')
+  context.mock.timers.tick(3_000)
+  assert.equal(audio.sources.length, 3)
+  stop()
+})
+
 test('a player that is behind again is left to play rather than started again every lag check', context => {
   context.mock.timers.enable({ apis: ['setTimeout', 'setInterval', 'Date'] })
   const audio = new FakeAudio(false)
@@ -2191,6 +2291,127 @@ test('a stall that starts the stream again drops the reconnect it was waiting on
   context.mock.timers.tick(5_000)
   assert.equal(audio.sources.length, 2)
   stop()
+})
+
+test('a player that is a little behind has silence left out of its stream, and is not started again', async context => {
+  context.mock.timers.enable({ apis: ['setTimeout', 'setInterval', 'Date'] })
+  const audio = new FakeAudio(false)
+  const logs: string[] = []
+  const asked: { url: URL; total: number }[] = []
+  let answer: Trimming = { trimmed: 0, pending: 4 }
+  const stop = playStream(
+    radioStream,
+    audio as unknown as HTMLAudioElement,
+    () => {},
+    message => logs.push(message),
+    async (url, total) => {
+      asked.push({ url: new URL(url), total })
+      return answer
+    },
+  )
+  // The service knows the response by a name that the page made up for it.
+  const listener = new URL(audio.sources[0]).searchParams.get('listener')!
+  assert.match(listener, /^[0-9a-f]{24}-1$/)
+
+  // A stall of five seconds: ten seconds on, the player has played five.
+  audio.respond()
+  audio.currentTime = 5
+  context.mock.timers.tick(10_000)
+  assert.equal(audio.sources.length, 1, 'starting again would drop whatever was said in those five seconds')
+  assert.equal(asked.length, 1)
+  assert.equal(asked[0].url.searchParams.get('listener'), listener)
+  // It is eight seconds behind, and four is where a player belongs.
+  assert.equal(asked[0].total, 4)
+  // The answer reaches the player in its own time, which the mocked timers do not hold back.
+  await setImmediate()
+
+  // The service has left the silence out. The element's clock never shows that, so the page asks
+  // once more, for the same total, and learns that it has caught up.
+  answer = { trimmed: 4, pending: 0 }
+  audio.currentTime = 15
+  context.mock.timers.tick(10_000)
+  assert.deepEqual(
+    asked.map(request => request.total),
+    [4, 4],
+  )
+  await setImmediate()
+  audio.currentTime = 25
+  context.mock.timers.tick(10_000)
+  assert.equal(asked.length, 2)
+  assert.deepEqual(
+    logs.filter(message => message.includes('of silence out')),
+    ['The announcement stream is 8 seconds behind, so the service is leaving 4 seconds of silence out of it'],
+  )
+
+  // Further behind than silence is worth waiting for, the stream starts again, under a new name.
+  context.mock.timers.tick(10_000)
+  assert.equal(audio.sources.length, 2)
+  assert.match(new URL(audio.sources[1]).searchParams.get('listener')!, /^[0-9a-f]{24}-2$/)
+  assert.equal(logs.at(-1), 'The announcement stream was 14 seconds behind, so it is starting again from the present')
+  stop()
+})
+
+test('a player that cannot start again yet has silence left out instead', async context => {
+  context.mock.timers.enable({ apis: ['setTimeout', 'setInterval', 'Date'] })
+  const audio = new FakeAudio(false)
+  const totals: number[] = []
+  let fails = true
+  const stop = playStream(
+    radioStream,
+    audio as unknown as HTMLAudioElement,
+    () => {},
+    () => {},
+    async (_, total) => {
+      totals.push(total)
+      if (fails) throw new Error('the network lost the request')
+      return null
+    },
+  )
+
+  // currentTime never moves, so the first check starts the stream again, and the second may not.
+  audio.respond()
+  context.mock.timers.tick(10_000)
+  assert.equal(audio.sources.length, 2)
+  audio.respond()
+  context.mock.timers.tick(10_000)
+  assert.equal(audio.sources.length, 2)
+  assert.deepEqual(totals, [9])
+  await setImmediate()
+
+  // A request that the network lost is made again.
+  fails = false
+  context.mock.timers.tick(10_000)
+  assert.deepEqual(totals, [9, 19])
+  await setImmediate()
+
+  // A service that has no such response, or that cannot trim one, is not asked again about it.
+  context.mock.timers.tick(10_000)
+  assert.equal(totals.length, 2)
+  stop()
+})
+
+test('the request to leave silence out names the response and the total', async () => {
+  const calls: { url: string; method?: string }[] = []
+  let status = 200
+  const realFetch = globalThis.fetch
+  globalThis.fetch = (async (input: URL, init?: RequestInit) => {
+    calls.push({ url: input.toString(), method: init?.method })
+    return new Response(JSON.stringify({ trimmed: 1.5, pending: 2.5 }), { status })
+  }) as unknown as typeof fetch
+  try {
+    const response = 'https://audio.example/base/v1/streams/live.mp3?crs=KGX&zone=1%3AAMEY_PHIL_V1&listener=abcdef012345-1'
+    assert.deepEqual(await askServiceToTrim(response, 4.04), { trimmed: 1.5, pending: 2.5 })
+    assert.deepEqual(calls, [
+      { url: 'https://audio.example/base/v1/streams/trim?crs=KGX&zone=1%3AAMEY_PHIL_V1&listener=abcdef012345-1&total=4.0', method: 'POST' },
+    ])
+
+    // The response has gone, or the service is one that cannot trim.
+    for (status of [404, 405]) assert.equal(await askServiceToTrim(response, 4), null)
+    status = 503
+    await assert.rejects(askServiceToTrim(response, 4))
+  } finally {
+    globalThis.fetch = realFetch
+  }
 })
 
 import { renderAnnouncement } from '../src/live/announcementService'

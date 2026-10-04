@@ -181,6 +181,21 @@ dry and stays that way for 4 seconds also starts the stream again, because a bro
 audio that never arrives faster than real time. Either way the page starts the stream at most once a minute: a player that's behind again that
 soon needs a deeper buffer or a faster network, which another response doesn't supply.
 
+Starting again drops whatever was said in between, so the page tries something gentler first. When the player is more than 6 seconds behind, the
+page asks the service to leave silence out of its response (`POST /v1/streams/trim`), which brings the player back to 4 seconds behind without a
+new connection and without losing an announcement. The page names each response with a `listener` parameter, so that the service knows which one
+to shorten, and asks for the total that the response has to lose, so asking again at the next check adds nothing. The player's own clock doesn't
+show the silence that was left out, so the page takes what the service reports off the lag that it measures. A station that never falls silent
+leaves nothing to trim, and the 10-second rule still applies.
+
+A stream that fails to load is asked for again after three seconds, and again until it answers. That includes a failure that comes straight after
+the page started the stream again, which is what a device with no network reports: a new load clears the player's error, so an error that the
+player still holds belongs to the new load and not to the one it replaced.
+
+A device can pause the player without the page asking. A phone does it for a call, for another app's audio or when headphones are unplugged, and
+a media key does it anywhere. The page then shows **waiting for you to press play** with the player's controls, as it does when the browser
+refuses to start the audio, so that the listener can start it again.
+
 Set `NEXT_PUBLIC_ANNOUNCEMENT_SERVICE_URL` to the service's URL. A production build offers the **Announcement audio** setting only when this is
 set, and ignores a saved choice of streamed audio without it, so the page never tries to stream from a service that isn't deployed. In
 development, the **Announcement service URL** setting overrides it, and the default is `http://localhost:8090`.

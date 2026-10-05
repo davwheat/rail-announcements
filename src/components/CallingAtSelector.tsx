@@ -15,6 +15,11 @@ export interface CallingAtPoint {
   splitForm?: string
   splitCallingPoints?: CallingAtPoint[]
   /**
+   * More portions that divide off, beyond the one that `splitForm` and `splitCallingPoints` describe. Only the live
+   * feed sets it: this form offers one portion for each stop.
+   */
+  furtherSplits?: { splitForm: string; splitCallingPoints: CallingAtPoint[] }[]
+  /**
    * Train terminates and RRB starts from here
    */
   continuesAsRrbAfterHere?: boolean

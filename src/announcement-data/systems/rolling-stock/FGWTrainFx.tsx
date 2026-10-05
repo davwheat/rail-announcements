@@ -42,6 +42,7 @@ interface IAtStationOptions {
   brand: Brand
   stationCode: string
   isFinalStop: boolean
+  principalArrival: boolean
   originCode: string
   terminatesAtCode: string
   callingAtCodes: CallingAtPoint[]
@@ -68,12 +69,12 @@ interface IDividingTrainOptions {
   rearDestinationCode: string
 }
 
-const SENTENCE_GAP = 500
+export const SENTENCE_GAP = 500
 
 /**
  * Station-specific extras, taken from the TrainFX export's auxiliary announcement table.
  */
-const APPROACH_EXTRAS: Record<string, AudioItem[]> = {
+export const APPROACH_EXTRAS: Record<string, AudioItem[]> = {
   TWY: [{ id: 'conjoiners.change here for connecting services to', opts: { delayStart: SENTENCE_GAP } }, 'stations.high.HOT'],
   MAI: [{ id: 'conjoiners.change here for connecting services to', opts: { delayStart: SENTENCE_GAP } }, 'stations.high.MLW'],
   FNN: [{ id: 'messages.do not use the foot crossing when the red light is showing', opts: { delayStart: SENTENCE_GAP } }],
@@ -81,17 +82,27 @@ const APPROACH_EXTRAS: Record<string, AudioItem[]> = {
   BDW: [{ id: 'messages.do not cross the railway line', opts: { delayStart: SENTENCE_GAP } }],
 }
 
-const ARRIVAL_EXTRAS: Record<string, AudioItem[]> = {
+export const ARRIVAL_EXTRAS: Record<string, AudioItem[]> = {
   PAD: [{ id: 'messages.for taxis and buses please follow signage', opts: { delayStart: SENTENCE_GAP } }],
   RDG: [{ id: 'messages.if you are travelling with luggage please use the lifts', opts: { delayStart: SENTENCE_GAP } }],
 }
 
 /**
  * Arriving at these stations repeats the full welcome and security reminder rather than the short welcome.
+ * The export lists Reading twice, and only the main line entry is principal, so the full welcome stays optional.
  */
-const PRINCIPAL_STATIONS = ['EAL', 'PAD', 'OXF', 'RDG', 'SLO', 'WOF']
+export const PRINCIPAL_STATIONS = ['EAL', 'PAD', 'OXF', 'RDG', 'SLO', 'WOF']
 
-const SECURITY_REMINDER: AudioItem[] = [
+/**
+ * The export's auxiliary table appends the luggage and CCTV messages to every start-of-journey welcome.
+ */
+export const START_OF_JOURNEY_SAFETY: AudioItem[] = [
+  { id: 'messages.safety information is on posters in the vestibule', opts: { delayStart: SENTENCE_GAP } },
+  { id: 'messages.please do not leave any items of luggage unattended', opts: { delayStart: SENTENCE_GAP } },
+  { id: 'messages.this train is fitted with cctv', opts: { delayStart: SENTENCE_GAP } },
+]
+
+export const SECURITY_REMINDER: AudioItem[] = [
   { id: 'messages.please do not leave any items of luggage unattended', opts: { delayStart: SENTENCE_GAP } },
   { id: 'messages.safety information is on posters in the vestibule', opts: { delayStart: SENTENCE_GAP } },
 ]
@@ -105,7 +116,7 @@ const BRAND_OPTIONS: { title: string; value: Brand }[] = [
 /**
  * The GWR rebrand only re-recorded some phrases with the short name, so the rest borrow the full name.
  */
-const SHORT_GWR_PHRASES: BrandPhrase[] = [
+export const SHORT_GWR_PHRASES: BrandPhrase[] = [
   'welcomes you aboard this service from',
   'welcome aboard this service from',
   'thank you for travelling with',
@@ -289,7 +300,7 @@ export default class FGWTrainFx extends TrainAnnouncementSystem {
     if (!files) return
 
     if (isStartOfJourney) {
-      files.push({ id: 'messages.safety information is on posters in the vestibule', opts: { delayStart: SENTENCE_GAP } })
+      files.push(...START_OF_JOURNEY_SAFETY)
     }
 
     await this.playAudioFiles(files, download)
@@ -335,15 +346,16 @@ export default class FGWTrainFx extends TrainAnnouncementSystem {
   }
 
   private async playAtStationAnnouncement(options: IAtStationOptions, download: boolean = false): Promise<void> {
-    const { brand, stationCode, isFinalStop, originCode, terminatesAtCode, callingAtCodes } = options
+    const { brand, stationCode, isFinalStop, principalArrival, originCode, terminatesAtCode, callingAtCodes } = options
 
+    const isPrincipalArrival = !isFinalStop && principalArrival && PRINCIPAL_STATIONS.includes(stationCode)
     const files: AudioItem[] = []
 
     if (isFinalStop) {
       if (!this.validateStationExists(stationCode, 'high')) return
 
       files.push('conjoiners.this station is', `stations.high.${stationCode}`, ...this.finalStopAudio(brand))
-    } else if (PRINCIPAL_STATIONS.includes(stationCode)) {
+    } else if (isPrincipalArrival) {
       const journey = this.journeyAudio(brand, 'welcome aboard this service from', originCode, terminatesAtCode, callingAtCodes)
       if (!journey) return
 
@@ -356,7 +368,7 @@ export default class FGWTrainFx extends TrainAnnouncementSystem {
 
     files.push(...(ARRIVAL_EXTRAS[stationCode] ?? []))
 
-    if (!isFinalStop && PRINCIPAL_STATIONS.includes(stationCode)) {
+    if (isPrincipalArrival) {
       files.push(...SECURITY_REMINDER)
     }
 
@@ -886,6 +898,7 @@ export default class FGWTrainFx extends TrainAnnouncementSystem {
         brand: 'fgw',
         stationCode: 'RDG',
         isFinalStop: false,
+        principalArrival: true,
         originCode: 'PAD',
         terminatesAtCode: 'BRI',
         callingAtCodes: [],
@@ -910,12 +923,18 @@ export default class FGWTrainFx extends TrainAnnouncementSystem {
             default: 'RDG',
             options: this.StationOptions,
           },
+          principalArrival: {
+            name: 'Principal station arrival (full welcome and security reminder)',
+            type: 'boolean',
+            default: true,
+            onlyShowWhen: state => !state.isFinalStop && PRINCIPAL_STATIONS.includes(state.stationCode),
+          },
           originCode: {
             name: 'Origin station',
             type: 'select',
             default: 'PAD',
             options: this.StationOptions,
-            onlyShowWhen: state => !state.isFinalStop && PRINCIPAL_STATIONS.includes(state.stationCode),
+            onlyShowWhen: state => !state.isFinalStop && state.principalArrival && PRINCIPAL_STATIONS.includes(state.stationCode),
           },
           terminatesAtCode: {
             name: 'Terminates at',
@@ -932,7 +951,7 @@ export default class FGWTrainFx extends TrainAnnouncementSystem {
               availableStations: this.AllAvailableStationNames,
             },
             default: [],
-            onlyShowWhen: state => !state.isFinalStop && PRINCIPAL_STATIONS.includes(state.stationCode),
+            onlyShowWhen: state => !state.isFinalStop && state.principalArrival && PRINCIPAL_STATIONS.includes(state.stationCode),
           },
         },
       },

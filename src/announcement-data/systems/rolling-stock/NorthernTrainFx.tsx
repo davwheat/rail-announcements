@@ -79,12 +79,12 @@ interface IConnectionsOptions {
   connectionCodes: CallingAtPoint[]
 }
 
-const SENTENCE_GAP = 500
+export const SENTENCE_GAP = 500
 
 /**
  * Stations flagged as principal in the TrainFX export, where arrival repeats the safety reminders.
  */
-const PRINCIPAL_STATIONS = [
+export const PRINCIPAL_STATIONS = [
   'BDI',
   'CHD',
   'DAR',
@@ -129,7 +129,7 @@ const PLATFORM_WARNING_OPTIONS: { title: string; value: PlatformWarning }[] = [
   { title: 'Mind the gap between the train and the platform edge', value: 'gap' },
 ]
 
-const START_OF_JOURNEY_SAFETY: AudioItem[] = [
+export const START_OF_JOURNEY_SAFETY: AudioItem[] = [
   { id: 'messages.please take time to read the safety information', opts: { delayStart: SENTENCE_GAP } },
   { id: 'messages.smoking including the use of e-cigarettes is not permitted', opts: { delayStart: SENTENCE_GAP } },
   { id: 'messages.please keep your belongings with you during your journey', opts: { delayStart: SENTENCE_GAP } },
@@ -237,7 +237,7 @@ const WAITING_FOR_REASONS = [
   'a person having been struck by a train',
 ]
 
-const OH_NUMBERS = ['', 'oh one', 'oh two', 'oh three', 'oh four', 'oh five', 'oh six', 'oh seven', 'oh eight', 'oh nine']
+export const OH_NUMBERS = ['', 'oh one', 'oh two', 'oh three', 'oh four', 'oh five', 'oh six', 'oh seven', 'oh eight', 'oh nine']
 
 function capitalise(text: string): string {
   return text.charAt(0).toUpperCase() + text.slice(1)

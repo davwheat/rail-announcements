@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "type": "update",
+  "epoch": "nrcc-1",
+  "previous_revision": 1,
+  "revision": 2,
+  "window": {"from": "2026-09-22T10:01:00Z", "to": "2026-09-22T11:01:00Z"},
+  "upserts": [],
+  "removals": [],
+  "ordering": [],
+  "override_upserts": [],
+  "override_removals": [],
+  "nrcc_messages": [{
+    "id": "12",
+    "text": "The station is closed.",
+    "category": "Station",
+    "severity": "3",
+    "suppress": true,
+    "updated_at": "2026-09-22T10:01:00Z"
+  }]
+}

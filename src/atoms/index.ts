@@ -10,6 +10,17 @@ export const selectedTabIdsState = atomWithStorage<Record<string, string>>('sele
 
 export const isPlayingAnnouncementState = atom<boolean>(false)
 
+const ssrSafeBooleanStorage = createJSONStorage<boolean>(() =>
+  typeof window !== 'undefined' ? localStorage : ({ getItem: () => null, setItem: () => {}, removeItem: () => {} } as unknown as Storage),
+)
+
+/**
+ * Whether the announcement service builds the audio in place of this browser, wherever it can:
+ * a tab it has been taught plays its MP3, and the live trains page plays its stream. The footer
+ * sets it for the whole site.
+ */
+export const serviceAudioState = atomWithStorage<boolean>('serviceAudio', false, ssrSafeBooleanStorage)
+
 export interface IPisDisplayMessage {
   /** `null` holds whatever the display already shows, for audio that carries no display text. */
   text: string | null

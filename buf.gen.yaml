@@ -1,0 +1,9 @@
+# Regenerates src/live/gen from Darwin Browser's stream schema:
+#   buf generate ../darwin-browser/proto
+# Keep the plugin no newer than the @bufbuild/protobuf runtime in package.json.
+version: v2
+plugins:
+  - remote: buf.build/bufbuild/es:v2.14.1
+    out: src/live/gen
+    opt:
+      - target=ts

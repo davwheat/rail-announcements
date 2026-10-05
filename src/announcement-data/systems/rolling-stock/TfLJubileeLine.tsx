@@ -14,7 +14,7 @@ interface IStationDataItem {
   fullMessages?: true
 }
 
-const StationData: IStationDataItem[] = [
+export const StationData: IStationDataItem[] = [
   {
     name: 'Stanmore',
     approachingFiles: ['stanmore'],
@@ -209,7 +209,7 @@ interface IDestinationInfoAnnouncementOptions {
   terminatingStationName: string
 }
 
-const elizAffectedStations = StationData.filter(station => station.postEliz).map(station => station.name)
+export const elizAffectedStations = StationData.filter(station => station.postEliz).map(station => station.name)
 
 const announcementPresets: Readonly<{ destinationInfo: ICustomAnnouncementPreset<IDestinationInfoAnnouncementOptions>[] }> = {
   destinationInfo: [

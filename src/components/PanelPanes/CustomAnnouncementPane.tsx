@@ -18,7 +18,7 @@ import DeleteIcon from 'mdi-react/DeleteOutlineIcon'
 import CopyIcon from 'mdi-react/ContentCopyIcon'
 
 import { useAtom } from 'jotai'
-import { tabStateFamily } from '@atoms/index'
+import { serviceAudioState, tabStateFamily } from '@atoms/index'
 import { SystemTabState } from '@data/SystemTabState'
 
 import copy from 'copy-to-clipboard'
@@ -28,9 +28,10 @@ import clsx from 'clsx'
 
 import type { AnnouncementState, AnnouncementSystemClass, TabOptions } from '@announcement-data/AnnouncementSystem'
 import type { IPersonalPresetObject } from '@data/db'
-import type AnnouncementSystem from '@announcement-data/AnnouncementSystem'
+import AnnouncementSystem from '@announcement-data/AnnouncementSystem'
 import { RttResponse } from '../../api-types/get-service-rtt-types'
 import ImportStateFromRtt from '@components/ImportStateFromRtt'
+import { ANNOUNCEMENT_SERVICE_AVAILABLE } from '../../live/announcementService'
 
 export interface ICustomAnnouncementPreset<State extends AnnouncementState = AnnouncementState> {
   name: string
@@ -129,6 +130,25 @@ function CustomAnnouncementPane({
     }
   }
 
+  const [serviceAudio] = useAtom(serviceAudioState)
+
+  /**
+   * Plays or saves the announcement. The play handler always runs, whatever the listener has asked
+   * for: when the service is to build the audio, the handler's clips are set aside by the player.
+   */
+  const playOrDownload = React.useCallback(
+    async function playOrDownload(download: boolean) {
+      AnnouncementSystem.serviceRequest = serviceAudio && ANNOUNCEMENT_SERVICE_AVAILABLE ? { tabId, state: optionsState } : null
+
+      try {
+        await playHandler(optionsState!!, download || undefined)
+      } finally {
+        AnnouncementSystem.serviceRequest = null
+      }
+    },
+    [serviceAudio, tabId, playHandler, optionsState],
+  )
+
   const playAnnouncement = React.useCallback(
     async function playAnnouncement() {
       if (isPlayingAnnouncement) return
@@ -148,14 +168,14 @@ function CustomAnnouncementPane({
       console.info('Playing announcement', name, optionsState)
 
       try {
-        await playHandler(optionsState!!)
+        await playOrDownload(false)
       } catch (err) {
         setPlayError(err as any)
       }
 
       setIsPlayingAnnouncement(false)
     },
-    [isPlayingAnnouncement, playHandler, setIsPlayingAnnouncement, optionsState],
+    [isPlayingAnnouncement, playOrDownload, setIsPlayingAnnouncement, optionsState],
   )
 
   const downloadAnnouncement = React.useCallback(
@@ -177,14 +197,14 @@ function CustomAnnouncementPane({
       console.info('Playing announcement', name, optionsState)
 
       try {
-        await playHandler(optionsState!!, true)
+        await playOrDownload(true)
       } catch (err) {
         setPlayError(err as any)
       }
 
       setIsPlayingAnnouncement(false)
     },
-    [isPlayingAnnouncement, playHandler, setIsPlayingAnnouncement, optionsState],
+    [isPlayingAnnouncement, playOrDownload, setIsPlayingAnnouncement, optionsState],
   )
 
   const shareAnnouncement = React.useCallback(

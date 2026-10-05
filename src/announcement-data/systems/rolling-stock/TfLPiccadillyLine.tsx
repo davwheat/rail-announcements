@@ -23,18 +23,18 @@ import {
   type IPiccadillyClip,
 } from './TfLPiccadillyLineData'
 
-const GAP_BETWEEN_CLIPS = 400
+export const GAP_BETWEEN_CLIPS = 400
 
 const NONE = 'none'
 
 /** Warns customers about stepping off the train, so it leads the announcement. */
-const MIND_THE_GAP = 500
+export const MIND_THE_GAP = 500
 
 /**
  * The card carries the terminating announcement twice, in the tense each moment calls for: 301
  * says the train "will terminate here" and 302 that it "terminates here".
  */
-const TERMINATING = { atStation: 302, approaching: 301 }
+export const TERMINATING = { atStation: 302, approaching: 301 }
 
 interface IExtraPair {
   atStation: number
@@ -51,7 +51,7 @@ interface IStationExtras {
  * recordings but not the route table, so these are the interchanges and points of interest the
  * line actually had when the recordings were made. Anything ambiguous is left out.
  */
-const StationExtras: Record<number, IStationExtras> = {
+export const StationExtras: Record<number, IStationExtras> = {
   11: { interchange: { atStation: 400, approaching: 450 } },
   15: { interchange: { atStation: 401, approaching: 451 }, localInfo: { atStation: 600, approaching: 650 } },
   16: { localInfo: { atStation: 601, approaching: 651 } },
@@ -102,7 +102,7 @@ interface IServiceAnnouncement {
  * opposite platform to catch a train going the other way, which is what audio IDs 424 and 472
  * are for.
  */
-const ServiceAnnouncements: Record<number, Record<number, IServiceAnnouncement>> = {
+export const ServiceAnnouncements: Record<number, Record<number, IServiceAnnouncement>> = {
   // Osterley
   38: {
     38: { approaching: 465 },
@@ -248,7 +248,7 @@ const ButtonLabels: Record<number, string> = {
 }
 
 /** Audio IDs 16 and 17, the only announcements the route database does not decide by itself. */
-const ReducedAccessAnnouncements = generalClips([16, 17])
+export const ReducedAccessAnnouncements = generalClips([16, 17])
 
 const StationsAtStation = Stations.filter(station => station.atStation)
 const StationsApproaching = Stations.filter(station => station.approaching)

@@ -6,7 +6,6 @@ import CustomAnnouncementPane, { ICustomAnnouncementPreset } from '@components/P
 import { AllStationsTitleValueMap } from '@data/StationManipulators'
 import { AnyCustomAnnouncementTab, AudioItem, CustomAnnouncementTab } from '../../AnnouncementSystem'
 import type { IAlternativeServicesState } from '@components/AtosDisruptionAlternatives'
-import { platform } from 'os'
 
 interface INextTrainAnnouncementOptions {
   platform: string
@@ -58,8 +57,8 @@ const AVAILABLE_TOCS = [
   'The Blue Pullman',
   'The Bluebell Railway',
   'The Cathedrals Express',
-  'The Cathedrals Express Special Steam Service',
-  'The Cathedrals Express Steam Service',
+  'The Cathedrals Express Special Steam',
+  'The Cathedrals Express Steam',
   'The Spa Valley Railway',
   'The Watercress Line',
   'Transport for London Overground',
@@ -67,12 +66,12 @@ const AVAILABLE_TOCS = [
   'Virgin Trains East Coast',
 ]
 
-const INTEGRATED_TOCS = [
+export const INTEGRATED_TOCS = [
   'London North Eastern Railway',
   'Midland Mainline',
   'Strathclyde Metro',
-  'The Cathedrals Express Special Steam Service',
-  'The Cathedrals Express Steam Service',
+  'The Cathedrals Express Special Steam',
+  'The Cathedrals Express Steam',
   'Virgin Trains East Coast',
 ]
 
@@ -963,7 +962,7 @@ export default class ScotRail extends StationAnnouncementSystem {
       )
     }
 
-    files.push(`formation.this train is formed of ${options.coaches} ${options.coaches === '1' ? 'coach' : 'coaches'}`)
+    files.push(`formation.this train is formed of ${options.coaches} ${options.coaches === '1' ? 'coach only' : 'coaches'}`)
 
     await this.playAudioFiles(files, download)
   }

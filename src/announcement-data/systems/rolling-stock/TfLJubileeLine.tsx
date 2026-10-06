@@ -252,7 +252,7 @@ export default class TfLJubileeLine extends AnnouncementSystem {
     const files: AudioItem[] = []
 
     files.push('anita.this train terminates at')
-    files.push({id: 'anita.' + options.terminatingStationName.toLowerCase().replace(/[^a-z ]/g, ''), opts: { delayStart: 500 }})
+    files.push({ id: 'anita.' + options.terminatingStationName.toLowerCase().replace(/[^a-z ]/g, ''), opts: { delayStart: 500 } })
 
     await this.playAudioFiles(files, download)
   }

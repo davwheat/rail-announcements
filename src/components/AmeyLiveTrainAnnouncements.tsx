@@ -2394,7 +2394,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
       >
         <p>
           We're currently trialling <strong>automated short platform announcements</strong> for stations served by GTR (Southern, Thameslink,
-          Gatwick Express, and Great Northern) and Southeastern.
+          Gatwick Express, and Great Northern), Southeastern, and South Western Railway.
         </p>
         <p>
           Please let us know if you know any short platforms that aren't correctly announced by the website for these TOCs. We'll seek

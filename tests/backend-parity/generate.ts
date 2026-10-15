@@ -680,6 +680,25 @@ function shortPlatformCases() {
     { operatorCode: 'SE', length: 6, origin: [{ crs: 'CHX' }], destination: [{ crs: 'DVP' }], subsequentLocations: [{ crs: 'ASI' }] },
     { operatorCode: 'TL', length: 12, origin: [{ crs: 'BDM' }], destination: [{ crs: 'BTN' }], subsequentLocations: [] },
     { operatorCode: 'TL', length: 0, origin: [], destination: [], subsequentLocations: [] },
+    { operatorCode: 'SW', length: 10, origin: [], destination: [], subsequentLocations: [], units: ['444001', '444002'] },
+    { operatorCode: 'SW', length: 12, origin: [], destination: [], subsequentLocations: [], units: ['450001', '450002', '450003'] },
+    { operatorCode: 'SW', length: 9, origin: [], destination: [], subsequentLocations: [], units: ['444010', '450020'] },
+    { operatorCode: 'SW', length: 8, origin: [], destination: [], subsequentLocations: [], units: ['455701', '455702'] },
+    { operatorCode: 'SW', length: 8, origin: [], destination: [], subsequentLocations: [], units: ['458401', '458402'] },
+    { operatorCode: 'SW', length: 10, origin: [], destination: [], subsequentLocations: [], units: ['458501', '458502'] },
+    { operatorCode: 'SW', length: 10, origin: [], destination: [], subsequentLocations: [], units: ['701001'] },
+    { operatorCode: 'SW', length: 6, origin: [], destination: [], subsequentLocations: [], units: ['159001', '158880', '158881'] },
+    { operatorCode: 'SW', length: null, origin: [], destination: [], subsequentLocations: [], units: ['450001'] },
+    { operatorCode: 'SW', length: 8, origin: [], destination: [], subsequentLocations: [], units: ['450001', '455701'] },
+    { operatorCode: 'SW', length: 4, origin: [], destination: [], subsequentLocations: [], units: ['165001'] },
+    { operatorCode: 'SW', length: 12, origin: [], destination: [], subsequentLocations: [] },
+    { operatorCode: 'SW', length: 10, origin: [], destination: [], subsequentLocations: [] },
+    { operatorCode: 'SW', length: 9, origin: [], destination: [], subsequentLocations: [] },
+    { operatorCode: 'SW', length: 8, origin: [], destination: [], subsequentLocations: [] },
+    { operatorCode: 'SW', length: 5, origin: [], destination: [], subsequentLocations: [] },
+    { operatorCode: 'SW', length: 4, origin: [], destination: [], subsequentLocations: [] },
+    { operatorCode: 'SW', length: 3, origin: [], destination: [], subsequentLocations: [] },
+    { operatorCode: 'SW', length: null, origin: [], destination: [], subsequentLocations: [] },
   ]
   const cases = []
   for (const [crs, platforms] of Object.entries(shortPlatformData)) {
@@ -726,7 +745,9 @@ function shortPlatformTable() {
           Object.fromEntries(
             Object.entries(operators).map(([operator, value]) => [
               operator,
-              typeof value === 'function' ? { rule: value.rule, lengths: value.lengths } : value,
+              typeof value === 'function'
+                ? { rule: value.rule, lengths: value.lengths, ...(value.figures ? { figures: value.figures } : {}) }
+                : value,
             ]),
           ),
         ]),

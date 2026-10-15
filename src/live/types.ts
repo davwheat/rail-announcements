@@ -39,6 +39,11 @@ export interface Call extends Location {
   detach_front: boolean | null
   false_destination: Location | null
   coach_count: number | null
+  /**
+   * The units that Gemini allocates to the train at this call, such as `450042`. Their order doesn't say which end
+   * each unit is at. Absent when Gemini allocates none.
+   */
+  units?: string[]
   /** The coaches that leave or join the train at this call. Absent when none do, or when nothing says. */
   formation_change?: FormationChange
 }
@@ -129,6 +134,8 @@ export interface Movement {
   cancel_reason: Reason
   delay_reason: Reason
   coach_count: number | null
+  /** The units that Gemini allocates to the train at this station. Absent when Gemini allocates none. */
+  units?: string[]
   loading_percent: number | null
   loading_category: string | null
   coaches: Coach[] | null

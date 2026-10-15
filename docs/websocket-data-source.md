@@ -144,6 +144,10 @@ reserved for future catering data. Unset means unknown; these fields do not chan
 station notices on CIS snapshots and updates, including an empty list when notices are withdrawn. Notice text remains the original HTML and is
 not rendered or announced automatically.
 
+Calls and movements can carry `units`, the units that Gemini allocates to the train there, such as `450042`. They're absent when Gemini allocates
+none. A unit's number gives its class, and South Western Railway's short platforms depend on the class: see
+`src/data/liveTrains/southWesternPlatforms.ts`.
+
 ### Audio rendered by the service
 
 An announcement can arrive with audio that the service has already rendered. The page then plays that audio once, in place of assembling the

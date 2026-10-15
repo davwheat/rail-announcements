@@ -138,6 +138,28 @@ test('request stops come from whole activity codes, so a reversal or run round i
   assert.equal(callingPoints(movement, voice)[0].requestStop, true)
 })
 
+test('a South Western Railway platform is as short as the booklet says for the units Gemini allocates', () => {
+  const movement = snapshot().movements[0]
+  movement.operator_code = 'SW'
+  movement.reverse_formation = false
+  const call = movement.calling_points[0]
+  call.crs = 'SHW'
+  call.platform.number = '1'
+  const shortAt = (coaches: number | null, units?: string[]) => {
+    const details = { ...movement, calling_points: [{ ...call, coach_count: coaches, ...(units ? { units } : {}) }] }
+    const decoded = decodeServerMessage(new Uint8Array(encodeServerMessage({ ...announcement('approaching'), details })))
+    return callingPoints((decoded as Announcement).details, voice)[0].shortPlatform
+  }
+  assert.equal(shortAt(10, ['444001', '444002']), 'front.4')
+  assert.equal(shortAt(12, ['450001', '450002', '450003']), 'front.5')
+  assert.equal(shortAt(9, ['444001', '450002']), 'front.4')
+  assert.equal(shortAt(5, ['458501']), undefined)
+  // Only 450s run as twelve coaches, but ten can be 444s or 458s, which this platform takes differently.
+  assert.equal(shortAt(12), 'front.5')
+  assert.equal(shortAt(10), undefined)
+  assert.equal(shortAt(null), undefined)
+})
+
 test('calling points stop at the destination even when that call is not a passenger stop', () => {
   const movement = snapshot().movements[0]
   const beyond = { ...movement.calling_points[0], id: 'beyond', tpl: 'BEYOND', crs: 'BYD', name: 'Beyond the terminus' }

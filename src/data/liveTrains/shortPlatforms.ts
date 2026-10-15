@@ -1,3 +1,5 @@
+import { southWesternPlatforms, type SouthWesternStock } from './southWesternPlatforms'
+
 type ShortPlatformLength = `${'front' | 'middle' | 'rear'}.${number}`
 
 /**
@@ -8,6 +10,8 @@ export interface ShortPlatformRule {
   (service: ShortPlatformTrain): ShortPlatformLength | null
   rule: string
   lengths: ShortPlatformLength[]
+  /** How many coaches of each class of train the platform takes, for a rule that depends on the class. */
+  figures?: Partial<Record<SouthWesternStock, number>>
 }
 
 /** Only railway facts used by the static platform preferences. */
@@ -17,6 +21,8 @@ export interface ShortPlatformTrain {
   origin: { crs: string }[]
   destination: { crs: string }[]
   subsequentLocations: { crs?: string | null }[]
+  /** The units that Gemini allocates to the train, such as `450042`. Empty or absent when it allocates none. */
+  units?: string[]
 }
 
 /**
@@ -2207,6 +2213,68 @@ export const shortPlatformData: Record<string, Record<string, Record<string, Sho
       GN: 'front.7',
     },
   },
+}
+
+/** The coach counts that each class runs in passenger service. 158s and 159s run in any mix of two and three coach units. */
+const southWesternFormations: Record<SouthWesternStock, number[]> = {
+  '444': [5, 10],
+  '450': [4, 8, 12],
+  '444/450': [9],
+  '455': [4, 8],
+  '458/4': [4, 8],
+  '458/5': [5, 10],
+  '701': [5, 10],
+  '158/159': [2, 3, 4, 5, 6, 7, 8, 9, 10],
+}
+
+/** The class of a South Western Railway train, from the units Gemini allocates to it. Null for a mix the booklet doesn't list. */
+function southWesternStockOf(units: string[]): SouthWesternStock | null {
+  const classes = new Set(
+    units.map(unit => {
+      const type = unit.slice(0, 3)
+      if (type === '458') return unit[3] === '4' ? '458/4' : '458/5'
+      if (type === '158' || type === '159') return '158/159'
+      return type
+    }),
+  )
+  if (classes.size === 2 && classes.has('444') && classes.has('450')) return '444/450'
+  const [type] = classes
+  return classes.size === 1 && type in southWesternFormations ? (type as SouthWesternStock) : null
+}
+
+/**
+ * South Western Railway gives a platform's length for each class of train. Gemini's units say the class. Without them,
+ * the coach count narrows the classes down, and the platform is short only if every class that runs that many coaches
+ * and may call there would be told the same thing.
+ */
+function southWesternStock(figures: Partial<Record<SouthWesternStock, number>>): ShortPlatformRule {
+  const rule = (trainService: ShortPlatformTrain): ShortPlatformLength | null => {
+    const stock = southWesternStockOf(trainService.units ?? [])
+    if (stock) {
+      const figure = figures[stock]
+      // A train of unknown length would otherwise be told to join the front of a platform it fits.
+      return figure && figure < Math.max(...southWesternFormations[stock]) ? `front.${figure}` : null
+    }
+
+    const length = trainService.length
+    if (!length) return null
+    const outcomes = new Set(
+      Object.entries(figures)
+        .filter(([stock]) => southWesternFormations[stock as SouthWesternStock].includes(length))
+        .map(([, figure]) => (figure < length ? figure : null)),
+    )
+    const [figure] = outcomes
+    return outcomes.size === 1 && figure ? `front.${figure}` : null
+  }
+
+  const lengths = [...new Set(Object.values(figures))].map((figure): ShortPlatformLength => `front.${figure}`)
+  return Object.assign(rule, { rule: 'southWesternStock', lengths, figures })
+}
+
+for (const [crs, platforms] of Object.entries(southWesternPlatforms)) {
+  for (const [platform, figures] of Object.entries(platforms)) {
+    ;((shortPlatformData[crs] ??= {})[platform] ??= {}).SW = southWesternStock(figures)
+  }
 }
 
 function southernTurboElectro(turboLen: ShortPlatformLength, electroLen: ShortPlatformLength): ShortPlatformRule {

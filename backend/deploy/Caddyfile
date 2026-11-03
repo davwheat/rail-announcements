@@ -1,0 +1,45 @@
+{
+	admin off
+	auto_https off
+}
+
+(replicas) {
+	# A replica that is being replaced refuses connections or has no address.
+	# Try the other one instead of failing the request.
+	lb_try_duration 5s
+	lb_try_interval 250ms
+	health_uri /healthz
+	health_interval 2s
+	health_timeout 2s
+	fail_duration 5s
+}
+
+:8080 {
+	# A stream is held in one replica's memory, so its playlist, its segments
+	# and its endless MP3 response must all reach the same replica. Every stream
+	# URL carries the station as `crs`, and hashing on it also puts all of a
+	# station's listeners on one replica: one feed connection and one encoder
+	# for each zone, however many people listen.
+	#
+	# The hash is over the replicas that are up. When one goes down its stations
+	# move to the other, and move back when it returns. A player sees each move
+	# as a stream that ended, and reconnects.
+	@streams path /v1/streams/*
+	handle @streams {
+		reverse_proxy backend-1:8090 backend-2:8090 {
+			lb_policy query crs
+			import replicas
+			# Hand audio on as it arrives: a buffered live stream is a late one.
+			flush_interval -1
+		}
+	}
+
+	# Rendering one announcement, or one help point's departure board, needs
+	# nothing from an earlier request.
+	handle {
+		reverse_proxy backend-1:8090 backend-2:8090 {
+			lb_policy round_robin
+			import replicas
+		}
+	}
+}

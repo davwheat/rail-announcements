@@ -76,6 +76,7 @@ const call = (value: Call) => ({
   detachFront: known(value.detach_front),
   falseDestination: value.false_destination ? location(value.false_destination) : undefined,
   coachCount: known(value.coach_count),
+  units: value.units,
   formationChange: formationChange(value.formation_change),
 })
 
@@ -130,6 +131,7 @@ function movement(value: Movement): MessageInitShape<typeof pb.MovementSchema> {
     cancelReason: { code: known(value.cancel_reason.code), text: known(value.cancel_reason.text) },
     delayReason: { code: known(value.delay_reason.code), text: known(value.delay_reason.text) },
     coachCount: known(value.coach_count),
+    units: value.units,
     loadingPercent: known(value.loading_percent),
     loadingCategory: known(value.loading_category),
     coaches: value.coaches

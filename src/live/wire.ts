@@ -124,6 +124,7 @@ function call(value: pb.Call): Call {
     detach_front: value.detachFront ?? null,
     false_destination: value.falseDestination ? location(value.falseDestination) : null,
     coach_count: value.coachCount ?? null,
+    ...(value.units.length ? { units: value.units } : {}),
     ...(value.formationChange ? { formation_change: formationChange(value.formationChange) } : {}),
   }
 }
@@ -206,6 +207,7 @@ function movement(value: pb.Movement | undefined): Movement {
     cancel_reason: reason(value.cancelReason),
     delay_reason: reason(value.delayReason),
     coach_count: value.coachCount ?? null,
+    ...(value.units.length ? { units: value.units } : {}),
     loading_percent: value.loadingPercent ?? null,
     loading_category: value.loadingCategory ?? null,
     coaches:

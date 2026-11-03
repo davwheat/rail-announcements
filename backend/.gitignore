@@ -1,0 +1,4 @@
+config.toml
+/rail-announcements-backend
+.DS_Store
+.idea/

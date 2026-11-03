@@ -1,0 +1,113 @@
+{
+ "APPROACH_EXTRAS": {
+  "TWY": [
+   {
+    "id": "conjoiners.change here for connecting services to",
+    "opts": {
+     "delayStart": 500
+    }
+   },
+   "stations.high.HOT"
+  ],
+  "MAI": [
+   {
+    "id": "conjoiners.change here for connecting services to",
+    "opts": {
+     "delayStart": 500
+    }
+   },
+   "stations.high.MLW"
+  ],
+  "FNN": [
+   {
+    "id": "messages.do not use the foot crossing when the red light is showing",
+    "opts": {
+     "delayStart": 500
+    }
+   }
+  ],
+  "GOM": [
+   {
+    "id": "messages.do not use the foot crossing until this train has left the station",
+    "opts": {
+     "delayStart": 500
+    }
+   }
+  ],
+  "BDW": [
+   {
+    "id": "messages.do not cross the railway line",
+    "opts": {
+     "delayStart": 500
+    }
+   }
+  ]
+ },
+ "ARRIVAL_EXTRAS": {
+  "PAD": [
+   {
+    "id": "messages.for taxis and buses please follow signage",
+    "opts": {
+     "delayStart": 500
+    }
+   }
+  ],
+  "RDG": [
+   {
+    "id": "messages.if you are travelling with luggage please use the lifts",
+    "opts": {
+     "delayStart": 500
+    }
+   }
+  ]
+ },
+ "PRINCIPAL_STATIONS": [
+  "EAL",
+  "PAD",
+  "OXF",
+  "RDG",
+  "SLO",
+  "WOF"
+ ],
+ "SECURITY_REMINDER": [
+  {
+   "id": "messages.please do not leave any items of luggage unattended",
+   "opts": {
+    "delayStart": 500
+   }
+  },
+  {
+   "id": "messages.safety information is on posters in the vestibule",
+   "opts": {
+    "delayStart": 500
+   }
+  }
+ ],
+ "SENTENCE_GAP": 500,
+ "SHORT_GWR_PHRASES": [
+  "welcomes you aboard this service from",
+  "welcome aboard this service from",
+  "thank you for travelling with",
+  "this service has been delayed"
+ ],
+ "START_OF_JOURNEY_SAFETY": [
+  {
+   "id": "messages.safety information is on posters in the vestibule",
+   "opts": {
+    "delayStart": 500
+   }
+  },
+  {
+   "id": "messages.please do not leave any items of luggage unattended",
+   "opts": {
+    "delayStart": 500
+   }
+  },
+  {
+   "id": "messages.this train is fitted with cctv",
+   "opts": {
+    "delayStart": 500
+   }
+  }
+ ]
+}

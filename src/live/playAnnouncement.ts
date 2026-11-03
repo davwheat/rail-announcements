@@ -254,6 +254,7 @@ export function callingPoints(movement: Movement, system: AmeyPhil): CallingAtPo
     origin: movement.origins.map(origin => ({ crs: origin.crs || '' })),
     destination: movement.destinations.map(destination => ({ crs: destination.crs || '' })),
     subsequentLocations: movement.calling_points.map(call => ({ crs: call.crs })),
+    units: movement.units,
   }
   // Preserve occurrence order on circular routes and reverse coach preferences
   // at each reversal, including reversals at operational calls.
@@ -288,7 +289,11 @@ export function callingPoints(movement: Movement, system: AmeyPhil): CallingAtPo
       continue
     }
     if (terminates && portions.length === 0) break
-    let shortPlatform = isShortPlatform(call.crs!, call.platform.number, { ...train, length: call.coach_count ?? train.length })
+    let shortPlatform = isShortPlatform(call.crs!, call.platform.number, {
+      ...train,
+      length: call.coach_count ?? train.length,
+      units: call.units ?? train.units,
+    })
     if (reversed && shortPlatform) {
       shortPlatform = shortPlatform.startsWith('front') ? shortPlatform.replace('front', 'rear') : shortPlatform.replace('rear', 'front')
     }

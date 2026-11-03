@@ -593,6 +593,12 @@ const changelog: IChangelogVersion[] = [
     date: '2026-09-21',
     additions: ["[Amey Phil & Celia] Add a Help point tab, which speaks a station's live departure board at the press of a button"],
   },
+  {
+    date: '2026-10-15',
+    additions: [
+      "[Amey Phil & Celia] Announce South Western Railway's short platforms on live trains, using the length its platform booklet gives for each class of train",
+    ],
+  },
 ]
 
 export default changelog

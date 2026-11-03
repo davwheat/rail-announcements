@@ -1,0 +1,9 @@
+{
+ "DESCRIPTION": "Generate ScotRail station announcements using real audio recordings from the ScotRail announcement system.",
+ "AUDIO_CDN": "https://cdn.railannouncements.co.uk",
+ "livePlayback": null,
+ "NAME": "ScotRail Stations",
+ "ID": "SCOTRAIL_STN_V1",
+ "FILE_PREFIX": "station/scotrail/audio",
+ "SYSTEM_TYPE": "station"
+}

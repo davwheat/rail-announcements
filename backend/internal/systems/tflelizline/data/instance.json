@@ -1,0 +1,9 @@
+{
+ "DESCRIPTION": "Generate TfL Elizabeth Line on-train announcements using real audio recordings from the Elizabeth line announcement system.",
+ "AUDIO_CDN": "https://cdn.railannouncements.co.uk",
+ "livePlayback": null,
+ "NAME": "TfL Elizabeth Line",
+ "ID": "TFL_ELIZ_LINE_V1",
+ "FILE_PREFIX": "TfL/Elizabeth Line",
+ "SYSTEM_TYPE": "train"
+}

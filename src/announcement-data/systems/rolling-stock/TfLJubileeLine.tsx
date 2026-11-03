@@ -252,7 +252,7 @@ export default class TfLJubileeLine extends AnnouncementSystem {
     const files: AudioItem[] = []
 
     files.push('anita.this train terminates at')
-    files.push('anita.' + options.terminatingStationName.toLowerCase().replace(/[^a-z ]/g, ''))
+    files.push({ id: 'anita.' + options.terminatingStationName.toLowerCase().replace(/[^a-z ]/g, ''), opts: { delayStart: 500 } })
 
     await this.playAudioFiles(files, download)
   }
@@ -278,12 +278,12 @@ export default class TfLJubileeLine extends AnnouncementSystem {
       stnFiles.push(...(stationData?.approachingFiles ?? []))
     }
 
-    stnFiles[0] = { id: stnFiles[0] as string, opts: { delayStart: 250 } }
-    stnFiles[1] &&= { id: stnFiles[1] as string, opts: { delayStart: 250 } }
+    stnFiles[0] = { id: stnFiles[0] as string, opts: { delayStart: 500 } }
+    stnFiles[1] &&= { id: stnFiles[1] as string, opts: { delayStart: 500 } }
 
     files.push(...stnFiles)
 
-    files.splice(2, 0, { id: `doors will open on the ${options.doorDirection} hand side`, opts: { delayStart: 250 } })
+    files.splice(2, 0, { id: `doors will open on the ${options.doorDirection} hand side`, opts: { delayStart: 500 } })
 
     await this.playAudioFiles(files, download)
   }
@@ -309,7 +309,7 @@ export default class TfLJubileeLine extends AnnouncementSystem {
       stnFiles.push(...(stationData?.standingFiles ?? []))
     }
 
-    stnFiles[0] = { id: stnFiles[0] as string, opts: { delayStart: 250 } }
+    stnFiles[0] = { id: stnFiles[0] as string, opts: { delayStart: 500 } }
 
     files.push(...stnFiles)
 

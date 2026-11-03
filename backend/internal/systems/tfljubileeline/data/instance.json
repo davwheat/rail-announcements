@@ -1,0 +1,9 @@
+{
+ "DESCRIPTION": "Generate TfL Jubilee Line on-train announcements using real audio recordings from the Jubilee line announcement system.",
+ "AUDIO_CDN": "https://cdn.railannouncements.co.uk",
+ "livePlayback": null,
+ "NAME": "TfL Jubilee Line",
+ "ID": "TFL_JUBILEE_LINE_V1",
+ "FILE_PREFIX": "TfL/Jubilee Line",
+ "SYSTEM_TYPE": "train"
+}

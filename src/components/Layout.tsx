@@ -24,7 +24,7 @@ const ServiceAudioToggle: React.FC = () => {
     <p>
       <label htmlFor="service-audio">
         <input type="checkbox" id="service-audio" checked={serviceAudio} onChange={event => setServiceAudio(event.target.checked)} /> Build
-        announcement audio on our server (beta)
+        announcement audio on our server
       </label>
       <br />
       <small>

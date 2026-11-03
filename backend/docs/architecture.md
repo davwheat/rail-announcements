@@ -231,7 +231,7 @@ TypeScript and records what it does:
   `playAudioFiles`, runs each tab's play handler over the tab's default state,
   its presets, every value of every dropdown, generated lists for custom
   options such as calling points, and seeded random mixes, and records the
-  clips. About 41,000 cases over the 16 systems, replayed by each package's
+  clips. About 42,000 cases over the 19 systems, replayed by each package's
   `parity_test.go` through `systems/paritytest`.
 - **Live announcements.** 205 real movements captured from production, each
   turned into every kind of announcement, plus variations that real traffic

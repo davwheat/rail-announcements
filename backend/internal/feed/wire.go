@@ -158,6 +158,7 @@ func calls(in []*livepb.Call) []Call {
 			DetachFront:      c.DetachFront,
 			FalseDestination: optionalLocation(c.GetFalseDestination()),
 			CoachCount:       count(c.CoachCount),
+			Units:            c.GetUnits(),
 			FormationChange:  formationChange(c.GetFormationChange()),
 		}
 	}
@@ -223,6 +224,7 @@ func movement(m *livepb.Movement) Movement {
 		CancelReason:     reason(m.GetCancelReason()),
 		DelayReason:      reason(m.GetDelayReason()),
 		CoachCount:       count(m.CoachCount),
+		Units:            m.GetUnits(),
 		LoadingPercent:   count(m.LoadingPercent),
 		ReverseFormation: m.ReverseFormation,
 		FalseDestination: optionalLocation(m.GetFalseDestination()),

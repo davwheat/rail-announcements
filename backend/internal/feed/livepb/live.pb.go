@@ -2337,8 +2337,17 @@ type Call struct {
 	// The coaches that leave or join the train at this call. Unset when none
 	// do, or when nothing says.
 	FormationChange *FormationChange `protobuf:"bytes,12,opt,name=formation_change,json=formationChange,proto3" json:"formation_change,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	// The units that Gemini allocates to the train at this call, by the number
+	// the allocation gives each one, such as "450082": the formation it leaves
+	// in, or at its last call the one it arrives in. Its first three digits are
+	// the class of train, and its fourth can tell a subclass apart (458/4 from
+	// 458/5). Units only, never a locomotive or a coaching set, each once, in
+	// the allocation's order. That order isn't to be trusted for which end of
+	// the train each unit is at. Empty when no allocation is in force at the
+	// call, or when it names no units: Darwin's own formation is never used.
+	Units         []string `protobuf:"bytes,13,rep,name=units,proto3" json:"units,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Call) Reset() {
@@ -2451,6 +2460,13 @@ func (x *Call) GetCoachCount() int32 {
 func (x *Call) GetFormationChange() *FormationChange {
 	if x != nil {
 		return x.FormationChange
+	}
+	return nil
+}
+
+func (x *Call) GetUnits() []string {
+	if x != nil {
+		return x.Units
 	}
 	return nil
 }
@@ -2869,8 +2885,11 @@ type Movement struct {
 	Td               *TdEvidence            `protobuf:"bytes,38,opt,name=td,proto3" json:"td,omitempty"`
 	// The coaches that leave or join the train at this station.
 	FormationChange *FormationChange `protobuf:"bytes,39,opt,name=formation_change,json=formationChange,proto3" json:"formation_change,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	// The units that Gemini allocates to the train at this station, as a call's
+	// `units` are.
+	Units         []string `protobuf:"bytes,40,rep,name=units,proto3" json:"units,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Movement) Reset() {
@@ -3172,6 +3191,13 @@ func (x *Movement) GetTd() *TdEvidence {
 func (x *Movement) GetFormationChange() *FormationChange {
 	if x != nil {
 		return x.FormationChange
+	}
+	return nil
+}
+
+func (x *Movement) GetUnits() []string {
+	if x != nil {
+		return x.Units
 	}
 	return nil
 }
@@ -3569,7 +3595,7 @@ const file_darwin_live_v2_live_proto_rawDesc = "" +
 	"\r_cycle_spacesB\a\n" +
 	"\x05_food\"<\n" +
 	"\tCoachList\x12/\n" +
-	"\acoaches\x18\x01 \x03(\v2\x15.darwin.live.v2.CoachR\acoaches\"\xde\x04\n" +
+	"\acoaches\x18\x01 \x03(\v2\x15.darwin.live.v2.CoachR\acoaches\"\xf4\x04\n" +
 	"\x04Call\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x124\n" +
 	"\blocation\x18\x02 \x01(\v2\x18.darwin.live.v2.LocationR\blocation\x12/\n" +
@@ -3586,7 +3612,8 @@ const file_darwin_live_v2_live_proto_rawDesc = "" +
 	" \x01(\v2\x18.darwin.live.v2.LocationR\x10falseDestination\x12$\n" +
 	"\vcoach_count\x18\v \x01(\x05H\x02R\n" +
 	"coachCount\x88\x01\x01\x12J\n" +
-	"\x10formation_change\x18\f \x01(\v2\x1f.darwin.live.v2.FormationChangeR\x0fformationChangeB\r\n" +
+	"\x10formation_change\x18\f \x01(\v2\x1f.darwin.live.v2.FormationChangeR\x0fformationChange\x12\x14\n" +
+	"\x05units\x18\r \x03(\tR\x05unitsB\r\n" +
 	"\v_activitiesB\x0f\n" +
 	"\r_detach_frontB\x0e\n" +
 	"\f_coach_count\"\x87\x01\n" +
@@ -3629,7 +3656,7 @@ const file_darwin_live_v2_live_proto_rawDesc = "" +
 	"\bposition\x18\x01 \x01(\x05R\bposition\x12\x1a\n" +
 	"\bplatform\x18\x02 \x01(\tR\bplatform\x129\n" +
 	"\n" +
-	"updated_at\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\xd6\x0f\n" +
+	"updated_at\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\xec\x0f\n" +
 	"\bMovement\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x10\n" +
 	"\x03rid\x18\x02 \x01(\tR\x03rid\x12\x1f\n" +
@@ -3679,7 +3706,8 @@ const file_darwin_live_v2_live_proto_rawDesc = "" +
 	"\vtrain_order\x18% \x01(\v2\x1a.darwin.live.v2.TrainOrderR\n" +
 	"trainOrder\x12*\n" +
 	"\x02td\x18& \x01(\v2\x1a.darwin.live.v2.TdEvidenceR\x02td\x12J\n" +
-	"\x10formation_change\x18' \x01(\v2\x1f.darwin.live.v2.FormationChangeR\x0fformationChangeB\x06\n" +
+	"\x10formation_change\x18' \x01(\v2\x1f.darwin.live.v2.FormationChangeR\x0fformationChange\x12\x14\n" +
+	"\x05units\x18( \x03(\tR\x05unitsB\x06\n" +
 	"\x04_uidB\v\n" +
 	"\t_headcodeB\x10\n" +
 	"\x0e_operator_codeB\x10\n" +

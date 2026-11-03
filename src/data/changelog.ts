@@ -599,6 +599,12 @@ const changelog: IChangelogVersion[] = [
       "[Amey Phil & Celia] Announce South Western Railway's short platforms on live trains, using the length its platform booklet gives for each class of train",
     ],
   },
+  {
+    date: '2026-11-03',
+    otherChanges: [
+      'Build announcement audio on our server by default, so a downloaded announcement is an MP3 file instead of a WAV file. To build announcements in your browser, clear the "Build announcement audio on our server" checkbox',
+    ],
+  },
 ]
 
 export default changelog

@@ -7,6 +7,7 @@ import NorthernTrainFx from './systems/rolling-stock/NorthernTrainFx'
 import AvantiPendolino from './systems/rolling-stock/AvantiPendolino'
 import WMTClass172 from './systems/rolling-stock/WMTClass172'
 import WMTClass323 from './systems/rolling-stock/WMTClass323'
+import MerseyrailClass777 from './systems/rolling-stock/MerseyrailClass777'
 
 import AmeyPhil from './systems/stations/AmeyPhil'
 import AmeyCelia from './systems/stations/AmeyCelia'
@@ -36,6 +37,7 @@ export const AllTrainAnnouncementSystems: AnnouncementSystemClass<TrainAnnouncem
   AvantiPendolino,
   WMTClass172,
   WMTClass323,
+  MerseyrailClass777,
 ]
 
 export const AllStationAnnouncementSystems: AnnouncementSystemClass<StationAnnouncementSystem>[] = [AmeyPhil, AmeyCelia, ScotRail, Banedanmark]

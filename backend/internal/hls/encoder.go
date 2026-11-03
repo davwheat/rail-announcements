@@ -56,6 +56,11 @@ func StartEncoder(ctx context.Context, ffmpeg string, codec Codec, sampleRate, b
 		output, readFrame = []string{"-c:a", "libmp3lame", "-write_xing", "0", "-id3v2_version", "0", "-f", "mp3"}, readMP3Frame
 	}
 	args := []string{"-v", "error", "-nostdin",
+		// ffmpeg 8.0 probes a raw PCM pipe for five seconds of audio before it
+		// encodes any of it, and a stream that has just started starves until
+		// then. The format and the rate are given, so there's nothing to probe,
+		// and the smallest probe size ends the probing at the first packet.
+		"-probesize", "32",
 		"-f", "s16le", "-ar", fmt.Sprint(sampleRate), "-ac", "1", "-i", "-",
 		"-b:a", fmt.Sprintf("%dk", bitrateKbps),
 		// Without these ffmpeg holds frames back, and a live stream starves.

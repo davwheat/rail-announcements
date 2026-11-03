@@ -206,10 +206,10 @@ development, the **Announcement service URL** setting overrides it, and the defa
 
 ### The same setting, for the rest of the site
 
-**Announcement audio** is one setting for the whole site, held in `serviceAudioState` and also shown as a checkbox in the footer. With it on, a
-tab asks the service to build its announcement: the pane names the tab and its state on `AnnouncementSystem.serviceRequest`, and `playAudioFiles`
-posts them to `POST /v1/announcements` and plays or saves the MP3 in place of the clips it was given. `src/live/announcementService.ts` holds
-that client.
+**Announcement audio** is one setting for the whole site, held in `serviceAudioState` and also shown as a checkbox in the footer. It's on unless
+the listener turns it off, and a production build ignores it unless `NEXT_PUBLIC_ANNOUNCEMENT_SERVICE_URL` is set. With it on, a tab asks the
+service to build its announcement: the pane names the tab and its state on `AnnouncementSystem.serviceRequest`, and `playAudioFiles` posts them
+to `POST /v1/announcements` and plays or saves the MP3 in place of the clips it was given. `src/live/announcementService.ts` holds that client.
 
 The player reads the request, rather than the pane calling the service, so that the tab's play handler still runs: the handler is what refuses a
 state it cannot announce, and what keeps the Piccadilly line's passenger information display in step with the audio. Button tabs are built the

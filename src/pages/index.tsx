@@ -53,6 +53,7 @@ const Systems = [
       { title: 'Avanti West Coast Pendolino', url: '/rolling-stock/avanti-west-coast-pendolino' },
       { title: 'WMR & LNR Class 172', url: '/rolling-stock/wmt-class-172' },
       { title: 'WMR Class 323', url: '/rolling-stock/wmt-class-323' },
+      { title: 'Merseyrail Class 777', url: '/rolling-stock/merseyrail-class-777' },
     ],
   },
   {

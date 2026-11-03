@@ -4,6 +4,7 @@ import TfWTrainFx from './systems/rolling-stock/TfWTrainFx'
 import TfWTelevic from './systems/rolling-stock/TfWTelevic'
 import FGWTrainFx from './systems/rolling-stock/FGWTrainFx'
 import NorthernTrainFx from './systems/rolling-stock/NorthernTrainFx'
+import MerseyrailClass777 from './systems/rolling-stock/MerseyrailClass777'
 
 import AmeyPhil from './systems/stations/AmeyPhil'
 import AmeyCelia from './systems/stations/AmeyCelia'
@@ -30,6 +31,7 @@ export const AllTrainAnnouncementSystems: AnnouncementSystemClass<TrainAnnouncem
   LnerAzuma,
   FGWTrainFx,
   NorthernTrainFx,
+  MerseyrailClass777,
 ]
 
 export const AllStationAnnouncementSystems: AnnouncementSystemClass<StationAnnouncementSystem>[] = [AmeyPhil, AmeyCelia, ScotRail, Banedanmark]

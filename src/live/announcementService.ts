@@ -1,5 +1,5 @@
-/** Where rail-announcements-backend is. It builds announcements itself: as a live stream for a
- *  station, and as one MP3 for the state of a tab. */
+/** Where the announcement service in `backend/` is. It builds announcements itself: as a live
+ *  stream for a station, and as one MP3 for the state of a tab. */
 export const ANNOUNCEMENT_SERVICE_URL = process.env.NEXT_PUBLIC_ANNOUNCEMENT_SERVICE_URL || 'http://localhost:8090'
 
 /** Without a deployed service there is nothing to ask, so a production build only offers audio

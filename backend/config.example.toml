@@ -1,0 +1,34 @@
+# Copy to config.toml, or in production to deploy/config.toml. Every key is
+# optional, and these are the defaults.
+# An environment variable overrides a key: API.Port is API_PORT.
+
+EnableDebugLogs = false
+
+[API]
+Port = 8090
+# The websites that may play streams and post states. "*" allows any, and
+# "https://*.example.com" allows every subdomain of example.com but not
+# example.com itself.
+AllowedOrigins = ["*"]
+
+[Feed]
+# The Darwin Browser instance whose announcement streams this service speaks.
+DarwinBrowserURL = "https://darwinbrowser.com"
+
+[Audio]
+# The website's audio directory: the one that holds station/ketech. The
+# default is the repository's, seen from this directory.
+Directory = "../audio"
+FFmpeg = "ffmpeg"
+# Decoded clips held in memory.
+CacheMB = 256
+
+[Stream]
+# Shorter segments mean less delay and more requests. One second gives a
+# listener about two seconds of delay.
+SegmentDuration = "1s"
+PlaylistWindow = 8
+BitrateKbps = 64
+# A stream stops this long after its last request.
+IdleTimeout = "45s"
+MaxStreams = 200

@@ -1,0 +1,168 @@
+{
+ "AFTER_TIME_DELAY": 200,
+ "AFTER_TRACK_DELAY": 120,
+ "BETWEEN_DESTINATION_DELAY": 100,
+ "COUNTDOWNS": [
+  {
+   "value": "moment",
+   "title": "Om et øjeblik / In a moment",
+   "da": "oejeblik",
+   "en": "amoment"
+  },
+  {
+   "value": "few",
+   "title": "Om få minutter / In a few minutes",
+   "da": "faaminutter",
+   "en": "fewminutes"
+  },
+  {
+   "value": "ca5min",
+   "title": "Om ca. 5 min. / In approx. 5 min",
+   "da": "ca5min",
+   "en": "ca5min"
+  },
+  {
+   "value": "ca6min",
+   "title": "Om ca. 6 min. / In approx. 6 min",
+   "da": "ca6min",
+   "en": "ca6min"
+  },
+  {
+   "value": "ca7min",
+   "title": "Om ca. 7 min. / In approx. 7 min",
+   "da": "ca7min",
+   "en": "ca7min"
+  },
+  {
+   "value": "ca8min",
+   "title": "Om ca. 8 min. / In approx. 8 min",
+   "da": "ca8min",
+   "en": "ca8min"
+  },
+  {
+   "value": "ca9min",
+   "title": "Om ca. 9 min. / In approx. 9 min",
+   "da": "ca9min",
+   "en": "ca9min"
+  },
+  {
+   "value": "ca10min",
+   "title": "Om ca. 10 min. / In approx. 10 min",
+   "da": "ca10min",
+   "en": "ca10min"
+  },
+  {
+   "value": "ca12-15min",
+   "title": "Om ca. 12-15 min. / In approx. 12-15 min",
+   "da": "ca12-15min",
+   "en": "ca12-15min"
+  },
+  {
+   "value": "ca15-20min",
+   "title": "Om ca. 15-20 min. / In approx. 15-20 min",
+   "da": "ca15-20min",
+   "en": "ca15-20min"
+  },
+  {
+   "value": "ca20-25min",
+   "title": "Om ca. 20-25 min. / In approx. 20-25 min",
+   "da": "ca20-25min",
+   "en": "ca20-25min"
+  },
+  {
+   "value": "ca25-30min",
+   "title": "Om ca. 25-30 min. / In approx. 25-30 min",
+   "da": "ca25-30min",
+   "en": "ca25-30min"
+  },
+  {
+   "value": "ca35min",
+   "title": "Om ca. 35 min. / In approx. 35 min",
+   "da": "ca35min",
+   "en": "ca35min"
+  },
+  {
+   "value": "ca40min",
+   "title": "Om ca. 40 min. / In approx. 40 min",
+   "da": "ca40min",
+   "en": "ca40min"
+  },
+  {
+   "value": "ca45min",
+   "title": "Om ca. 45 min. / In approx. 45 min",
+   "da": "ca45min",
+   "en": "ca45min"
+  },
+  {
+   "value": "ca50min",
+   "title": "Om ca. 50 min. / In approx. 50 min",
+   "da": "ca50min",
+   "en": "ca50min"
+  },
+  {
+   "value": "ca55min",
+   "title": "Om ca. 55 min. / In approx. 55 min",
+   "da": "ca55min",
+   "en": "ca55min"
+  },
+  {
+   "value": "ca60min",
+   "title": "Om ca. 60 min. / In approx. 60 min",
+   "da": "ca60min",
+   "en": "ca60min"
+  },
+  {
+   "value": "ca65min",
+   "title": "Om ca. 65 min. / In approx. 65 min",
+   "da": "ca65min",
+   "en": "ca65min"
+  },
+  {
+   "value": "ca70min",
+   "title": "Om ca. 70 min. / In approx. 70 min",
+   "da": "ca70min",
+   "en": "ca70min"
+  },
+  {
+   "value": "ca75min",
+   "title": "Om ca. 75 min. / In approx. 75 min",
+   "da": "ca75min",
+   "en": "ca75min"
+  },
+  {
+   "value": "ca80min",
+   "title": "Om ca. 80 min. / In approx. 80 min",
+   "da": "ca80min",
+   "en": "ca80min"
+  },
+  {
+   "value": "ca85min",
+   "title": "Om ca. 85 min. / In approx. 85 min",
+   "da": "ca85min",
+   "en": "ca85min"
+  },
+  {
+   "value": "ca90min",
+   "title": "Om ca. 90 min. / In approx. 90 min",
+   "da": "ca90min",
+   "en": "ca90min"
+  }
+ ],
+ "DISRUPTIONS": [
+  {
+   "value": "awaitstime",
+   "title": "Afventer tid / Awaiting a departure time",
+   "da": "awaitstime",
+   "en": "awaitstime"
+  },
+  {
+   "value": "cancelled",
+   "title": "Er desværre aflyst / Has been cancelled",
+   "da": "canceled",
+   "en": "canceled"
+  }
+ ],
+ "LANGUAGE_DELAY": 1000,
+ "SECTION_DELAY": 225,
+ "UNKNOWN_TRACK": "unknown"
+}

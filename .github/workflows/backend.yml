@@ -1,0 +1,109 @@
+name: Backend
+
+# The service plays the recordings in audio/, so a change to them is tested and
+# deployed like a change to the service itself.
+on:
+  push:
+    branches: [main, deploy]
+    paths:
+      - backend/**
+      - audio/**
+      - .github/workflows/backend.yml
+  pull_request:
+    paths:
+      - backend/**
+      - audio/**
+      - .github/workflows/backend.yml
+
+permissions:
+  contents: read
+
+# A newer push cancels the run it supersedes, except on the deploy branch,
+# where a rollout stopped halfway leaves the replicas on different versions.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/deploy' }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
+      # Without ffmpeg, the tests that play the audio skip themselves, and the
+      # run passes without them.
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install --yes --no-install-recommends ffmpeg
+      - run: go build ./...
+      - run: go vet ./...
+      - run: go test ./...
+
+  deploy:
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/deploy'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: production
+    env:
+      DEPLOY_HOST: main.hetzner.cloud.davw.network
+      # Pinned, so that the runner never trusts whatever key it is offered.
+      # Replace it when the host is rebuilt.
+      DEPLOY_HOST_KEY: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDYPWJJdYSv6NglXBxZQUzVPbq9XZI8WYS+rfJU+aNKx
+    steps:
+      - name: Configure SSH
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          if [ -z "$DEPLOY_SSH_KEY" ]; then
+            echo "::error::Add the deploy key's private key as the DEPLOY_SSH_KEY secret."
+            exit 1
+          fi
+          install -d -m 700 ~/.ssh
+          # A key pasted into a secret often loses its final newline, and ssh
+          # rejects a key file without one.
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          echo "$DEPLOY_HOST $DEPLOY_HOST_KEY" > ~/.ssh/known_hosts
+          cat > ~/.ssh/config <<EOF
+          Host $DEPLOY_HOST
+            User railannouncements
+            IdentityFile ~/.ssh/deploy_key
+            IdentitiesOnly yes
+            BatchMode yes
+            StrictHostKeyChecking yes
+            ServerAliveInterval 15
+            ServerAliveCountMax 4
+          EOF
+
+      - name: Deploy
+        id: deploy
+        # Unlike the default shell, this one sets pipefail, so the step fails
+        # when the deploy does and not only when tee does.
+        shell: bash
+        # A login shell reads the profile that points Docker at the rootless
+        # daemon. The commit keeps the host from deploying a newer push whose
+        # tests haven't passed yet.
+        run: >
+          ssh "$DEPLOY_HOST"
+          "bash --login -c '~/rail-announcements/backend/deploy/deploy.sh $GITHUB_SHA'"
+          2>&1 | tee "$RUNNER_TEMP/deploy.log"
+
+      - name: Summarize
+        if: always() && steps.deploy.outcome != 'skipped'
+        env:
+          OUTCOME: ${{ steps.deploy.outcome }}
+        run: |
+          {
+            echo "### Deploy of \`${GITHUB_SHA::7}\`: $OUTCOME"
+            echo '```'
+            tail -n 50 "$RUNNER_TEMP/deploy.log"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

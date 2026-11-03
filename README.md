@@ -15,6 +15,11 @@ A website to generate and play UK railway announcements.
 When Phil Sayer slowly begun leaving the railway, I wished I had gotten more recordings of his announcements. Because I didn't do that back then,
 I decided I'll do it proactively this time!
 
+## The announcement service
+
+The `backend/` directory holds the Go service that streams and renders announcements for the website. It plays the recordings in `audio/`, and
+its announcement logic is a port of the website's TypeScript. See [backend/README.md](backend/README.md).
+
 ## Contributing
 
 > ⚠️ **Please follow these guidelines before submitting any files. If you don't, your PR may not be accepted.**

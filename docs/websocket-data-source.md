@@ -162,8 +162,8 @@ setting for the listener to choose.
 ## Announcements streamed from the announcement service
 
 With **Announcement audio** set to **Streamed from the announcement service**, the live trains page doesn't build announcements. The announcement
-service (`../rail-announcements-backend`) listens to the same feed, builds each announcement from the same recordings, and serves the audio as a
-live stream. The page doesn't open the announcement stream in this mode, and its queue stays empty.
+service (`backend/`) listens to the same feed, builds each announcement from the same recordings, and serves the audio as a live stream. The page
+doesn't open the announcement stream in this mode, and its queue stays empty.
 
 `src/live/audioStreams.ts` asks for one stream for the whole station, and `AnnouncementStreams` plays it through one audio element. The stream's
 URL lists the announcement zones that have a voice. The service lets zones speak over each other and mixes them, and the platforms within a zone
@@ -239,13 +239,13 @@ feed has no such station.
 
 ### Keep the service's copy of the logic in step
 
-The service holds a Go port of every registered system, of `src/live/playAnnouncement.ts` and of `src/live/playbackQueue.ts`, and this repository
+The service holds a Go port of every registered system, of `src/live/playAnnouncement.ts` and of `src/live/playbackQueue.ts`, and the TypeScript
 is the reference for all of it. `npm run export:backend` runs every tab of every registered system through its real play handler — over the tab's
 default state, its presets, every value of every dropdown, generated lists for custom options such as calling points, and seeded random mixes —
 and runs the Amey voices over captured movements as well. It writes each system's own data tables, the voices' tables and the expected clips into
-`../rail-announcements-backend`, whose tests replay about 41,000 cases. After you change any system's play handler, or how a live announcement is
-worded, queued or interrupted, run the export and port the change there. `tests/backend-parity` holds the generator: `systems.ts` covers the
-systems, and `generate.ts` the Amey voices, the queue and the data they read.
+`backend/`, whose tests replay about 41,000 cases. After you change any system's play handler, or how a live announcement is worded, queued or
+interrupted, run the export and port the change there. `tests/backend-parity` holds the generator: `systems.ts` covers the systems, and
+`generate.ts` the Amey voices, the queue and the data they read.
 
 Run `yarn test:live` for the decoder, reducer, reconnect, queue, expiry, withdrawal, revision, rendered-audio, stream URL and voice-adapter
 regressions. It uses Node's test runner and Wrangler's existing esbuild compiler. Run `yarn build` for the production build.

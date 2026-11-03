@@ -1,0 +1,5265 @@
+{
+ "DESCRIPTION": "Generate bilingual Danish and English platform announcements for the Danish railway network using real Banedanmark station audio recordings.",
+ "AUDIO_CDN": "https://cdn.railannouncements.co.uk",
+ "livePlayback": null,
+ "NAME": "Banedanmark Stations (Denmark)",
+ "ID": "BANEDANMARK_V1",
+ "FILE_PREFIX": "Banedanmark",
+ "SYSTEM_TYPE": "station",
+ "baseOptions": {
+  "destinations": {
+   "name": "Destinations",
+   "type": "custom",
+   "props": {
+    "options": [
+     {
+      "title": "Aalborg",
+      "value": "ab"
+     },
+     {
+      "title": "Aalborg Lufthavn",
+      "value": "abl"
+     },
+     {
+      "title": "Aalborg og Lindholm",
+      "value": "aboglih"
+     },
+     {
+      "title": "Aalborg Vestby",
+      "value": "abv"
+     },
+     {
+      "title": "Aarhus",
+      "value": "ar"
+     },
+     {
+      "title": "Aarhus via København Syd",
+      "value": "arvianel"
+     },
+     {
+      "title": "Aarup",
+      "value": "ap"
+     },
+     {
+      "title": "Alken",
+      "value": "ak"
+     },
+     {
+      "title": "Arden",
+      "value": "ad"
+     },
+     {
+      "title": "Arnbjerg",
+      "value": "arn"
+     },
+     {
+      "title": "Assedrup",
+      "value": "asd"
+     },
+     {
+      "title": "Aulum",
+      "value": "uu"
+     },
+     {
+      "title": "Bedsted Thy",
+      "value": "bn"
+     },
+     {
+      "title": "Berlin",
+      "value": "berlin"
+     },
+     {
+      "title": "Berlin Hauptbahnhof",
+      "value": "dbbhbf"
+     },
+     {
+      "title": "Berlin Ostbahnhof",
+      "value": "dbbhf"
+     },
+     {
+      "title": "Berlin via Hamborg",
+      "value": "dbbhfviadbhmb"
+     },
+     {
+      "title": "Birk Centerpark",
+      "value": "bic"
+     },
+     {
+      "title": "Bjerringbro",
+      "value": "bj"
+     },
+     {
+      "title": "Bording",
+      "value": "bg"
+     },
+     {
+      "title": "Bornholm",
+      "value": "bornholm"
+     },
+     {
+      "title": "Borris",
+      "value": "bs"
+     },
+     {
+      "title": "Borup",
+      "value": "bo"
+     },
+     {
+      "title": "Bramming",
+      "value": "bm"
+     },
+     {
+      "title": "Brande",
+      "value": "bb"
+     },
+     {
+      "title": "Bred",
+      "value": "bd"
+     },
+     {
+      "title": "Bredebro",
+      "value": "bw"
+     },
+     {
+      "title": "Brejning",
+      "value": "bet"
+     },
+     {
+      "title": "Brønderslev",
+      "value": "bl"
+     },
+     {
+      "title": "Brøns",
+      "value": "brr"
+     },
+     {
+      "title": "Brørup",
+      "value": "bp"
+     },
+     {
+      "title": "Bur",
+      "value": "bu"
+     },
+     {
+      "title": "Børkop",
+      "value": "bk"
+     },
+     {
+      "title": "Copenhagen South Station",
+      "value": "kbhs"
+     },
+     {
+      "title": "Den Permanente",
+      "value": "per"
+     },
+     {
+      "title": "Døllefjelde-Musse",
+      "value": "df"
+     },
+     {
+      "title": "Døstrup Sønderjylland",
+      "value": "ds"
+     },
+     {
+      "title": "Ejby",
+      "value": "eb"
+     },
+     {
+      "title": "Engesvang",
+      "value": "ev"
+     },
+     {
+      "title": "Esbjerg",
+      "value": "es"
+     },
+     {
+      "title": "Eskilstrup",
+      "value": "ek"
+     },
+     {
+      "title": "Europaplads",
+      "value": "eu"
+     },
+     {
+      "title": "Faxe Syd",
+      "value": "fa"
+     },
+     {
+      "title": "Festivalpladsen",
+      "value": "rof"
+     },
+     {
+      "title": "Flensburg",
+      "value": "dbflb"
+     },
+     {
+      "title": "Frederikshavn",
+      "value": "fh"
+     },
+     {
+      "title": "Fruens Bøge",
+      "value": "frs"
+     },
+     {
+      "title": "Gadstrup",
+      "value": "gt"
+     },
+     {
+      "title": "Gedser",
+      "value": "ge"
+     },
+     {
+      "title": "Gelsted",
+      "value": "gd"
+     },
+     {
+      "title": "Gilleleje",
+      "value": "gll"
+     },
+     {
+      "title": "Give",
+      "value": "gw"
+     },
+     {
+      "title": "Gjesing",
+      "value": "gje"
+     },
+     {
+      "title": "Glumsø",
+      "value": "gz"
+     },
+     {
+      "title": "Gredstedbro",
+      "value": "gs"
+     },
+     {
+      "title": "Grenaa",
+      "value": "gr"
+     },
+     {
+      "title": "Grindsted",
+      "value": "gi"
+     },
+     {
+      "title": "Gråsten",
+      "value": "gst"
+     },
+     {
+      "title": "Guldager",
+      "value": "gu"
+     },
+     {
+      "title": "Göteborg",
+      "value": "sweg"
+     },
+     {
+      "title": "Göteborg via Københavns Hovedbanegård og Københavns Lufthavn (CPH Airport)",
+      "value": "swegviakhogcph"
+     },
+     {
+      "title": "Göteborg via Københavns Lufthavn (CPH Airport) og Malmö",
+      "value": "swegviacphogswem"
+     },
+     {
+      "title": "Göteborg via Malmö",
+      "value": "swegviaswem"
+     },
+     {
+      "title": "Gødstrup",
+      "value": "gp"
+     },
+     {
+      "title": "Hadsten",
+      "value": "ha"
+     },
+     {
+      "title": "Hadsund Nord",
+      "value": "hn"
+     },
+     {
+      "title": "Hamborg",
+      "value": "dbhmb"
+     },
+     {
+      "title": "Hamborg og Berlin",
+      "value": "dbhmbogdbbhf"
+     },
+     {
+      "title": "Hammerum",
+      "value": "hu"
+     },
+     {
+      "title": "Haslev",
+      "value": "hz"
+     },
+     {
+      "title": "Havdrup",
+      "value": "hd"
+     },
+     {
+      "title": "Hedehusene",
+      "value": "hh"
+     },
+     {
+      "title": "Hedensted",
+      "value": "hed"
+     },
+     {
+      "title": "Hee",
+      "value": "he"
+     },
+     {
+      "title": "Hellerup",
+      "value": "hl"
+     },
+     {
+      "title": "Helsingborg",
+      "value": "swehb"
+     },
+     {
+      "title": "Helsingør",
+      "value": "hg"
+     },
+     {
+      "title": "Helsingør via Københavns Hovedbanegård",
+      "value": "hgviakh"
+     },
+     {
+      "title": "Herfølge",
+      "value": "hf"
+     },
+     {
+      "title": "Herning",
+      "value": "hr"
+     },
+     {
+      "title": "Herning Messecenter",
+      "value": "hrm"
+     },
+     {
+      "title": "Herning via Skjern",
+      "value": "hrviasj"
+     },
+     {
+      "title": "Himlingøje",
+      "value": "hi"
+     },
+     {
+      "title": "Himlingøje via Fredensborg",
+      "value": "hiviafd"
+     },
+     {
+      "title": "Himlingøje via Gilleleje",
+      "value": "hiviagll"
+     },
+     {
+      "title": "Hjallese",
+      "value": "hjs"
+     },
+     {
+      "title": "Hjerm",
+      "value": "hm"
+     },
+     {
+      "title": "Hjortshøj",
+      "value": "ht"
+     },
+     {
+      "title": "Hjørring",
+      "value": "hj"
+     },
+     {
+      "title": "Hj況ring 漵t",
+      "value": "hjoe"
+     },
+     {
+      "title": "Hobro",
+      "value": "hb"
+     },
+     {
+      "title": "Holbæk",
+      "value": "hk"
+     },
+     {
+      "title": "Holme-Olstrup",
+      "value": "ol"
+     },
+     {
+      "title": "Holmstrup",
+      "value": "hp"
+     },
+     {
+      "title": "Holstebro",
+      "value": "ho"
+     },
+     {
+      "title": "Holsted",
+      "value": "hq"
+     },
+     {
+      "title": "Hornbæk",
+      "value": "hnk"
+     },
+     {
+      "title": "Hornslet",
+      "value": "os"
+     },
+     {
+      "title": "Horsens",
+      "value": "hs"
+     },
+     {
+      "title": "Hovmarken",
+      "value": "lpt"
+     },
+     {
+      "title": "Humlebæk",
+      "value": "hum"
+     },
+     {
+      "title": "Humlum",
+      "value": "um"
+     },
+     {
+      "title": "Hurup Thy",
+      "value": "ur"
+     },
+     {
+      "title": "Hvalsø",
+      "value": "hv"
+     },
+     {
+      "title": "Hvidbjerg",
+      "value": "hw"
+     },
+     {
+      "title": "Hviding",
+      "value": "vd"
+     },
+     {
+      "title": "Hässleholm",
+      "value": "swehm"
+     },
+     {
+      "title": "Hässleholm via Københavns Hovedbanegård og Københavns Lufthavn (CPH Airport)",
+      "value": "swehmviakhogcph"
+     },
+     {
+      "title": "Hässleholm via Københavns Lufthavn (CPH Airport) og Malmö",
+      "value": "swehmviacphogswem"
+     },
+     {
+      "title": "Hässleholm via Malmö",
+      "value": "swehmviaswem"
+     },
+     {
+      "title": "Hørning",
+      "value": "hx"
+     },
+     {
+      "title": "Ikast",
+      "value": "ik"
+     },
+     {
+      "title": "Jelling",
+      "value": "jl"
+     },
+     {
+      "title": "Jerne",
+      "value": "jne"
+     },
+     {
+      "title": "Jyderup",
+      "value": "jy"
+     },
+     {
+      "title": "Kalundborg",
+      "value": "kb"
+     },
+     {
+      "title": "Kauslunde",
+      "value": "ka"
+     },
+     {
+      "title": "Klampenborg",
+      "value": "kl"
+     },
+     {
+      "title": "Kliplev",
+      "value": "kw"
+     },
+     {
+      "title": "Knabstrup",
+      "value": "ks"
+     },
+     {
+      "title": "Kokkedal",
+      "value": "ok"
+     },
+     {
+      "title": "Kolding",
+      "value": "kd"
+     },
+     {
+      "title": "Kolind",
+      "value": "ko"
+     },
+     {
+      "title": "Kristianstad",
+      "value": "sweks"
+     },
+     {
+      "title": "Kristianstad via Københavns Hovedbanegård og Københavns Lufthavn (CPH Airport)",
+      "value": "sweksviakhogcph"
+     },
+     {
+      "title": "Kristianstad via Københavns Lufthavn (CPH Airport) og Malmö",
+      "value": "sweksviacphogswem"
+     },
+     {
+      "title": "Kristianstad via Malmö",
+      "value": "sweksviaswem"
+     },
+     {
+      "title": "Kvissel",
+      "value": "kv"
+     },
+     {
+      "title": "Kværndrup",
+      "value": "kvs"
+     },
+     {
+      "title": "København Syd",
+      "value": "nel"
+     },
+     {
+      "title": "Københavns Hovedbanegård",
+      "value": "kh"
+     },
+     {
+      "title": "Københavns Hovedbanegård via København Syd",
+      "value": "khvianel"
+     },
+     {
+      "title": "Københavns Hovedbanegård via Køge",
+      "value": "khviakj"
+     },
+     {
+      "title": "Københavns Lufthavn (CPH Airport)",
+      "value": "cph"
+     },
+     {
+      "title": "Københavns Lufthavn (CPH Airport) via København Syd",
+      "value": "cphvianel"
+     },
+     {
+      "title": "Københavns Lufthavn (CPH Airport) via Københavns Hovedbanegård",
+      "value": "cphviakh"
+     },
+     {
+      "title": "Køge",
+      "value": "kj"
+     },
+     {
+      "title": "Køge Nord",
+      "value": "kjn"
+     },
+     {
+      "title": "Langeskov",
+      "value": "lv"
+     },
+     {
+      "title": "Langå",
+      "value": "lg"
+     },
+     {
+      "title": "Laven",
+      "value": "la"
+     },
+     {
+      "title": "Lejre",
+      "value": "lj"
+     },
+     {
+      "title": "Lem",
+      "value": "lm"
+     },
+     {
+      "title": "Lemvig",
+      "value": "lmv"
+     },
+     {
+      "title": "Lille Skensved",
+      "value": "lw"
+     },
+     {
+      "title": "Lindholm",
+      "value": "lih"
+     },
+     {
+      "title": "Lund",
+      "value": "swelu"
+     },
+     {
+      "title": "Lundby",
+      "value": "lu"
+     },
+     {
+      "title": "Lunderskov",
+      "value": "lk"
+     },
+     {
+      "title": "Lyngs",
+      "value": "ln"
+     },
+     {
+      "title": "Lystrup",
+      "value": "lp"
+     },
+     {
+      "title": "Løgten",
+      "value": "lt"
+     },
+     {
+      "title": "Malmö",
+      "value": "swem"
+     },
+     {
+      "title": "Malmö via Københavns Hovedbanegård og Københavns Lufthavn (CPH Airport)",
+      "value": "swemviakhogcph"
+     },
+     {
+      "title": "Malmö via Københavns Lufthavn (CPH Airport)",
+      "value": "swemviacph"
+     },
+     {
+      "title": "Middelfart",
+      "value": "md"
+     },
+     {
+      "title": "Nakskov",
+      "value": "nsk"
+     },
+     {
+      "title": "Nivå",
+      "value": "ni"
+     },
+     {
+      "title": "Nivå via Københavns Hovedbanegård",
+      "value": "niviakh"
+     },
+     {
+      "title": "Nyborg",
+      "value": "ng"
+     },
+     {
+      "title": "Nykøbing F",
+      "value": "nf"
+     },
+     {
+      "title": "Nykøbing F via København Syd",
+      "value": "nfvianel"
+     },
+     {
+      "title": "Nykøbing F via Køge",
+      "value": "nfviakj"
+     },
+     {
+      "title": "Nykøbing F via Ringsted",
+      "value": "nfviarg"
+     },
+     {
+      "title": "Nykøbing Sjælland",
+      "value": "nks"
+     },
+     {
+      "title": "Nørre Alslev",
+      "value": "nv"
+     },
+     {
+      "title": "Nørre Nebel",
+      "value": "nbl"
+     },
+     {
+      "title": "Nørre Åby",
+      "value": "na"
+     },
+     {
+      "title": "Nørreport",
+      "value": "kn"
+     },
+     {
+      "title": "Odder",
+      "value": "odd"
+     },
+     {
+      "title": "Oddesund Nord",
+      "value": "no"
+     },
+     {
+      "title": "Odense",
+      "value": "od"
+     },
+     {
+      "title": "Odense Sygehus",
+      "value": "oss"
+     },
+     {
+      "title": "Orehoved",
+      "value": "oh"
+     },
+     {
+      "title": "Padborg",
+      "value": "pa"
+     },
+     {
+      "title": "Pederstrup",
+      "value": "pds"
+     },
+     {
+      "title": "Randers",
+      "value": "rd"
+     },
+     {
+      "title": "Regstrup",
+      "value": "rt"
+     },
+     {
+      "title": "Rejsby",
+      "value": "rej"
+     },
+     {
+      "title": "Ribe",
+      "value": "rb"
+     },
+     {
+      "title": "Ribe Nørremark",
+      "value": "rbn"
+     },
+     {
+      "title": "Ringe",
+      "value": "re"
+     },
+     {
+      "title": "Ringkøbing",
+      "value": "rj"
+     },
+     {
+      "title": "Ringsted",
+      "value": "rg"
+     },
+     {
+      "title": "Roskilde",
+      "value": "ro"
+     },
+     {
+      "title": "Roskilde via Køge",
+      "value": "roviakj"
+     },
+     {
+      "title": "Rudme",
+      "value": "rus"
+     },
+     {
+      "title": "Rungsted Kyst",
+      "value": "ru"
+     },
+     {
+      "title": "Ry",
+      "value": "ry"
+     },
+     {
+      "title": "Rydsgård",
+      "value": "rdg"
+     },
+     {
+      "title": "Rødby Færge",
+      "value": "rf"
+     },
+     {
+      "title": "Rødby Færge via Køge",
+      "value": "rfviakj"
+     },
+     {
+      "title": "Rødekro",
+      "value": "rq"
+     },
+     {
+      "title": "Rødkærsbro",
+      "value": "rk"
+     },
+     {
+      "title": "Sejstrup",
+      "value": "sej"
+     },
+     {
+      "title": "Sig",
+      "value": "is"
+     },
+     {
+      "title": "Silkeborg",
+      "value": "sl"
+     },
+     {
+      "title": "Sindal",
+      "value": "sa"
+     },
+     {
+      "title": "Sjørring",
+      "value": "ri"
+     },
+     {
+      "title": "Skagen",
+      "value": "sgb"
+     },
+     {
+      "title": "Skalbjerg",
+      "value": "sc"
+     },
+     {
+      "title": "Skalborg",
+      "value": "og"
+     },
+     {
+      "title": "Skive",
+      "value": "sk"
+     },
+     {
+      "title": "Skjern",
+      "value": "sj"
+     },
+     {
+      "title": "Skolebakken",
+      "value": "bak"
+     },
+     {
+      "title": "Slagelse",
+      "value": "sg"
+     },
+     {
+      "title": "Slagelse via København Syd",
+      "value": "sgvianel"
+     },
+     {
+      "title": "Snedsted",
+      "value": "sne"
+     },
+     {
+      "title": "Snekkersten",
+      "value": "sq"
+     },
+     {
+      "title": "Sommerland Sjælland",
+      "value": "slt"
+     },
+     {
+      "title": "Sorø",
+      "value": "so"
+     },
+     {
+      "title": "Spangsbjerg",
+      "value": "esn"
+     },
+     {
+      "title": "Stenstrup",
+      "value": "sts"
+     },
+     {
+      "title": "Stenstrup Syd",
+      "value": "sis"
+     },
+     {
+      "title": "Stoholm",
+      "value": "sm"
+     },
+     {
+      "title": "Skanderborg",
+      "value": "sd"
+     },
+     {
+      "title": "Strib",
+      "value": "sb"
+     },
+     {
+      "title": "Struer",
+      "value": "str"
+     },
+     {
+      "title": "Struer via Aarhus",
+      "value": "strviaar"
+     },
+     {
+      "title": "Struer via Herning",
+      "value": "strviahr"
+     },
+     {
+      "title": "Struer via Langå",
+      "value": "strvialg"
+     },
+     {
+      "title": "Studsgård",
+      "value": "stu"
+     },
+     {
+      "title": "Støvring",
+      "value": "sr"
+     },
+     {
+      "title": "Svebølle",
+      "value": "se"
+     },
+     {
+      "title": "Svejbæk",
+      "value": "sv"
+     },
+     {
+      "title": "Svendborg",
+      "value": "svg"
+     },
+     {
+      "title": "Svendborg Vest",
+      "value": "svv"
+     },
+     {
+      "title": "Svenstrup",
+      "value": "sn"
+     },
+     {
+      "title": "Alvestad via Københavns Hovedbanegård og Københavns Lufthavn (CPH Airport)",
+      "value": "sweavviakhogcph"
+     },
+     {
+      "title": "Alvestad via Københavns Lufthavn (CPH Airport) og Malmö",
+      "value": "sweavviacphogswem"
+     },
+     {
+      "title": "Alvestad via Malmö",
+      "value": "sweavviaswem"
+     },
+     {
+      "title": "Kristianstad via Københavns Hovedbanegård og Københavns Lufthavn (CPH Airport)",
+      "value": "swecrviakhogcph"
+     },
+     {
+      "title": "Kristianstad via Københavns Lufthavn (CPH Airport) og Malmö",
+      "value": "swecrviacphogswem"
+     },
+     {
+      "title": "Kristianstad via Malmö",
+      "value": "swecrviaswem"
+     },
+     {
+      "title": "Stockholm via Københavns Hovedbanegård og Københavns Lufthavn (CPH Airport)",
+      "value": "swecstviakhogcph"
+     },
+     {
+      "title": "Stockholm via Københavns Lufthavn (CPH Airport) og Malmö",
+      "value": "swecstviacphogswem"
+     },
+     {
+      "title": "Stockholm via Malmö",
+      "value": "swecstviaswem"
+     },
+     {
+      "title": "Sønderborg",
+      "value": "sdb"
+     },
+     {
+      "title": "Tarm",
+      "value": "ta"
+     },
+     {
+      "title": "Taulov",
+      "value": "tl"
+     },
+     {
+      "title": "Thisted",
+      "value": "ti"
+     },
+     {
+      "title": "Thisted via Aarhus",
+      "value": "tiviaar"
+     },
+     {
+      "title": "Thisted via Skjern",
+      "value": "tiviasj"
+     },
+     {
+      "title": "Thyborøn",
+      "value": "thb"
+     },
+     {
+      "title": "Thyregod",
+      "value": "ty"
+     },
+     {
+      "title": "Tim",
+      "value": "tm"
+     },
+     {
+      "title": "Tinglev",
+      "value": "te"
+     },
+     {
+      "title": "Tistrup",
+      "value": "tr"
+     },
+     {
+      "title": "Tjæreborg",
+      "value": "tb"
+     },
+     {
+      "title": "Tolne",
+      "value": "to"
+     },
+     {
+      "title": "Tommerup",
+      "value": "tp"
+     },
+     {
+      "title": "Torsøvej",
+      "value": "tov"
+     },
+     {
+      "title": "Trekroner",
+      "value": "trk"
+     },
+     {
+      "title": "Troldhede",
+      "value": "td"
+     },
+     {
+      "title": "Tureby",
+      "value": "th"
+     },
+     {
+      "title": "Tyskland",
+      "value": "dbdb"
+     },
+     {
+      "title": "Tønder",
+      "value": "tdr"
+     },
+     {
+      "title": "Tønder Nord",
+      "value": "trn"
+     },
+     {
+      "title": "Uglev",
+      "value": "ul"
+     },
+     {
+      "title": "Ulfborg",
+      "value": "uf"
+     },
+     {
+      "title": "Ulstrup",
+      "value": "up"
+     },
+     {
+      "title": "Valby",
+      "value": "val"
+     },
+     {
+      "title": "Vallensbæk",
+      "value": "vlb"
+     },
+     {
+      "title": "Vamdrup",
+      "value": "vm"
+     },
+     {
+      "title": "Vangede",
+      "value": "ang"
+     },
+     {
+      "title": "Varde",
+      "value": "va"
+     },
+     {
+      "title": "Varde Kaserne",
+      "value": "vka"
+     },
+     {
+      "title": "Varde Nord",
+      "value": "vno"
+     },
+     {
+      "title": "Varpelev",
+      "value": "vp"
+     },
+     {
+      "title": "Vedbæk",
+      "value": "vb"
+     },
+     {
+      "title": "Vejen",
+      "value": "vn"
+     },
+     {
+      "title": "Vejle",
+      "value": "vj"
+     },
+     {
+      "title": "Vejle Sygehus",
+      "value": "vjs"
+     },
+     {
+      "title": "Vemb",
+      "value": "vem"
+     },
+     {
+      "title": "Vestre Strandallé",
+      "value": "vsa"
+     },
+     {
+      "title": "Viborg",
+      "value": "vg"
+     },
+     {
+      "title": "Viby J",
+      "value": "vi"
+     },
+     {
+      "title": "Viby Sjælland",
+      "value": "vy"
+     },
+     {
+      "title": "Vig",
+      "value": "vig"
+     },
+     {
+      "title": "Vigerslev Allé",
+      "value": "vgt"
+     },
+     {
+      "title": "Vildbjerg",
+      "value": "id"
+     },
+     {
+      "title": "Vipperød",
+      "value": "pe"
+     },
+     {
+      "title": "Visby",
+      "value": "vis"
+     },
+     {
+      "title": "Vojens",
+      "value": "oj"
+     },
+     {
+      "title": "Vordingborg",
+      "value": "vo"
+     },
+     {
+      "title": "Vrå",
+      "value": "vr"
+     },
+     {
+      "title": "Ydby",
+      "value": "yd"
+     },
+     {
+      "title": "Østerport",
+      "value": "kk"
+     },
+     {
+      "title": "Østerport via København Syd",
+      "value": "kkvianel"
+     },
+     {
+      "title": "Østerport via Københavns Hovedbanegård",
+      "value": "kkviakh"
+     },
+     {
+      "title": "Østerport via Køge",
+      "value": "kkviakj"
+     },
+     {
+      "title": "Basel",
+      "value": "bas"
+     },
+     {
+      "title": "Niebüll",
+      "value": "dbanb"
+     },
+     {
+      "title": "Munich",
+      "value": "dbmyn"
+     },
+     {
+      "title": "Egedal",
+      "value": "egd"
+     },
+     {
+      "title": "Em",
+      "value": "em"
+     },
+     {
+      "title": "Faxe Ledeplads",
+      "value": "fxl"
+     },
+     {
+      "title": "Farris",
+      "value": "fz"
+     },
+     {
+      "title": "Haderslev By",
+      "value": "had"
+     },
+     {
+      "title": "Holeby",
+      "value": "hby"
+     },
+     {
+      "title": "Hirtsals",
+      "value": "hhs"
+     },
+     {
+      "title": "Kroager",
+      "value": "kro"
+     },
+     {
+      "title": "Lolland Midt",
+      "value": "llm"
+     },
+     {
+      "title": "Møldrup",
+      "value": "mp"
+     },
+     {
+      "title": "Nårup",
+      "value": "np"
+     },
+     {
+      "title": "Prague",
+      "value": "pra"
+     },
+     {
+      "title": "Ring",
+      "value": "rit"
+     },
+     {
+      "title": "Rønne",
+      "value": "rnn"
+     },
+     {
+      "title": "Roskilde Vest",
+      "value": "rov"
+     },
+     {
+      "title": "Sweden",
+      "value": "swe"
+     },
+     {
+      "title": "Alvestad",
+      "value": "sweav"
+     },
+     {
+      "title": "Karlskrona",
+      "value": "sweck"
+     },
+     {
+      "title": "Kristianstad",
+      "value": "swecr"
+     },
+     {
+      "title": "Stockholm",
+      "value": "swecst"
+     },
+     {
+      "title": "Halmstad",
+      "value": "swehd"
+     },
+     {
+      "title": "Kalmar",
+      "value": "swekac"
+     },
+     {
+      "title": "Tofterup",
+      "value": "tt"
+     },
+     {
+      "title": "Vejrup",
+      "value": "vu"
+     }
+    ],
+    "max": 3
+   },
+   "default": [
+    "ab"
+   ]
+  },
+  "hour": {
+   "name": "Time of train — hour (24h)",
+   "default": "18",
+   "options": [
+    {
+     "title": "0",
+     "value": "0"
+    },
+    {
+     "title": "1",
+     "value": "1"
+    },
+    {
+     "title": "2",
+     "value": "2"
+    },
+    {
+     "title": "3",
+     "value": "3"
+    },
+    {
+     "title": "4",
+     "value": "4"
+    },
+    {
+     "title": "5",
+     "value": "5"
+    },
+    {
+     "title": "6",
+     "value": "6"
+    },
+    {
+     "title": "7",
+     "value": "7"
+    },
+    {
+     "title": "8",
+     "value": "8"
+    },
+    {
+     "title": "9",
+     "value": "9"
+    },
+    {
+     "title": "10",
+     "value": "10"
+    },
+    {
+     "title": "11",
+     "value": "11"
+    },
+    {
+     "title": "12",
+     "value": "12"
+    },
+    {
+     "title": "13",
+     "value": "13"
+    },
+    {
+     "title": "14",
+     "value": "14"
+    },
+    {
+     "title": "15",
+     "value": "15"
+    },
+    {
+     "title": "16",
+     "value": "16"
+    },
+    {
+     "title": "17",
+     "value": "17"
+    },
+    {
+     "title": "18",
+     "value": "18"
+    },
+    {
+     "title": "19",
+     "value": "19"
+    },
+    {
+     "title": "20",
+     "value": "20"
+    },
+    {
+     "title": "21",
+     "value": "21"
+    },
+    {
+     "title": "22",
+     "value": "22"
+    },
+    {
+     "title": "23",
+     "value": "23"
+    }
+   ],
+   "type": "select"
+  },
+  "minute": {
+   "name": "Time of train — minute",
+   "default": "12",
+   "options": [
+    {
+     "title": "00",
+     "value": "00"
+    },
+    {
+     "title": "01",
+     "value": "01"
+    },
+    {
+     "title": "02",
+     "value": "02"
+    },
+    {
+     "title": "03",
+     "value": "03"
+    },
+    {
+     "title": "04",
+     "value": "04"
+    },
+    {
+     "title": "05",
+     "value": "05"
+    },
+    {
+     "title": "06",
+     "value": "06"
+    },
+    {
+     "title": "07",
+     "value": "07"
+    },
+    {
+     "title": "08",
+     "value": "08"
+    },
+    {
+     "title": "09",
+     "value": "09"
+    },
+    {
+     "title": "10",
+     "value": "10"
+    },
+    {
+     "title": "11",
+     "value": "11"
+    },
+    {
+     "title": "12",
+     "value": "12"
+    },
+    {
+     "title": "13",
+     "value": "13"
+    },
+    {
+     "title": "14",
+     "value": "14"
+    },
+    {
+     "title": "15",
+     "value": "15"
+    },
+    {
+     "title": "16",
+     "value": "16"
+    },
+    {
+     "title": "17",
+     "value": "17"
+    },
+    {
+     "title": "18",
+     "value": "18"
+    },
+    {
+     "title": "19",
+     "value": "19"
+    },
+    {
+     "title": "20",
+     "value": "20"
+    },
+    {
+     "title": "21",
+     "value": "21"
+    },
+    {
+     "title": "22",
+     "value": "22"
+    },
+    {
+     "title": "23",
+     "value": "23"
+    },
+    {
+     "title": "24",
+     "value": "24"
+    },
+    {
+     "title": "25",
+     "value": "25"
+    },
+    {
+     "title": "26",
+     "value": "26"
+    },
+    {
+     "title": "27",
+     "value": "27"
+    },
+    {
+     "title": "28",
+     "value": "28"
+    },
+    {
+     "title": "29",
+     "value": "29"
+    },
+    {
+     "title": "30",
+     "value": "30"
+    },
+    {
+     "title": "31",
+     "value": "31"
+    },
+    {
+     "title": "32",
+     "value": "32"
+    },
+    {
+     "title": "33",
+     "value": "33"
+    },
+    {
+     "title": "34",
+     "value": "34"
+    },
+    {
+     "title": "35",
+     "value": "35"
+    },
+    {
+     "title": "36",
+     "value": "36"
+    },
+    {
+     "title": "37",
+     "value": "37"
+    },
+    {
+     "title": "38",
+     "value": "38"
+    },
+    {
+     "title": "39",
+     "value": "39"
+    },
+    {
+     "title": "40",
+     "value": "40"
+    },
+    {
+     "title": "41",
+     "value": "41"
+    },
+    {
+     "title": "42",
+     "value": "42"
+    },
+    {
+     "title": "43",
+     "value": "43"
+    },
+    {
+     "title": "44",
+     "value": "44"
+    },
+    {
+     "title": "45",
+     "value": "45"
+    },
+    {
+     "title": "46",
+     "value": "46"
+    },
+    {
+     "title": "47",
+     "value": "47"
+    },
+    {
+     "title": "48",
+     "value": "48"
+    },
+    {
+     "title": "49",
+     "value": "49"
+    },
+    {
+     "title": "50",
+     "value": "50"
+    },
+    {
+     "title": "51",
+     "value": "51"
+    },
+    {
+     "title": "52",
+     "value": "52"
+    },
+    {
+     "title": "53",
+     "value": "53"
+    },
+    {
+     "title": "54",
+     "value": "54"
+    },
+    {
+     "title": "55",
+     "value": "55"
+    },
+    {
+     "title": "56",
+     "value": "56"
+    },
+    {
+     "title": "57",
+     "value": "57"
+    },
+    {
+     "title": "58",
+     "value": "58"
+    },
+    {
+     "title": "59",
+     "value": "59"
+    }
+   ],
+   "type": "select"
+  }
+ },
+ "announcementOptions": {
+  "destinations": {
+   "name": "Destinations",
+   "type": "custom",
+   "props": {
+    "options": [
+     {
+      "title": "Aalborg",
+      "value": "ab"
+     },
+     {
+      "title": "Aalborg Lufthavn",
+      "value": "abl"
+     },
+     {
+      "title": "Aalborg og Lindholm",
+      "value": "aboglih"
+     },
+     {
+      "title": "Aalborg Vestby",
+      "value": "abv"
+     },
+     {
+      "title": "Aarhus",
+      "value": "ar"
+     },
+     {
+      "title": "Aarhus via København Syd",
+      "value": "arvianel"
+     },
+     {
+      "title": "Aarup",
+      "value": "ap"
+     },
+     {
+      "title": "Alken",
+      "value": "ak"
+     },
+     {
+      "title": "Arden",
+      "value": "ad"
+     },
+     {
+      "title": "Arnbjerg",
+      "value": "arn"
+     },
+     {
+      "title": "Assedrup",
+      "value": "asd"
+     },
+     {
+      "title": "Aulum",
+      "value": "uu"
+     },
+     {
+      "title": "Bedsted Thy",
+      "value": "bn"
+     },
+     {
+      "title": "Berlin",
+      "value": "berlin"
+     },
+     {
+      "title": "Berlin Hauptbahnhof",
+      "value": "dbbhbf"
+     },
+     {
+      "title": "Berlin Ostbahnhof",
+      "value": "dbbhf"
+     },
+     {
+      "title": "Berlin via Hamborg",
+      "value": "dbbhfviadbhmb"
+     },
+     {
+      "title": "Birk Centerpark",
+      "value": "bic"
+     },
+     {
+      "title": "Bjerringbro",
+      "value": "bj"
+     },
+     {
+      "title": "Bording",
+      "value": "bg"
+     },
+     {
+      "title": "Bornholm",
+      "value": "bornholm"
+     },
+     {
+      "title": "Borris",
+      "value": "bs"
+     },
+     {
+      "title": "Borup",
+      "value": "bo"
+     },
+     {
+      "title": "Bramming",
+      "value": "bm"
+     },
+     {
+      "title": "Brande",
+      "value": "bb"
+     },
+     {
+      "title": "Bred",
+      "value": "bd"
+     },
+     {
+      "title": "Bredebro",
+      "value": "bw"
+     },
+     {
+      "title": "Brejning",
+      "value": "bet"
+     },
+     {
+      "title": "Brønderslev",
+      "value": "bl"
+     },
+     {
+      "title": "Brøns",
+      "value": "brr"
+     },
+     {
+      "title": "Brørup",
+      "value": "bp"
+     },
+     {
+      "title": "Bur",
+      "value": "bu"
+     },
+     {
+      "title": "Børkop",
+      "value": "bk"
+     },
+     {
+      "title": "Copenhagen South Station",
+      "value": "kbhs"
+     },
+     {
+      "title": "Den Permanente",
+      "value": "per"
+     },
+     {
+      "title": "Døllefjelde-Musse",
+      "value": "df"
+     },
+     {
+      "title": "Døstrup Sønderjylland",
+      "value": "ds"
+     },
+     {
+      "title": "Ejby",
+      "value": "eb"
+     },
+     {
+      "title": "Engesvang",
+      "value": "ev"
+     },
+     {
+      "title": "Esbjerg",
+      "value": "es"
+     },
+     {
+      "title": "Eskilstrup",
+      "value": "ek"
+     },
+     {
+      "title": "Europaplads",
+      "value": "eu"
+     },
+     {
+      "title": "Faxe Syd",
+      "value": "fa"
+     },
+     {
+      "title": "Festivalpladsen",
+      "value": "rof"
+     },
+     {
+      "title": "Flensburg",
+      "value": "dbflb"
+     },
+     {
+      "title": "Frederikshavn",
+      "value": "fh"
+     },
+     {
+      "title": "Fruens Bøge",
+      "value": "frs"
+     },
+     {
+      "title": "Gadstrup",
+      "value": "gt"
+     },
+     {
+      "title": "Gedser",
+      "value": "ge"
+     },
+     {
+      "title": "Gelsted",
+      "value": "gd"
+     },
+     {
+      "title": "Gilleleje",
+      "value": "gll"
+     },
+     {
+      "title": "Give",
+      "value": "gw"
+     },
+     {
+      "title": "Gjesing",
+      "value": "gje"
+     },
+     {
+      "title": "Glumsø",
+      "value": "gz"
+     },
+     {
+      "title": "Gredstedbro",
+      "value": "gs"
+     },
+     {
+      "title": "Grenaa",
+      "value": "gr"
+     },
+     {
+      "title": "Grindsted",
+      "value": "gi"
+     },
+     {
+      "title": "Gråsten",
+      "value": "gst"
+     },
+     {
+      "title": "Guldager",
+      "value": "gu"
+     },
+     {
+      "title": "Göteborg",
+      "value": "sweg"
+     },
+     {
+      "title": "Göteborg via Københavns Hovedbanegård og Københavns Lufthavn (CPH Airport)",
+      "value": "swegviakhogcph"
+     },
+     {
+      "title": "Göteborg via Københavns Lufthavn (CPH Airport) og Malmö",
+      "value": "swegviacphogswem"
+     },
+     {
+      "title": "Göteborg via Malmö",
+      "value": "swegviaswem"
+     },
+     {
+      "title": "Gødstrup",
+      "value": "gp"
+     },
+     {
+      "title": "Hadsten",
+      "value": "ha"
+     },
+     {
+      "title": "Hadsund Nord",
+      "value": "hn"
+     },
+     {
+      "title": "Hamborg",
+      "value": "dbhmb"
+     },
+     {
+      "title": "Hamborg og Berlin",
+      "value": "dbhmbogdbbhf"
+     },
+     {
+      "title": "Hammerum",
+      "value": "hu"
+     },
+     {
+      "title": "Haslev",
+      "value": "hz"
+     },
+     {
+      "title": "Havdrup",
+      "value": "hd"
+     },
+     {
+      "title": "Hedehusene",
+      "value": "hh"
+     },
+     {
+      "title": "Hedensted",
+      "value": "hed"
+     },
+     {
+      "title": "Hee",
+      "value": "he"
+     },
+     {
+      "title": "Hellerup",
+      "value": "hl"
+     },
+     {
+      "title": "Helsingborg",
+      "value": "swehb"
+     },
+     {
+      "title": "Helsingør",
+      "value": "hg"
+     },
+     {
+      "title": "Helsingør via Københavns Hovedbanegård",
+      "value": "hgviakh"
+     },
+     {
+      "title": "Herfølge",
+      "value": "hf"
+     },
+     {
+      "title": "Herning",
+      "value": "hr"
+     },
+     {
+      "title": "Herning Messecenter",
+      "value": "hrm"
+     },
+     {
+      "title": "Herning via Skjern",
+      "value": "hrviasj"
+     },
+     {
+      "title": "Himlingøje",
+      "value": "hi"
+     },
+     {
+      "title": "Himlingøje via Fredensborg",
+      "value": "hiviafd"
+     },
+     {
+      "title": "Himlingøje via Gilleleje",
+      "value": "hiviagll"
+     },
+     {
+      "title": "Hjallese",
+      "value": "hjs"
+     },
+     {
+      "title": "Hjerm",
+      "value": "hm"
+     },
+     {
+      "title": "Hjortshøj",
+      "value": "ht"
+     },
+     {
+      "title": "Hjørring",
+      "value": "hj"
+     },
+     {
+      "title": "Hj況ring 漵t",
+      "value": "hjoe"
+     },
+     {
+      "title": "Hobro",
+      "value": "hb"
+     },
+     {
+      "title": "Holbæk",
+      "value": "hk"
+     },
+     {
+      "title": "Holme-Olstrup",
+      "value": "ol"
+     },
+     {
+      "title": "Holmstrup",
+      "value": "hp"
+     },
+     {
+      "title": "Holstebro",
+      "value": "ho"
+     },
+     {
+      "title": "Holsted",
+      "value": "hq"
+     },
+     {
+      "title": "Hornbæk",
+      "value": "hnk"
+     },
+     {
+      "title": "Hornslet",
+      "value": "os"
+     },
+     {
+      "title": "Horsens",
+      "value": "hs"
+     },
+     {
+      "title": "Hovmarken",
+      "value": "lpt"
+     },
+     {
+      "title": "Humlebæk",
+      "value": "hum"
+     },
+     {
+      "title": "Humlum",
+      "value": "um"
+     },
+     {
+      "title": "Hurup Thy",
+      "value": "ur"
+     },
+     {
+      "title": "Hvalsø",
+      "value": "hv"
+     },
+     {
+      "title": "Hvidbjerg",
+      "value": "hw"
+     },
+     {
+      "title": "Hviding",
+      "value": "vd"
+     },
+     {
+      "title": "Hässleholm",
+      "value": "swehm"
+     },
+     {
+      "title": "Hässleholm via Københavns Hovedbanegård og Københavns Lufthavn (CPH Airport)",
+      "value": "swehmviakhogcph"
+     },
+     {
+      "title": "Hässleholm via Københavns Lufthavn (CPH Airport) og Malmö",
+      "value": "swehmviacphogswem"
+     },
+     {
+      "title": "Hässleholm via Malmö",
+      "value": "swehmviaswem"
+     },
+     {
+      "title": "Hørning",
+      "value": "hx"
+     },
+     {
+      "title": "Ikast",
+      "value": "ik"
+     },
+     {
+      "title": "Jelling",
+      "value": "jl"
+     },
+     {
+      "title": "Jerne",
+      "value": "jne"
+     },
+     {
+      "title": "Jyderup",
+      "value": "jy"
+     },
+     {
+      "title": "Kalundborg",
+      "value": "kb"
+     },
+     {
+      "title": "Kauslunde",
+      "value": "ka"
+     },
+     {
+      "title": "Klampenborg",
+      "value": "kl"
+     },
+     {
+      "title": "Kliplev",
+      "value": "kw"
+     },
+     {
+      "title": "Knabstrup",
+      "value": "ks"
+     },
+     {
+      "title": "Kokkedal",
+      "value": "ok"
+     },
+     {
+      "title": "Kolding",
+      "value": "kd"
+     },
+     {
+      "title": "Kolind",
+      "value": "ko"
+     },
+     {
+      "title": "Kristianstad",
+      "value": "sweks"
+     },
+     {
+      "title": "Kristianstad via Københavns Hovedbanegård og Københavns Lufthavn (CPH Airport)",
+      "value": "sweksviakhogcph"
+     },
+     {
+      "title": "Kristianstad via Københavns Lufthavn (CPH Airport) og Malmö",
+      "value": "sweksviacphogswem"
+     },
+     {
+      "title": "Kristianstad via Malmö",
+      "value": "sweksviaswem"
+     },
+     {
+      "title": "Kvissel",
+      "value": "kv"
+     },
+     {
+      "title": "Kværndrup",
+      "value": "kvs"
+     },
+     {
+      "title": "København Syd",
+      "value": "nel"
+     },
+     {
+      "title": "Københavns Hovedbanegård",
+      "value": "kh"
+     },
+     {
+      "title": "Københavns Hovedbanegård via København Syd",
+      "value": "khvianel"
+     },
+     {
+      "title": "Københavns Hovedbanegård via Køge",
+      "value": "khviakj"
+     },
+     {
+      "title": "Københavns Lufthavn (CPH Airport)",
+      "value": "cph"
+     },
+     {
+      "title": "Københavns Lufthavn (CPH Airport) via København Syd",
+      "value": "cphvianel"
+     },
+     {
+      "title": "Københavns Lufthavn (CPH Airport) via Københavns Hovedbanegård",
+      "value": "cphviakh"
+     },
+     {
+      "title": "Køge",
+      "value": "kj"
+     },
+     {
+      "title": "Køge Nord",
+      "value": "kjn"
+     },
+     {
+      "title": "Langeskov",
+      "value": "lv"
+     },
+     {
+      "title": "Langå",
+      "value": "lg"
+     },
+     {
+      "title": "Laven",
+      "value": "la"
+     },
+     {
+      "title": "Lejre",
+      "value": "lj"
+     },
+     {
+      "title": "Lem",
+      "value": "lm"
+     },
+     {
+      "title": "Lemvig",
+      "value": "lmv"
+     },
+     {
+      "title": "Lille Skensved",
+      "value": "lw"
+     },
+     {
+      "title": "Lindholm",
+      "value": "lih"
+     },
+     {
+      "title": "Lund",
+      "value": "swelu"
+     },
+     {
+      "title": "Lundby",
+      "value": "lu"
+     },
+     {
+      "title": "Lunderskov",
+      "value": "lk"
+     },
+     {
+      "title": "Lyngs",
+      "value": "ln"
+     },
+     {
+      "title": "Lystrup",
+      "value": "lp"
+     },
+     {
+      "title": "Løgten",
+      "value": "lt"
+     },
+     {
+      "title": "Malmö",
+      "value": "swem"
+     },
+     {
+      "title": "Malmö via Københavns Hovedbanegård og Københavns Lufthavn (CPH Airport)",
+      "value": "swemviakhogcph"
+     },
+     {
+      "title": "Malmö via Københavns Lufthavn (CPH Airport)",
+      "value": "swemviacph"
+     },
+     {
+      "title": "Middelfart",
+      "value": "md"
+     },
+     {
+      "title": "Nakskov",
+      "value": "nsk"
+     },
+     {
+      "title": "Nivå",
+      "value": "ni"
+     },
+     {
+      "title": "Nivå via Københavns Hovedbanegård",
+      "value": "niviakh"
+     },
+     {
+      "title": "Nyborg",
+      "value": "ng"
+     },
+     {
+      "title": "Nykøbing F",
+      "value": "nf"
+     },
+     {
+      "title": "Nykøbing F via København Syd",
+      "value": "nfvianel"
+     },
+     {
+      "title": "Nykøbing F via Køge",
+      "value": "nfviakj"
+     },
+     {
+      "title": "Nykøbing F via Ringsted",
+      "value": "nfviarg"
+     },
+     {
+      "title": "Nykøbing Sjælland",
+      "value": "nks"
+     },
+     {
+      "title": "Nørre Alslev",
+      "value": "nv"
+     },
+     {
+      "title": "Nørre Nebel",
+      "value": "nbl"
+     },
+     {
+      "title": "Nørre Åby",
+      "value": "na"
+     },
+     {
+      "title": "Nørreport",
+      "value": "kn"
+     },
+     {
+      "title": "Odder",
+      "value": "odd"
+     },
+     {
+      "title": "Oddesund Nord",
+      "value": "no"
+     },
+     {
+      "title": "Odense",
+      "value": "od"
+     },
+     {
+      "title": "Odense Sygehus",
+      "value": "oss"
+     },
+     {
+      "title": "Orehoved",
+      "value": "oh"
+     },
+     {
+      "title": "Padborg",
+      "value": "pa"
+     },
+     {
+      "title": "Pederstrup",
+      "value": "pds"
+     },
+     {
+      "title": "Randers",
+      "value": "rd"
+     },
+     {
+      "title": "Regstrup",
+      "value": "rt"
+     },
+     {
+      "title": "Rejsby",
+      "value": "rej"
+     },
+     {
+      "title": "Ribe",
+      "value": "rb"
+     },
+     {
+      "title": "Ribe Nørremark",
+      "value": "rbn"
+     },
+     {
+      "title": "Ringe",
+      "value": "re"
+     },
+     {
+      "title": "Ringkøbing",
+      "value": "rj"
+     },
+     {
+      "title": "Ringsted",
+      "value": "rg"
+     },
+     {
+      "title": "Roskilde",
+      "value": "ro"
+     },
+     {
+      "title": "Roskilde via Køge",
+      "value": "roviakj"
+     },
+     {
+      "title": "Rudme",
+      "value": "rus"
+     },
+     {
+      "title": "Rungsted Kyst",
+      "value": "ru"
+     },
+     {
+      "title": "Ry",
+      "value": "ry"
+     },
+     {
+      "title": "Rydsgård",
+      "value": "rdg"
+     },
+     {
+      "title": "Rødby Færge",
+      "value": "rf"
+     },
+     {
+      "title": "Rødby Færge via Køge",
+      "value": "rfviakj"
+     },
+     {
+      "title": "Rødekro",
+      "value": "rq"
+     },
+     {
+      "title": "Rødkærsbro",
+      "value": "rk"
+     },
+     {
+      "title": "Sejstrup",
+      "value": "sej"
+     },
+     {
+      "title": "Sig",
+      "value": "is"
+     },
+     {
+      "title": "Silkeborg",
+      "value": "sl"
+     },
+     {
+      "title": "Sindal",
+      "value": "sa"
+     },
+     {
+      "title": "Sjørring",
+      "value": "ri"
+     },
+     {
+      "title": "Skagen",
+      "value": "sgb"
+     },
+     {
+      "title": "Skalbjerg",
+      "value": "sc"
+     },
+     {
+      "title": "Skalborg",
+      "value": "og"
+     },
+     {
+      "title": "Skive",
+      "value": "sk"
+     },
+     {
+      "title": "Skjern",
+      "value": "sj"
+     },
+     {
+      "title": "Skolebakken",
+      "value": "bak"
+     },
+     {
+      "title": "Slagelse",
+      "value": "sg"
+     },
+     {
+      "title": "Slagelse via København Syd",
+      "value": "sgvianel"
+     },
+     {
+      "title": "Snedsted",
+      "value": "sne"
+     },
+     {
+      "title": "Snekkersten",
+      "value": "sq"
+     },
+     {
+      "title": "Sommerland Sjælland",
+      "value": "slt"
+     },
+     {
+      "title": "Sorø",
+      "value": "so"
+     },
+     {
+      "title": "Spangsbjerg",
+      "value": "esn"
+     },
+     {
+      "title": "Stenstrup",
+      "value": "sts"
+     },
+     {
+      "title": "Stenstrup Syd",
+      "value": "sis"
+     },
+     {
+      "title": "Stoholm",
+      "value": "sm"
+     },
+     {
+      "title": "Skanderborg",
+      "value": "sd"
+     },
+     {
+      "title": "Strib",
+      "value": "sb"
+     },
+     {
+      "title": "Struer",
+      "value": "str"
+     },
+     {
+      "title": "Struer via Aarhus",
+      "value": "strviaar"
+     },
+     {
+      "title": "Struer via Herning",
+      "value": "strviahr"
+     },
+     {
+      "title": "Struer via Langå",
+      "value": "strvialg"
+     },
+     {
+      "title": "Studsgård",
+      "value": "stu"
+     },
+     {
+      "title": "Støvring",
+      "value": "sr"
+     },
+     {
+      "title": "Svebølle",
+      "value": "se"
+     },
+     {
+      "title": "Svejbæk",
+      "value": "sv"
+     },
+     {
+      "title": "Svendborg",
+      "value": "svg"
+     },
+     {
+      "title": "Svendborg Vest",
+      "value": "svv"
+     },
+     {
+      "title": "Svenstrup",
+      "value": "sn"
+     },
+     {
+      "title": "Alvestad via Københavns Hovedbanegård og Københavns Lufthavn (CPH Airport)",
+      "value": "sweavviakhogcph"
+     },
+     {
+      "title": "Alvestad via Københavns Lufthavn (CPH Airport) og Malmö",
+      "value": "sweavviacphogswem"
+     },
+     {
+      "title": "Alvestad via Malmö",
+      "value": "sweavviaswem"
+     },
+     {
+      "title": "Kristianstad via Københavns Hovedbanegård og Københavns Lufthavn (CPH Airport)",
+      "value": "swecrviakhogcph"
+     },
+     {
+      "title": "Kristianstad via Københavns Lufthavn (CPH Airport) og Malmö",
+      "value": "swecrviacphogswem"
+     },
+     {
+      "title": "Kristianstad via Malmö",
+      "value": "swecrviaswem"
+     },
+     {
+      "title": "Stockholm via Københavns Hovedbanegård og Københavns Lufthavn (CPH Airport)",
+      "value": "swecstviakhogcph"
+     },
+     {
+      "title": "Stockholm via Københavns Lufthavn (CPH Airport) og Malmö",
+      "value": "swecstviacphogswem"
+     },
+     {
+      "title": "Stockholm via Malmö",
+      "value": "swecstviaswem"
+     },
+     {
+      "title": "Sønderborg",
+      "value": "sdb"
+     },
+     {
+      "title": "Tarm",
+      "value": "ta"
+     },
+     {
+      "title": "Taulov",
+      "value": "tl"
+     },
+     {
+      "title": "Thisted",
+      "value": "ti"
+     },
+     {
+      "title": "Thisted via Aarhus",
+      "value": "tiviaar"
+     },
+     {
+      "title": "Thisted via Skjern",
+      "value": "tiviasj"
+     },
+     {
+      "title": "Thyborøn",
+      "value": "thb"
+     },
+     {
+      "title": "Thyregod",
+      "value": "ty"
+     },
+     {
+      "title": "Tim",
+      "value": "tm"
+     },
+     {
+      "title": "Tinglev",
+      "value": "te"
+     },
+     {
+      "title": "Tistrup",
+      "value": "tr"
+     },
+     {
+      "title": "Tjæreborg",
+      "value": "tb"
+     },
+     {
+      "title": "Tolne",
+      "value": "to"
+     },
+     {
+      "title": "Tommerup",
+      "value": "tp"
+     },
+     {
+      "title": "Torsøvej",
+      "value": "tov"
+     },
+     {
+      "title": "Trekroner",
+      "value": "trk"
+     },
+     {
+      "title": "Troldhede",
+      "value": "td"
+     },
+     {
+      "title": "Tureby",
+      "value": "th"
+     },
+     {
+      "title": "Tyskland",
+      "value": "dbdb"
+     },
+     {
+      "title": "Tønder",
+      "value": "tdr"
+     },
+     {
+      "title": "Tønder Nord",
+      "value": "trn"
+     },
+     {
+      "title": "Uglev",
+      "value": "ul"
+     },
+     {
+      "title": "Ulfborg",
+      "value": "uf"
+     },
+     {
+      "title": "Ulstrup",
+      "value": "up"
+     },
+     {
+      "title": "Valby",
+      "value": "val"
+     },
+     {
+      "title": "Vallensbæk",
+      "value": "vlb"
+     },
+     {
+      "title": "Vamdrup",
+      "value": "vm"
+     },
+     {
+      "title": "Vangede",
+      "value": "ang"
+     },
+     {
+      "title": "Varde",
+      "value": "va"
+     },
+     {
+      "title": "Varde Kaserne",
+      "value": "vka"
+     },
+     {
+      "title": "Varde Nord",
+      "value": "vno"
+     },
+     {
+      "title": "Varpelev",
+      "value": "vp"
+     },
+     {
+      "title": "Vedbæk",
+      "value": "vb"
+     },
+     {
+      "title": "Vejen",
+      "value": "vn"
+     },
+     {
+      "title": "Vejle",
+      "value": "vj"
+     },
+     {
+      "title": "Vejle Sygehus",
+      "value": "vjs"
+     },
+     {
+      "title": "Vemb",
+      "value": "vem"
+     },
+     {
+      "title": "Vestre Strandallé",
+      "value": "vsa"
+     },
+     {
+      "title": "Viborg",
+      "value": "vg"
+     },
+     {
+      "title": "Viby J",
+      "value": "vi"
+     },
+     {
+      "title": "Viby Sjælland",
+      "value": "vy"
+     },
+     {
+      "title": "Vig",
+      "value": "vig"
+     },
+     {
+      "title": "Vigerslev Allé",
+      "value": "vgt"
+     },
+     {
+      "title": "Vildbjerg",
+      "value": "id"
+     },
+     {
+      "title": "Vipperød",
+      "value": "pe"
+     },
+     {
+      "title": "Visby",
+      "value": "vis"
+     },
+     {
+      "title": "Vojens",
+      "value": "oj"
+     },
+     {
+      "title": "Vordingborg",
+      "value": "vo"
+     },
+     {
+      "title": "Vrå",
+      "value": "vr"
+     },
+     {
+      "title": "Ydby",
+      "value": "yd"
+     },
+     {
+      "title": "Østerport",
+      "value": "kk"
+     },
+     {
+      "title": "Østerport via København Syd",
+      "value": "kkvianel"
+     },
+     {
+      "title": "Østerport via Københavns Hovedbanegård",
+      "value": "kkviakh"
+     },
+     {
+      "title": "Østerport via Køge",
+      "value": "kkviakj"
+     },
+     {
+      "title": "Basel",
+      "value": "bas"
+     },
+     {
+      "title": "Niebüll",
+      "value": "dbanb"
+     },
+     {
+      "title": "Munich",
+      "value": "dbmyn"
+     },
+     {
+      "title": "Egedal",
+      "value": "egd"
+     },
+     {
+      "title": "Em",
+      "value": "em"
+     },
+     {
+      "title": "Faxe Ledeplads",
+      "value": "fxl"
+     },
+     {
+      "title": "Farris",
+      "value": "fz"
+     },
+     {
+      "title": "Haderslev By",
+      "value": "had"
+     },
+     {
+      "title": "Holeby",
+      "value": "hby"
+     },
+     {
+      "title": "Hirtsals",
+      "value": "hhs"
+     },
+     {
+      "title": "Kroager",
+      "value": "kro"
+     },
+     {
+      "title": "Lolland Midt",
+      "value": "llm"
+     },
+     {
+      "title": "Møldrup",
+      "value": "mp"
+     },
+     {
+      "title": "Nårup",
+      "value": "np"
+     },
+     {
+      "title": "Prague",
+      "value": "pra"
+     },
+     {
+      "title": "Ring",
+      "value": "rit"
+     },
+     {
+      "title": "Rønne",
+      "value": "rnn"
+     },
+     {
+      "title": "Roskilde Vest",
+      "value": "rov"
+     },
+     {
+      "title": "Sweden",
+      "value": "swe"
+     },
+     {
+      "title": "Alvestad",
+      "value": "sweav"
+     },
+     {
+      "title": "Karlskrona",
+      "value": "sweck"
+     },
+     {
+      "title": "Kristianstad",
+      "value": "swecr"
+     },
+     {
+      "title": "Stockholm",
+      "value": "swecst"
+     },
+     {
+      "title": "Halmstad",
+      "value": "swehd"
+     },
+     {
+      "title": "Kalmar",
+      "value": "swekac"
+     },
+     {
+      "title": "Tofterup",
+      "value": "tt"
+     },
+     {
+      "title": "Vejrup",
+      "value": "vu"
+     }
+    ],
+    "max": 3
+   },
+   "default": [
+    "ab"
+   ]
+  },
+  "hour": {
+   "name": "Time of train — hour (24h)",
+   "default": "18",
+   "options": [
+    {
+     "title": "0",
+     "value": "0"
+    },
+    {
+     "title": "1",
+     "value": "1"
+    },
+    {
+     "title": "2",
+     "value": "2"
+    },
+    {
+     "title": "3",
+     "value": "3"
+    },
+    {
+     "title": "4",
+     "value": "4"
+    },
+    {
+     "title": "5",
+     "value": "5"
+    },
+    {
+     "title": "6",
+     "value": "6"
+    },
+    {
+     "title": "7",
+     "value": "7"
+    },
+    {
+     "title": "8",
+     "value": "8"
+    },
+    {
+     "title": "9",
+     "value": "9"
+    },
+    {
+     "title": "10",
+     "value": "10"
+    },
+    {
+     "title": "11",
+     "value": "11"
+    },
+    {
+     "title": "12",
+     "value": "12"
+    },
+    {
+     "title": "13",
+     "value": "13"
+    },
+    {
+     "title": "14",
+     "value": "14"
+    },
+    {
+     "title": "15",
+     "value": "15"
+    },
+    {
+     "title": "16",
+     "value": "16"
+    },
+    {
+     "title": "17",
+     "value": "17"
+    },
+    {
+     "title": "18",
+     "value": "18"
+    },
+    {
+     "title": "19",
+     "value": "19"
+    },
+    {
+     "title": "20",
+     "value": "20"
+    },
+    {
+     "title": "21",
+     "value": "21"
+    },
+    {
+     "title": "22",
+     "value": "22"
+    },
+    {
+     "title": "23",
+     "value": "23"
+    }
+   ],
+   "type": "select"
+  },
+  "minute": {
+   "name": "Time of train — minute",
+   "default": "12",
+   "options": [
+    {
+     "title": "00",
+     "value": "00"
+    },
+    {
+     "title": "01",
+     "value": "01"
+    },
+    {
+     "title": "02",
+     "value": "02"
+    },
+    {
+     "title": "03",
+     "value": "03"
+    },
+    {
+     "title": "04",
+     "value": "04"
+    },
+    {
+     "title": "05",
+     "value": "05"
+    },
+    {
+     "title": "06",
+     "value": "06"
+    },
+    {
+     "title": "07",
+     "value": "07"
+    },
+    {
+     "title": "08",
+     "value": "08"
+    },
+    {
+     "title": "09",
+     "value": "09"
+    },
+    {
+     "title": "10",
+     "value": "10"
+    },
+    {
+     "title": "11",
+     "value": "11"
+    },
+    {
+     "title": "12",
+     "value": "12"
+    },
+    {
+     "title": "13",
+     "value": "13"
+    },
+    {
+     "title": "14",
+     "value": "14"
+    },
+    {
+     "title": "15",
+     "value": "15"
+    },
+    {
+     "title": "16",
+     "value": "16"
+    },
+    {
+     "title": "17",
+     "value": "17"
+    },
+    {
+     "title": "18",
+     "value": "18"
+    },
+    {
+     "title": "19",
+     "value": "19"
+    },
+    {
+     "title": "20",
+     "value": "20"
+    },
+    {
+     "title": "21",
+     "value": "21"
+    },
+    {
+     "title": "22",
+     "value": "22"
+    },
+    {
+     "title": "23",
+     "value": "23"
+    },
+    {
+     "title": "24",
+     "value": "24"
+    },
+    {
+     "title": "25",
+     "value": "25"
+    },
+    {
+     "title": "26",
+     "value": "26"
+    },
+    {
+     "title": "27",
+     "value": "27"
+    },
+    {
+     "title": "28",
+     "value": "28"
+    },
+    {
+     "title": "29",
+     "value": "29"
+    },
+    {
+     "title": "30",
+     "value": "30"
+    },
+    {
+     "title": "31",
+     "value": "31"
+    },
+    {
+     "title": "32",
+     "value": "32"
+    },
+    {
+     "title": "33",
+     "value": "33"
+    },
+    {
+     "title": "34",
+     "value": "34"
+    },
+    {
+     "title": "35",
+     "value": "35"
+    },
+    {
+     "title": "36",
+     "value": "36"
+    },
+    {
+     "title": "37",
+     "value": "37"
+    },
+    {
+     "title": "38",
+     "value": "38"
+    },
+    {
+     "title": "39",
+     "value": "39"
+    },
+    {
+     "title": "40",
+     "value": "40"
+    },
+    {
+     "title": "41",
+     "value": "41"
+    },
+    {
+     "title": "42",
+     "value": "42"
+    },
+    {
+     "title": "43",
+     "value": "43"
+    },
+    {
+     "title": "44",
+     "value": "44"
+    },
+    {
+     "title": "45",
+     "value": "45"
+    },
+    {
+     "title": "46",
+     "value": "46"
+    },
+    {
+     "title": "47",
+     "value": "47"
+    },
+    {
+     "title": "48",
+     "value": "48"
+    },
+    {
+     "title": "49",
+     "value": "49"
+    },
+    {
+     "title": "50",
+     "value": "50"
+    },
+    {
+     "title": "51",
+     "value": "51"
+    },
+    {
+     "title": "52",
+     "value": "52"
+    },
+    {
+     "title": "53",
+     "value": "53"
+    },
+    {
+     "title": "54",
+     "value": "54"
+    },
+    {
+     "title": "55",
+     "value": "55"
+    },
+    {
+     "title": "56",
+     "value": "56"
+    },
+    {
+     "title": "57",
+     "value": "57"
+    },
+    {
+     "title": "58",
+     "value": "58"
+    },
+    {
+     "title": "59",
+     "value": "59"
+    }
+   ],
+   "type": "select"
+  },
+  "track": {
+   "name": "Track (spor)",
+   "default": "5",
+   "options": [
+    {
+     "title": "Unknown (not yet known)",
+     "value": "unknown"
+    },
+    {
+     "title": "0",
+     "value": "0"
+    },
+    {
+     "title": "1",
+     "value": "1"
+    },
+    {
+     "title": "1a",
+     "value": "1a"
+    },
+    {
+     "title": "1b",
+     "value": "1b"
+    },
+    {
+     "title": "1c",
+     "value": "1c"
+    },
+    {
+     "title": "2",
+     "value": "2"
+    },
+    {
+     "title": "2a",
+     "value": "2a"
+    },
+    {
+     "title": "2b",
+     "value": "2b"
+    },
+    {
+     "title": "2c",
+     "value": "2c"
+    },
+    {
+     "title": "3",
+     "value": "3"
+    },
+    {
+     "title": "3a",
+     "value": "3a"
+    },
+    {
+     "title": "3b",
+     "value": "3b"
+    },
+    {
+     "title": "3c",
+     "value": "3c"
+    },
+    {
+     "title": "4",
+     "value": "4"
+    },
+    {
+     "title": "5",
+     "value": "5"
+    },
+    {
+     "title": "6",
+     "value": "6"
+    },
+    {
+     "title": "7",
+     "value": "7"
+    },
+    {
+     "title": "8",
+     "value": "8"
+    },
+    {
+     "title": "9",
+     "value": "9"
+    },
+    {
+     "title": "10",
+     "value": "10"
+    },
+    {
+     "title": "11",
+     "value": "11"
+    },
+    {
+     "title": "12",
+     "value": "12"
+    },
+    {
+     "title": "13",
+     "value": "13"
+    },
+    {
+     "title": "14",
+     "value": "14"
+    },
+    {
+     "title": "15",
+     "value": "15"
+    },
+    {
+     "title": "16",
+     "value": "16"
+    },
+    {
+     "title": "17",
+     "value": "17"
+    },
+    {
+     "title": "18",
+     "value": "18"
+    },
+    {
+     "title": "19",
+     "value": "19"
+    },
+    {
+     "title": "20",
+     "value": "20"
+    },
+    {
+     "title": "21",
+     "value": "21"
+    },
+    {
+     "title": "22",
+     "value": "22"
+    },
+    {
+     "title": "23",
+     "value": "23"
+    },
+    {
+     "title": "24",
+     "value": "24"
+    },
+    {
+     "title": "25",
+     "value": "25"
+    },
+    {
+     "title": "26",
+     "value": "26"
+    }
+   ],
+   "type": "select"
+  },
+  "countdown": {
+   "name": "Time before departure",
+   "default": "ca15-20min",
+   "options": [
+    {
+     "title": "Om et øjeblik / In a moment",
+     "value": "moment"
+    },
+    {
+     "title": "Om få minutter / In a few minutes",
+     "value": "few"
+    },
+    {
+     "title": "Om ca. 5 min. / In approx. 5 min",
+     "value": "ca5min"
+    },
+    {
+     "title": "Om ca. 6 min. / In approx. 6 min",
+     "value": "ca6min"
+    },
+    {
+     "title": "Om ca. 7 min. / In approx. 7 min",
+     "value": "ca7min"
+    },
+    {
+     "title": "Om ca. 8 min. / In approx. 8 min",
+     "value": "ca8min"
+    },
+    {
+     "title": "Om ca. 9 min. / In approx. 9 min",
+     "value": "ca9min"
+    },
+    {
+     "title": "Om ca. 10 min. / In approx. 10 min",
+     "value": "ca10min"
+    },
+    {
+     "title": "Om ca. 12-15 min. / In approx. 12-15 min",
+     "value": "ca12-15min"
+    },
+    {
+     "title": "Om ca. 15-20 min. / In approx. 15-20 min",
+     "value": "ca15-20min"
+    },
+    {
+     "title": "Om ca. 20-25 min. / In approx. 20-25 min",
+     "value": "ca20-25min"
+    },
+    {
+     "title": "Om ca. 25-30 min. / In approx. 25-30 min",
+     "value": "ca25-30min"
+    },
+    {
+     "title": "Om ca. 35 min. / In approx. 35 min",
+     "value": "ca35min"
+    },
+    {
+     "title": "Om ca. 40 min. / In approx. 40 min",
+     "value": "ca40min"
+    },
+    {
+     "title": "Om ca. 45 min. / In approx. 45 min",
+     "value": "ca45min"
+    },
+    {
+     "title": "Om ca. 50 min. / In approx. 50 min",
+     "value": "ca50min"
+    },
+    {
+     "title": "Om ca. 55 min. / In approx. 55 min",
+     "value": "ca55min"
+    },
+    {
+     "title": "Om ca. 60 min. / In approx. 60 min",
+     "value": "ca60min"
+    },
+    {
+     "title": "Om ca. 65 min. / In approx. 65 min",
+     "value": "ca65min"
+    },
+    {
+     "title": "Om ca. 70 min. / In approx. 70 min",
+     "value": "ca70min"
+    },
+    {
+     "title": "Om ca. 75 min. / In approx. 75 min",
+     "value": "ca75min"
+    },
+    {
+     "title": "Om ca. 80 min. / In approx. 80 min",
+     "value": "ca80min"
+    },
+    {
+     "title": "Om ca. 85 min. / In approx. 85 min",
+     "value": "ca85min"
+    },
+    {
+     "title": "Om ca. 90 min. / In approx. 90 min",
+     "value": "ca90min"
+    }
+   ],
+   "type": "select"
+  },
+  "trackChange": {
+   "name": "Track change?",
+   "default": false,
+   "type": "boolean"
+  }
+ },
+ "disruptionOptions": {
+  "destinations": {
+   "name": "Destinations",
+   "type": "custom",
+   "props": {
+    "options": [
+     {
+      "title": "Aalborg",
+      "value": "ab"
+     },
+     {
+      "title": "Aalborg Lufthavn",
+      "value": "abl"
+     },
+     {
+      "title": "Aalborg og Lindholm",
+      "value": "aboglih"
+     },
+     {
+      "title": "Aalborg Vestby",
+      "value": "abv"
+     },
+     {
+      "title": "Aarhus",
+      "value": "ar"
+     },
+     {
+      "title": "Aarhus via København Syd",
+      "value": "arvianel"
+     },
+     {
+      "title": "Aarup",
+      "value": "ap"
+     },
+     {
+      "title": "Alken",
+      "value": "ak"
+     },
+     {
+      "title": "Arden",
+      "value": "ad"
+     },
+     {
+      "title": "Arnbjerg",
+      "value": "arn"
+     },
+     {
+      "title": "Assedrup",
+      "value": "asd"
+     },
+     {
+      "title": "Aulum",
+      "value": "uu"
+     },
+     {
+      "title": "Bedsted Thy",
+      "value": "bn"
+     },
+     {
+      "title": "Berlin",
+      "value": "berlin"
+     },
+     {
+      "title": "Berlin Hauptbahnhof",
+      "value": "dbbhbf"
+     },
+     {
+      "title": "Berlin Ostbahnhof",
+      "value": "dbbhf"
+     },
+     {
+      "title": "Berlin via Hamborg",
+      "value": "dbbhfviadbhmb"
+     },
+     {
+      "title": "Birk Centerpark",
+      "value": "bic"
+     },
+     {
+      "title": "Bjerringbro",
+      "value": "bj"
+     },
+     {
+      "title": "Bording",
+      "value": "bg"
+     },
+     {
+      "title": "Bornholm",
+      "value": "bornholm"
+     },
+     {
+      "title": "Borris",
+      "value": "bs"
+     },
+     {
+      "title": "Borup",
+      "value": "bo"
+     },
+     {
+      "title": "Bramming",
+      "value": "bm"
+     },
+     {
+      "title": "Brande",
+      "value": "bb"
+     },
+     {
+      "title": "Bred",
+      "value": "bd"
+     },
+     {
+      "title": "Bredebro",
+      "value": "bw"
+     },
+     {
+      "title": "Brejning",
+      "value": "bet"
+     },
+     {
+      "title": "Brønderslev",
+      "value": "bl"
+     },
+     {
+      "title": "Brøns",
+      "value": "brr"
+     },
+     {
+      "title": "Brørup",
+      "value": "bp"
+     },
+     {
+      "title": "Bur",
+      "value": "bu"
+     },
+     {
+      "title": "Børkop",
+      "value": "bk"
+     },
+     {
+      "title": "Copenhagen South Station",
+      "value": "kbhs"
+     },
+     {
+      "title": "Den Permanente",
+      "value": "per"
+     },
+     {
+      "title": "Døllefjelde-Musse",
+      "value": "df"
+     },
+     {
+      "title": "Døstrup Sønderjylland",
+      "value": "ds"
+     },
+     {
+      "title": "Ejby",
+      "value": "eb"
+     },
+     {
+      "title": "Engesvang",
+      "value": "ev"
+     },
+     {
+      "title": "Esbjerg",
+      "value": "es"
+     },
+     {
+      "title": "Eskilstrup",
+      "value": "ek"
+     },
+     {
+      "title": "Europaplads",
+      "value": "eu"
+     },
+     {
+      "title": "Faxe Syd",
+      "value": "fa"
+     },
+     {
+      "title": "Festivalpladsen",
+      "value": "rof"
+     },
+     {
+      "title": "Flensburg",
+      "value": "dbflb"
+     },
+     {
+      "title": "Frederikshavn",
+      "value": "fh"
+     },
+     {
+      "title": "Fruens Bøge",
+      "value": "frs"
+     },
+     {
+      "title": "Gadstrup",
+      "value": "gt"
+     },
+     {
+      "title": "Gedser",
+      "value": "ge"
+     },
+     {
+      "title": "Gelsted",
+      "value": "gd"
+     },
+     {
+      "title": "Gilleleje",
+      "value": "gll"
+     },
+     {
+      "title": "Give",
+      "value": "gw"
+     },
+     {
+      "title": "Gjesing",
+      "value": "gje"
+     },
+     {
+      "title": "Glumsø",
+      "value": "gz"
+     },
+     {
+      "title": "Gredstedbro",
+      "value": "gs"
+     },
+     {
+      "title": "Grenaa",
+      "value": "gr"
+     },
+     {
+      "title": "Grindsted",
+      "value": "gi"
+     },
+     {
+      "title": "Gråsten",
+      "value": "gst"
+     },
+     {
+      "title": "Guldager",
+      "value": "gu"
+     },
+     {
+      "title": "Göteborg",
+      "value": "sweg"
+     },
+     {
+      "title": "Göteborg via Københavns Hovedbanegård og Københavns Lufthavn (CPH Airport)",
+      "value": "swegviakhogcph"
+     },
+     {
+      "title": "Göteborg via Københavns Lufthavn (CPH Airport) og Malmö",
+      "value": "swegviacphogswem"
+     },
+     {
+      "title": "Göteborg via Malmö",
+      "value": "swegviaswem"
+     },
+     {
+      "title": "Gødstrup",
+      "value": "gp"
+     },
+     {
+      "title": "Hadsten",
+      "value": "ha"
+     },
+     {
+      "title": "Hadsund Nord",
+      "value": "hn"
+     },
+     {
+      "title": "Hamborg",
+      "value": "dbhmb"
+     },
+     {
+      "title": "Hamborg og Berlin",
+      "value": "dbhmbogdbbhf"
+     },
+     {
+      "title": "Hammerum",
+      "value": "hu"
+     },
+     {
+      "title": "Haslev",
+      "value": "hz"
+     },
+     {
+      "title": "Havdrup",
+      "value": "hd"
+     },
+     {
+      "title": "Hedehusene",
+      "value": "hh"
+     },
+     {
+      "title": "Hedensted",
+      "value": "hed"
+     },
+     {
+      "title": "Hee",
+      "value": "he"
+     },
+     {
+      "title": "Hellerup",
+      "value": "hl"
+     },
+     {
+      "title": "Helsingborg",
+      "value": "swehb"
+     },
+     {
+      "title": "Helsingør",
+      "value": "hg"
+     },
+     {
+      "title": "Helsingør via Københavns Hovedbanegård",
+      "value": "hgviakh"
+     },
+     {
+      "title": "Herfølge",
+      "value": "hf"
+     },
+     {
+      "title": "Herning",
+      "value": "hr"
+     },
+     {
+      "title": "Herning Messecenter",
+      "value": "hrm"
+     },
+     {
+      "title": "Herning via Skjern",
+      "value": "hrviasj"
+     },
+     {
+      "title": "Himlingøje",
+      "value": "hi"
+     },
+     {
+      "title": "Himlingøje via Fredensborg",
+      "value": "hiviafd"
+     },
+     {
+      "title": "Himlingøje via Gilleleje",
+      "value": "hiviagll"
+     },
+     {
+      "title": "Hjallese",
+      "value": "hjs"
+     },
+     {
+      "title": "Hjerm",
+      "value": "hm"
+     },
+     {
+      "title": "Hjortshøj",
+      "value": "ht"
+     },
+     {
+      "title": "Hjørring",
+      "value": "hj"
+     },
+     {
+      "title": "Hj況ring 漵t",
+      "value": "hjoe"
+     },
+     {
+      "title": "Hobro",
+      "value": "hb"
+     },
+     {
+      "title": "Holbæk",
+      "value": "hk"
+     },
+     {
+      "title": "Holme-Olstrup",
+      "value": "ol"
+     },
+     {
+      "title": "Holmstrup",
+      "value": "hp"
+     },
+     {
+      "title": "Holstebro",
+      "value": "ho"
+     },
+     {
+      "title": "Holsted",
+      "value": "hq"
+     },
+     {
+      "title": "Hornbæk",
+      "value": "hnk"
+     },
+     {
+      "title": "Hornslet",
+      "value": "os"
+     },
+     {
+      "title": "Horsens",
+      "value": "hs"
+     },
+     {
+      "title": "Hovmarken",
+      "value": "lpt"
+     },
+     {
+      "title": "Humlebæk",
+      "value": "hum"
+     },
+     {
+      "title": "Humlum",
+      "value": "um"
+     },
+     {
+      "title": "Hurup Thy",
+      "value": "ur"
+     },
+     {
+      "title": "Hvalsø",
+      "value": "hv"
+     },
+     {
+      "title": "Hvidbjerg",
+      "value": "hw"
+     },
+     {
+      "title": "Hviding",
+      "value": "vd"
+     },
+     {
+      "title": "Hässleholm",
+      "value": "swehm"
+     },
+     {
+      "title": "Hässleholm via Københavns Hovedbanegård og Københavns Lufthavn (CPH Airport)",
+      "value": "swehmviakhogcph"
+     },
+     {
+      "title": "Hässleholm via Københavns Lufthavn (CPH Airport) og Malmö",
+      "value": "swehmviacphogswem"
+     },
+     {
+      "title": "Hässleholm via Malmö",
+      "value": "swehmviaswem"
+     },
+     {
+      "title": "Hørning",
+      "value": "hx"
+     },
+     {
+      "title": "Ikast",
+      "value": "ik"
+     },
+     {
+      "title": "Jelling",
+      "value": "jl"
+     },
+     {
+      "title": "Jerne",
+      "value": "jne"
+     },
+     {
+      "title": "Jyderup",
+      "value": "jy"
+     },
+     {
+      "title": "Kalundborg",
+      "value": "kb"
+     },
+     {
+      "title": "Kauslunde",
+      "value": "ka"
+     },
+     {
+      "title": "Klampenborg",
+      "value": "kl"
+     },
+     {
+      "title": "Kliplev",
+      "value": "kw"
+     },
+     {
+      "title": "Knabstrup",
+      "value": "ks"
+     },
+     {
+      "title": "Kokkedal",
+      "value": "ok"
+     },
+     {
+      "title": "Kolding",
+      "value": "kd"
+     },
+     {
+      "title": "Kolind",
+      "value": "ko"
+     },
+     {
+      "title": "Kristianstad",
+      "value": "sweks"
+     },
+     {
+      "title": "Kristianstad via Københavns Hovedbanegård og Københavns Lufthavn (CPH Airport)",
+      "value": "sweksviakhogcph"
+     },
+     {
+      "title": "Kristianstad via Københavns Lufthavn (CPH Airport) og Malmö",
+      "value": "sweksviacphogswem"
+     },
+     {
+      "title": "Kristianstad via Malmö",
+      "value": "sweksviaswem"
+     },
+     {
+      "title": "Kvissel",
+      "value": "kv"
+     },
+     {
+      "title": "Kværndrup",
+      "value": "kvs"
+     },
+     {
+      "title": "København Syd",
+      "value": "nel"
+     },
+     {
+      "title": "Københavns Hovedbanegård",
+      "value": "kh"
+     },
+     {
+      "title": "Københavns Hovedbanegård via København Syd",
+      "value": "khvianel"
+     },
+     {
+      "title": "Københavns Hovedbanegård via Køge",
+      "value": "khviakj"
+     },
+     {
+      "title": "Københavns Lufthavn (CPH Airport)",
+      "value": "cph"
+     },
+     {
+      "title": "Københavns Lufthavn (CPH Airport) via København Syd",
+      "value": "cphvianel"
+     },
+     {
+      "title": "Københavns Lufthavn (CPH Airport) via Københavns Hovedbanegård",
+      "value": "cphviakh"
+     },
+     {
+      "title": "Køge",
+      "value": "kj"
+     },
+     {
+      "title": "Køge Nord",
+      "value": "kjn"
+     },
+     {
+      "title": "Langeskov",
+      "value": "lv"
+     },
+     {
+      "title": "Langå",
+      "value": "lg"
+     },
+     {
+      "title": "Laven",
+      "value": "la"
+     },
+     {
+      "title": "Lejre",
+      "value": "lj"
+     },
+     {
+      "title": "Lem",
+      "value": "lm"
+     },
+     {
+      "title": "Lemvig",
+      "value": "lmv"
+     },
+     {
+      "title": "Lille Skensved",
+      "value": "lw"
+     },
+     {
+      "title": "Lindholm",
+      "value": "lih"
+     },
+     {
+      "title": "Lund",
+      "value": "swelu"
+     },
+     {
+      "title": "Lundby",
+      "value": "lu"
+     },
+     {
+      "title": "Lunderskov",
+      "value": "lk"
+     },
+     {
+      "title": "Lyngs",
+      "value": "ln"
+     },
+     {
+      "title": "Lystrup",
+      "value": "lp"
+     },
+     {
+      "title": "Løgten",
+      "value": "lt"
+     },
+     {
+      "title": "Malmö",
+      "value": "swem"
+     },
+     {
+      "title": "Malmö via Københavns Hovedbanegård og Københavns Lufthavn (CPH Airport)",
+      "value": "swemviakhogcph"
+     },
+     {
+      "title": "Malmö via Københavns Lufthavn (CPH Airport)",
+      "value": "swemviacph"
+     },
+     {
+      "title": "Middelfart",
+      "value": "md"
+     },
+     {
+      "title": "Nakskov",
+      "value": "nsk"
+     },
+     {
+      "title": "Nivå",
+      "value": "ni"
+     },
+     {
+      "title": "Nivå via Københavns Hovedbanegård",
+      "value": "niviakh"
+     },
+     {
+      "title": "Nyborg",
+      "value": "ng"
+     },
+     {
+      "title": "Nykøbing F",
+      "value": "nf"
+     },
+     {
+      "title": "Nykøbing F via København Syd",
+      "value": "nfvianel"
+     },
+     {
+      "title": "Nykøbing F via Køge",
+      "value": "nfviakj"
+     },
+     {
+      "title": "Nykøbing F via Ringsted",
+      "value": "nfviarg"
+     },
+     {
+      "title": "Nykøbing Sjælland",
+      "value": "nks"
+     },
+     {
+      "title": "Nørre Alslev",
+      "value": "nv"
+     },
+     {
+      "title": "Nørre Nebel",
+      "value": "nbl"
+     },
+     {
+      "title": "Nørre Åby",
+      "value": "na"
+     },
+     {
+      "title": "Nørreport",
+      "value": "kn"
+     },
+     {
+      "title": "Odder",
+      "value": "odd"
+     },
+     {
+      "title": "Oddesund Nord",
+      "value": "no"
+     },
+     {
+      "title": "Odense",
+      "value": "od"
+     },
+     {
+      "title": "Odense Sygehus",
+      "value": "oss"
+     },
+     {
+      "title": "Orehoved",
+      "value": "oh"
+     },
+     {
+      "title": "Padborg",
+      "value": "pa"
+     },
+     {
+      "title": "Pederstrup",
+      "value": "pds"
+     },
+     {
+      "title": "Randers",
+      "value": "rd"
+     },
+     {
+      "title": "Regstrup",
+      "value": "rt"
+     },
+     {
+      "title": "Rejsby",
+      "value": "rej"
+     },
+     {
+      "title": "Ribe",
+      "value": "rb"
+     },
+     {
+      "title": "Ribe Nørremark",
+      "value": "rbn"
+     },
+     {
+      "title": "Ringe",
+      "value": "re"
+     },
+     {
+      "title": "Ringkøbing",
+      "value": "rj"
+     },
+     {
+      "title": "Ringsted",
+      "value": "rg"
+     },
+     {
+      "title": "Roskilde",
+      "value": "ro"
+     },
+     {
+      "title": "Roskilde via Køge",
+      "value": "roviakj"
+     },
+     {
+      "title": "Rudme",
+      "value": "rus"
+     },
+     {
+      "title": "Rungsted Kyst",
+      "value": "ru"
+     },
+     {
+      "title": "Ry",
+      "value": "ry"
+     },
+     {
+      "title": "Rydsgård",
+      "value": "rdg"
+     },
+     {
+      "title": "Rødby Færge",
+      "value": "rf"
+     },
+     {
+      "title": "Rødby Færge via Køge",
+      "value": "rfviakj"
+     },
+     {
+      "title": "Rødekro",
+      "value": "rq"
+     },
+     {
+      "title": "Rødkærsbro",
+      "value": "rk"
+     },
+     {
+      "title": "Sejstrup",
+      "value": "sej"
+     },
+     {
+      "title": "Sig",
+      "value": "is"
+     },
+     {
+      "title": "Silkeborg",
+      "value": "sl"
+     },
+     {
+      "title": "Sindal",
+      "value": "sa"
+     },
+     {
+      "title": "Sjørring",
+      "value": "ri"
+     },
+     {
+      "title": "Skagen",
+      "value": "sgb"
+     },
+     {
+      "title": "Skalbjerg",
+      "value": "sc"
+     },
+     {
+      "title": "Skalborg",
+      "value": "og"
+     },
+     {
+      "title": "Skive",
+      "value": "sk"
+     },
+     {
+      "title": "Skjern",
+      "value": "sj"
+     },
+     {
+      "title": "Skolebakken",
+      "value": "bak"
+     },
+     {
+      "title": "Slagelse",
+      "value": "sg"
+     },
+     {
+      "title": "Slagelse via København Syd",
+      "value": "sgvianel"
+     },
+     {
+      "title": "Snedsted",
+      "value": "sne"
+     },
+     {
+      "title": "Snekkersten",
+      "value": "sq"
+     },
+     {
+      "title": "Sommerland Sjælland",
+      "value": "slt"
+     },
+     {
+      "title": "Sorø",
+      "value": "so"
+     },
+     {
+      "title": "Spangsbjerg",
+      "value": "esn"
+     },
+     {
+      "title": "Stenstrup",
+      "value": "sts"
+     },
+     {
+      "title": "Stenstrup Syd",
+      "value": "sis"
+     },
+     {
+      "title": "Stoholm",
+      "value": "sm"
+     },
+     {
+      "title": "Skanderborg",
+      "value": "sd"
+     },
+     {
+      "title": "Strib",
+      "value": "sb"
+     },
+     {
+      "title": "Struer",
+      "value": "str"
+     },
+     {
+      "title": "Struer via Aarhus",
+      "value": "strviaar"
+     },
+     {
+      "title": "Struer via Herning",
+      "value": "strviahr"
+     },
+     {
+      "title": "Struer via Langå",
+      "value": "strvialg"
+     },
+     {
+      "title": "Studsgård",
+      "value": "stu"
+     },
+     {
+      "title": "Støvring",
+      "value": "sr"
+     },
+     {
+      "title": "Svebølle",
+      "value": "se"
+     },
+     {
+      "title": "Svejbæk",
+      "value": "sv"
+     },
+     {
+      "title": "Svendborg",
+      "value": "svg"
+     },
+     {
+      "title": "Svendborg Vest",
+      "value": "svv"
+     },
+     {
+      "title": "Svenstrup",
+      "value": "sn"
+     },
+     {
+      "title": "Alvestad via Københavns Hovedbanegård og Københavns Lufthavn (CPH Airport)",
+      "value": "sweavviakhogcph"
+     },
+     {
+      "title": "Alvestad via Københavns Lufthavn (CPH Airport) og Malmö",
+      "value": "sweavviacphogswem"
+     },
+     {
+      "title": "Alvestad via Malmö",
+      "value": "sweavviaswem"
+     },
+     {
+      "title": "Kristianstad via Københavns Hovedbanegård og Københavns Lufthavn (CPH Airport)",
+      "value": "swecrviakhogcph"
+     },
+     {
+      "title": "Kristianstad via Københavns Lufthavn (CPH Airport) og Malmö",
+      "value": "swecrviacphogswem"
+     },
+     {
+      "title": "Kristianstad via Malmö",
+      "value": "swecrviaswem"
+     },
+     {
+      "title": "Stockholm via Københavns Hovedbanegård og Københavns Lufthavn (CPH Airport)",
+      "value": "swecstviakhogcph"
+     },
+     {
+      "title": "Stockholm via Københavns Lufthavn (CPH Airport) og Malmö",
+      "value": "swecstviacphogswem"
+     },
+     {
+      "title": "Stockholm via Malmö",
+      "value": "swecstviaswem"
+     },
+     {
+      "title": "Sønderborg",
+      "value": "sdb"
+     },
+     {
+      "title": "Tarm",
+      "value": "ta"
+     },
+     {
+      "title": "Taulov",
+      "value": "tl"
+     },
+     {
+      "title": "Thisted",
+      "value": "ti"
+     },
+     {
+      "title": "Thisted via Aarhus",
+      "value": "tiviaar"
+     },
+     {
+      "title": "Thisted via Skjern",
+      "value": "tiviasj"
+     },
+     {
+      "title": "Thyborøn",
+      "value": "thb"
+     },
+     {
+      "title": "Thyregod",
+      "value": "ty"
+     },
+     {
+      "title": "Tim",
+      "value": "tm"
+     },
+     {
+      "title": "Tinglev",
+      "value": "te"
+     },
+     {
+      "title": "Tistrup",
+      "value": "tr"
+     },
+     {
+      "title": "Tjæreborg",
+      "value": "tb"
+     },
+     {
+      "title": "Tolne",
+      "value": "to"
+     },
+     {
+      "title": "Tommerup",
+      "value": "tp"
+     },
+     {
+      "title": "Torsøvej",
+      "value": "tov"
+     },
+     {
+      "title": "Trekroner",
+      "value": "trk"
+     },
+     {
+      "title": "Troldhede",
+      "value": "td"
+     },
+     {
+      "title": "Tureby",
+      "value": "th"
+     },
+     {
+      "title": "Tyskland",
+      "value": "dbdb"
+     },
+     {
+      "title": "Tønder",
+      "value": "tdr"
+     },
+     {
+      "title": "Tønder Nord",
+      "value": "trn"
+     },
+     {
+      "title": "Uglev",
+      "value": "ul"
+     },
+     {
+      "title": "Ulfborg",
+      "value": "uf"
+     },
+     {
+      "title": "Ulstrup",
+      "value": "up"
+     },
+     {
+      "title": "Valby",
+      "value": "val"
+     },
+     {
+      "title": "Vallensbæk",
+      "value": "vlb"
+     },
+     {
+      "title": "Vamdrup",
+      "value": "vm"
+     },
+     {
+      "title": "Vangede",
+      "value": "ang"
+     },
+     {
+      "title": "Varde",
+      "value": "va"
+     },
+     {
+      "title": "Varde Kaserne",
+      "value": "vka"
+     },
+     {
+      "title": "Varde Nord",
+      "value": "vno"
+     },
+     {
+      "title": "Varpelev",
+      "value": "vp"
+     },
+     {
+      "title": "Vedbæk",
+      "value": "vb"
+     },
+     {
+      "title": "Vejen",
+      "value": "vn"
+     },
+     {
+      "title": "Vejle",
+      "value": "vj"
+     },
+     {
+      "title": "Vejle Sygehus",
+      "value": "vjs"
+     },
+     {
+      "title": "Vemb",
+      "value": "vem"
+     },
+     {
+      "title": "Vestre Strandallé",
+      "value": "vsa"
+     },
+     {
+      "title": "Viborg",
+      "value": "vg"
+     },
+     {
+      "title": "Viby J",
+      "value": "vi"
+     },
+     {
+      "title": "Viby Sjælland",
+      "value": "vy"
+     },
+     {
+      "title": "Vig",
+      "value": "vig"
+     },
+     {
+      "title": "Vigerslev Allé",
+      "value": "vgt"
+     },
+     {
+      "title": "Vildbjerg",
+      "value": "id"
+     },
+     {
+      "title": "Vipperød",
+      "value": "pe"
+     },
+     {
+      "title": "Visby",
+      "value": "vis"
+     },
+     {
+      "title": "Vojens",
+      "value": "oj"
+     },
+     {
+      "title": "Vordingborg",
+      "value": "vo"
+     },
+     {
+      "title": "Vrå",
+      "value": "vr"
+     },
+     {
+      "title": "Ydby",
+      "value": "yd"
+     },
+     {
+      "title": "Østerport",
+      "value": "kk"
+     },
+     {
+      "title": "Østerport via København Syd",
+      "value": "kkvianel"
+     },
+     {
+      "title": "Østerport via Københavns Hovedbanegård",
+      "value": "kkviakh"
+     },
+     {
+      "title": "Østerport via Køge",
+      "value": "kkviakj"
+     },
+     {
+      "title": "Basel",
+      "value": "bas"
+     },
+     {
+      "title": "Niebüll",
+      "value": "dbanb"
+     },
+     {
+      "title": "Munich",
+      "value": "dbmyn"
+     },
+     {
+      "title": "Egedal",
+      "value": "egd"
+     },
+     {
+      "title": "Em",
+      "value": "em"
+     },
+     {
+      "title": "Faxe Ledeplads",
+      "value": "fxl"
+     },
+     {
+      "title": "Farris",
+      "value": "fz"
+     },
+     {
+      "title": "Haderslev By",
+      "value": "had"
+     },
+     {
+      "title": "Holeby",
+      "value": "hby"
+     },
+     {
+      "title": "Hirtsals",
+      "value": "hhs"
+     },
+     {
+      "title": "Kroager",
+      "value": "kro"
+     },
+     {
+      "title": "Lolland Midt",
+      "value": "llm"
+     },
+     {
+      "title": "Møldrup",
+      "value": "mp"
+     },
+     {
+      "title": "Nårup",
+      "value": "np"
+     },
+     {
+      "title": "Prague",
+      "value": "pra"
+     },
+     {
+      "title": "Ring",
+      "value": "rit"
+     },
+     {
+      "title": "Rønne",
+      "value": "rnn"
+     },
+     {
+      "title": "Roskilde Vest",
+      "value": "rov"
+     },
+     {
+      "title": "Sweden",
+      "value": "swe"
+     },
+     {
+      "title": "Alvestad",
+      "value": "sweav"
+     },
+     {
+      "title": "Karlskrona",
+      "value": "sweck"
+     },
+     {
+      "title": "Kristianstad",
+      "value": "swecr"
+     },
+     {
+      "title": "Stockholm",
+      "value": "swecst"
+     },
+     {
+      "title": "Halmstad",
+      "value": "swehd"
+     },
+     {
+      "title": "Kalmar",
+      "value": "swekac"
+     },
+     {
+      "title": "Tofterup",
+      "value": "tt"
+     },
+     {
+      "title": "Vejrup",
+      "value": "vu"
+     }
+    ],
+    "max": 3
+   },
+   "default": [
+    "ab"
+   ]
+  },
+  "hour": {
+   "name": "Time of train — hour (24h)",
+   "default": "18",
+   "options": [
+    {
+     "title": "0",
+     "value": "0"
+    },
+    {
+     "title": "1",
+     "value": "1"
+    },
+    {
+     "title": "2",
+     "value": "2"
+    },
+    {
+     "title": "3",
+     "value": "3"
+    },
+    {
+     "title": "4",
+     "value": "4"
+    },
+    {
+     "title": "5",
+     "value": "5"
+    },
+    {
+     "title": "6",
+     "value": "6"
+    },
+    {
+     "title": "7",
+     "value": "7"
+    },
+    {
+     "title": "8",
+     "value": "8"
+    },
+    {
+     "title": "9",
+     "value": "9"
+    },
+    {
+     "title": "10",
+     "value": "10"
+    },
+    {
+     "title": "11",
+     "value": "11"
+    },
+    {
+     "title": "12",
+     "value": "12"
+    },
+    {
+     "title": "13",
+     "value": "13"
+    },
+    {
+     "title": "14",
+     "value": "14"
+    },
+    {
+     "title": "15",
+     "value": "15"
+    },
+    {
+     "title": "16",
+     "value": "16"
+    },
+    {
+     "title": "17",
+     "value": "17"
+    },
+    {
+     "title": "18",
+     "value": "18"
+    },
+    {
+     "title": "19",
+     "value": "19"
+    },
+    {
+     "title": "20",
+     "value": "20"
+    },
+    {
+     "title": "21",
+     "value": "21"
+    },
+    {
+     "title": "22",
+     "value": "22"
+    },
+    {
+     "title": "23",
+     "value": "23"
+    }
+   ],
+   "type": "select"
+  },
+  "minute": {
+   "name": "Time of train — minute",
+   "default": "12",
+   "options": [
+    {
+     "title": "00",
+     "value": "00"
+    },
+    {
+     "title": "01",
+     "value": "01"
+    },
+    {
+     "title": "02",
+     "value": "02"
+    },
+    {
+     "title": "03",
+     "value": "03"
+    },
+    {
+     "title": "04",
+     "value": "04"
+    },
+    {
+     "title": "05",
+     "value": "05"
+    },
+    {
+     "title": "06",
+     "value": "06"
+    },
+    {
+     "title": "07",
+     "value": "07"
+    },
+    {
+     "title": "08",
+     "value": "08"
+    },
+    {
+     "title": "09",
+     "value": "09"
+    },
+    {
+     "title": "10",
+     "value": "10"
+    },
+    {
+     "title": "11",
+     "value": "11"
+    },
+    {
+     "title": "12",
+     "value": "12"
+    },
+    {
+     "title": "13",
+     "value": "13"
+    },
+    {
+     "title": "14",
+     "value": "14"
+    },
+    {
+     "title": "15",
+     "value": "15"
+    },
+    {
+     "title": "16",
+     "value": "16"
+    },
+    {
+     "title": "17",
+     "value": "17"
+    },
+    {
+     "title": "18",
+     "value": "18"
+    },
+    {
+     "title": "19",
+     "value": "19"
+    },
+    {
+     "title": "20",
+     "value": "20"
+    },
+    {
+     "title": "21",
+     "value": "21"
+    },
+    {
+     "title": "22",
+     "value": "22"
+    },
+    {
+     "title": "23",
+     "value": "23"
+    },
+    {
+     "title": "24",
+     "value": "24"
+    },
+    {
+     "title": "25",
+     "value": "25"
+    },
+    {
+     "title": "26",
+     "value": "26"
+    },
+    {
+     "title": "27",
+     "value": "27"
+    },
+    {
+     "title": "28",
+     "value": "28"
+    },
+    {
+     "title": "29",
+     "value": "29"
+    },
+    {
+     "title": "30",
+     "value": "30"
+    },
+    {
+     "title": "31",
+     "value": "31"
+    },
+    {
+     "title": "32",
+     "value": "32"
+    },
+    {
+     "title": "33",
+     "value": "33"
+    },
+    {
+     "title": "34",
+     "value": "34"
+    },
+    {
+     "title": "35",
+     "value": "35"
+    },
+    {
+     "title": "36",
+     "value": "36"
+    },
+    {
+     "title": "37",
+     "value": "37"
+    },
+    {
+     "title": "38",
+     "value": "38"
+    },
+    {
+     "title": "39",
+     "value": "39"
+    },
+    {
+     "title": "40",
+     "value": "40"
+    },
+    {
+     "title": "41",
+     "value": "41"
+    },
+    {
+     "title": "42",
+     "value": "42"
+    },
+    {
+     "title": "43",
+     "value": "43"
+    },
+    {
+     "title": "44",
+     "value": "44"
+    },
+    {
+     "title": "45",
+     "value": "45"
+    },
+    {
+     "title": "46",
+     "value": "46"
+    },
+    {
+     "title": "47",
+     "value": "47"
+    },
+    {
+     "title": "48",
+     "value": "48"
+    },
+    {
+     "title": "49",
+     "value": "49"
+    },
+    {
+     "title": "50",
+     "value": "50"
+    },
+    {
+     "title": "51",
+     "value": "51"
+    },
+    {
+     "title": "52",
+     "value": "52"
+    },
+    {
+     "title": "53",
+     "value": "53"
+    },
+    {
+     "title": "54",
+     "value": "54"
+    },
+    {
+     "title": "55",
+     "value": "55"
+    },
+    {
+     "title": "56",
+     "value": "56"
+    },
+    {
+     "title": "57",
+     "value": "57"
+    },
+    {
+     "title": "58",
+     "value": "58"
+    },
+    {
+     "title": "59",
+     "value": "59"
+    }
+   ],
+   "type": "select"
+  },
+  "disruption": {
+   "name": "Disruption",
+   "default": "awaitstime",
+   "options": [
+    {
+     "title": "Afventer tid / Awaiting a departure time",
+     "value": "awaitstime"
+    },
+    {
+     "title": "Er desværre aflyst / Has been cancelled",
+     "value": "cancelled"
+    }
+   ],
+   "type": "select"
+  }
+ },
+ "defaultState": {
+  "destinations": [
+   "ab"
+  ],
+  "hour": "18",
+  "minute": "12",
+  "track": "5",
+  "countdown": "ca15-20min",
+  "trackChange": false
+ },
+ "presets": [
+  {
+   "name": "Aarhus H — spor 3 — om ca. 10 min",
+   "state": {
+    "destinations": [
+     "ar"
+    ],
+    "hour": "14",
+    "minute": "30",
+    "track": "3",
+    "countdown": "ca10min",
+    "trackChange": false
+   }
+  },
+  {
+   "name": "København H — spor 5 — om ca. 5 min",
+   "state": {
+    "destinations": [
+     "kh"
+    ],
+    "hour": "8",
+    "minute": "12",
+    "track": "5",
+    "countdown": "ca5min",
+    "trackChange": false
+   }
+  }
+ ],
+ "disruptionDefaultState": {
+  "destinations": [
+   "ab"
+  ],
+  "hour": "18",
+  "minute": "12",
+  "disruption": "awaitstime"
+ },
+ "disruptionPresets": [
+  {
+   "name": "Aarhus H — afventer tid",
+   "state": {
+    "destinations": [
+     "ar"
+    ],
+    "hour": "14",
+    "minute": "30",
+    "disruption": "awaitstime"
+   }
+  },
+  {
+   "name": "København H — aflyst",
+   "state": {
+    "destinations": [
+     "kh"
+    ],
+    "hour": "8",
+    "minute": "12",
+    "disruption": "cancelled"
+   }
+  }
+ ]
+}

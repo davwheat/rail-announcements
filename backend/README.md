@@ -247,8 +247,8 @@ For each system it writes `internal/systems/PKG`, where `PKG` is the system's
 ID in lower case without the version or the underscores (`TFL_DLR_V1` becomes
 `tfldlr`):
 
-- `testdata/parity.json.gz`: the tab, the state and the clips, for about 41,000
-  cases over the 16 systems.
+- `testdata/parity.json.gz`: the tab, the state and the clips, for about 42,000
+  cases over the 19 systems.
 - `data/instance.json`: the system class's own fields and getters.
 - `data/module.json`: the constants the handlers read from a module beside the
   class, for the systems that keep them there.

@@ -1,0 +1,9 @@
+{
+ "DESCRIPTION": "Generate TfL Piccadilly Line on-train announcements using the real audio recordings and display text from a 1973 Tube Stock announcement card.",
+ "AUDIO_CDN": "https://cdn.railannouncements.co.uk",
+ "livePlayback": null,
+ "NAME": "TfL Piccadilly Line",
+ "ID": "TFL_PICCADILLY_LINE_V1",
+ "FILE_PREFIX": "TfL/Piccadilly Line",
+ "SYSTEM_TYPE": "train"
+}

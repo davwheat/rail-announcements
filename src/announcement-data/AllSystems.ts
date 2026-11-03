@@ -4,6 +4,9 @@ import TfWTrainFx from './systems/rolling-stock/TfWTrainFx'
 import TfWTelevic from './systems/rolling-stock/TfWTelevic'
 import FGWTrainFx from './systems/rolling-stock/FGWTrainFx'
 import NorthernTrainFx from './systems/rolling-stock/NorthernTrainFx'
+import AvantiPendolino from './systems/rolling-stock/AvantiPendolino'
+import WMTClass172 from './systems/rolling-stock/WMTClass172'
+import WMTClass323 from './systems/rolling-stock/WMTClass323'
 import MerseyrailClass777 from './systems/rolling-stock/MerseyrailClass777'
 
 import AmeyPhil from './systems/stations/AmeyPhil'
@@ -31,6 +34,9 @@ export const AllTrainAnnouncementSystems: AnnouncementSystemClass<TrainAnnouncem
   LnerAzuma,
   FGWTrainFx,
   NorthernTrainFx,
+  AvantiPendolino,
+  WMTClass172,
+  WMTClass323,
   MerseyrailClass777,
 ]
 

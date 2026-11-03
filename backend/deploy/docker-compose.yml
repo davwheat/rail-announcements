@@ -1,0 +1,98 @@
+# Production: two replicas behind a proxy, for rootless Docker. Roll out changes
+# with ./deploy.sh, which replaces the replicas one at a time. README.md in
+# this directory explains the routing and the rootless setup.
+name: rail-announcements-backend
+
+x-replica: &replica
+  build:
+    context: ..
+    dockerfile: Dockerfile
+  image: rail-announcements-backend:${VERSION:-latest}
+  restart: unless-stopped
+  volumes:
+    # The audio is the repository's own, at its root, and is not part of the
+    # image.
+    - ../../audio:/audio:ro
+    # The service's settings, at a path where it looks for them. A replica
+    # without them would allow every origin, so a missing file fails the
+    # mount, where the short syntax would mount an empty directory instead.
+    - type: bind
+      source: ./config.toml
+      target: /config/config.toml
+      read_only: true
+      bind:
+        create_host_path: false
+  # Nothing is written outside /tmp, where ffmpeg leaves each rendered MP3
+  # for as long as it takes to read it back.
+  read_only: true
+  tmpfs:
+    - /tmp
+  cap_drop: [ALL]
+  security_opt:
+    - no-new-privileges:true
+  # On SIGTERM a replica ends its streams, which sends each listener's player
+  # to reconnect, and the proxy gives them the other replica.
+  stop_grace_period: 20s
+  healthcheck:
+    test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8090/healthz"]
+    interval: 5s
+    timeout: 3s
+    retries: 3
+    start_period: 5s
+  networks: [internal]
+  logging: &logging
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "5"
+
+services:
+  # Two named services and not `replicas: 2`, because the rollout and the proxy
+  # both need to tell them apart.
+  #
+  # Each replica is also published by itself, on the loopback address only, so
+  # that you can ask one replica for its health and its stream count. Listeners
+  # must go through the proxy, which is what keeps a stream on one replica.
+  backend-1:
+    <<: *replica
+    ports:
+      - "${LISTEN_BACKEND_1:-127.0.0.1:12001}:8090"
+  backend-2:
+    <<: *replica
+    ports:
+      - "${LISTEN_BACKEND_2:-127.0.0.1:12002}:8090"
+
+  proxy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    user: "10001:10001"
+    # Rootless Docker cannot publish a port below 1024. Terminate TLS in front
+    # of this, on the host, and forward to it.
+    ports:
+      - "${LISTEN:-127.0.0.1:12000}:8080"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    read_only: true
+    tmpfs:
+      - /data
+      - /config
+    cap_drop: [ALL]
+    # Caddy's binary is marked as able to bind low ports, and the kernel refuses
+    # to run a binary marked with a capability the container may never hold.
+    # The proxy listens on 8080, so the capability is never used.
+    cap_add: [NET_BIND_SERVICE]
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      # Healthy means a request made it through the proxy to a replica.
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    networks: [internal]
+    logging: *logging
+
+networks:
+  internal:
+    driver: bridge

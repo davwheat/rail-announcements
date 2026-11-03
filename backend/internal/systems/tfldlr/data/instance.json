@@ -1,0 +1,9 @@
+{
+ "DESCRIPTION": "Generate Docklands Light Railway on-train announcements using real audio recordings from the DLR automatic voice information system.",
+ "AUDIO_CDN": "https://cdn.railannouncements.co.uk",
+ "livePlayback": null,
+ "NAME": "TfL Docklands Light Railway",
+ "ID": "TFL_DLR_V1",
+ "FILE_PREFIX": "TfL/DLR",
+ "SYSTEM_TYPE": "train"
+}

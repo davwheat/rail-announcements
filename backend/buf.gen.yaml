@@ -1,0 +1,14 @@
+# Settings for generating internal/feed/livepb from the feed's protobuf schema,
+# which lives in the Darwin Browser repository. Run this in backend/, with
+# DARWIN_BROWSER as that repository's checkout:
+#   buf generate DARWIN_BROWSER
+version: v2
+managed:
+  enabled: true
+  override:
+    - file_option: go_package
+      value: rail-announcements-backend/internal/feed/livepb;livepb
+plugins:
+  - local: protoc-gen-go
+    out: internal/feed/livepb
+    opt: module=rail-announcements-backend/internal/feed/livepb

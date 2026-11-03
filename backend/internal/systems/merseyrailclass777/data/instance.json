@@ -1,0 +1,580 @@
+{
+ "DESCRIPTION": "Generate Merseyrail Class 777 on-train announcements using real audio recordings.",
+ "AUDIO_CDN": "https://cdn.railannouncements.co.uk",
+ "livePlayback": null,
+ "NAME": "Merseyrail Class 777",
+ "ID": "MERSEYRAIL_CLASS_777_V1",
+ "FILE_PREFIX": "Class 777",
+ "SYSTEM_TYPE": "train",
+ "AllAvailableStationNames": [
+  "AIG",
+  "AIN",
+  "ANS",
+  "AUG",
+  "BAC",
+  "BAH",
+  "BDL",
+  "BEB",
+  "BID",
+  "BKC",
+  "BKN",
+  "BKP",
+  "BKQ",
+  "BLN",
+  "BMR",
+  "BNW",
+  "BOM",
+  "BOT",
+  "BRW",
+  "CNP",
+  "CPU",
+  "CSG",
+  "CTR",
+  "ELP",
+  "ERA",
+  "FAZ",
+  "FBY",
+  "FRE",
+  "GNL",
+  "HBL",
+  "HIL",
+  "HLR",
+  "HNX",
+  "HOO",
+  "HTO",
+  "HYK",
+  "KIR",
+  "KKD",
+  "LIV",
+  "LSW",
+  "LTT",
+  "LVC",
+  "LVJ",
+  "MAG",
+  "MEO",
+  "MNR",
+  "MRF",
+  "MRT",
+  "NBN",
+  "OMS",
+  "OPK",
+  "ORN",
+  "OVE",
+  "PRS",
+  "PSL",
+  "RFY",
+  "RIL",
+  "SDL",
+  "SFL",
+  "SKM",
+  "SOP",
+  "SPI",
+  "STM",
+  "TWN",
+  "WAO",
+  "WKI",
+  "WLG",
+  "WLO",
+  "WLV",
+  "LIV2",
+  "LSP",
+  "MHN",
+  "WXM"
+ ],
+ "AvailableStationNames": {
+  "low": [
+   "AIG",
+   "AIN",
+   "ANS",
+   "AUG",
+   "BAC",
+   "BAH",
+   "BDL",
+   "BEB",
+   "BID",
+   "BKC",
+   "BKN",
+   "BKP",
+   "BKQ",
+   "BLN",
+   "BMR",
+   "BNW",
+   "BOM",
+   "BOT",
+   "BRW",
+   "CNP",
+   "CPU",
+   "CSG",
+   "CTR",
+   "ELP",
+   "ERA",
+   "FAZ",
+   "FBY",
+   "FRE",
+   "GNL",
+   "HBL",
+   "HIL",
+   "HLR",
+   "HNX",
+   "HOO",
+   "HTO",
+   "HYK",
+   "KIR",
+   "KKD",
+   "LIV",
+   "LSW",
+   "LTT",
+   "LVC",
+   "LVJ",
+   "MAG",
+   "MEO",
+   "MNR",
+   "MRF",
+   "MRT",
+   "NBN",
+   "OMS",
+   "OPK",
+   "ORN",
+   "OVE",
+   "PRS",
+   "PSL",
+   "RFY",
+   "RIL",
+   "SDL",
+   "SFL",
+   "SKM",
+   "SOP",
+   "SPI",
+   "STM",
+   "TWN",
+   "WAO",
+   "WKI",
+   "WLG",
+   "WLO",
+   "WLV",
+   "LIV2",
+   "LSP",
+   "MHN",
+   "WXM"
+  ],
+  "high": [
+   "AIG",
+   "AIN",
+   "ANS",
+   "AUG",
+   "BAC",
+   "BAH",
+   "BDL",
+   "BEB",
+   "BID",
+   "BKC",
+   "BKN",
+   "BKP",
+   "BKQ",
+   "BLN",
+   "BMR",
+   "BNW",
+   "BOM",
+   "BOT",
+   "BRW",
+   "CNP",
+   "CPU",
+   "CSG",
+   "CTR",
+   "ELP",
+   "ERA",
+   "FAZ",
+   "FBY",
+   "FRE",
+   "GNL",
+   "HBL",
+   "HIL",
+   "HLR",
+   "HNX",
+   "HOO",
+   "HTO",
+   "HYK",
+   "KIR",
+   "KKD",
+   "LIV",
+   "LSW",
+   "LTT",
+   "LVC",
+   "LVJ",
+   "MAG",
+   "MEO",
+   "MNR",
+   "MRF",
+   "MRT",
+   "NBN",
+   "OMS",
+   "OPK",
+   "ORN",
+   "OVE",
+   "PRS",
+   "PSL",
+   "RFY",
+   "RIL",
+   "SDL",
+   "SFL",
+   "SKM",
+   "SOP",
+   "SPI",
+   "STM",
+   "TWN",
+   "WAO",
+   "WKI",
+   "WLG",
+   "WLO",
+   "WLV",
+   "LIV2",
+   "LSP",
+   "MHN",
+   "WXM"
+  ]
+ },
+ "StationOptions": [
+  {
+   "value": "AIG",
+   "title": "Aigburth (AIG)"
+  },
+  {
+   "value": "ANS",
+   "title": "Ainsdale (ANS)"
+  },
+  {
+   "value": "AIN",
+   "title": "Aintree (AIN)"
+  },
+  {
+   "value": "AUG",
+   "title": "Aughton Park (AUG)"
+  },
+  {
+   "value": "BAC",
+   "title": "Bache (BAC)"
+  },
+  {
+   "value": "BAH",
+   "title": "Bank Hall (BAH)"
+  },
+  {
+   "value": "BEB",
+   "title": "Bebington (BEB)"
+  },
+  {
+   "value": "BID",
+   "title": "Bidston (BID)"
+  },
+  {
+   "value": "BDL",
+   "title": "Birkdale (BDL)"
+  },
+  {
+   "value": "BKC",
+   "title": "Birkenhead Central (BKC)"
+  },
+  {
+   "value": "BKQ",
+   "title": "Birkenhead Hamilton Square (BKQ)"
+  },
+  {
+   "value": "BKN",
+   "title": "Birkenhead North (BKN)"
+  },
+  {
+   "value": "BKP",
+   "title": "Birkenhead Park (BKP)"
+  },
+  {
+   "value": "BLN",
+   "title": "Blundellsands & Crosby (BLN)"
+  },
+  {
+   "value": "BNW",
+   "title": "Bootle New Strand (BNW)"
+  },
+  {
+   "value": "BOT",
+   "title": "Bootle Oriel Road (BOT)"
+  },
+  {
+   "value": "BOM",
+   "title": "Bromborough (BOM)"
+  },
+  {
+   "value": "BMR",
+   "title": "Bromborough Rake (BMR)"
+  },
+  {
+   "value": "BRW",
+   "title": "Brunswick (BRW)"
+  },
+  {
+   "value": "CPU",
+   "title": "Capenhurst (CPU)"
+  },
+  {
+   "value": "CTR",
+   "title": "Chester (CTR)"
+  },
+  {
+   "value": "CNP",
+   "title": "Conway Park (CNP)"
+  },
+  {
+   "value": "CSG",
+   "title": "Cressington (CSG)"
+  },
+  {
+   "value": "ERA",
+   "title": "Eastham Rake (ERA)"
+  },
+  {
+   "value": "ELP",
+   "title": "Ellesmere Port (ELP)"
+  },
+  {
+   "value": "FAZ",
+   "title": "Fazakerley (FAZ)"
+  },
+  {
+   "value": "FBY",
+   "title": "Formby (FBY)"
+  },
+  {
+   "value": "FRE",
+   "title": "Freshfield (FRE)"
+  },
+  {
+   "value": "GNL",
+   "title": "Green Lane (GNL)"
+  },
+  {
+   "value": "HLR",
+   "title": "Hall Road (HLR)"
+  },
+  {
+   "value": "HBL",
+   "title": "Headbolt Lane (HBL)"
+  },
+  {
+   "value": "HTO",
+   "title": "Hightown (HTO)"
+  },
+  {
+   "value": "HIL",
+   "title": "Hillside (HIL)"
+  },
+  {
+   "value": "HOO",
+   "title": "Hooton (HOO)"
+  },
+  {
+   "value": "HYK",
+   "title": "Hoylake (HYK)"
+  },
+  {
+   "value": "HNX",
+   "title": "Hunts Cross (HNX)"
+  },
+  {
+   "value": "LVJ",
+   "title": "James Street (LVJ)"
+  },
+  {
+   "value": "KIR",
+   "title": "Kirkby (KIR)"
+  },
+  {
+   "value": "KKD",
+   "title": "Kirkdale (KKD)"
+  },
+  {
+   "value": "LSW",
+   "title": "Leasowe (LSW)"
+  },
+  {
+   "value": "LTT",
+   "title": "Little Sutton (LTT)"
+  },
+  {
+   "value": "LVC",
+   "title": "Liverpool Central (LVC)"
+  },
+  {
+   "title": "Liverpool Lime Street (alternate recording) (LIV2)",
+   "value": "LIV2"
+  },
+  {
+   "value": "LIV",
+   "title": "Liverpool Lime Street (LIV)"
+  },
+  {
+   "title": "Liverpool South Parkway (LSP)",
+   "value": "LSP"
+  },
+  {
+   "value": "MAG",
+   "title": "Maghull (MAG)"
+  },
+  {
+   "title": "Maghull North (MHN)",
+   "value": "MHN"
+  },
+  {
+   "value": "MNR",
+   "title": "Manor Road (MNR)"
+  },
+  {
+   "value": "MEO",
+   "title": "Meols (MEO)"
+  },
+  {
+   "value": "MRF",
+   "title": "Moorfields (MRF)"
+  },
+  {
+   "value": "MRT",
+   "title": "Moreton (Merseyside) (MRT)"
+  },
+  {
+   "value": "NBN",
+   "title": "New Brighton (NBN)"
+  },
+  {
+   "value": "ORN",
+   "title": "Old Roan (ORN)"
+  },
+  {
+   "value": "OMS",
+   "title": "Ormskirk (OMS)"
+  },
+  {
+   "value": "OPK",
+   "title": "Orrell Park (OPK)"
+  },
+  {
+   "value": "OVE",
+   "title": "Overpool (OVE)"
+  },
+  {
+   "value": "PSL",
+   "title": "Port Sunlight (PSL)"
+  },
+  {
+   "value": "PRS",
+   "title": "Prees (PRS)"
+  },
+  {
+   "value": "RIL",
+   "title": "Rice Lane (RIL)"
+  },
+  {
+   "value": "RFY",
+   "title": "Rock Ferry (RFY)"
+  },
+  {
+   "value": "SDL",
+   "title": "Sandhills (SDL)"
+  },
+  {
+   "value": "SFL",
+   "title": "Seaforth & Litherland (SFL)"
+  },
+  {
+   "value": "SOP",
+   "title": "Southport (SOP)"
+  },
+  {
+   "value": "SPI",
+   "title": "Spital (SPI)"
+  },
+  {
+   "value": "STM",
+   "title": "St Michaels (STM)"
+  },
+  {
+   "value": "SKM",
+   "title": "Stoke Mandeville (SKM)"
+  },
+  {
+   "value": "TWN",
+   "title": "Town Green (TWN)"
+  },
+  {
+   "value": "WLG",
+   "title": "Wallasey Grove Road (WLG)"
+  },
+  {
+   "value": "WLV",
+   "title": "Wallasey Village (WLV)"
+  },
+  {
+   "value": "WAO",
+   "title": "Walton (Merseyside) (WAO)"
+  },
+  {
+   "value": "WLO",
+   "title": "Waterloo (Merseyside) (WLO)"
+  },
+  {
+   "value": "WKI",
+   "title": "West Kirby (WKI)"
+  },
+  {
+   "title": "Wrexham (WXM)",
+   "value": "WXM"
+  }
+ ],
+ "ReasonOptions": [
+  {
+   "title": "A failed train ahead",
+   "value": "a failed train ahead"
+  },
+  {
+   "title": "A lineside incident",
+   "value": "a lineside incident"
+  },
+  {
+   "title": "A points failure",
+   "value": "a points failure"
+  },
+  {
+   "title": "Adverse weather conditions",
+   "value": "adverse weather conditions"
+  },
+  {
+   "title": "Circumstances beyond our control",
+   "value": "circumstances beyond our control"
+  },
+  {
+   "title": "Operational difficulties",
+   "value": "operational difficulties"
+  },
+  {
+   "title": "Power problems",
+   "value": "power problems"
+  },
+  {
+   "title": "Power supply problems",
+   "value": "power supply problems"
+  },
+  {
+   "title": "Signaling problems",
+   "value": "signaling problems"
+  },
+  {
+   "title": "Technical problems with this train",
+   "value": "technical problems with this train"
+  },
+  {
+   "title": "Technical problems",
+   "value": "technical problems"
+  },
+  {
+   "title": "Vandalism",
+   "value": "vandalism"
+  }
+ ]
+}

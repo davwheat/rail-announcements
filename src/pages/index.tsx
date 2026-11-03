@@ -53,6 +53,7 @@ const Systems = [
       { title: 'Avanti West Coast Pendolino', url: '/rolling-stock/avanti-west-coast-pendolino' },
       { title: 'WMR & LNR Class 172', url: '/rolling-stock/wmt-class-172' },
       { title: 'WMR Class 323', url: '/rolling-stock/wmt-class-323' },
+      { title: 'Merseyrail Class 777', url: '/rolling-stock/merseyrail-class-777', new: true },
     ],
   },
   {
@@ -71,7 +72,7 @@ const Systems = [
 
 export default function IndexPage() {
   return (
-    <Layout description="Generate station and on-train announcements for the UK rail network using real audio recordings. Covers rolling stock from Avanti, First Great Western, LNER, Northern, Thameslink, TfL, Transport for Wales, and West Midlands Trains, plus station systems from Amey/KeTech and ScotRail.">
+    <Layout description="Generate station and on-train announcements for the UK rail network using real audio recordings. Covers rolling stock from Avanti, First Great Western, LNER, Merseyrail, Northern, Thameslink, TfL, Transport for Wales, and West Midlands Trains, plus station systems from Amey/KeTech and ScotRail.">
       <SavedAnnouncementLoader />
 
       <header>

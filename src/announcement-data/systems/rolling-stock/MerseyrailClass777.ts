@@ -64,15 +64,80 @@ const AdditionalStations: { crs: string; name: string }[] = [
 
 const AdditionalStationsTitleValueMap = AdditionalStations.map(s => ({ title: `${s.name} (${s.crs})`, value: s.crs }))
 
-const START_OF_JOURNEY_PRESETS: ICustomAnnouncementPreset<IStartOfJourneyOptions>[] = [
-  {
-    name: 'Headbolt Lane to Liverpool Central',
+const NORTHERN_LINE_INTRO = 'conjoiners.this is the merseyrail northern line service to'
+const WIRRAL_LINE_INTRO = 'conjoiners.this is the merseyrail wirral line service to'
+
+const SOUTHPORT_TO_HUNTS_CROSS = [
+  'SOP',
+  'BDL',
+  'HIL',
+  'ANS',
+  'FRE',
+  'FBY',
+  'HTO',
+  'HLR',
+  'BLN',
+  'WLO',
+  'SFL',
+  'BNW',
+  'BOT',
+  'BAH',
+  'SDL',
+  'MRF',
+  'LVC',
+  'BRW',
+  'STM',
+  'AIG',
+  'CSG',
+  'LSP',
+  'HNX',
+]
+const ORMSKIRK_TO_LIVERPOOL_CENTRAL = ['OMS', 'AUG', 'TWN', 'MHN', 'MAG', 'ORN', 'AIN', 'OPK', 'WAO', 'KKD', 'SDL', 'MRF', 'LVC']
+const HEADBOLT_LANE_TO_LIVERPOOL_CENTRAL = ['HBL', 'KIR', 'FAZ', 'RIL', 'KKD', 'SDL', 'MRF', 'LVC']
+
+const LIVERPOOL_LOOP_FROM_HAMILTON_SQUARE = ['BKQ', 'LVJ', 'MRF', 'LIV', 'LVC']
+// Trains leave the loop at Central and call at James Street again on the way back under the Mersey.
+const HAMILTON_SQUARE_FROM_LIVERPOOL_CENTRAL = ['LVC', 'LVJ', 'BKQ']
+
+const WEST_KIRBY_TO_HAMILTON_SQUARE = ['WKI', 'HYK', 'MNR', 'MEO', 'MRT', 'LSW', 'BID', 'BKN', 'BKP', 'CNP', 'BKQ']
+const NEW_BRIGHTON_TO_HAMILTON_SQUARE = ['NBN', 'WLG', 'WLV', 'BKN', 'BKP', 'CNP', 'BKQ']
+const CHESTER_TO_HAMILTON_SQUARE = ['CTR', 'BAC', 'CPU', 'HOO', 'ERA', 'BOM', 'BMR', 'SPI', 'PSL', 'BEB', 'RFY', 'GNL', 'BKC', 'BKQ']
+const ELLESMERE_PORT_TO_HAMILTON_SQUARE = ['ELP', 'OVE', 'LTT', 'HOO', 'ERA', 'BOM', 'BMR', 'SPI', 'PSL', 'BEB', 'RFY', 'GNL', 'BKC', 'BKQ']
+
+function wirralLineToLiverpool(branch: string[]): string[] {
+  return [...branch.slice(0, -1), ...LIVERPOOL_LOOP_FROM_HAMILTON_SQUARE]
+}
+
+function wirralLineFromLiverpool(branch: string[]): string[] {
+  return [...HAMILTON_SQUARE_FROM_LIVERPOOL_CENTRAL.slice(0, -1), ...[...branch].reverse()]
+}
+
+function journeyPreset(name: string, serviceIntro: string, stops: string[]): ICustomAnnouncementPreset<IStartOfJourneyOptions> {
+  return {
+    name,
     state: {
-      serviceIntro: 'messages.welcome aboard this merseyrail service to',
-      terminatesAtCode: 'LVC',
-      callingAtCodes: ['HBL', 'KIR', 'FAZ', 'RIL', 'KKD', 'SDL', 'MRF'].map(crsToStationItemMapper),
+      serviceIntro,
+      terminatesAtCode: stops[stops.length - 1],
+      callingAtCodes: stops.slice(0, -1).map(crsToStationItemMapper),
     },
-  },
+  }
+}
+
+const START_OF_JOURNEY_PRESETS: ICustomAnnouncementPreset<IStartOfJourneyOptions>[] = [
+  journeyPreset('Southport to Hunts Cross', NORTHERN_LINE_INTRO, SOUTHPORT_TO_HUNTS_CROSS),
+  journeyPreset('Hunts Cross to Southport', NORTHERN_LINE_INTRO, [...SOUTHPORT_TO_HUNTS_CROSS].reverse()),
+  journeyPreset('Ormskirk to Liverpool Central', NORTHERN_LINE_INTRO, ORMSKIRK_TO_LIVERPOOL_CENTRAL),
+  journeyPreset('Liverpool Central to Ormskirk', NORTHERN_LINE_INTRO, [...ORMSKIRK_TO_LIVERPOOL_CENTRAL].reverse()),
+  journeyPreset('Headbolt Lane to Liverpool Central', NORTHERN_LINE_INTRO, HEADBOLT_LANE_TO_LIVERPOOL_CENTRAL),
+  journeyPreset('Liverpool Central to Headbolt Lane', NORTHERN_LINE_INTRO, [...HEADBOLT_LANE_TO_LIVERPOOL_CENTRAL].reverse()),
+  journeyPreset('West Kirby to Liverpool Central', WIRRAL_LINE_INTRO, wirralLineToLiverpool(WEST_KIRBY_TO_HAMILTON_SQUARE)),
+  journeyPreset('Liverpool Central to West Kirby', WIRRAL_LINE_INTRO, wirralLineFromLiverpool(WEST_KIRBY_TO_HAMILTON_SQUARE)),
+  journeyPreset('New Brighton to Liverpool Central', WIRRAL_LINE_INTRO, wirralLineToLiverpool(NEW_BRIGHTON_TO_HAMILTON_SQUARE)),
+  journeyPreset('Liverpool Central to New Brighton', WIRRAL_LINE_INTRO, wirralLineFromLiverpool(NEW_BRIGHTON_TO_HAMILTON_SQUARE)),
+  journeyPreset('Chester to Liverpool Central', WIRRAL_LINE_INTRO, wirralLineToLiverpool(CHESTER_TO_HAMILTON_SQUARE)),
+  journeyPreset('Liverpool Central to Chester', WIRRAL_LINE_INTRO, wirralLineFromLiverpool(CHESTER_TO_HAMILTON_SQUARE)),
+  journeyPreset('Ellesmere Port to Liverpool Central', WIRRAL_LINE_INTRO, wirralLineToLiverpool(ELLESMERE_PORT_TO_HAMILTON_SQUARE)),
+  journeyPreset('Liverpool Central to Ellesmere Port', WIRRAL_LINE_INTRO, wirralLineFromLiverpool(ELLESMERE_PORT_TO_HAMILTON_SQUARE)),
 ]
 
 const SERVICE_INTRO_OPTIONS: { title: string; value: string }[] = [
@@ -160,6 +225,110 @@ const REASONS = [
 function capitalise(text: string): string {
   return text.charAt(0).toUpperCase() + text.slice(1)
 }
+
+const MIND_THE_DOORS = 'messages.please mind the closing doors'
+const THANK_YOU = 'messages.thank you for travelling with merseyrail'
+
+function departingPreset(
+  name: string,
+  serviceIntro: string,
+  terminatesAtCode: string,
+  nextStationCode: string,
+): ICustomAnnouncementPreset<IDepartingStationOptions> {
+  return {
+    name,
+    state: {
+      doorWarning: MIND_THE_DOORS,
+      serviceIntro,
+      terminatesAtCode,
+      nextStopWording: 'conjoiners.the next station is',
+      nextStationCode,
+      shortPlatform: '',
+    },
+  }
+}
+
+function approachingPreset(name: string, stationCode: string, isFinalStop: boolean): ICustomAnnouncementPreset<IApproachingStationOptions> {
+  return { name, state: { stationCode, isFinalStop, doorSide: '', shortPlatform: '', thanks: THANK_YOU } }
+}
+
+function atStationPreset(
+  name: string,
+  stationCode: string,
+  onward: { serviceIntro: string; terminatesAtCode: string } | null,
+): ICustomAnnouncementPreset<IAtStationOptions> {
+  return {
+    name,
+    state: {
+      stationCode,
+      isFinalStop: onward === null,
+      serviceIntro: onward?.serviceIntro ?? NORTHERN_LINE_INTRO,
+      terminatesAtCode: onward?.terminatesAtCode ?? stationCode,
+      doorSide: '',
+      thanks: THANK_YOU,
+    },
+  }
+}
+
+const DEPARTING_STATION_PRESETS: ICustomAnnouncementPreset<IDepartingStationOptions>[] = [
+  departingPreset('Southport, for Hunts Cross', NORTHERN_LINE_INTRO, 'HNX', 'BDL'),
+  departingPreset('Liverpool Central, for Southport', NORTHERN_LINE_INTRO, 'SOP', 'MRF'),
+  departingPreset('Ormskirk, for Liverpool Central', NORTHERN_LINE_INTRO, 'LVC', 'AUG'),
+  departingPreset('Headbolt Lane, for Liverpool Central', NORTHERN_LINE_INTRO, 'LVC', 'KIR'),
+  departingPreset('West Kirby, for Liverpool Central', WIRRAL_LINE_INTRO, 'LVC', 'HYK'),
+  departingPreset('New Brighton, for Liverpool Central', WIRRAL_LINE_INTRO, 'LVC', 'WLG'),
+  departingPreset('Chester, for Liverpool Central', WIRRAL_LINE_INTRO, 'LVC', 'BAC'),
+  departingPreset('Liverpool Central, for Chester', WIRRAL_LINE_INTRO, 'CTR', 'LVJ'),
+]
+
+const APPROACHING_STATION_PRESETS: ICustomAnnouncementPreset<IApproachingStationOptions>[] = [
+  approachingPreset('Moorfields', 'MRF', false),
+  approachingPreset('Liverpool Central', 'LVC', false),
+  approachingPreset('Hamilton Square', 'BKQ', false),
+  approachingPreset('Liverpool Central (terminating)', 'LVC', true),
+  approachingPreset('Southport (terminating)', 'SOP', true),
+  approachingPreset('Hunts Cross (terminating)', 'HNX', true),
+  approachingPreset('Chester (terminating)', 'CTR', true),
+  approachingPreset('West Kirby (terminating)', 'WKI', true),
+]
+
+const AT_STATION_PRESETS: ICustomAnnouncementPreset<IAtStationOptions>[] = [
+  atStationPreset('Moorfields, for Hunts Cross', 'MRF', { serviceIntro: NORTHERN_LINE_INTRO, terminatesAtCode: 'HNX' }),
+  atStationPreset('Sandhills, for Southport', 'SDL', { serviceIntro: NORTHERN_LINE_INTRO, terminatesAtCode: 'SOP' }),
+  atStationPreset('Hamilton Square, for Liverpool Central', 'BKQ', { serviceIntro: WIRRAL_LINE_INTRO, terminatesAtCode: 'LVC' }),
+  atStationPreset('James Street, for New Brighton', 'LVJ', { serviceIntro: WIRRAL_LINE_INTRO, terminatesAtCode: 'NBN' }),
+  atStationPreset('Liverpool Central (terminating)', 'LVC', null),
+  atStationPreset('Ormskirk (terminating)', 'OMS', null),
+  atStationPreset('Chester (terminating)', 'CTR', null),
+  atStationPreset('New Brighton (terminating)', 'NBN', null),
+]
+
+const DISRUPTION_PRESETS: ICustomAnnouncementPreset<IDisruptionOptions>[] = [
+  {
+    name: 'Running 10 minutes late, signalling problems',
+    state: { disruptionType: 'running late', delayDuration: '10', delayReason: 'signaling problems', stationCode: 'LIV' },
+  },
+  {
+    name: 'Running over an hour late, power supply problems',
+    state: { disruptionType: 'running late', delayDuration: 'over-an-hour', delayReason: 'power supply problems', stationCode: 'LIV' },
+  },
+  {
+    name: 'Delayed, a failed train ahead',
+    state: { disruptionType: 'delayed', delayDuration: '10', delayReason: 'a failed train ahead', stationCode: 'LIV' },
+  },
+  {
+    name: 'Not calling at Liverpool Lime Street, operational difficulties',
+    state: { disruptionType: 'not calling at', delayDuration: '10', delayReason: 'operational difficulties', stationCode: 'LIV' },
+  },
+  {
+    name: 'Terminating early, a points failure',
+    state: { disruptionType: 'terminating early', delayDuration: '10', delayReason: 'a points failure', stationCode: 'LIV' },
+  },
+  {
+    name: 'Terminating early, engineering work',
+    state: { disruptionType: 'engineering work', delayDuration: '10', delayReason: 'vandalism', stationCode: 'LIV' },
+  },
+]
 
 export default class MerseyrailClass777 extends TrainAnnouncementSystem {
   readonly NAME = 'Merseyrail Class 777'
@@ -466,6 +635,7 @@ export default class MerseyrailClass777 extends TrainAnnouncementSystem {
       },
       props: {
         playHandler: this.playDepartingStationAnnouncement.bind(this),
+        presets: DEPARTING_STATION_PRESETS,
         options: {
           doorWarning: {
             name: 'Door warning',
@@ -518,6 +688,7 @@ export default class MerseyrailClass777 extends TrainAnnouncementSystem {
       },
       props: {
         playHandler: this.playApproachingStationAnnouncement.bind(this),
+        presets: APPROACHING_STATION_PRESETS,
         options: {
           stationCode: {
             name: 'Station',
@@ -565,6 +736,7 @@ export default class MerseyrailClass777 extends TrainAnnouncementSystem {
       },
       props: {
         playHandler: this.playAtStationAnnouncement.bind(this),
+        presets: AT_STATION_PRESETS,
         options: {
           stationCode: {
             name: 'This station',
@@ -618,6 +790,7 @@ export default class MerseyrailClass777 extends TrainAnnouncementSystem {
       },
       props: {
         playHandler: this.playDisruptionAnnouncement.bind(this),
+        presets: DISRUPTION_PRESETS,
         options: {
           disruptionType: {
             name: 'Announcement',

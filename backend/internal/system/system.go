@@ -15,6 +15,7 @@ import (
 	"rail-announcements-backend/internal/systems/banedanmark"
 	"rail-announcements-backend/internal/systems/fgwtrainfx"
 	"rail-announcements-backend/internal/systems/lnerazuma"
+	"rail-announcements-backend/internal/systems/merseyrailclass777"
 	"rail-announcements-backend/internal/systems/northerntrainfx"
 	"rail-announcements-backend/internal/systems/scotrailstn"
 	"rail-announcements-backend/internal/systems/snclass377"
@@ -51,6 +52,7 @@ var All = []System{
 	load(banedanmark.New),
 	load(fgwtrainfx.New),
 	load(lnerazuma.New),
+	load(merseyrailclass777.New),
 	load(northerntrainfx.New),
 	load(scotrailstn.New),
 	load(snclass377.New),

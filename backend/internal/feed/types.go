@@ -102,6 +102,9 @@ type Call struct {
 	DetachFront      *bool     `json:"detach_front"`
 	FalseDestination *Location `json:"false_destination"`
 	CoachCount       *int      `json:"coach_count"`
+	// Units are the units Gemini allocates to the train at this call, such as
+	// 450042. Their order doesn't say which end each unit is at.
+	Units []string `json:"units,omitempty"`
 	// FormationChange is the coaches that leave or join the train at this
 	// call. Nil when none do, or when nothing says.
 	FormationChange *FormationChange `json:"formation_change,omitempty"`
@@ -160,23 +163,25 @@ type Coach struct {
 // evidence, train order and coach facilities are not spoken, so they are not
 // decoded.
 type Movement struct {
-	ID               string     `json:"id"`
-	RID              string     `json:"rid"`
-	Station          Location   `json:"station"`
-	Kind             string     `json:"kind"`
-	Mode             string     `json:"mode"`
-	UID              *string    `json:"uid"`
-	Headcode         *string    `json:"headcode"`
-	OperatorCode     *string    `json:"operator_code"`
-	OperatorName     *string    `json:"operator_name"`
-	Arrival          Times      `json:"arrival"`
-	Departure        Times      `json:"departure"`
-	Passing          Times      `json:"passing"`
-	Platform         Platform   `json:"platform"`
-	Cancelled        bool       `json:"cancelled"`
-	CancelReason     Reason     `json:"cancel_reason"`
-	DelayReason      Reason     `json:"delay_reason"`
-	CoachCount       *int       `json:"coach_count"`
+	ID           string   `json:"id"`
+	RID          string   `json:"rid"`
+	Station      Location `json:"station"`
+	Kind         string   `json:"kind"`
+	Mode         string   `json:"mode"`
+	UID          *string  `json:"uid"`
+	Headcode     *string  `json:"headcode"`
+	OperatorCode *string  `json:"operator_code"`
+	OperatorName *string  `json:"operator_name"`
+	Arrival      Times    `json:"arrival"`
+	Departure    Times    `json:"departure"`
+	Passing      Times    `json:"passing"`
+	Platform     Platform `json:"platform"`
+	Cancelled    bool     `json:"cancelled"`
+	CancelReason Reason   `json:"cancel_reason"`
+	DelayReason  Reason   `json:"delay_reason"`
+	CoachCount   *int     `json:"coach_count"`
+	// Units are the units Gemini allocates to the train at this station.
+	Units            []string   `json:"units,omitempty"`
 	LoadingPercent   *int       `json:"loading_percent"`
 	Coaches          []Coach    `json:"coaches"`
 	ReverseFormation *bool      `json:"reverse_formation"`

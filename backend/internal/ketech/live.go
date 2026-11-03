@@ -359,6 +359,7 @@ func CallingPoints(m feed.Movement) ([]CallingPoint, error) {
 	train := ShortPlatformTrain{
 		OperatorCode:        deref(m.OperatorCode),
 		Length:              m.CoachCount,
+		Units:               m.Units,
 		Origins:             crsOf(m.Origins, func(e feed.Endpoint) feed.Location { return e.Location }),
 		Destinations:        crsOf(m.Destinations, func(e feed.Endpoint) feed.Location { return e.Location }),
 		SubsequentLocations: crsOf(m.CallingPoints, func(c feed.Call) feed.Location { return c.Location }),
@@ -418,6 +419,9 @@ func CallingPoints(m feed.Movement) ([]CallingPoint, error) {
 		callTrain := train
 		if call.CoachCount != nil {
 			callTrain.Length = call.CoachCount
+		}
+		if len(call.Units) > 0 {
+			callTrain.Units = call.Units
 		}
 		short := ShortPlatform(deref(call.CRS), call.Platform.Number, callTrain)
 		if reversed && short != "" {

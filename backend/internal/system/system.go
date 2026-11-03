@@ -11,6 +11,7 @@ import (
 	"rail-announcements-backend/internal/plan"
 	"rail-announcements-backend/internal/systems/ameycelia"
 	"rail-announcements-backend/internal/systems/ameyphil"
+	"rail-announcements-backend/internal/systems/awcpendolino"
 	"rail-announcements-backend/internal/systems/banedanmark"
 	"rail-announcements-backend/internal/systems/fgwtrainfx"
 	"rail-announcements-backend/internal/systems/lnerazuma"
@@ -25,6 +26,8 @@ import (
 	"rail-announcements-backend/internal/systems/tfwtelevic"
 	"rail-announcements-backend/internal/systems/tfwtrainfx"
 	"rail-announcements-backend/internal/systems/tlclass700"
+	"rail-announcements-backend/internal/systems/wmtclass172"
+	"rail-announcements-backend/internal/systems/wmtclass323"
 )
 
 type System interface {
@@ -44,6 +47,7 @@ type System interface {
 var All = []System{
 	load(ameycelia.New),
 	load(ameyphil.New),
+	load(awcpendolino.New),
 	load(banedanmark.New),
 	load(fgwtrainfx.New),
 	load(lnerazuma.New),
@@ -58,6 +62,8 @@ var All = []System{
 	load(tfwtelevic.New),
 	load(tfwtrainfx.New),
 	load(tlclass700.New),
+	load(wmtclass172.New),
+	load(wmtclass323.New),
 }
 
 // load builds a system at start-up. A system fails to build only when its

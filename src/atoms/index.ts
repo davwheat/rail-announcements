@@ -19,7 +19,7 @@ const ssrSafeBooleanStorage = createJSONStorage<boolean>(() =>
  * a tab it has been taught plays its MP3, and the live trains page plays its stream. The footer
  * sets it for the whole site.
  */
-export const serviceAudioState = atomWithStorage<boolean>('serviceAudio', false, ssrSafeBooleanStorage)
+export const serviceAudioState = atomWithStorage<boolean>('serviceAudio', true, ssrSafeBooleanStorage)
 
 export interface IPisDisplayMessage {
   /** `null` holds whatever the display already shows, for audio that carries no display text. */

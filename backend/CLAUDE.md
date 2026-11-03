@@ -52,7 +52,8 @@ website, which the root `CLAUDE.md` covers. A path here is relative to
   `internal/systems/shared/data/`, `internal/systems/*/testdata/` or
   `internal/*/testdata/parity-*` (the export writes them all), or
   `internal/feed/livepb/` (generated from the feed's protobuf schema, which
-  isn't in this repository).
+  is in the Darwin Browser repository: see `buf.gen.yaml`). When the schema
+  gains a field, regenerate `livepb` rather than reading the field by hand.
 - **`queue.Queue` isn't safe for concurrent use.** `stream.Stream.run` is its
   only caller, on one goroutine. `start` callbacks must not call back into the
   queue: the stream collects started playbacks and handles them after the call

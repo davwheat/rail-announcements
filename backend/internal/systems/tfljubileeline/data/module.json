@@ -1,0 +1,325 @@
+{
+ "StationData": [
+  {
+   "name": "Stanmore",
+   "approachingFiles": [
+    "stanmore"
+   ],
+   "standingFiles": [
+    "stanmore"
+   ],
+   "canTerminate": true
+  },
+  {
+   "name": "Canons Park",
+   "approachingFiles": [
+    "canons park"
+   ],
+   "standingFiles": [
+    "canons park"
+   ],
+   "canTerminate": true
+  },
+  {
+   "name": "Queensbury",
+   "approachingFiles": [
+    "queensbury"
+   ],
+   "standingFiles": [
+    "queensbury"
+   ],
+   "canTerminate": false
+  },
+  {
+   "name": "Kingsbury",
+   "approachingFiles": [
+    "kingsbury"
+   ],
+   "standingFiles": [
+    "kingsbury"
+   ],
+   "canTerminate": false
+  },
+  {
+   "name": "Wembley Park",
+   "approachingFiles": [
+    "wembley park",
+    "change for the metropolitan line",
+    "exit for wembley national stadium"
+   ],
+   "standingFiles": [
+    "wembley park change here"
+   ],
+   "canTerminate": true
+  },
+  {
+   "name": "Neasden",
+   "approachingFiles": [
+    "neasden"
+   ],
+   "standingFiles": [
+    "neasden",
+    "change for the metropolitan line"
+   ],
+   "canTerminate": true
+  },
+  {
+   "name": "Dollis Hill",
+   "approachingFiles": [
+    "dollis hill"
+   ],
+   "standingFiles": [
+    "dollis hill"
+   ],
+   "canTerminate": true
+  },
+  {
+   "name": "Willesden Green",
+   "approachingFiles": [
+    "willesden green",
+    "change for the metropolitan line"
+   ],
+   "standingFiles": [
+    "willesden green",
+    "change for the metropolitan line"
+   ],
+   "canTerminate": true
+  },
+  {
+   "name": "Kilburn",
+   "approachingFiles": [
+    "kilburn"
+   ],
+   "standingFiles": [
+    "kilburn"
+   ],
+   "canTerminate": false
+  },
+  {
+   "name": "West Hampstead",
+   "approachingFiles": [
+    "west hampstead",
+    "change for national rail and london overground"
+   ],
+   "standingFiles": [
+    "west hampstead change here"
+   ],
+   "canTerminate": true
+  },
+  {
+   "name": "Finchley Road",
+   "approachingFiles": [
+    "finchley road",
+    "change for the met please mind the gap"
+   ],
+   "standingFiles": [
+    "finchley road change here"
+   ],
+   "canTerminate": true
+  },
+  {
+   "name": "Swiss Cottage",
+   "approachingFiles": [
+    "swiss cottage"
+   ],
+   "standingFiles": [
+    "swiss cottage"
+   ],
+   "canTerminate": false
+  },
+  {
+   "name": "St. John's Wood",
+   "approachingFiles": [
+    "st johns wood"
+   ],
+   "standingFiles": [
+    "st johns wood"
+   ],
+   "canTerminate": false
+  },
+  {
+   "name": "Baker Street",
+   "approachingFiles": [
+    "baker street",
+    "change for the bakerloo, h&c, circle and met"
+   ],
+   "standingFiles": [
+    "baker street change here"
+   ],
+   "canTerminate": false
+  },
+  {
+   "name": "Bond Street",
+   "approachingFiles": [
+    "bond street",
+    "change for the central line"
+   ],
+   "standingFiles": [
+    "bond street change here"
+   ],
+   "canTerminate": false,
+   "postEliz": {
+    "approachingFiles": [
+     "bond street",
+     "post eliz.change for the central line and the elizabeth line"
+    ],
+    "standingFiles": [
+     "post eliz.bond street change here"
+    ]
+   }
+  },
+  {
+   "name": "Green Park",
+   "approachingFiles": [
+    "green park",
+    "change for the piccadilly and victoria lines exit for buckingham palace"
+   ],
+   "standingFiles": [
+    "green park change here"
+   ],
+   "canTerminate": true
+  },
+  {
+   "name": "Westminster",
+   "approachingFiles": [
+    "westminster",
+    "change for the circle and district line exit for westminster abbey and houses of parliament"
+   ],
+   "standingFiles": [
+    "westminster change here"
+   ],
+   "canTerminate": false
+  },
+  {
+   "name": "Waterloo",
+   "approachingFiles": [
+    "waterloo",
+    "change for the bakerloo, northern, and waterloo and city, and national rail"
+   ],
+   "standingFiles": [
+    "waterloo change here"
+   ],
+   "canTerminate": true
+  },
+  {
+   "name": "Southwark",
+   "approachingFiles": [
+    "southwark",
+    "change for national rail from waterloo east"
+   ],
+   "standingFiles": [
+    "southwark change here"
+   ],
+   "canTerminate": false
+  },
+  {
+   "name": "London Bridge",
+   "approachingFiles": [
+    "london bridge",
+    "change for the northern line and national rail"
+   ],
+   "standingFiles": [
+    "london bridge change here"
+   ],
+   "canTerminate": true
+  },
+  {
+   "name": "Bermondsey",
+   "approachingFiles": [
+    "bermondsey"
+   ],
+   "standingFiles": [
+    "bermondsey"
+   ],
+   "canTerminate": false
+  },
+  {
+   "name": "Canada Water",
+   "approachingFiles": [
+    "canada water",
+    "change for london overground"
+   ],
+   "standingFiles": [
+    "canada water change here"
+   ],
+   "canTerminate": false
+  },
+  {
+   "name": "Canary Wharf",
+   "approachingFiles": [
+    "canary wharf",
+    "change for the dlr"
+   ],
+   "standingFiles": [
+    "canary wharf change here"
+   ],
+   "canTerminate": true,
+   "postEliz": {
+    "approachingFiles": [
+     "canary wharf",
+     "post eliz.change for the dlr and the elizabeth line"
+    ],
+    "standingFiles": [
+     "post eliz.canary wharf change here"
+    ]
+   }
+  },
+  {
+   "name": "North Greenwich",
+   "approachingFiles": [
+    "north greenwich",
+    "exit here for the emirates airline and the o2"
+   ],
+   "standingFiles": [
+    "north greenwich",
+    "exit here for the emirates airline and the o2"
+   ],
+   "canTerminate": true
+  },
+  {
+   "name": "Canning Town",
+   "approachingFiles": [
+    "parnell.next canning town RHS change for"
+   ],
+   "standingFiles": [
+    "parnell.this canning town change here"
+   ],
+   "canTerminate": false,
+   "fullMessages": true
+  },
+  {
+   "name": "West Ham",
+   "approachingFiles": [
+    "west ham",
+    "change for the district, hammersmith and city, dlr, national rail"
+   ],
+   "standingFiles": [
+    "west ham change here"
+   ],
+   "canTerminate": true
+  },
+  {
+   "name": "Stratford",
+   "approachingFiles": [
+    "stratford change for"
+   ],
+   "standingFiles": [
+    "stratford change here"
+   ],
+   "canTerminate": true,
+   "postEliz": {
+    "approachingFiles": [
+     "post eliz.stratford change for"
+    ],
+    "standingFiles": [
+     "post eliz.stratford change here"
+    ]
+   }
+  }
+ ],
+ "elizAffectedStations": [
+  "Bond Street",
+  "Canary Wharf",
+  "Stratford"
+ ]
+}

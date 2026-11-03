@@ -1,0 +1,67 @@
+{
+ "OH_NUMBERS": [
+  "",
+  "oh one",
+  "oh two",
+  "oh three",
+  "oh four",
+  "oh five",
+  "oh six",
+  "oh seven",
+  "oh eight",
+  "oh nine"
+ ],
+ "PRINCIPAL_STATIONS": [
+  "BDI",
+  "CHD",
+  "DAR",
+  "DON",
+  "HUD",
+  "LAN",
+  "LDS",
+  "LIV",
+  "LPY",
+  "MAN",
+  "MCE",
+  "MCO",
+  "MCV",
+  "MHS",
+  "MIA",
+  "NCL",
+  "PRE",
+  "SHF",
+  "SHJ",
+  "SNH",
+  "WGN",
+  "WGW",
+  "WKF",
+  "YRK"
+ ],
+ "SENTENCE_GAP": 500,
+ "START_OF_JOURNEY_SAFETY": [
+  {
+   "id": "messages.please take time to read the safety information",
+   "opts": {
+    "delayStart": 500
+   }
+  },
+  {
+   "id": "messages.smoking including the use of e-cigarettes is not permitted",
+   "opts": {
+    "delayStart": 500
+   }
+  },
+  {
+   "id": "messages.please keep your belongings with you during your journey",
+   "opts": {
+    "delayStart": 500
+   }
+  },
+  {
+   "id": "messages.if you see anything suspicious please tell a member of staff",
+   "opts": {
+    "delayStart": 500
+   }
+  }
+ ]
+}

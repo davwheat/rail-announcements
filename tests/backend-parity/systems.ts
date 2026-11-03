@@ -1,7 +1,7 @@
 /**
- * Expected output for every registered announcement system, for rail-announcements-backend's Go
- * ports to be held to. Nothing here knows any one system: a tab's states come from its own
- * defaults, presets and option descriptors, and a button tab's come from its buttons.
+ * Expected output for every registered announcement system, for the Go ports in `backend/` to be
+ * held to. Nothing here knows any one system: a tab's states come from its own defaults, presets
+ * and option descriptors, and a button tab's come from its buttons.
  */
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'

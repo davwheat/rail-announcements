@@ -1,7 +1,7 @@
 /**
- * Writes the data tables and the expected output that rail-announcements-backend holds its Go
- * port of these voices to. The backend's tests replay every case here and fail on any difference,
- * so a change to a voice or to the live announcement logic has to be regenerated and ported.
+ * Writes the data tables and the expected output that `backend/` holds its Go port of these
+ * voices to. The backend's tests replay every case here and fail on any difference, so a change
+ * to a voice or to the live announcement logic has to be regenerated and ported.
  *
  * Run it with `npm run export:backend`.
  */
@@ -742,7 +742,7 @@ function writeJson(path: string, value: unknown, compress = false) {
 
 async function main() {
   const backend = process.argv[2]
-  if (!backend) throw new Error('Pass the path of the rail-announcements-backend checkout')
+  if (!backend) throw new Error('Pass the path of the backend directory')
   const data = join(backend, 'internal/ketech/data')
   const testdata = join(backend, 'internal/ketech/testdata')
   const queueTestdata = join(backend, 'internal/queue/testdata')

@@ -1,0 +1,912 @@
+{
+ "AllDestinations": [
+  {
+   "id": "Abbey Road",
+   "station": "Abbey Road",
+   "clip": "station.abbey road"
+  },
+  {
+   "id": "All Saints",
+   "station": "All Saints",
+   "clip": "station.all saints"
+  },
+  {
+   "id": "Bank",
+   "station": "Bank",
+   "clip": "station.bank"
+  },
+  {
+   "id": "Bank via Canary Wharf",
+   "station": "Bank",
+   "via": "Canary Wharf",
+   "clip": "destination.bank via canary wharf"
+  },
+  {
+   "id": "Beckton",
+   "station": "Beckton",
+   "clip": "station.beckton"
+  },
+  {
+   "id": "Beckton via Canary Wharf",
+   "station": "Beckton",
+   "via": "Canary Wharf",
+   "clip": "destination.beckton via canary wharf"
+  },
+  {
+   "id": "Beckton Park",
+   "station": "Beckton Park",
+   "clip": "station.beckton park"
+  },
+  {
+   "id": "Blackwall",
+   "station": "Blackwall",
+   "clip": "station.blackwall"
+  },
+  {
+   "id": "Bow Church",
+   "station": "Bow Church",
+   "clip": "station.bow church"
+  },
+  {
+   "id": "Bow Creek",
+   "station": "Bow Creek",
+   "clip": "station.bow creek"
+  },
+  {
+   "id": "Canary Wharf",
+   "station": "Canary Wharf",
+   "clip": "station.canary wharf"
+  },
+  {
+   "id": "Canning Town",
+   "station": "Canning Town",
+   "clip": "station.canning town"
+  },
+  {
+   "id": "Canning Town via Canary Wharf",
+   "station": "Canning Town",
+   "via": "Canary Wharf",
+   "clip": "destination.canning town via canary wharf"
+  },
+  {
+   "id": "Crossharbour",
+   "station": "Crossharbour",
+   "clip": "station.crossharbour"
+  },
+  {
+   "id": "Custom House",
+   "station": "Custom House",
+   "clip": "station.custom house for excel west"
+  },
+  {
+   "id": "Cutty Sark",
+   "station": "Cutty Sark",
+   "clip": "station.cutty sark for maritime greenwich"
+  },
+  {
+   "id": "Cyprus",
+   "station": "Cyprus",
+   "clip": "station.cyprus"
+  },
+  {
+   "id": "Deptford Bridge",
+   "station": "Deptford Bridge",
+   "clip": "station.deptford bridge"
+  },
+  {
+   "id": "Devons Road",
+   "station": "Devons Road",
+   "clip": "station.devons road"
+  },
+  {
+   "id": "East India",
+   "station": "East India",
+   "clip": "station.east india"
+  },
+  {
+   "id": "Elverson Road",
+   "station": "Elverson Road",
+   "clip": "station.elverson road"
+  },
+  {
+   "id": "Gallions Reach",
+   "station": "Gallions Reach",
+   "clip": "station.gallions reach"
+  },
+  {
+   "id": "Greenwich",
+   "station": "Greenwich",
+   "clip": "station.greenwich"
+  },
+  {
+   "id": "Heron Quays",
+   "station": "Heron Quays",
+   "clip": "station.heron quays"
+  },
+  {
+   "id": "Island Gardens",
+   "station": "Island Gardens",
+   "clip": "station.island gardens"
+  },
+  {
+   "id": "King George V",
+   "station": "King George V",
+   "clip": "station.king george v"
+  },
+  {
+   "id": "King George V via London City Airport",
+   "station": "King George V",
+   "via": "London City Airport",
+   "clip": "destination.king george v via london city airport"
+  },
+  {
+   "id": "Langdon Park",
+   "station": "Langdon Park",
+   "clip": "station.langdon park"
+  },
+  {
+   "id": "Lewisham",
+   "station": "Lewisham",
+   "clip": "station.lewisham"
+  },
+  {
+   "id": "Limehouse",
+   "station": "Limehouse",
+   "clip": "station.limehouse"
+  },
+  {
+   "id": "London City Airport",
+   "station": "London City Airport",
+   "clip": "station.london city airport"
+  },
+  {
+   "id": "London City Airport via Canary Wharf",
+   "station": "London City Airport",
+   "via": "Canary Wharf",
+   "clip": "destination.city airport via canary wharf"
+  },
+  {
+   "id": "Mudchute",
+   "station": "Mudchute",
+   "clip": "station.mudchute"
+  },
+  {
+   "id": "Pontoon Dock",
+   "station": "Pontoon Dock",
+   "clip": "station.pontoon dock"
+  },
+  {
+   "id": "Poplar",
+   "station": "Poplar",
+   "clip": "station.poplar"
+  },
+  {
+   "id": "Prince Regent",
+   "station": "Prince Regent",
+   "clip": "station.prince regent for excel east and icc london"
+  },
+  {
+   "id": "Prince Regent via Canary Wharf",
+   "station": "Prince Regent",
+   "via": "Canary Wharf",
+   "clip": "destination.prince regent via canary wharf"
+  },
+  {
+   "id": "Pudding Mill Lane",
+   "station": "Pudding Mill Lane",
+   "clip": "station.pudding mill lane"
+  },
+  {
+   "id": "Royal Albert",
+   "station": "Royal Albert",
+   "clip": "station.royal albert"
+  },
+  {
+   "id": "Royal Victoria",
+   "station": "Royal Victoria",
+   "clip": "station.royal victoria"
+  },
+  {
+   "id": "Shadwell",
+   "station": "Shadwell",
+   "clip": "station.shadwell"
+  },
+  {
+   "id": "South Quay",
+   "station": "South Quay",
+   "clip": "station.south quay"
+  },
+  {
+   "id": "Star Lane",
+   "station": "Star Lane",
+   "clip": "station.star lane"
+  },
+  {
+   "id": "Stratford",
+   "station": "Stratford",
+   "clip": "station.stratford"
+  },
+  {
+   "id": "Stratford High Street",
+   "station": "Stratford High Street",
+   "clip": "station.stratford high street"
+  },
+  {
+   "id": "Stratford International",
+   "station": "Stratford International",
+   "clip": "station.stratford international"
+  },
+  {
+   "id": "Thames Wharf",
+   "station": "Thames Wharf",
+   "clip": "station.thames wharf"
+  },
+  {
+   "id": "Tower Gateway",
+   "station": "Tower Gateway",
+   "clip": "station.tower gateway"
+  },
+  {
+   "id": "Tower Gateway via Canary Wharf",
+   "station": "Tower Gateway",
+   "via": "Canary Wharf",
+   "clip": "destination.tower gateway via canary wharf"
+  },
+  {
+   "id": "West Ham",
+   "station": "West Ham",
+   "clip": "station.west ham"
+  },
+  {
+   "id": "West India Quay",
+   "station": "West India Quay",
+   "clip": "station.west india quay"
+  },
+  {
+   "id": "West Silvertown",
+   "station": "West Silvertown",
+   "clip": "station.west silvertown"
+  },
+  {
+   "id": "Westferry",
+   "station": "Westferry",
+   "clip": "station.westferry"
+  },
+  {
+   "id": "Woolwich Arsenal",
+   "station": "Woolwich Arsenal",
+   "clip": "station.woolwich arsenal"
+  },
+  {
+   "id": "Woolwich Arsenal via Canary Wharf",
+   "station": "Woolwich Arsenal",
+   "via": "Canary Wharf",
+   "clip": "destination.woolwich arsenal via canary wharf"
+  },
+  {
+   "id": "Woolwich Arsenal via London City Airport",
+   "station": "Woolwich Arsenal",
+   "via": "London City Airport",
+   "clip": "destination.woolwich arsenal via london city airport"
+  }
+ ],
+ "AllStations": [
+  {
+   "name": "Abbey Road",
+   "clip": "station.abbey road",
+   "approachClip": "station.abbey road",
+   "dockedClip": "station.abbey road",
+   "departureClip": "station.abbey road",
+   "belongings": false,
+   "sdo": false,
+   "mindTheGap": false
+  },
+  {
+   "name": "All Saints",
+   "clip": "station.all saints",
+   "approachClip": "station.all saints for chrisp street market",
+   "dockedClip": "station.all saints",
+   "departureClip": "station.all saints",
+   "belongings": true,
+   "sdo": false,
+   "mindTheGap": false
+  },
+  {
+   "name": "Bank",
+   "clip": "station.bank",
+   "approachClip": "station.bank",
+   "dockedClip": "station.bank",
+   "departureClip": "station.bank",
+   "belongings": true,
+   "sdo": false,
+   "mindTheGap": false
+  },
+  {
+   "name": "Beckton",
+   "clip": "station.beckton",
+   "approachClip": "station.beckton",
+   "dockedClip": "station.beckton",
+   "departureClip": "station.beckton",
+   "belongings": true,
+   "sdo": false,
+   "mindTheGap": false
+  },
+  {
+   "name": "Beckton Park",
+   "clip": "station.beckton park",
+   "approachClip": "station.beckton park",
+   "dockedClip": "station.beckton park",
+   "departureClip": "station.beckton park",
+   "belongings": false,
+   "sdo": false,
+   "mindTheGap": false
+  },
+  {
+   "name": "Blackwall",
+   "clip": "station.blackwall",
+   "approachClip": "station.blackwall",
+   "dockedClip": "station.blackwall",
+   "departureClip": "station.blackwall",
+   "belongings": false,
+   "sdo": false,
+   "mindTheGap": false
+  },
+  {
+   "name": "Bow Church",
+   "clip": "station.bow church",
+   "approachClip": "station.bow church",
+   "dockedClip": "station.bow church",
+   "departureClip": "station.bow church",
+   "belongings": true,
+   "sdo": false,
+   "mindTheGap": false
+  },
+  {
+   "name": "Bow Creek",
+   "clip": "station.bow creek",
+   "approachClip": "station.bow creek",
+   "dockedClip": "station.bow creek",
+   "departureClip": "station.bow creek",
+   "belongings": false,
+   "sdo": false,
+   "mindTheGap": false
+  },
+  {
+   "name": "Canary Wharf",
+   "clip": "station.canary wharf",
+   "approachClip": "station.canary wharf",
+   "dockedClip": "station.canary wharf",
+   "departureClip": "station.canary wharf",
+   "belongings": true,
+   "sdo": false,
+   "mindTheGap": true
+  },
+  {
+   "name": "Canning Town",
+   "clip": "station.canning town",
+   "approachClip": "station.canning town",
+   "dockedClip": "station.canning town",
+   "departureClip": "station.canning town",
+   "belongings": true,
+   "sdo": false,
+   "mindTheGap": false
+  },
+  {
+   "name": "Crossharbour",
+   "clip": "station.crossharbour",
+   "approachClip": "station.crossharbour",
+   "dockedClip": "station.crossharbour",
+   "departureClip": "station.crossharbour",
+   "belongings": true,
+   "sdo": false,
+   "mindTheGap": false
+  },
+  {
+   "name": "Custom House",
+   "clip": "station.custom house for excel west",
+   "approachClip": "station.custom house for excel west",
+   "dockedClip": "station.custom house for excel west",
+   "departureClip": "station.custom house for excel west",
+   "belongings": true,
+   "sdo": false,
+   "mindTheGap": false
+  },
+  {
+   "name": "Cutty Sark",
+   "clip": "station.cutty sark",
+   "approachClip": "station.cutty sark for maritime greenwich alight here",
+   "dockedClip": "station.cutty sark",
+   "departureClip": "station.cutty sark for maritime greenwich",
+   "belongings": true,
+   "sdo": true,
+   "mindTheGap": false
+  },
+  {
+   "name": "Cyprus",
+   "clip": "station.cyprus",
+   "approachClip": "station.cyprus",
+   "dockedClip": "station.cyprus",
+   "departureClip": "station.cyprus",
+   "belongings": false,
+   "sdo": false,
+   "mindTheGap": false
+  },
+  {
+   "name": "Deptford Bridge",
+   "clip": "station.deptford bridge",
+   "approachClip": "station.deptford bridge",
+   "dockedClip": "station.deptford bridge",
+   "departureClip": "station.deptford bridge",
+   "belongings": false,
+   "sdo": false,
+   "mindTheGap": false
+  },
+  {
+   "name": "Devons Road",
+   "clip": "station.devons road",
+   "approachClip": "station.devons road",
+   "dockedClip": "station.devons road",
+   "departureClip": "station.devons road",
+   "belongings": false,
+   "sdo": false,
+   "mindTheGap": false
+  },
+  {
+   "name": "East India",
+   "clip": "station.east india",
+   "approachClip": "station.east india",
+   "dockedClip": "station.east india",
+   "departureClip": "station.east india",
+   "belongings": false,
+   "sdo": false,
+   "mindTheGap": false
+  },
+  {
+   "name": "Elverson Road",
+   "clip": "station.elverson road",
+   "approachClip": "station.elverson road",
+   "dockedClip": "station.elverson road",
+   "departureClip": "station.elverson road",
+   "belongings": false,
+   "sdo": true,
+   "mindTheGap": false
+  },
+  {
+   "name": "Gallions Reach",
+   "clip": "station.gallions reach",
+   "approachClip": "station.gallions reach",
+   "dockedClip": "station.gallions reach",
+   "departureClip": "station.gallions reach",
+   "belongings": false,
+   "sdo": true,
+   "mindTheGap": false
+  },
+  {
+   "name": "Greenwich",
+   "clip": "station.greenwich",
+   "approachClip": "station.greenwich",
+   "dockedClip": "station.greenwich",
+   "departureClip": "station.greenwich",
+   "belongings": true,
+   "sdo": false,
+   "mindTheGap": true
+  },
+  {
+   "name": "Heron Quays",
+   "clip": "station.heron quays",
+   "approachClip": "station.heron quays",
+   "dockedClip": "station.heron quays",
+   "departureClip": "station.heron quays",
+   "belongings": true,
+   "sdo": false,
+   "mindTheGap": false
+  },
+  {
+   "name": "Island Gardens",
+   "clip": "station.island gardens",
+   "approachClip": "station.island gardens",
+   "dockedClip": "station.island gardens",
+   "departureClip": "station.island gardens",
+   "belongings": true,
+   "sdo": false,
+   "mindTheGap": true
+  },
+  {
+   "name": "King George V",
+   "clip": "station.king george v",
+   "approachClip": "station.king george v",
+   "dockedClip": "station.king george v",
+   "departureClip": "station.king george v",
+   "belongings": false,
+   "sdo": false,
+   "mindTheGap": false
+  },
+  {
+   "name": "Langdon Park",
+   "clip": "station.langdon park",
+   "approachClip": "station.langdon park",
+   "dockedClip": "station.langdon park",
+   "departureClip": "station.langdon park",
+   "belongings": false,
+   "sdo": false,
+   "mindTheGap": false
+  },
+  {
+   "name": "Lewisham",
+   "clip": "station.lewisham",
+   "approachClip": "station.lewisham",
+   "dockedClip": "station.lewisham",
+   "departureClip": "station.lewisham",
+   "belongings": true,
+   "sdo": false,
+   "mindTheGap": false
+  },
+  {
+   "name": "Limehouse",
+   "clip": "station.limehouse",
+   "approachClip": "station.limehouse",
+   "dockedClip": "station.limehouse",
+   "departureClip": "station.limehouse",
+   "belongings": true,
+   "sdo": false,
+   "mindTheGap": false
+  },
+  {
+   "name": "London City Airport",
+   "clip": "station.london city airport",
+   "approachClip": "station.london city airport",
+   "dockedClip": "station.london city airport",
+   "departureClip": "station.london city airport",
+   "belongings": false,
+   "sdo": false,
+   "mindTheGap": false
+  },
+  {
+   "name": "Mudchute",
+   "clip": "station.mudchute",
+   "approachClip": "station.mudchute",
+   "dockedClip": "station.mudchute",
+   "departureClip": "station.mudchute",
+   "belongings": false,
+   "sdo": false,
+   "mindTheGap": false
+  },
+  {
+   "name": "Pontoon Dock",
+   "clip": "station.pontoon dock",
+   "approachClip": "station.pontoon dock",
+   "dockedClip": "station.pontoon dock",
+   "departureClip": "station.pontoon dock",
+   "belongings": false,
+   "sdo": false,
+   "mindTheGap": false
+  },
+  {
+   "name": "Poplar",
+   "clip": "station.poplar",
+   "approachClip": "station.poplar",
+   "dockedClip": "station.poplar",
+   "departureClip": "station.poplar",
+   "belongings": true,
+   "sdo": false,
+   "mindTheGap": false
+  },
+  {
+   "name": "Prince Regent",
+   "clip": "station.prince regent",
+   "approachClip": "station.prince regent for excel east and icc london",
+   "dockedClip": "station.prince regent for excel east and icc london",
+   "departureClip": "station.prince regent for excel east and icc london",
+   "belongings": true,
+   "sdo": false,
+   "mindTheGap": false
+  },
+  {
+   "name": "Pudding Mill Lane",
+   "clip": "station.pudding mill lane",
+   "approachClip": "station.pudding mill lane",
+   "dockedClip": "station.pudding mill lane",
+   "departureClip": "station.pudding mill lane",
+   "belongings": true,
+   "sdo": true,
+   "mindTheGap": false
+  },
+  {
+   "name": "Royal Albert",
+   "clip": "station.royal albert",
+   "approachClip": "station.royal albert for west beckton",
+   "dockedClip": "station.royal albert",
+   "departureClip": "station.royal albert",
+   "belongings": false,
+   "sdo": true,
+   "mindTheGap": false
+  },
+  {
+   "name": "Royal Victoria",
+   "clip": "station.royal victoria",
+   "approachClip": "station.royal victoria",
+   "dockedClip": "station.royal victoria",
+   "departureClip": "station.royal victoria",
+   "belongings": false,
+   "sdo": false,
+   "mindTheGap": false
+  },
+  {
+   "name": "Shadwell",
+   "clip": "station.shadwell",
+   "approachClip": "station.shadwell",
+   "dockedClip": "station.shadwell",
+   "departureClip": "station.shadwell",
+   "belongings": true,
+   "sdo": false,
+   "mindTheGap": false
+  },
+  {
+   "name": "South Quay",
+   "clip": "station.south quay",
+   "approachClip": "station.south quay",
+   "dockedClip": "station.south quay",
+   "departureClip": "station.south quay",
+   "belongings": true,
+   "sdo": false,
+   "mindTheGap": false
+  },
+  {
+   "name": "Star Lane",
+   "clip": "station.star lane",
+   "approachClip": "station.star lane",
+   "dockedClip": "station.star lane",
+   "departureClip": "station.star lane",
+   "belongings": false,
+   "sdo": false,
+   "mindTheGap": false
+  },
+  {
+   "name": "Stratford",
+   "clip": "station.stratford",
+   "approachClip": "station.stratford",
+   "dockedClip": "station.stratford",
+   "departureClip": "station.stratford",
+   "belongings": true,
+   "sdo": false,
+   "mindTheGap": false
+  },
+  {
+   "name": "Stratford High Street",
+   "clip": "station.stratford high street",
+   "approachClip": "station.stratford high street",
+   "dockedClip": "station.stratford high street",
+   "departureClip": "station.stratford high street",
+   "belongings": false,
+   "sdo": false,
+   "mindTheGap": false
+  },
+  {
+   "name": "Stratford International",
+   "clip": "station.stratford international",
+   "approachClip": "station.stratford international",
+   "dockedClip": "station.stratford international",
+   "departureClip": "station.stratford international",
+   "belongings": false,
+   "sdo": false,
+   "mindTheGap": false
+  },
+  {
+   "name": "Thames Wharf",
+   "clip": "station.thames wharf",
+   "approachClip": "station.thames wharf",
+   "dockedClip": "station.thames wharf",
+   "departureClip": "station.thames wharf",
+   "belongings": false,
+   "sdo": false,
+   "mindTheGap": false
+  },
+  {
+   "name": "Tower Gateway",
+   "clip": "station.tower gateway",
+   "approachClip": "station.tower gateway",
+   "dockedClip": "station.tower gateway",
+   "departureClip": "station.tower gateway",
+   "belongings": true,
+   "sdo": false,
+   "mindTheGap": false
+  },
+  {
+   "name": "West Ham",
+   "clip": "station.west ham",
+   "approachClip": "station.west ham",
+   "dockedClip": "station.west ham",
+   "departureClip": "station.west ham",
+   "belongings": false,
+   "sdo": false,
+   "mindTheGap": false
+  },
+  {
+   "name": "West India Quay",
+   "clip": "station.west india quay",
+   "approachClip": "station.west india quay",
+   "dockedClip": "station.west india quay",
+   "departureClip": "station.west india quay",
+   "belongings": true,
+   "sdo": false,
+   "mindTheGap": false
+  },
+  {
+   "name": "West Silvertown",
+   "clip": "station.west silvertown",
+   "approachClip": "station.west silvertown",
+   "dockedClip": "station.west silvertown",
+   "departureClip": "station.west silvertown",
+   "belongings": false,
+   "sdo": false,
+   "mindTheGap": false
+  },
+  {
+   "name": "Westferry",
+   "clip": "station.westferry",
+   "approachClip": "station.westferry",
+   "dockedClip": "station.westferry",
+   "departureClip": "station.westferry",
+   "belongings": true,
+   "sdo": false,
+   "mindTheGap": false
+  },
+  {
+   "name": "Woolwich Arsenal",
+   "clip": "station.woolwich arsenal",
+   "approachClip": "station.woolwich arsenal",
+   "dockedClip": "station.woolwich arsenal",
+   "departureClip": "station.woolwich arsenal",
+   "belongings": false,
+   "sdo": false,
+   "mindTheGap": false
+  }
+ ],
+ "Clips": {
+  "thisTrainIsFor": "phrase.this train is for",
+  "theNextStopIs": "phrase.the next stop is",
+  "thisIs": "phrase.this is",
+  "whereThisTrainTerminates": "phrase.where this train terminates",
+  "whereThisTrainWillTerminateAllChange": "phrase.where this train will terminate all change",
+  "whereThisTrainWillTerminateBelongings": "phrase.where this train will terminate please remember to take all your belongings with you",
+  "theTrainWillTerminateAllChange": "phrase.the train will terminate all change",
+  "theTrainWillTerminateBelongings": "phrase.the train will terminate please remember to take all your belongings with you",
+  "thisTrainTerminatesHere": "phrase.this train terminates here all change please remember to take all your belongings with you",
+  "pleaseRememberBelongings": "phrase.please remember to take all your belongings with you",
+  "whenLeavingBelongings": "phrase.when leaving the train please remember to take all your belongings with you",
+  "as": "phrase.as",
+  "at": "phrase.at",
+  "andDlrToWestIndiaQuay": "phrase.and dlr to west india quay",
+  "toAlightMoveToCentre": "misc.to alight please move towards the centre of the train",
+  "firstAndLastDoorsWillNotOpen": "misc.first and last two sets of doors will not open",
+  "reverseAtPoplar": "misc.the next stop is poplar the train will reverse en route",
+  "wiqBypass": "misc.this train does not stop at west india quay for west india quay please change at canary wharf",
+  "wiqBypassPlatform5": "misc.this train does not stop at west india quay for west india quay please change at canary wharf and go to platform 5",
+  "leaveFromRightHandSide": "misc.please leave the train from the right hand side in the direction of travel",
+  "notInService": "misc.this train is not in service",
+  "contactTrainCaptain": "misc.please contact the train captain or press the passenger alarm immediately",
+  "mindTheGap": "misc.mind the gap please"
+ },
+ "ElizabethLineEra": {
+  "jubileeElizabeth": "emma.change for london underground jubilee line and elizabeth line",
+  "jubileeElizabethBankTowerGateway": "emma.change for london underground jubilee line elizabeth line and stations towards bank and tower gateway",
+  "jubileeElizabethStratford": "emma.change for london underground jubilee line and elizabeth line and stations towards stratford",
+  "elizabeth": "emma.change for the elizabeth line",
+  "stratford": "emma.change for london underground central and jubilee lines elizabeth line london overground national rail and local bus services",
+  "cableCarAndCityHall": "emma.exit for london cable car and city hall",
+  "forJubileeElizabethGreenwichLewisham": "emma.for london underground jubilee line elizabeth line and stations towards greenwich and lewisham",
+  "forElizabeth": "emma.for the elizabeth line",
+  "forElizabethRiverNationalRailAndLocalBus": "emma.for the elizabeth line river services national rail and local bus services",
+  "forStratford": "emma.for london underground central and jubilee lines elizabeth line london overground national rail and local bus services"
+ },
+ "ElizabethLineEraStations": [
+  "Canary Wharf",
+  "Custom House",
+  "Royal Victoria",
+  "Stratford",
+  "Woolwich Arsenal"
+ ],
+ "Interchange": {
+  "jubilee": "interchange.change for london underground jubilee line",
+  "jubileeAndLocalBus": "interchange.change for london underground jubilee line and local bus services",
+  "jubileeElizabethGreenwichLewisham": "interchange.change for london underground jubilee line elizabeth line and stations towards greenwich and lewisham",
+  "districtHammersmithAtBowRoad": "interchange.change for london underground district and hammersmith and city lines at bow road station",
+  "nationalRail": "interchange.change for national rail services",
+  "towardsBecktonAndCityAirport": "interchange.change for stations towards beckton and london city airport",
+  "towardsBecktonCityAirportBankAndTowerGateway": "interchange.change for stations towards beckton london city airport bank and tower gateway",
+  "towardsBecktonJubileeAndLocalBus": "interchange.change for stations towards beckton london underground jubilee line and local bus services",
+  "towardsCanaryWharfAndLewisham": "interchange.change for stations towards canary wharf and lewisham",
+  "towardsStratford": "interchange.change for stations towards stratford",
+  "towardsStratfordCanaryWharfAndLewisham": "interchange.change for stations towards stratford canary wharf and lewisham",
+  "forLondonUnderground": "interchange.for london underground services",
+  "forDistrictHammersmithAtBowRoad": "interchange.for london underground district and hammersmith and city lines at bow road station",
+  "forDistrictCircleAtTowerHill": "interchange.for london underground district and circle lines at tower hill station",
+  "forJubileeAndLocalBus": "interchange.for london underground jubilee line and local bus services",
+  "forNationalRailAndLocalBus": "interchange.for national rail and local bus services",
+  "forTowardsBecktonViaStairs": "interchange.for stations towards beckton cross via the stairs to platform 1"
+ },
+ "Lines": [
+  [
+   "Bank",
+   "Shadwell"
+  ],
+  [
+   "Tower Gateway",
+   "Shadwell",
+   "Limehouse",
+   "Westferry",
+   "Poplar"
+  ],
+  [
+   "Westferry",
+   "West India Quay"
+  ],
+  [
+   "Poplar",
+   "West India Quay",
+   "Canary Wharf",
+   "Heron Quays",
+   "South Quay",
+   "Crossharbour",
+   "Mudchute",
+   "Island Gardens",
+   "Cutty Sark",
+   "Greenwich",
+   "Deptford Bridge",
+   "Elverson Road",
+   "Lewisham"
+  ],
+  [
+   "Poplar",
+   "All Saints",
+   "Langdon Park",
+   "Devons Road",
+   "Bow Church",
+   "Pudding Mill Lane",
+   "Stratford"
+  ],
+  [
+   "Poplar",
+   "Blackwall",
+   "East India",
+   "Canning Town"
+  ],
+  [
+   "Canning Town",
+   "Royal Victoria",
+   "Custom House",
+   "Prince Regent",
+   "Royal Albert",
+   "Beckton Park",
+   "Cyprus",
+   "Gallions Reach",
+   "Beckton"
+  ],
+  [
+   "Canning Town",
+   "West Silvertown",
+   "Pontoon Dock",
+   "London City Airport",
+   "King George V",
+   "Woolwich Arsenal"
+  ],
+  [
+   "Stratford International",
+   "Stratford (low level)",
+   "Stratford High Street",
+   "Abbey Road",
+   "West Ham",
+   "Star Lane",
+   "Canning Town"
+  ]
+ ],
+ "OneWayLinks": [
+  {
+   "from": "Westferry",
+   "to": "Canary Wharf",
+   "arrivingFrom": "Limehouse"
+  }
+ ],
+ "SDO_WARNING_PAUSE": 460,
+ "STRATFORD_LOW_LEVEL": "Stratford (low level)"
+}

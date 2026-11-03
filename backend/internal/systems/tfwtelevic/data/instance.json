@@ -1,0 +1,1844 @@
+{
+ "DESCRIPTION": "Generate Transport for Wales Televic on-train announcements using real audio recordings from Elin Llwyd and Eryl Jones.",
+ "AUDIO_CDN": "https://cdn.railannouncements.co.uk",
+ "livePlayback": null,
+ "NAME": "Transport for Wales - Televic (Elin Llwyd & Eryl Jones)",
+ "ID": "TFW_TELEVIC_V1",
+ "FILE_PREFIX": "TfW/Televic",
+ "SYSTEM_TYPE": "train",
+ "AvailableStationNames": {
+  "high": [],
+  "low": []
+ },
+ "announcementPresets": {
+  "startOfJourney": [
+   {
+    "name": "CDF to BYI",
+    "state": {
+     "callingAtCodes": [
+      {
+       "crsCode": "GTN",
+       "name": "Grangetown (GTN)",
+       "randomId": "id"
+      },
+      {
+       "crsCode": "CGN",
+       "name": "Cogan (CGN)",
+       "randomId": "id"
+      },
+      {
+       "crsCode": "EBK",
+       "name": "Eastbrook (EBK)",
+       "randomId": "id"
+      },
+      {
+       "crsCode": "DNS",
+       "name": "Dinas Powys (DNS)",
+       "randomId": "id"
+      },
+      {
+       "crsCode": "CAD",
+       "name": "Cadoxton (CAD)",
+       "randomId": "id"
+      },
+      {
+       "crsCode": "BYD",
+       "name": "Barry Docks (BYD)",
+       "randomId": "id"
+      },
+      {
+       "crsCode": "BRY",
+       "name": "Barry (BRY)",
+       "randomId": "id"
+      },
+      {
+       "crsCode": "BYI",
+       "name": "Barry Island (BYI)",
+       "randomId": "id"
+      }
+     ]
+    }
+   }
+  ],
+  "stoppedAtStation": [
+   {
+    "name": "BRY, next BYI",
+    "state": {
+     "thisStation": "BRY",
+     "terminus": "BYI",
+     "isTerminusNext": true
+    }
+   }
+  ]
+ },
+ "AvailableStations": [
+  "ABA",
+  "ABE",
+  "ABH",
+  "ACY",
+  "AGL",
+  "AGV",
+  "ALB",
+  "ALD",
+  "AMF",
+  "ASC",
+  "AVY",
+  "AYW",
+  "BAJ",
+  "BBK",
+  "BCG",
+  "BCK",
+  "BFF",
+  "BFR",
+  "BGD",
+  "BGN",
+  "BHD",
+  "BHI",
+  "BHM",
+  "BHR",
+  "BID",
+  "BKC",
+  "BKN",
+  "BKP",
+  "BKQ",
+  "BME",
+  "BNF",
+  "BNG",
+  "BOR",
+  "BOW",
+  "BPN",
+  "BPS",
+  "BPW",
+  "BRH",
+  "BRI",
+  "BRM",
+  "BRY",
+  "BTH",
+  "BUK",
+  "BYC",
+  "BYD",
+  "BYE",
+  "BYI",
+  "CAD",
+  "CCC",
+  "CDB",
+  "CDF",
+  "CDQ",
+  "CDT",
+  "CGN",
+  "CGW",
+  "CHX",
+  "CIM",
+  "CKY",
+  "CLR",
+  "CMH",
+  "CMN",
+  "CNM",
+  "CNN",
+  "CNW",
+  "COS",
+  "COY",
+  "CPH",
+  "CPW",
+  "CRE",
+  "CRK",
+  "CRV",
+  "CSL",
+  "CST",
+  "CTR",
+  "CTT",
+  "CUW",
+  "CWB",
+  "CWM",
+  "CWS",
+  "CYB",
+  "CYN",
+  "CYS",
+  "DCT",
+  "DGL",
+  "DGT",
+  "DGY",
+  "DID",
+  "DLG",
+  "DMG",
+  "DNS",
+  "DOL",
+  "DVY",
+  "DWD",
+  "DYF",
+  "EBB",
+  "EBK",
+  "EBV",
+  "ECC",
+  "ECP",
+  "EDA",
+  "EDB",
+  "EDP",
+  "EDY",
+  "ERL",
+  "EUS",
+  "FER",
+  "FFA",
+  "FGH",
+  "FGW",
+  "FLN",
+  "FRB",
+  "FRD",
+  "FRW",
+  "FST",
+  "FYS",
+  "GCR",
+  "GCW",
+  "GFF",
+  "GGT",
+  "GLC",
+  "GMG",
+  "GOB",
+  "GTH",
+  "GTN",
+  "GTW",
+  "GWE",
+  "GWN",
+  "HFD",
+  "HHD",
+  "HHL",
+  "HLL",
+  "HNG",
+  "HPE",
+  "HPT",
+  "HRL",
+  "HSB",
+  "HSW",
+  "HTR",
+  "HVF",
+  "HWB",
+  "HWD",
+  "HWV",
+  "HXX",
+  "JOH",
+  "KGT",
+  "KGX",
+  "KNI",
+  "KNU",
+  "KWL",
+  "LAM",
+  "LAN",
+  "LAS",
+  "LBR",
+  "LDN",
+  "LEI",
+  "LEO",
+  "LGO",
+  "LIV",
+  "LLA",
+  "LLC",
+  "LLD",
+  "LLE",
+  "LLF",
+  "LLG",
+  "LLH",
+  "LLI",
+  "LLJ",
+  "LLL",
+  "LLM",
+  "LLN",
+  "LLO",
+  "LLR",
+  "LLS",
+  "LLT",
+  "LLV",
+  "LLW",
+  "LLY",
+  "LNB",
+  "LNR",
+  "LNW",
+  "LPG",
+  "LPY",
+  "LST",
+  "LTH",
+  "LUD",
+  "LVC",
+  "LVJ",
+  "LVT",
+  "LWM",
+  "LWR",
+  "LYD",
+  "MAN",
+  "MCN",
+  "MCO",
+  "MER",
+  "MEV",
+  "MEW",
+  "MFA",
+  "MFF",
+  "MFH",
+  "MIA",
+  "MKC",
+  "MRB",
+  "MST",
+  "MTA",
+  "MYB",
+  "NAN",
+  "NAR",
+  "NBE",
+  "NES",
+  "NLR",
+  "NLW",
+  "NNP",
+  "NRW",
+  "NTH",
+  "NWP",
+  "NWT",
+  "OKN",
+  "OXF",
+  "PAD",
+  "PBY",
+  "PCD",
+  "PDK",
+  "PEN",
+  "PER",
+  "PES",
+  "PGM",
+  "PHG",
+  "PLT",
+  "PMB",
+  "PMD",
+  "PMW",
+  "PNA",
+  "PNC",
+  "PNF",
+  "PNY",
+  "POR",
+  "PPD",
+  "PPL",
+  "PRH",
+  "PRS",
+  "PRT",
+  "PTA",
+  "PTB",
+  "PTD",
+  "PTF",
+  "PTM",
+  "PWL",
+  "PYC",
+  "PYE",
+  "PYL",
+  "PYP",
+  "QYD",
+  "RCA",
+  "RDR",
+  "RHI",
+  "RHL",
+  "RHO",
+  "RHY",
+  "RIA",
+  "RMB",
+  "ROR",
+  "RUA",
+  "RUE",
+  "RUN",
+  "SAL",
+  "SDF",
+  "SFN",
+  "SGB",
+  "SHT",
+  "SKE",
+  "SPT",
+  "SRR",
+  "STA",
+  "STJ",
+  "STP",
+  "SUG",
+  "SWA",
+  "TAF",
+  "TAL",
+  "TDU",
+  "TEN",
+  "TFC",
+  "TGS",
+  "TIR",
+  "TLB",
+  "TLC",
+  "TNF",
+  "TNP",
+  "TPN",
+  "TRB",
+  "TRD",
+  "TRE",
+  "TRF",
+  "TRH",
+  "TRY",
+  "TYC",
+  "TYG",
+  "TYW",
+  "UPT",
+  "VAL",
+  "VIC",
+  "WAE",
+  "WAT",
+  "WBQ",
+  "WEM",
+  "WHT",
+  "WLN",
+  "WLP",
+  "WMI",
+  "WML",
+  "WNG",
+  "WRE",
+  "WRX",
+  "WTC",
+  "WTL",
+  "WVH",
+  "WXC",
+  "XPB",
+  "YNW",
+  "YRK",
+  "YRT",
+  "YSM",
+  "YSR"
+ ],
+ "AdditionalOptions": [
+  {
+   "title": "Acton Grange Junction",
+   "value": "Acton Grange Junction"
+  },
+  {
+   "title": "Astley",
+   "value": "Astley"
+  },
+  {
+   "title": "Beeston Castle & Tarporley Signal Box",
+   "value": "Beeston Castle & Tarporley Signal Box"
+  },
+  {
+   "title": "Birkenhead",
+   "value": "Birkenhead"
+  },
+  {
+   "title": "Chester South Junction",
+   "value": "Chester South Junction"
+  },
+  {
+   "title": "Crewe Steel Works",
+   "value": "Crewe Steel Works"
+  },
+  {
+   "title": "Dallam Junction",
+   "value": "Dallam Junction"
+  },
+  {
+   "title": "Frodsham Junction",
+   "value": "Frodsham Junction"
+  },
+  {
+   "title": "Gaerwen",
+   "value": "Gaerwen"
+  },
+  {
+   "title": "Menai Bridge",
+   "value": "Menai Bridge"
+  },
+  {
+   "title": "Mickle Trafford",
+   "value": "Mickle Trafford"
+  },
+  {
+   "title": "Moston East Junction",
+   "value": "Moston East Junction"
+  },
+  {
+   "title": "Ordsall Lane Junction",
+   "value": "Ordsall Lane Junction"
+  },
+  {
+   "title": "Parkside Junction",
+   "value": "Parkside Junction"
+  },
+  {
+   "title": "Saltney Junction",
+   "value": "Saltney Junction"
+  },
+  {
+   "title": "Tan-y-Bwlch Ffestiniog",
+   "value": "Tan-y-Bwlch Ffestiniog"
+  },
+  {
+   "title": "Waterstreet Junction",
+   "value": "Waterstreet Junction"
+  },
+  {
+   "title": "Winwick Junction",
+   "value": "Winwick Junction"
+  }
+ ],
+ "StationsAsItems": [
+  {
+   "title": "Aberdare (ABA)",
+   "value": "ABA"
+  },
+  {
+   "title": "Aber (ABE)",
+   "value": "ABE"
+  },
+  {
+   "title": "Abererch (ABH)",
+   "value": "ABH"
+  },
+  {
+   "title": "Abercynon (ACY)",
+   "value": "ACY"
+  },
+  {
+   "title": "Abergele & Pensarn (AGL)",
+   "value": "AGL"
+  },
+  {
+   "title": "Abergavenny (AGV)",
+   "value": "AGV"
+  },
+  {
+   "title": "Albrighton (ALB)",
+   "value": "ALB"
+  },
+  {
+   "title": "Alderley Edge (ALD)",
+   "value": "ALD"
+  },
+  {
+   "title": "Ammanford (AMF)",
+   "value": "AMF"
+  },
+  {
+   "title": "Ashchurch for Tewkesbury (ASC)",
+   "value": "ASC"
+  },
+  {
+   "title": "Aberdovey (AVY)",
+   "value": "AVY"
+  },
+  {
+   "title": "Aberystwyth (AYW)",
+   "value": "AYW"
+  },
+  {
+   "title": "Baglan (BAJ)",
+   "value": "BAJ"
+  },
+  {
+   "title": "Bilbrook (BBK)",
+   "value": "BBK"
+  },
+  {
+   "title": "Birchgrove (BCG)",
+   "value": "BCG"
+  },
+  {
+   "title": "Buckley (BCK)",
+   "value": "BCK"
+  },
+  {
+   "title": "Blaenau Ffestiniog (BFF)",
+   "value": "BFF"
+  },
+  {
+   "title": "London Blackfriars (BFR)",
+   "value": "BFR"
+  },
+  {
+   "title": "Bargoed (BGD)",
+   "value": "BGD"
+  },
+  {
+   "title": "Bridgend (BGN)",
+   "value": "BGN"
+  },
+  {
+   "title": "Brithdir (BHD)",
+   "value": "BHD"
+  },
+  {
+   "title": "Birmingham International (BHI)",
+   "value": "BHI"
+  },
+  {
+   "title": "Birmingham New Street (BHM)",
+   "value": "BHM"
+  },
+  {
+   "title": "Builth Road (BHR)",
+   "value": "BHR"
+  },
+  {
+   "title": "Bidston (BID)",
+   "value": "BID"
+  },
+  {
+   "title": "Birkenhead Central (BKC)",
+   "value": "BKC"
+  },
+  {
+   "title": "Birkenhead North (BKN)",
+   "value": "BKN"
+  },
+  {
+   "title": "Birkenhead Park (BKP)",
+   "value": "BKP"
+  },
+  {
+   "title": "Birkenhead Hamilton Square (BKQ)",
+   "value": "BKQ"
+  },
+  {
+   "title": "Broome (BME)",
+   "value": "BME"
+  },
+  {
+   "title": "Briton Ferry (BNF)",
+   "value": "BNF"
+  },
+  {
+   "title": "Bangor (Gwynedd) (BNG)",
+   "value": "BNG"
+  },
+  {
+   "title": "Bodorgan (BOR)",
+   "value": "BOR"
+  },
+  {
+   "title": "Bow Street (BOW)",
+   "value": "BOW"
+  },
+  {
+   "title": "Blackpool North (BPN)",
+   "value": "BPN"
+  },
+  {
+   "title": "Blackpool South (BPS)",
+   "value": "BPS"
+  },
+  {
+   "title": "Bristol Parkway (BPW)",
+   "value": "BPW"
+  },
+  {
+   "title": "Borth (BRH)",
+   "value": "BRH"
+  },
+  {
+   "title": "Bristol Temple Meads (BRI)",
+   "value": "BRI"
+  },
+  {
+   "title": "Barmouth (BRM)",
+   "value": "BRM"
+  },
+  {
+   "title": "Barry (BRY)",
+   "value": "BRY"
+  },
+  {
+   "title": "Bath Spa (BTH)",
+   "value": "BTH"
+  },
+  {
+   "title": "Bucknell (BUK)",
+   "value": "BUK"
+  },
+  {
+   "title": "Betws-Y-Coed (BYC)",
+   "value": "BYC"
+  },
+  {
+   "title": "Barry Docks (BYD)",
+   "value": "BYD"
+  },
+  {
+   "title": "Bynea (BYE)",
+   "value": "BYE"
+  },
+  {
+   "title": "Barry Island (BYI)",
+   "value": "BYI"
+  },
+  {
+   "title": "Cadoxton (CAD)",
+   "value": "CAD"
+  },
+  {
+   "title": "Criccieth (CCC)",
+   "value": "CCC"
+  },
+  {
+   "title": "Cardiff Bay (CDB)",
+   "value": "CDB"
+  },
+  {
+   "title": "Cardiff Central (CDF)",
+   "value": "CDF"
+  },
+  {
+   "title": "Cardiff Queen Street (CDQ)",
+   "value": "CDQ"
+  },
+  {
+   "title": "Caldicot (CDT)",
+   "value": "CDT"
+  },
+  {
+   "title": "Cogan (CGN)",
+   "value": "CGN"
+  },
+  {
+   "title": "Caergwrle (CGW)",
+   "value": "CGW"
+  },
+  {
+   "title": "London Charing Cross (CHX)",
+   "value": "CHX"
+  },
+  {
+   "title": "Cilmeri (CIM)",
+   "value": "CIM"
+  },
+  {
+   "title": "Crosskeys (CKY)",
+   "value": "CKY"
+  },
+  {
+   "title": "Clarbeston Road (CLR)",
+   "value": "CLR"
+  },
+  {
+   "title": "Cwmbach (CMH)",
+   "value": "CMH"
+  },
+  {
+   "title": "Carmarthen (CMN)",
+   "value": "CMN"
+  },
+  {
+   "title": "Cheltenham Spa (CNM)",
+   "value": "CNM"
+  },
+  {
+   "title": "Canonbury (CNN)",
+   "value": "CNN"
+  },
+  {
+   "title": "Conwy (CNW)",
+   "value": "CNW"
+  },
+  {
+   "title": "Cosford (COS)",
+   "value": "COS"
+  },
+  {
+   "title": "Coryton (COY)",
+   "value": "COY"
+  },
+  {
+   "title": "Caerphilly (CPH)",
+   "value": "CPH"
+  },
+  {
+   "title": "Chepstow (CPW)",
+   "value": "CPW"
+  },
+  {
+   "title": "Crewe (CRE)",
+   "value": "CRE"
+  },
+  {
+   "title": "Chirk (CRK)",
+   "value": "CRK"
+  },
+  {
+   "title": "Craven Arms (CRV)",
+   "value": "CRV"
+  },
+  {
+   "title": "Codsall (CSL)",
+   "value": "CSL"
+  },
+  {
+   "title": "London Cannon Street (CST)",
+   "value": "CST"
+  },
+  {
+   "title": "Chester (CTR)",
+   "value": "CTR"
+  },
+  {
+   "title": "Church Stretton (CTT)",
+   "value": "CTT"
+  },
+  {
+   "title": "Clunderwen (CUW)",
+   "value": "CUW"
+  },
+  {
+   "title": "Colwyn Bay (CWB)",
+   "value": "CWB"
+  },
+  {
+   "title": "Cwmbran (CWM)",
+   "value": "CWM"
+  },
+  {
+   "title": "Caersws (CWS)",
+   "value": "CWS"
+  },
+  {
+   "title": "Cefn-Y-Bedd (CYB)",
+   "value": "CYB"
+  },
+  {
+   "title": "Cynghordy (CYN)",
+   "value": "CYN"
+  },
+  {
+   "title": "Cathays (CYS)",
+   "value": "CYS"
+  },
+  {
+   "title": "Danescourt (DCT)",
+   "value": "DCT"
+  },
+  {
+   "title": "Dingle Road (DGL)",
+   "value": "DGL"
+  },
+  {
+   "title": "Deansgate (DGT)",
+   "value": "DGT"
+  },
+  {
+   "title": "Deganwy (DGY)",
+   "value": "DGY"
+  },
+  {
+   "title": "Didcot Parkway (DID)",
+   "value": "DID"
+  },
+  {
+   "title": "Dolgarrog (DLG)",
+   "value": "DLG"
+  },
+  {
+   "title": "Dinas Rhondda (DMG)",
+   "value": "DMG"
+  },
+  {
+   "title": "Dinas Powys (DNS)",
+   "value": "DNS"
+  },
+  {
+   "title": "Dolau (DOL)",
+   "value": "DOL"
+  },
+  {
+   "title": "Dovey Junction (DVY)",
+   "value": "DVY"
+  },
+  {
+   "title": "Dolwyddelan (DWD)",
+   "value": "DWD"
+  },
+  {
+   "title": "Dyffryn Ardudwy (DYF)",
+   "value": "DYF"
+  },
+  {
+   "title": "Ebbw Vale Town (EBB)",
+   "value": "EBB"
+  },
+  {
+   "title": "Eastbrook (EBK)",
+   "value": "EBK"
+  },
+  {
+   "title": "Ebbw Vale Parkway (EBV)",
+   "value": "EBV"
+  },
+  {
+   "title": "Eccles (ECC)",
+   "value": "ECC"
+  },
+  {
+   "title": "Energlyn & Churchill Park (ECP)",
+   "value": "ECP"
+  },
+  {
+   "title": "Unknown (EDA)",
+   "value": "EDA"
+  },
+  {
+   "title": "Edinburgh Waverley (EDB)",
+   "value": "EDB"
+  },
+  {
+   "title": "Edinburgh Park (EDP)",
+   "value": "EDP"
+  },
+  {
+   "title": "East Didsbury (EDY)",
+   "value": "EDY"
+  },
+  {
+   "title": "Earlestown (ERL)",
+   "value": "ERL"
+  },
+  {
+   "title": "London Euston (EUS)",
+   "value": "EUS"
+  },
+  {
+   "title": "Fernhill (FER)",
+   "value": "FER"
+  },
+  {
+   "title": "Ffairfach (FFA)",
+   "value": "FFA"
+  },
+  {
+   "title": "Fishguard Harbour (FGH)",
+   "value": "FGH"
+  },
+  {
+   "title": "Fishguard & Goodwick (FGW)",
+   "value": "FGW"
+  },
+  {
+   "title": "Flint (FLN)",
+   "value": "FLN"
+  },
+  {
+   "title": "Fairbourne (FRB)",
+   "value": "FRB"
+  },
+  {
+   "title": "Frodsham (FRD)",
+   "value": "FRD"
+  },
+  {
+   "title": "Fairwater (FRW)",
+   "value": "FRW"
+  },
+  {
+   "title": "London Fenchurch Street (FST)",
+   "value": "FST"
+  },
+  {
+   "title": "Ferryside (FYS)",
+   "value": "FYS"
+  },
+  {
+   "title": "Gloucester (GCR)",
+   "value": "GCR"
+  },
+  {
+   "title": "Glan Conwy (GCW)",
+   "value": "GCW"
+  },
+  {
+   "title": "Gilfach Fargoed (GFF)",
+   "value": "GFF"
+  },
+  {
+   "title": "Unknown (GGT)",
+   "value": "GGT"
+  },
+  {
+   "title": "Glasgow Central (GLC)",
+   "value": "GLC"
+  },
+  {
+   "title": "Garth (Mid Glamorgan) (GMG)",
+   "value": "GMG"
+  },
+  {
+   "title": "Gobowen (GOB)",
+   "value": "GOB"
+  },
+  {
+   "title": "Garth (Powys) (GTH)",
+   "value": "GTH"
+  },
+  {
+   "title": "Grangetown (GTN)",
+   "value": "GTN"
+  },
+  {
+   "title": "Gatwick Airport (GTW)",
+   "value": "GTW"
+  },
+  {
+   "title": "Gwersyllt (GWE)",
+   "value": "GWE"
+  },
+  {
+   "title": "Gowerton (GWN)",
+   "value": "GWN"
+  },
+  {
+   "title": "Hereford (HFD)",
+   "value": "HFD"
+  },
+  {
+   "title": "Holyhead (HHD)",
+   "value": "HHD"
+  },
+  {
+   "title": "Heath High Level (HHL)",
+   "value": "HHL"
+  },
+  {
+   "title": "Heath Low Level (HLL)",
+   "value": "HLL"
+  },
+  {
+   "title": "Hengoed (HNG)",
+   "value": "HNG"
+  },
+  {
+   "title": "Hope (Flintshire) (HPE)",
+   "value": "HPE"
+  },
+  {
+   "title": "Hopton Heath (HPT)",
+   "value": "HPT"
+  },
+  {
+   "title": "Harlech (HRL)",
+   "value": "HRL"
+  },
+  {
+   "title": "Helsby (HSB)",
+   "value": "HSB"
+  },
+  {
+   "title": "Heswall (HSW)",
+   "value": "HSW"
+  },
+  {
+   "title": "Unknown (HTR)",
+   "value": "HTR"
+  },
+  {
+   "title": "Haverfordwest (HVF)",
+   "value": "HVF"
+  },
+  {
+   "title": "Hawarden Bridge (HWB)",
+   "value": "HWB"
+  },
+  {
+   "title": "Hawarden (HWD)",
+   "value": "HWD"
+  },
+  {
+   "title": "Heathrow Terminal 5 Rail (HWV)",
+   "value": "HWV"
+  },
+  {
+   "title": "Heathrow Terminals 2 & 3 Rail (HXX)",
+   "value": "HXX"
+  },
+  {
+   "title": "Johnston (JOH)",
+   "value": "JOH"
+  },
+  {
+   "title": "Kilgetty (KGT)",
+   "value": "KGT"
+  },
+  {
+   "title": "London Kings Cross (KGX)",
+   "value": "KGX"
+  },
+  {
+   "title": "Knighton (KNI)",
+   "value": "KNI"
+  },
+  {
+   "title": "Knucklas (KNU)",
+   "value": "KNU"
+  },
+  {
+   "title": "Kidwelly (KWL)",
+   "value": "KWL"
+  },
+  {
+   "title": "Lamphey (LAM)",
+   "value": "LAM"
+  },
+  {
+   "title": "Lancaster (LAN)",
+   "value": "LAN"
+  },
+  {
+   "title": "Llansamlet (LAS)",
+   "value": "LAS"
+  },
+  {
+   "title": "Llanbedr (LBR)",
+   "value": "LBR"
+  },
+  {
+   "title": "Llandanwg (LDN)",
+   "value": "LDN"
+  },
+  {
+   "title": "Leicester (LEI)",
+   "value": "LEI"
+  },
+  {
+   "title": "Leominster (LEO)",
+   "value": "LEO"
+  },
+  {
+   "title": "Llangynllo (LGO)",
+   "value": "LGO"
+  },
+  {
+   "title": "Liverpool Lime Street (LIV)",
+   "value": "LIV"
+  },
+  {
+   "title": "Llanaber (LLA)",
+   "value": "LLA"
+  },
+  {
+   "title": "Llandecwyn (LLC)",
+   "value": "LLC"
+  },
+  {
+   "title": "Llandudno (LLD)",
+   "value": "LLD"
+  },
+  {
+   "title": "Llanelli (LLE)",
+   "value": "LLE"
+  },
+  {
+   "title": "Llanfairfechan (LLF)",
+   "value": "LLF"
+  },
+  {
+   "title": "Llangadog (LLG)",
+   "value": "LLG"
+  },
+  {
+   "title": "Llangennech (LLH)",
+   "value": "LLH"
+  },
+  {
+   "title": "Llandybie (LLI)",
+   "value": "LLI"
+  },
+  {
+   "title": "Llandudno Junction (LLJ)",
+   "value": "LLJ"
+  },
+  {
+   "title": "Llandeilo (LLL)",
+   "value": "LLL"
+  },
+  {
+   "title": "Llangammarch (LLM)",
+   "value": "LLM"
+  },
+  {
+   "title": "Llandaf (LLN)",
+   "value": "LLN"
+  },
+  {
+   "title": "Llandrindod (LLO)",
+   "value": "LLO"
+  },
+  {
+   "title": "Llanharan (LLR)",
+   "value": "LLR"
+  },
+  {
+   "title": "Llanishen (LLS)",
+   "value": "LLS"
+  },
+  {
+   "title": "Llanbister Road (LLT)",
+   "value": "LLT"
+  },
+  {
+   "title": "Llandovery (LLV)",
+   "value": "LLV"
+  },
+  {
+   "title": "Llwyngwril (LLW)",
+   "value": "LLW"
+  },
+  {
+   "title": "Llwynypia (LLY)",
+   "value": "LLY"
+  },
+  {
+   "title": "Llanbradach (LNB)",
+   "value": "LNB"
+  },
+  {
+   "title": "Llanwrda (LNR)",
+   "value": "LNR"
+  },
+  {
+   "title": "Llanwrtyd (LNW)",
+   "value": "LNW"
+  },
+  {
+   "title": "Llanfairpwll (LPG)",
+   "value": "LPG"
+  },
+  {
+   "title": "Liverpool South Parkway (LPY)",
+   "value": "LPY"
+  },
+  {
+   "title": "London Liverpool Street (LST)",
+   "value": "LST"
+  },
+  {
+   "title": "Llanhilleth (LTH)",
+   "value": "LTH"
+  },
+  {
+   "title": "Ludlow (LUD)",
+   "value": "LUD"
+  },
+  {
+   "title": "Liverpool Central (LVC)",
+   "value": "LVC"
+  },
+  {
+   "title": "James Street (LVJ)",
+   "value": "LVJ"
+  },
+  {
+   "title": "Lisvane & Thornhill (LVT)",
+   "value": "LVT"
+  },
+  {
+   "title": "Llantwit Major (LWM)",
+   "value": "LWM"
+  },
+  {
+   "title": "Llanrwst (LWR)",
+   "value": "LWR"
+  },
+  {
+   "title": "Lydney (LYD)",
+   "value": "LYD"
+  },
+  {
+   "title": "Manchester Piccadilly (MAN)",
+   "value": "MAN"
+  },
+  {
+   "title": "Machynlleth (MCN)",
+   "value": "MCN"
+  },
+  {
+   "title": "Manchester Oxford Road (MCO)",
+   "value": "MCO"
+  },
+  {
+   "title": "Merthyr Tydfil (MER)",
+   "value": "MER"
+  },
+  {
+   "title": "Merthyr Vale (MEV)",
+   "value": "MEV"
+  },
+  {
+   "title": "Maesteg (Ewenny Road) (MEW)",
+   "value": "MEW"
+  },
+  {
+   "title": "Morfa Mawddach (MFA)",
+   "value": "MFA"
+  },
+  {
+   "title": "Minffordd (MFF)",
+   "value": "MFF"
+  },
+  {
+   "title": "Milford Haven (MFH)",
+   "value": "MFH"
+  },
+  {
+   "title": "Manchester Airport (MIA)",
+   "value": "MIA"
+  },
+  {
+   "title": "Milton Keynes Central (MKC)",
+   "value": "MKC"
+  },
+  {
+   "title": "Manorbier (MRB)",
+   "value": "MRB"
+  },
+  {
+   "title": "Maesteg (MST)",
+   "value": "MST"
+  },
+  {
+   "title": "Mountain Ash (MTA)",
+   "value": "MTA"
+  },
+  {
+   "title": "London Marylebone (MYB)",
+   "value": "MYB"
+  },
+  {
+   "title": "Nantwich (NAN)",
+   "value": "NAN"
+  },
+  {
+   "title": "Narberth (NAR)",
+   "value": "NAR"
+  },
+  {
+   "title": "Newbridge (NBE)",
+   "value": "NBE"
+  },
+  {
+   "title": "Neston (NES)",
+   "value": "NES"
+  },
+  {
+   "title": "North Llanrwst (NLR)",
+   "value": "NLR"
+  },
+  {
+   "title": "Newton-Le-Willows (NLW)",
+   "value": "NLW"
+  },
+  {
+   "title": "Ninian Park (NNP)",
+   "value": "NNP"
+  },
+  {
+   "title": "Norwich (NRW)",
+   "value": "NRW"
+  },
+  {
+   "title": "Neath (NTH)",
+   "value": "NTH"
+  },
+  {
+   "title": "Newport (South Wales) (NWP)",
+   "value": "NWP"
+  },
+  {
+   "title": "Newtown (Powys) (NWT)",
+   "value": "NWT"
+  },
+  {
+   "title": "Oakengates (OKN)",
+   "value": "OKN"
+  },
+  {
+   "title": "Oxford (OXF)",
+   "value": "OXF"
+  },
+  {
+   "title": "London Paddington (PAD)",
+   "value": "PAD"
+  },
+  {
+   "title": "Pembrey & Burry Port (PBY)",
+   "value": "PBY"
+  },
+  {
+   "title": "Pencoed (PCD)",
+   "value": "PCD"
+  },
+  {
+   "title": "Unknown (PDK)",
+   "value": "PDK"
+  },
+  {
+   "title": "Penarth (PEN)",
+   "value": "PEN"
+  },
+  {
+   "title": "Penrhiwceiber (PER)",
+   "value": "PER"
+  },
+  {
+   "title": "Pensarn (PES)",
+   "value": "PES"
+  },
+  {
+   "title": "Pengam (PGM)",
+   "value": "PGM"
+  },
+  {
+   "title": "Penhelig (PHG)",
+   "value": "PHG"
+  },
+  {
+   "title": "Pontlottyn (PLT)",
+   "value": "PLT"
+  },
+  {
+   "title": "Pembroke (PMB)",
+   "value": "PMB"
+  },
+  {
+   "title": "Pembroke Dock (PMD)",
+   "value": "PMD"
+  },
+  {
+   "title": "Penmaenmawr (PMW)",
+   "value": "PMW"
+  },
+  {
+   "title": "Penally (PNA)",
+   "value": "PNA"
+  },
+  {
+   "title": "Penychain (PNC)",
+   "value": "PNC"
+  },
+  {
+   "title": "Penyffordd (PNF)",
+   "value": "PNF"
+  },
+  {
+   "title": "Pen-Y-Bont (PNY)",
+   "value": "PNY"
+  },
+  {
+   "title": "Porth (POR)",
+   "value": "POR"
+  },
+  {
+   "title": "Pontypridd (PPD)",
+   "value": "PPD"
+  },
+  {
+   "title": "Pontypool and New Inn (PPL)",
+   "value": "PPL"
+  },
+  {
+   "title": "Penrhyndeudraeth (PRH)",
+   "value": "PRH"
+  },
+  {
+   "title": "Prees (PRS)",
+   "value": "PRS"
+  },
+  {
+   "title": "Prestatyn (PRT)",
+   "value": "PRT"
+  },
+  {
+   "title": "Port Talbot Parkway (PTA)",
+   "value": "PTA"
+  },
+  {
+   "title": "Pentre-Bach (PTB)",
+   "value": "PTB"
+  },
+  {
+   "title": "Pontarddulais (PTD)",
+   "value": "PTD"
+  },
+  {
+   "title": "Pantyffynnon (PTF)",
+   "value": "PTF"
+  },
+  {
+   "title": "Porthmadog (PTM)",
+   "value": "PTM"
+  },
+  {
+   "title": "Pwllheli (PWL)",
+   "value": "PWL"
+  },
+  {
+   "title": "Pontyclun (PYC)",
+   "value": "PYC"
+  },
+  {
+   "title": "Pye Corner (PYE)",
+   "value": "PYE"
+  },
+  {
+   "title": "Pyle (PYL)",
+   "value": "PYL"
+  },
+  {
+   "title": "Pont-Y-Pant (PYP)",
+   "value": "PYP"
+  },
+  {
+   "title": "Quakers Yard (QYD)",
+   "value": "QYD"
+  },
+  {
+   "title": "Risca & Pontymister (RCA)",
+   "value": "RCA"
+  },
+  {
+   "title": "Radyr (RDR)",
+   "value": "RDR"
+  },
+  {
+   "title": "Rhiwbina (RHI)",
+   "value": "RHI"
+  },
+  {
+   "title": "Rhyl (RHL)",
+   "value": "RHL"
+  },
+  {
+   "title": "Rhosneigr (RHO)",
+   "value": "RHO"
+  },
+  {
+   "title": "Rhymney (RHY)",
+   "value": "RHY"
+  },
+  {
+   "title": "Rhoose Cardiff Airport (RIA)",
+   "value": "RIA"
+  },
+  {
+   "title": "Roman Bridge (RMB)",
+   "value": "RMB"
+  },
+  {
+   "title": "Rogerstone (ROR)",
+   "value": "ROR"
+  },
+  {
+   "title": "Ruabon (RUA)",
+   "value": "RUA"
+  },
+  {
+   "title": "Runcorn East (RUE)",
+   "value": "RUE"
+  },
+  {
+   "title": "Runcorn (RUN)",
+   "value": "RUN"
+  },
+  {
+   "title": "Salisbury (SAL)",
+   "value": "SAL"
+  },
+  {
+   "title": "Saundersfoot (SDF)",
+   "value": "SDF"
+  },
+  {
+   "title": "Shifnal (SFN)",
+   "value": "SFN"
+  },
+  {
+   "title": "Smethwick Galton Bridge (SGB)",
+   "value": "SGB"
+  },
+  {
+   "title": "Shotton (SHT)",
+   "value": "SHT"
+  },
+  {
+   "title": "Skewen (SKE)",
+   "value": "SKE"
+  },
+  {
+   "title": "Stockport (SPT)",
+   "value": "SPT"
+  },
+  {
+   "title": "Sarn (SRR)",
+   "value": "SRR"
+  },
+  {
+   "title": "Stafford (STA)",
+   "value": "STA"
+  },
+  {
+   "title": "Severn Tunnel Junction (STJ)",
+   "value": "STJ"
+  },
+  {
+   "title": "London St Pancras International (STP)",
+   "value": "STP"
+  },
+  {
+   "title": "Sugar Loaf (SUG)",
+   "value": "SUG"
+  },
+  {
+   "title": "Swansea (SWA)",
+   "value": "SWA"
+  },
+  {
+   "title": "Taffs Well (TAF)",
+   "value": "TAF"
+  },
+  {
+   "title": "Talsarnau (TAL)",
+   "value": "TAL"
+  },
+  {
+   "title": "Tondu (TDU)",
+   "value": "TDU"
+  },
+  {
+   "title": "Tenby (TEN)",
+   "value": "TEN"
+  },
+  {
+   "title": "Telford Central (TFC)",
+   "value": "TFC"
+  },
+  {
+   "title": "Ty Glas (TGS)",
+   "value": "TGS"
+  },
+  {
+   "title": "Tir-Phil (TIR)",
+   "value": "TIR"
+  },
+  {
+   "title": "Talybont (TLB)",
+   "value": "TLB"
+  },
+  {
+   "title": "Tal-Y-Cafn (TLC)",
+   "value": "TLC"
+  },
+  {
+   "title": "Tonfanau (TNF)",
+   "value": "TNF"
+  },
+  {
+   "title": "Tonypandy (TNP)",
+   "value": "TNP"
+  },
+  {
+   "title": "Ton Pentre (TPN)",
+   "value": "TPN"
+  },
+  {
+   "title": "Treherbert (TRB)",
+   "value": "TRB"
+  },
+  {
+   "title": "Troed-Y-Rhiw (TRD)",
+   "value": "TRD"
+  },
+  {
+   "title": "Trefforest Estate (TRE)",
+   "value": "TRE"
+  },
+  {
+   "title": "Trefforest (TRF)",
+   "value": "TRF"
+  },
+  {
+   "title": "Trehafod (TRH)",
+   "value": "TRH"
+  },
+  {
+   "title": "Treorchy (TRY)",
+   "value": "TRY"
+  },
+  {
+   "title": "Ty Croes (TYC)",
+   "value": "TYC"
+  },
+  {
+   "title": "Tygwyn (TYG)",
+   "value": "TYG"
+  },
+  {
+   "title": "Tywyn (TYW)",
+   "value": "TYW"
+  },
+  {
+   "title": "Upton (UPT)",
+   "value": "UPT"
+  },
+  {
+   "title": "Valley (VAL)",
+   "value": "VAL"
+  },
+  {
+   "title": "London Victoria (VIC)",
+   "value": "VIC"
+  },
+  {
+   "title": "London Waterloo East (WAE)",
+   "value": "WAE"
+  },
+  {
+   "title": "London Waterloo (WAT)",
+   "value": "WAT"
+  },
+  {
+   "title": "Warrington Bank Quay (WBQ)",
+   "value": "WBQ"
+  },
+  {
+   "title": "Wem (WEM)",
+   "value": "WEM"
+  },
+  {
+   "title": "Whitchurch (Cardiff) (WHT)",
+   "value": "WHT"
+  },
+  {
+   "title": "Wellington (Shropshire) (WLN)",
+   "value": "WLN"
+  },
+  {
+   "title": "Welshpool (WLP)",
+   "value": "WLP"
+  },
+  {
+   "title": "Wildmill (WMI)",
+   "value": "WMI"
+  },
+  {
+   "title": "Wilmslow (WML)",
+   "value": "WML"
+  },
+  {
+   "title": "Waun-Gron Park (WNG)",
+   "value": "WNG"
+  },
+  {
+   "title": "Wrenbury (WRE)",
+   "value": "WRE"
+  },
+  {
+   "title": "Wrexham General (WRX)",
+   "value": "WRX"
+  },
+  {
+   "title": "Whitchurch (Shropshire) (WTC)",
+   "value": "WTC"
+  },
+  {
+   "title": "Whitland (WTL)",
+   "value": "WTL"
+  },
+  {
+   "title": "Wolverhampton (WVH)",
+   "value": "WVH"
+  },
+  {
+   "title": "Wrexham Central (WXC)",
+   "value": "WXC"
+  },
+  {
+   "title": "Unknown (XPB)",
+   "value": "XPB"
+  },
+  {
+   "title": "Ynyswen (YNW)",
+   "value": "YNW"
+  },
+  {
+   "title": "York (YRK)",
+   "value": "YRK"
+  },
+  {
+   "title": "Yorton (YRT)",
+   "value": "YRT"
+  },
+  {
+   "title": "Ystrad Mynach (YSM)",
+   "value": "YSM"
+  },
+  {
+   "title": "Ystrad Rhondda (YSR)",
+   "value": "YSR"
+  },
+  {
+   "title": "Acton Grange Junction",
+   "value": "Acton Grange Junction"
+  },
+  {
+   "title": "Astley",
+   "value": "Astley"
+  },
+  {
+   "title": "Beeston Castle & Tarporley Signal Box",
+   "value": "Beeston Castle & Tarporley Signal Box"
+  },
+  {
+   "title": "Birkenhead",
+   "value": "Birkenhead"
+  },
+  {
+   "title": "Chester South Junction",
+   "value": "Chester South Junction"
+  },
+  {
+   "title": "Crewe Steel Works",
+   "value": "Crewe Steel Works"
+  },
+  {
+   "title": "Dallam Junction",
+   "value": "Dallam Junction"
+  },
+  {
+   "title": "Frodsham Junction",
+   "value": "Frodsham Junction"
+  },
+  {
+   "title": "Gaerwen",
+   "value": "Gaerwen"
+  },
+  {
+   "title": "Menai Bridge",
+   "value": "Menai Bridge"
+  },
+  {
+   "title": "Mickle Trafford",
+   "value": "Mickle Trafford"
+  },
+  {
+   "title": "Moston East Junction",
+   "value": "Moston East Junction"
+  },
+  {
+   "title": "Ordsall Lane Junction",
+   "value": "Ordsall Lane Junction"
+  },
+  {
+   "title": "Parkside Junction",
+   "value": "Parkside Junction"
+  },
+  {
+   "title": "Saltney Junction",
+   "value": "Saltney Junction"
+  },
+  {
+   "title": "Tan-y-Bwlch Ffestiniog",
+   "value": "Tan-y-Bwlch Ffestiniog"
+  },
+  {
+   "title": "Waterstreet Junction",
+   "value": "Waterstreet Junction"
+  },
+  {
+   "title": "Winwick Junction",
+   "value": "Winwick Junction"
+  }
+ ]
+}

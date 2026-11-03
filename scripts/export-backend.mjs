@@ -7,7 +7,7 @@ import { spawnSync } from 'node:child_process'
 // Wrangler already ships esbuild; use its compiler without adding a build dependency.
 const require = createRequire(import.meta.url)
 const { build } = createRequire(require.resolve('wrangler'))('esbuild')
-const backend = resolve(process.argv[2] || '../rail-announcements-backend')
+const backend = resolve(process.argv[2] || 'backend')
 const directory = await mkdtemp(join(tmpdir(), 'backend-parity-'))
 try {
   const output = join(directory, 'generate.cjs')

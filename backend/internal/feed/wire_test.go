@@ -106,3 +106,31 @@ func TestDecodeReadsLinksAtEveryDepth(t *testing.T) {
 		t.Fatalf("the last link decoded to %+v", back)
 	}
 }
+
+func TestDecodeReadsUnits(t *testing.T) {
+	details := &livepb.Movement{
+		Mode:          livepb.TransportMode_TRANSPORT_MODE_TRAIN,
+		Units:         []string{"450042"},
+		CallingPoints: []*livepb.Call{{Id: "call", Units: []string{"444001", "450002"}}, {Id: "none"}},
+	}
+	frame, err := proto.Marshal(&livepb.ServerMessage{Version: ProtocolVersion, Payload: &livepb.ServerMessage_Announcement{
+		Announcement: &livepb.Announcement{AnnouncementType: livepb.AnnouncementType_ANNOUNCEMENT_TYPE_NEXT, Details: details},
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	decoded, err := Decode(frame)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := decoded.(*Announcement).Details
+	if !reflect.DeepEqual(got.Units, []string{"450042"}) {
+		t.Errorf("the movement's units decoded to %q", got.Units)
+	}
+	if !reflect.DeepEqual(got.CallingPoints[0].Units, []string{"444001", "450002"}) {
+		t.Errorf("the call's units decoded to %q", got.CallingPoints[0].Units)
+	}
+	if got.CallingPoints[1].Units != nil {
+		t.Errorf("a call without units decoded to %q", got.CallingPoints[1].Units)
+	}
+}

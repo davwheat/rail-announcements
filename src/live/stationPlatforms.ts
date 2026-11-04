@@ -9,11 +9,13 @@ export interface StationPlatformsResponse {
   platforms: string[]
   /** Other CRS codes sharing this station's STANOX, whose platforms SMART cannot tell apart from its own. */
   shared_with?: string[]
+  /** Platforms used whole on some days and in parts on others, each with its parts (Birmingham New Street's 4: 4A, 4B). */
+  subdivisions?: Record<string, string[]>
 }
 
 export type StationPlatforms =
   | { status: 'loading' }
-  | { status: 'ready'; platforms: string[]; name?: string; sharedWith: string[] }
+  | { status: 'ready'; platforms: string[]; name?: string; sharedWith: string[]; subdivisions: Record<string, string[]> }
   /** SMART describes no platform here, or the service could not answer. Either way the
    *  caller knows nothing about this station and must not narrow anything on that basis. */
   | { status: 'unavailable'; reason: string }
@@ -58,7 +60,27 @@ export async function fetchStationPlatforms(base: string, crs: string, signal?: 
     return { status: 'unavailable', reason: `SMART describes no platforms at ${crs}` }
   }
 
-  return { status: 'ready', platforms: body.platforms, name: body.name, sharedWith: body.shared_with ?? [] }
+  return {
+    status: 'ready',
+    platforms: body.platforms,
+    name: body.name,
+    sharedWith: body.shared_with ?? [],
+    subdivisions: readSubdivisions(body.subdivisions),
+  }
+}
+
+function readSubdivisions(value: unknown): Record<string, string[]> {
+  if (!value || typeof value !== 'object') return {}
+  return Object.fromEntries(
+    Object.entries(value).flatMap(([platform, parts]) => (Array.isArray(parts) && parts.length > 0 ? [[platform, parts.map(String)]] : [])),
+  )
+}
+
+/** The platforms that get a board of their own. A subdivided platform has none: its parts' boards show its trains too,
+ *  as the live service sends a train for the whole of 4 to the boards for 4A and 4B. */
+export function boardPlatforms(platforms: string[], subdivisions: Record<string, string[]>): string[] {
+  const divided = new Set(Object.keys(subdivisions).map(platform => platform.toUpperCase()))
+  return platforms.filter(platform => !divided.has(platform.toUpperCase()))
 }
 
 /** Reads the platform list for one station, refetching when the station or service changes. */

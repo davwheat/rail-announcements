@@ -9,7 +9,7 @@ import { playAnnouncement, announcementPlatforms, audioPlatform } from '../live/
 import { announcementName, describeAnnouncement, describeMovement } from '../live/describe'
 import type { Announcement, AnnouncementType as FeedAnnouncementType } from '../live/types'
 import type { ConnectionStatus } from '../live/connection'
-import { useStationPlatforms } from '../live/stationPlatforms'
+import { boardPlatforms, useStationPlatforms } from '../live/stationPlatforms'
 import {
   comparePlatforms,
   isPlatformZoneStore,
@@ -2453,7 +2453,7 @@ export function LiveTrainAnnouncements<SystemKeys extends string>({
                   },
                 }}
               >
-                {stationPlatforms.platforms.map(platform => (
+                {boardPlatforms(stationPlatforms.platforms, stationPlatforms.subdivisions).map(platform => (
                   <section key={platform}>
                     <h3 css={{ marginBottom: 8 }}>Platform {platform}</h3>
 

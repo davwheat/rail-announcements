@@ -1510,7 +1510,7 @@ test('a saved WebSocket preference produces the same initial markup as the serve
   assert.equal(firstClientMarkup, serverMarkup)
 })
 
-import { fetchStationPlatforms, platformsUrl } from '../src/live/stationPlatforms'
+import { boardPlatforms, fetchStationPlatforms, platformsUrl } from '../src/live/stationPlatforms'
 
 test('platform list URLs follow the live service host over HTTP', () => {
   assert.equal(platformsUrl('ws://localhost:8080', 'TST').href, 'http://localhost:8080/v1/platforms?crs=TST')
@@ -1528,6 +1528,10 @@ test('a platform list is only reported when the service actually describes one',
     empty: { status: 200, body: { crs: 'TST', tiplocs: [], stanox: [], platforms: [] } },
     missing: { status: 404 },
     warming: { status: 503 },
+    divided: {
+      status: 200,
+      body: { crs: 'TST', tiplocs: [], stanox: [], platforms: ['4', '4A', '4B', '4C'], subdivisions: { '4': ['4A', '4B'] } },
+    },
   }
   const original = globalThis.fetch
   Object.defineProperty(globalThis, 'fetch', {
@@ -1540,15 +1544,23 @@ test('a platform list is only reported when the service actually describes one',
   context.after(() => Object.defineProperty(globalThis, 'fetch', { configurable: true, value: original }))
 
   const ready = await fetchStationPlatforms('wss://example.test', 'ready')
-  assert.deepEqual(ready, { status: 'ready', platforms: ['1', '2'], name: 'Test', sharedWith: [] })
+  assert.deepEqual(ready, { status: 'ready', platforms: ['1', '2'], name: 'Test', sharedWith: [], subdivisions: {} })
 
   const shared = await fetchStationPlatforms('wss://example.test', 'shared')
-  assert.deepEqual(shared, { status: 'ready', platforms: ['1'], name: undefined, sharedWith: ['XTS'] })
+  assert.deepEqual(shared, { status: 'ready', platforms: ['1'], name: undefined, sharedWith: ['XTS'], subdivisions: {} })
+
+  const divided = await fetchStationPlatforms('wss://example.test', 'divided')
+  assert.deepEqual(divided.status === 'ready' && divided.subdivisions, { '4': ['4A', '4B'] })
 
   for (const crs of ['empty', 'missing', 'warming']) {
     const result = await fetchStationPlatforms('wss://example.test', crs)
     assert.equal(result.status, 'unavailable', `${crs} must not be read as a platform list`)
   }
+})
+
+test('a subdivided platform gets no board of its own, and its parts and its neighbours each get one', () => {
+  assert.deepEqual(boardPlatforms(['3', '4', '4A', '4B', '4C'], { '4': ['4A', '4B'] }), ['3', '4A', '4B', '4C'])
+  assert.deepEqual(boardPlatforms(['1', '2'], {}), ['1', '2'])
 })
 
 import { comparePlatforms, isPlatformZoneStore, moveToZone, resolveZones, zoneKey, zoneLanes, zonesToSave } from '../src/live/platformZones'

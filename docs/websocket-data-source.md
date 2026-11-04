@@ -67,11 +67,11 @@ shown, so they configure the station in front of you. A voice already set on a h
 announces with it.
 
 **Board layout** chooses between one board for the whole station and one board per platform. Per-platform boards render a grid of boards, one for
-each platform SMART describes, each filtered to its own platform. A platform used whole on some days and in parts on others, such as
-Birmingham New Street's 4, gets no board of its own: its parts each get one, and a train for the whole platform shows on both, because the
-service sends it to the boards for 4A and 4B. Darwin Browser names those platforms in the response's `subdivisions`, from parts entered by hand.
-The option needs a platform list, so it stays unavailable while the list is
-loading or the service can't supply one. In the legacy polling mode, every board on the page receives the service data.
+each platform SMART describes, each filtered to its own platform. A platform used whole on some days and in parts on others, such as Birmingham
+New Street's 4, gets no board of its own: its parts each get one, and a train for the whole platform shows on both, because the service sends it
+to the boards for 4A and 4B. Darwin Browser names those platforms in the response's `subdivisions`, from parts entered by hand. The option needs
+a platform list, so it stays unavailable while the list is loading or the service can't supply one. In the legacy polling mode, every board on
+the page receives the service data.
 
 Anything other than a platform list means _unknown_, and the page narrows nothing: the service returns 404 for a station SMART doesn't describe,
 503 while it's still loading the datasets, and an empty list for a station whose berths carry no platform. In each case the full platform list is
